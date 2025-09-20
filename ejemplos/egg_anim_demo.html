@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo Sprite Huevo</title>
+  <style>
+    body { background:#0b1b2b; color:#fff; font-family:sans-serif; text-align:center; margin:0; }
+    main { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; gap:10px; }
+    img { width:256px; height:256px; object-fit:contain; }
+    button { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; background:#205b86; color:white; margin:0 4px; }
+    button:hover { filter:brightness(1.1); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Demo animación por frames — Huevo</h1>
+    <img id="sprite" alt="Huevo animado">
+    <div>
+      <button id="play">▶️ Reproducir</button>
+      <button id="pause">⏸️ Pausa</button>
+      <button id="step">⏭️ Siguiente frame</button>
+    </div>
+    <p>Se usan 3 imágenes como frames a 4 FPS.</p>
+  </main>
+
+  <script>
+    const frames = ['egg1.png', 'egg2.png', 'egg3.png'];
+    const img = document.getElementById('sprite');
+    let i = 0;
+    let fps = 4;
+    let timer = null;
+
+    function show(){ img.src = frames[i]; }
+    function play(){ if(timer) return; timer = setInterval(()=>{ i = (i+1)%frames.length; show(); }, 1000/fps); }
+    function pause(){ clearInterval(timer); timer = null; }
+    function step(){ pause(); i = (i+1)%frames.length; show(); }
+
+    document.getElementById('play').addEventListener('click', play);
+    document.getElementById('pause').addEventListener('click', pause);
+    document.getElementById('step').addEventListener('click', step);
+
+    show();
+  </script>
+</body>
+</html>

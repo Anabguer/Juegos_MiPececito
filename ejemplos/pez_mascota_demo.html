@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pez Mascota — Demo</title>
+  <style>
+    :root{
+      --bg1:#0b1b2b; /* oscuro mar */
+      --bg2:#133754; /* degradado mar */
+      --ui:#ffffff;
+      --accent:#8ad7ff;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--ui);font-family:system-ui,Segoe UI,Roboto,Inter,Arial}
+    .wrap{height:100%;display:flex;flex-direction:column}
+    header{padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);backdrop-filter:blur(3px)}
+    h1{font-size:16px;margin:0;opacity:.9}
+    .hint{font-size:12px;opacity:.75}
+    .hud{display:flex;gap:14px;align-items:center;font-size:12px}
+    .btn{appearance:none;border:0;border-radius:12px;padding:8px 12px;background:#1f4668;color:#fff;cursor:pointer}
+    .btn:hover{filter:brightness(1.1)}
+    canvas{flex:1;display:block}
+    footer{padding:10px 14px;font-size:12px;opacity:.8}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Pez Mascota (demo)</h1>
+        <div class="hint">Toques/clics: el pez se acerca. Doble toque: pausa/seguir.</div>
+      </div>
+      <div class="hud">
+        <button id="pauseBtn" class="btn">Pausa</button>
+        <button id="feedBtn" class="btn">Llamar</button>
+      </div>
+    </header>
+    <canvas id="sea" aria-label="Acuario"></canvas>
+    <footer>
+      Hecho para ti: movimiento aleatorio con suave giro, evita bordes y suelta burbujas de vez en cuando.
+    </footer>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('sea');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const pauseBtn = document.getElementById('pauseBtn');
+    const feedBtn  = document.getElementById('feedBtn');
+
+    let W = 0, H = 0, dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    function resize(){
+      W = canvas.clientWidth;
+      H = canvas.clientHeight;
+      canvas.width = Math.floor(W * dpr);
+      canvas.height = Math.floor(H * dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    window.addEventListener('resize', resize, { passive:true });
+    resize();
+
+    // Utilidades
+    const TAU = Math.PI*2;
+    function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+    function lerp(a,b,t){ return a + (b-a)*t; }
+    function rand(a=1,b=null){ if(b===null){ return Math.random()*a; } return a + Math.random()*(b-a); }
+    function randn(){ // gauss simple
+      let u = 0, v = 0;
+      while(u===0) u = Math.random();
+      while(v===0) v = Math.random();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0*Math.PI*v);
+    }
+
+    // Pez
+    const fish = {
+      x: window.innerWidth*0.5,
+      y: window.innerHeight*0.55,
+      dir: rand(0, TAU),
+      speed: 60,        // px/s base
+      targetSpeed: 60,
+      maxTurn: Math.PI/90, // giro por frame
+      wiggleT: 0,
+      size: 40,         // escala base cuerpo
+      desire: null,     // {x,y} al que irá si llamamos
+      paused: false,
+    };
+
+    const bubbles = [];
+    function makeBubble(x, y){
+      bubbles.push({
+        x, y, r: rand(2,5),
+        vy: -rand(20,40),
+        life: rand(1.2, 2.0),
+        t: 0, drift: rand(-10,10)
+      });
+    }
+
+    let last = performance.now();
+    function loop(now){
+      const dt = Math.min(0.033, (now-last)/1000);
+      last = now;
+      if(!fish.paused){
+        update(dt);
+      }
+      draw(dt);
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    function update(dt){
+      // Variación suave de velocidad y dirección (nado)
+      fish.wiggleT += dt;
+      const swim = Math.sin(fish.wiggleT*6) * 0.06; // oscilación
+      let desiredDir = fish.dir + swim;
+
+      // Si hay objetivo (desire), steer hacia él
+      if(fish.desire){
+        const dx = fish.desire.x - fish.x;
+        const dy = fish.desire.y - fish.y;
+        const target = Math.atan2(dy, dx);
+        // interpolar ángulo corto
+        let diff = ((target - fish.dir + Math.PI) % (TAU)) - Math.PI;
+        desiredDir = fish.dir + clamp(diff, -fish.maxTurn*2, fish.maxTurn*2);
+        fish.targetSpeed = 90;
+        // si cerca, soltar deseo
+        if(Math.hypot(dx,dy) < 30){
+          fish.desire = null;
+        }
+      } else {
+        // Random wander
+        fish.targetSpeed = 60 + randn()*5;
+        if(Math.random()<0.01){
+          desiredDir += rand(-0.5, 0.5);
+        }
+      }
+
+      // Evitar bordes con un “campo” suave
+      const margin = 60;
+      let steer = 0;
+      if(fish.x < margin) steer += 0.2;
+      if(fish.x > W - margin) steer -= 0.2;
+      if(fish.y < margin) steer += 0.2;
+      if(fish.y > H - margin) steer -= 0.2;
+      desiredDir += steer;
+
+      // Aplicar giro limitado
+      let diff = ((desiredDir - fish.dir + Math.PI) % TAU) - Math.PI;
+      fish.dir += clamp(diff, -fish.maxTurn, fish.maxTurn);
+
+      // Suavizar velocidad
+      fish.speed = lerp(fish.speed, clamp(fish.targetSpeed, 30, 120), 0.04);
+
+      // Mover
+      fish.x += Math.cos(fish.dir) * fish.speed * dt;
+      fish.y += Math.sin(fish.dir) * fish.speed * dt;
+
+      // Rebote suave si se sale
+      if(fish.x<0){ fish.x=0; fish.dir=0; }
+      if(fish.y<0){ fish.y=0; fish.dir=TAU/4; }
+      if(fish.x>W){ fish.x=W; fish.dir=Math.PI; }
+      if(fish.y>H){ fish.y=H; fish.dir=TAU*3/4; }
+
+      // Burbujas ocasionales
+      if(Math.random()<0.02){
+        makeBubble(fish.x - Math.cos(fish.dir)*8, fish.y - Math.sin(fish.dir)*8);
+      }
+
+      // Actualizar burbujas
+      for(let i=bubbles.length-1;i>=0;i--){
+        const b = bubbles[i];
+        b.t += dt;
+        b.y += b.vy*dt;
+        b.x += Math.sin(b.t*2)* (b.drift*dt);
+        if(b.t > b.life || b.y < -20) bubbles.splice(i,1);
+      }
+    }
+
+    function draw(dt){
+      // Fondo “agua” con gradiente y luz
+      const g = ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0,'#0b1b2b');
+      g.addColorStop(1,'#133754');
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,W,H);
+
+      // “Rayos de luz” simples
+      ctx.globalAlpha = 0.06;
+      ctx.fillStyle = '#ffffff';
+      for(let i=0;i<4;i++){
+        const x = (i/4)*W + Math.sin((last/1000)+i)*W*0.1;
+        ctx.beginPath();
+        ctx.moveTo(x-80,0);
+        ctx.lineTo(x+40,0);
+        ctx.lineTo(x+200,H);
+        ctx.lineTo(x-200,H);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      // Burbujas
+      ctx.fillStyle = '#b6e9ff';
+      for(const b of bubbles){
+        ctx.globalAlpha = 0.2 + 0.4*(1 - (b.t/b.life));
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, TAU);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      // Dibujar pez (cuerpo elíptico + cola)
+      ctx.save();
+      ctx.translate(fish.x, fish.y);
+      ctx.rotate(fish.dir);
+
+      const s = fish.size;
+      // cola
+      const wag = Math.sin(fish.wiggleT*12) * 6;
+      ctx.fillStyle = '#8ad7ff';
+      ctx.beginPath();
+      ctx.moveTo(-s*0.8, 0);
+      ctx.lineTo(-s*1.1, wag+ s*0.28);
+      ctx.lineTo(-s*1.1, wag- s*0.28);
+      ctx.closePath();
+      ctx.fill();
+
+      // cuerpo
+      const grd = ctx.createLinearGradient(-s*0.6, -s*0.4, s*0.7, s*0.4);
+      grd.addColorStop(0, '#89cff0');
+      grd.addColorStop(1, '#5fb4e6');
+      ctx.fillStyle = grd;
+      roundedEllipse(ctx, 0, 0, s*0.9, s*0.55);
+      ctx.fill();
+
+      // ojo
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(s*0.25, -s*0.10, s*0.10, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#0c2740';
+      ctx.beginPath();
+      ctx.arc(s*0.27, -s*0.10, s*0.05, 0, TAU);
+      ctx.fill();
+
+      // aleta superior/inferior
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      roundedEllipse(ctx, -s*0.1, -s*0.35, s*0.35, s*0.10); ctx.fill();
+      roundedEllipse(ctx, -s*0.05,  s*0.35, s*0.35, s*0.10); ctx.fill();
+
+      ctx.restore();
+
+      // Si hay deseo, dibuja un pequeño target
+      if(fish.desire){
+        ctx.globalAlpha = 0.5;
+        ctx.strokeStyle = '#8ad7ff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(fish.desire.x, fish.desire.y, 16, 0, TAU);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    function roundedEllipse(ctx, x, y, rx, ry){
+      // aproximación con Bézier (visual)
+      ctx.beginPath();
+      const k = 0.552284749831; // círculo → bézier
+      ctx.moveTo(x - rx, y);
+      ctx.bezierCurveTo(x - rx, y - ry*k, x - rx*k, y - ry, x, y - ry);
+      ctx.bezierCurveTo(x + rx*k, y - ry, x + rx, y - ry*k, x + rx, y);
+      ctx.bezierCurveTo(x + rx, y + ry*k, x + rx*k, y + ry, x, y + ry);
+      ctx.bezierCurveTo(x - rx*k, y + ry, x - rx, y + ry*k, x - rx, y);
+      ctx.closePath();
+    }
+
+    // Interacciones
+    let lastTap = 0;
+    function goTo(x,y){
+      fish.desire = { x: clamp(x, 10, W-10), y: clamp(y, 10, H-10) };
+    }
+    canvas.addEventListener('click', (e)=>{
+      const rect = canvas.getBoundingClientRect();
+      goTo(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    canvas.addEventListener('touchstart', (e)=>{
+      const t = e.changedTouches[0];
+      const rect = canvas.getBoundingClientRect();
+      const now = performance.now();
+      if(now - lastTap < 300){
+        fish.paused = !fish.paused;
+      } else {
+        goTo(t.clientX - rect.left, t.clientY - rect.top);
+      }
+      lastTap = now;
+    }, {passive:true});
+
+    pauseBtn.addEventListener('click', ()=>{
+      fish.paused = !fish.paused;
+      pauseBtn.textContent = fish.paused ? 'Seguir' : 'Pausa';
+    });
+
+    feedBtn.addEventListener('click', ()=>{
+      // Llamar al pez al centro inferior
+      goTo(W*0.5, H*0.65);
+      // Unas burbujas “extra”
+      for(let i=0;i<4;i++) makeBubble(fish.x, fish.y+rand(0,20));
+    });
+  </script>
+</body>
+</html>

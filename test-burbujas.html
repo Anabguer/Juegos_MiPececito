@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Burbujas - Mi Pececito</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #001122;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        canvas {
+            border: 2px solid #fff;
+            background: linear-gradient(180deg, #87ceeb 0%, #4682b4 100%);
+            display: block;
+            margin: 20px auto;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        .info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🫧 Test de Burbujas - Diagnóstico</h1>
+    
+    <div class="info">
+        <p><strong>Estado del Canvas:</strong> <span id="canvasStatus">Iniciando...</span></p>
+        <p><strong>Burbujas Activas:</strong> <span id="bubbleCount">0</span></p>
+        <p><strong>FPS:</strong> <span id="fps">0</span></p>
+    </div>
+    
+    <canvas id="testCanvas" width="450" height="600"></canvas>
+    
+    <div class="controls">
+        <button onclick="testBubbles.createSimpleBubbles()">🔴 Crear Burbujas Rojas</button>
+        <button onclick="testBubbles.createMovingBubbles()">🟢 Crear Burbujas Móviles</button>
+        <button onclick="testBubbles.createCircleBubbles()">🔵 Crear Círculo de Burbujas</button>
+        <button onclick="testBubbles.clearAll()">🗑️ Limpiar Todo</button>
+        <button onclick="testBubbles.testDraw()">✏️ Test Dibujo Directo</button>
+    </div>
+    
+    <div class="info">
+        <h3>🎯 Diagnósticos:</h3>
+        <ul>
+            <li>Si NO ves burbujas → Problema de renderizado Canvas</li>
+            <li>Si VES burbujas estáticas → Problema de animación</li>
+            <li>Si VES burbujas móviles → El sistema funciona, problema en el juego</li>
+        </ul>
+    </div>
+
+    <script>
+        class BubbleTest {
+            constructor() {
+                this.canvas = document.getElementById('testCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.bubbles = [];
+                this.frameCount = 0;
+                this.lastTime = 0;
+                
+                console.log('🎮 Iniciando Test de Burbujas...');
+                console.log('📐 Canvas:', this.canvas.width, 'x', this.canvas.height);
+                console.log('🎯 Contexto:', !!this.ctx);
+                
+                this.updateStatus();
+                this.startLoop();
+            }
+            
+            updateStatus() {
+                document.getElementById('canvasStatus').textContent = 
+                    `${this.canvas.width}x${this.canvas.height} - Contexto: ${!!this.ctx ? 'OK' : 'ERROR'}`;
+                document.getElementById('bubbleCount').textContent = this.bubbles.length;
+            }
+            
+            createSimpleBubbles() {
+                console.log('🔴 Creando burbujas rojas estáticas...');
+                this.clearAll();
+                
+                // 5 burbujas rojas grandes fijas
+                for (let i = 0; i < 5; i++) {
+                    this.bubbles.push({
+                        x: 50 + i * 80,
+                        y: 100,
+                        r: 30,
+                        color: '#ff0000',
+                        vx: 0,
+                        vy: 0,
+                        life: 10000,
+                        type: 'static'
+                    });
+                }
+                this.updateStatus();
+            }
+            
+            createMovingBubbles() {
+                console.log('🟢 Creando burbujas móviles...');
+                this.clearAll();
+                
+                // 10 burbujas verdes móviles
+                for (let i = 0; i < 10; i++) {
+                    this.bubbles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        r: 15 + Math.random() * 15,
+                        color: '#00ff00',
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: (Math.random() - 0.5) * 4,
+                        life: 15000,
+                        type: 'moving'
+                    });
+                }
+                this.updateStatus();
+            }
+            
+            createCircleBubbles() {
+                console.log('🔵 Creando círculo de burbujas...');
+                this.clearAll();
+                
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                
+                // 20 burbujas azules en círculo (como el juego original)
+                for (let i = 0; i < 20; i++) {
+                    const angle = (i / 20) * Math.PI * 2;
+                    const distance = 30 + i * 10;
+                    const x = centerX + Math.cos(angle) * distance;
+                    const y = centerY + Math.sin(angle) * distance;
+                    
+                    this.bubbles.push({
+                        x: x,
+                        y: y,
+                        r: 25,
+                        color: '#0080ff',
+                        vx: Math.cos(angle) * 0.5,
+                        vy: Math.sin(angle) * 0.5 - 0.2,
+                        life: 8000,
+                        maxLife: 8000,
+                        alpha: 1,
+                        type: 'circle'
+                    });
+                }
+                this.updateStatus();
+            }
+            
+            testDraw() {
+                console.log('✏️ Test de dibujo directo...');
+                
+                // Dibujar directamente en el canvas sin arrays
+                this.ctx.save();
+                this.ctx.fillStyle = '#ffff00';
+                this.ctx.beginPath();
+                this.ctx.arc(this.canvas.width / 2, this.canvas.height / 2, 50, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.restore();
+                
+                // Texto de confirmación
+                this.ctx.save();
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = 'bold 20px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('CÍRCULO AMARILLO DIRECTO', this.canvas.width / 2, this.canvas.height / 2 + 100);
+                this.ctx.restore();
+            }
+            
+            clearAll() {
+                this.bubbles = [];
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.updateStatus();
+            }
+            
+            startLoop() {
+                const loop = (currentTime) => {
+                    const deltaTime = currentTime - this.lastTime;
+                    this.lastTime = currentTime;
+                    this.frameCount++;
+                    
+                    // Calcular FPS cada segundo
+                    if (this.frameCount % 60 === 0) {
+                        const fps = Math.round(1000 / (deltaTime || 16.67));
+                        document.getElementById('fps').textContent = fps;
+                    }
+                    
+                    this.update(deltaTime);
+                    this.render();
+                    
+                    requestAnimationFrame(loop);
+                };
+                
+                requestAnimationFrame(loop);
+            }
+            
+            update(deltaTime) {
+                // Actualizar burbujas
+                for (let i = this.bubbles.length - 1; i >= 0; i--) {
+                    const bubble = this.bubbles[i];
+                    
+                    // Mover burbujas
+                    if (bubble.type === 'moving' || bubble.type === 'circle') {
+                        bubble.x += bubble.vx;
+                        bubble.y += bubble.vy;
+                        
+                        // Rebote en bordes
+                        if (bubble.x < bubble.r || bubble.x > this.canvas.width - bubble.r) {
+                            bubble.vx *= -1;
+                        }
+                        if (bubble.y < bubble.r || bubble.y > this.canvas.height - bubble.r) {
+                            bubble.vy *= -1;
+                        }
+                    }
+                    
+                    // Reducir vida
+                    bubble.life -= deltaTime || 16.67;
+                    
+                    // Eliminar burbujas muertas
+                    if (bubble.life <= 0) {
+                        this.bubbles.splice(i, 1);
+                        this.updateStatus();
+                    }
+                }
+            }
+            
+            render() {
+                // Limpiar canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Dibujar todas las burbujas
+                for (const bubble of this.bubbles) {
+                    this.ctx.save();
+                    
+                    // Alpha basado en vida restante
+                    if (bubble.maxLife) {
+                        const lifeRatio = bubble.life / bubble.maxLife;
+                        this.ctx.globalAlpha = (bubble.alpha || 1) * lifeRatio;
+                    } else {
+                        this.ctx.globalAlpha = bubble.alpha || 1;
+                    }
+                    
+                    this.ctx.fillStyle = bubble.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    this.ctx.restore();
+                }
+                
+                // Info de debug en canvas
+                this.ctx.save();
+                this.ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                this.ctx.fillRect(10, 10, 200, 60);
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = '14px Arial';
+                this.ctx.fillText(`Burbujas: ${this.bubbles.length}`, 20, 30);
+                this.ctx.fillText(`Frame: ${this.frameCount}`, 20, 50);
+                this.ctx.restore();
+            }
+        }
+        
+        // Inicializar test cuando cargue la página
+        let testBubbles;
+        window.addEventListener('load', () => {
+            testBubbles = new BubbleTest();
+        });
+    </script>
+</body>
+</html>
+

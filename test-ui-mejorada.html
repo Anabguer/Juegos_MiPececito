@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐠 Test UI Mejorada - Mi Pececito</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0b1b2b 0%, #133754 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* 🌊 OPCIÓN A: HEADER MINIMALISTA CON BURBUJAS */
+        .minimal-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(30, 58, 95, 0.95) 0%, rgba(30, 58, 95, 0.7) 70%, transparent 100%);
+            backdrop-filter: blur(8px);
+            padding: 12px 20px;
+            z-index: 50;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .fish-info-bubble {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 8px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .fish-name {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .fish-age {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+        }
+        
+        .currency-bubbles {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .currency-bubble {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 6px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        /* 🌊 OPCIÓN B: HEADER CURVO COMO OLA */
+        .wave-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            z-index: 50;
+            clip-path: ellipse(100% 100% at 50% 0%);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .wave-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            height: 60px;
+        }
+        
+        /* 🌊 OPCIÓN C: HEADER FLOTANTE MÚLTIPLE */
+        .floating-widgets {
+            position: fixed;
+            top: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 50;
+        }
+        
+        .widget {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(15px);
+            border-radius: 18px;
+            padding: 10px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .widget-fish {
+            text-align: center;
+        }
+        
+        .widget-currency {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .currency-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* 🎮 DOCK MEJORADO */
+        .improved-dock {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 8px;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .dock-container {
+            display: flex;
+            gap: 4px;
+            align-items: end;
+        }
+        
+        .dock-btn {
+            width: 55px;
+            height: 55px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .dock-btn:hover:not(.disabled) {
+            transform: translateY(-20px) scale(1.15);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 30px rgba(255, 255, 255, 0.2);
+        }
+        
+        .dock-btn.disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+        
+        .dock-btn.disabled:hover {
+            transform: none;
+        }
+        
+        .dock-icon {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+            transition: all 0.3s ease;
+        }
+        
+        .dock-btn:hover:not(.disabled) .dock-icon {
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4)) brightness(1.2);
+        }
+        
+        .dock-btn.disabled .dock-icon {
+            filter: grayscale(100%) drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+        }
+        
+        .dock-emoji {
+            font-size: 32px;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+        }
+        
+        /* 🎯 BURBUJAS DE NECESIDADES */
+        .need-bubble {
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            animation: needPulse 2s infinite ease-in-out;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            z-index: 80;
+        }
+        
+        .need-bubble.hunger {
+            background: rgba(255, 150, 150, 0.9);
+            border-color: rgba(255, 100, 100, 0.8);
+            box-shadow: 0 4px 15px rgba(255, 100, 100, 0.4);
+        }
+        
+        .need-bubble.dirty {
+            background: rgba(150, 200, 255, 0.9);
+            border-color: rgba(100, 180, 255, 0.8);
+            box-shadow: 0 4px 15px rgba(100, 180, 255, 0.4);
+        }
+        
+        .need-bubble.medicine {
+            background: rgba(200, 255, 150, 0.9);
+            border-color: rgba(150, 255, 100, 0.8);
+            box-shadow: 0 4px 15px rgba(150, 255, 100, 0.4);
+        }
+        
+        .need-bubble.play {
+            background: rgba(255, 200, 150, 0.9);
+            border-color: rgba(255, 180, 100, 0.8);
+            box-shadow: 0 4px 15px rgba(255, 180, 100, 0.4);
+        }
+        
+        .need-icon {
+            width: 28px;
+            height: 28px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        @keyframes needPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* 📱 CANVAS */
+        #gameCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0b1b2b 0%, #133754 100%);
+        }
+        
+        /* ⏰ CRONÓMETRO BONITO */
+        .timer-display {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 12px 25px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            z-index: 60;
+        }
+        
+        .timer-time {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 4px;
+        }
+        
+        .timer-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            text-align: center;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- 🎮 Canvas de fondo -->
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    
+    <!-- 🌊 OPCIÓN A: HEADER MINIMALISTA -->
+    <div class="minimal-header">
+        <div class="header-row">
+            <div class="fish-info-bubble">
+                <div class="fish-name">🐠 Mi Pececito Bebé</div>
+                <div class="fish-age">0 días</div>
+            </div>
+            <div class="currency-bubbles">
+                <div class="currency-bubble">🫧 150</div>
+                <div class="currency-bubble">⭐ 25</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ⏰ CRONÓMETRO BONITO -->
+    <div class="timer-display">
+        <div class="timer-time">23:45:12</div>
+        <div class="timer-label">🥚 Tiempo para eclosionar 🐣</div>
+    </div>
+    
+    <!-- 🎯 BURBUJAS DE NECESIDADES (EJEMPLOS) -->
+    <div class="need-bubble hunger" style="top: 200px; left: 150px;">
+        <img src="./images/ui/badge_hunger.png" class="need-icon" alt="Hambre">
+    </div>
+    
+    <div class="need-bubble dirty" style="top: 180px; left: 250px;">
+        <img src="./images/ui/badge_dirty.png" class="need-icon" alt="Sucio">
+    </div>
+    
+    <div class="need-bubble play" style="top: 220px; left: 320px;">
+        <img src="./images/ui/badge_play.png" class="need-icon" alt="Jugar">
+    </div>
+    
+    <!-- 🎮 DOCK MEJORADO -->
+    <div class="improved-dock">
+        <div class="dock-container">
+            <div class="dock-btn" onclick="alert('¡Comida!')">
+                <img src="./images/ui/badge_hunger.png" class="dock-icon" alt="Comida">
+            </div>
+            <div class="dock-btn disabled">
+                <img src="./images/ui/badge_dirty.png" class="dock-icon" alt="Limpiar">
+            </div>
+            <div class="dock-btn disabled">
+                <img src="./images/ui/badge_medicine.png" class="dock-icon" alt="Medicina">
+            </div>
+            <div class="dock-btn">
+                <img src="./images/ui/badge_play.png" class="dock-icon" alt="Jugar">
+            </div>
+            <div class="dock-btn">
+                <div class="dock-emoji">🎒</div>
+            </div>
+            <div class="dock-btn">
+                <div class="dock-emoji">📸</div>
+            </div>
+        </div>
+    </div>
+    
+    <hr style="margin: 50px 0; border: 2px solid rgba(255,255,255,0.2); margin-top: 300px;">
+    
+    <!-- 🌊 OPCIÓN B: HEADER CURVO -->
+    <div class="wave-header">
+        <div class="wave-content">
+            <div style="color: white;">
+                <div style="font-size: 16px; font-weight: 600;">🐠 Mi Pececito Bebé</div>
+                <div style="font-size: 12px; opacity: 0.8;">0 días</div>
+            </div>
+            <div style="display: flex; gap: 15px; color: white; font-weight: 600;">
+                <span>🫧 150</span>
+                <span>⭐ 25</span>
+            </div>
+        </div>
+    </div>
+    
+    <hr style="margin: 50px 0; border: 2px solid rgba(255,255,255,0.2);">
+    
+    <!-- 🌊 OPCIÓN C: WIDGETS FLOTANTES -->
+    <div class="floating-widgets">
+        <div class="widget widget-fish">
+            <div style="color: white; text-align: center;">
+                <div style="font-size: 14px; font-weight: 600;">🐠 Mi Pececito</div>
+                <div style="font-size: 11px; opacity: 0.8;">Bebé - 0 días</div>
+            </div>
+        </div>
+        <div class="widget widget-currency">
+            <div class="currency-item">
+                <span>🫧</span>
+                <span>150</span>
+            </div>
+            <div class="currency-item">
+                <span>⭐</span>
+                <span>25</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Simular fondo acuático
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        function drawBackground() {
+            // Gradiente acuático
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#0b1b2b');
+            gradient.addColorStop(1, '#133754');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Burbujas de fondo
+            ctx.save();
+            ctx.globalAlpha = 0.3;
+            for (let i = 0; i < 12; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const size = 8 + Math.random() * 20;
+                
+                ctx.fillStyle = '#87CEEB';
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+            
+            // Simular pez en el centro
+            ctx.save();
+            ctx.fillStyle = '#4facfe';
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, 30, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+        
+        function animate() {
+            drawBackground();
+            requestAnimationFrame(animate);
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        animate();
+        
+        // Test de cronómetro
+        function updateTimer() {
+            const timerElement = document.querySelector('.timer-time');
+            if (timerElement) {
+                const now = new Date();
+                const hours = 23 - now.getSeconds() % 24;
+                const minutes = 59 - now.getSeconds() % 60;
+                const seconds = 59 - now.getMilliseconds() / 1000;
+                
+                timerElement.textContent = `${hours.toString().padStart(2, '0')}:${Math.floor(minutes).toString().padStart(2, '0')}:${Math.floor(seconds).toString().padStart(2, '0')}`;
+            }
+        }
+        
+        setInterval(updateTimer, 100);
+    </script>
+</body>
+</html>
+

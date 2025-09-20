@@ -1,0 +1,125 @@
+/* 🎨 VARIABLES CSS GLOBALES - MI PECECITO */
+/* ============================================ */
+/* UN SOLO LUGAR PARA CAMBIAR TODO EL DISEÑO */
+
+:root {
+  /* 🌊 COLORES PRINCIPALES */
+  --bg-primary: #08243a;
+  --bg-secondary: #1d4b6b;
+  --bg-accent: #2a6287;
+  --text-primary: #e9f6ff;
+  --text-secondary: rgba(233, 246, 255, 0.8);
+  
+  /* 🐟 COLORES DE PECES */
+  --fish-baby-body: #d9ccff;
+  --fish-baby-tail: #ff9ecf;
+  --fish-baby-fin: #ffd0e2;
+  --fish-baby-stripe: #ffba7a;
+  
+  --fish-young-body: #b1a1ff;
+  --fish-young-tail: #f191cd;
+  --fish-young-fin: #f1c4e4;
+  --fish-young-stripe: #ffa960;
+  
+  --fish-adult-body: #5a48c8;
+  --fish-adult-tail: #d073c6;
+  --fish-adult-fin: #e2a8d6;
+  --fish-adult-stripe: #ff9745;
+  
+  /* 🎮 UI ELEMENTOS */
+  --button-primary: #205b86;
+  --button-hover: #2a6287;
+  --button-active: #1a4a73;
+  --button-radius: 12px;
+  --button-size: 80px;
+  
+  --badge-size: 64px;
+  --bubble-size: 48px;
+  
+  /* 🌈 COLORES DE JUEGO */
+  --good-item: #4CAF50;
+  --bad-item: #F44336;
+  --star-color: #FFD700;
+  --coin-color: #FF8C42;
+  
+  /* 📐 TAMAÑOS */
+  --fish-baby-size: 46px;
+  --fish-young-size: 52px;
+  --fish-adult-size: 60px;
+  
+  --egg-size: 64px;
+  --pellet-size: 16px;
+  --star-size: 32px;
+  
+  /* ⚡ ANIMACIONES */
+  --transition-fast: 0.15s ease;
+  --transition-smooth: 0.3s ease;
+  --transition-slow: 0.6s ease;
+  
+  --bounce-animation: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* 📱 RESPONSIVE */
+  --mobile-padding: 12px;
+  --desktop-padding: 20px;
+  
+  /* 🎯 EFECTOS */
+  --shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.25);
+  --shadow-strong: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --blur-light: blur(4px);
+  --blur-strong: blur(10px);
+  
+  /* 🏆 RANKINGS */
+  --rank-bronze: #CD7F32;
+  --rank-silver: #C0C0C0;
+  --rank-gold: #FFD700;
+  --rank-diamond: #B9F2FF;
+}
+
+/* 📱 RESPONSIVE BREAKPOINTS */
+@media (max-width: 768px) {
+  :root {
+    --button-size: 70px;
+    --badge-size: 56px;
+    --bubble-size: 42px;
+    --fish-baby-size: 42px;
+    --fish-young-size: 48px;
+    --fish-adult-size: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --button-size: 60px;
+    --badge-size: 48px;
+    --bubble-size: 36px;
+    --fish-baby-size: 38px;
+    --fish-young-size: 44px;
+    --fish-adult-size: 52px;
+  }
+}
+
+/* 🎨 UTILIDADES GLOBALES */
+.fade-in {
+  animation: fadeIn var(--transition-smooth) ease;
+}
+
+.bounce-in {
+  animation: bounceIn 0.5s var(--bounce-animation);
+}
+
+.blur-transition {
+  transition: filter var(--transition-slow);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+

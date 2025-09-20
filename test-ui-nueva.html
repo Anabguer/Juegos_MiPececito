@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐠 Test UI Nueva - Mi Pececito</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0b1b2b 0%, #133754 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* 🌊 HEADER FLOTANTE ESTILO BURBUJA */
+        .floating-header {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 8px 20px;
+            z-index: 50;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: floatGentle 4s ease-in-out infinite;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .fish-info {
+            color: white;
+            text-align: center;
+        }
+        
+        .fish-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .fish-age {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+        
+        .currency-mini {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .currency-mini span {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* 🎮 MENÚ CIRCULAR FLOTANTE */
+        .circular-menu {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 100;
+        }
+        
+        .menu-center {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+            transition: all 0.3s ease;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .menu-center:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(79, 172, 254, 0.6);
+        }
+        
+        .menu-center-icon {
+            font-size: 24px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .menu-items {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .circular-menu.active .menu-items {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .menu-item {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(79, 172, 254, 0.3);
+        }
+        
+        .menu-item:hover {
+            transform: scale(1.15);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .menu-item img {
+            width: 28px;
+            height: 28px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        
+        .menu-item.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .menu-item.disabled img {
+            filter: grayscale(100%) drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        
+        /* 🌀 POSICIONES CIRCULARES */
+        .menu-item:nth-child(1) { transform: translate(0, -80px); } /* Arriba */
+        .menu-item:nth-child(2) { transform: translate(60px, -40px); } /* Derecha arriba */
+        .menu-item:nth-child(3) { transform: translate(60px, 40px); } /* Derecha abajo */
+        .menu-item:nth-child(4) { transform: translate(0, 80px); } /* Abajo */
+        .menu-item:nth-child(5) { transform: translate(-60px, 40px); } /* Izquierda abajo */
+        .menu-item:nth-child(6) { transform: translate(-60px, -40px); } /* Izquierda arriba */
+        
+        /* 🎭 ANIMACIONES */
+        @keyframes floatGentle {
+            0%, 100% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+        
+        /* 📱 CANVAS */
+        #gameCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0b1b2b 0%, #133754 100%);
+        }
+        
+        /* 🎮 ALTERNATIVA: BARRA LATERAL ELEGANTE */
+        .sidebar-menu {
+            position: fixed;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 15px 8px;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .sidebar-item {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .sidebar-item:hover:not(.disabled) {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+        
+        .sidebar-item.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .sidebar-item img {
+            width: 26px;
+            height: 26px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .sidebar-item.disabled img {
+            filter: grayscale(100%) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        /* 🏷️ TOOLTIPS */
+        .tooltip {
+            position: absolute;
+            left: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar-item:hover .tooltip {
+            opacity: 1;
+        }
+        
+        /* 🎨 OPCIÓN 3: DOCK ESTILO MAC */
+        .dock-menu {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 8px 15px;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dock-items {
+            display: flex;
+            gap: 5px;
+            align-items: end;
+        }
+        
+        .dock-item {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dock-item:hover:not(.disabled) {
+            transform: translateY(-15px) scale(1.2);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        }
+        
+        .dock-item.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .dock-item img {
+            width: 30px;
+            height: 30px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .dock-item.disabled img {
+            filter: grayscale(100%) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+    </style>
+</head>
+<body>
+    <!-- 🎮 Canvas de fondo -->
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    
+    <!-- 🌊 OPCIÓN 1: HEADER FLOTANTE + MENÚ CIRCULAR -->
+    <div class="floating-header">
+        <div class="header-content">
+            <div class="fish-info">
+                <div class="fish-name">🐠 Mi Pececito Bebé</div>
+                <div class="fish-age">0 días</div>
+            </div>
+            <div class="currency-mini">
+                <span>🫧 150</span>
+                <span>⭐ 25</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="circular-menu" id="circularMenu">
+        <div class="menu-center" onclick="toggleMenu()">
+            <div class="menu-center-icon">🎮</div>
+        </div>
+        <div class="menu-items">
+            <div class="menu-item" onclick="alert('Comida!')">
+                <img src="./images/ui/badge_hunger.png" alt="Comida">
+            </div>
+            <div class="menu-item disabled">
+                <img src="./images/ui/badge_dirty.png" alt="Limpiar">
+            </div>
+            <div class="menu-item disabled">
+                <img src="./images/ui/badge_medicine.png" alt="Medicina">
+            </div>
+            <div class="menu-item">
+                <img src="./images/ui/badge_play.png" alt="Jugar">
+            </div>
+            <div class="menu-item">
+                <div style="font-size: 24px;">🎒</div>
+            </div>
+            <div class="menu-item">
+                <div style="font-size: 24px;">📸</div>
+            </div>
+        </div>
+    </div>
+    
+    <hr style="margin: 50px 0; border: 2px solid rgba(255,255,255,0.2);">
+    
+    <!-- 🎨 OPCIÓN 2: SIDEBAR ELEGANTE -->
+    <div class="sidebar-menu">
+        <div class="sidebar-item" onclick="alert('Comida!')">
+            <img src="./images/ui/badge_hunger.png" alt="Comida">
+            <div class="tooltip">Alimentar</div>
+        </div>
+        <div class="sidebar-item disabled">
+            <img src="./images/ui/badge_dirty.png" alt="Limpiar">
+            <div class="tooltip">Limpiar</div>
+        </div>
+        <div class="sidebar-item disabled">
+            <img src="./images/ui/badge_medicine.png" alt="Medicina">
+            <div class="tooltip">Medicina</div>
+        </div>
+        <div class="sidebar-item">
+            <img src="./images/ui/badge_play.png" alt="Jugar">
+            <div class="tooltip">Jugar</div>
+        </div>
+        <div class="sidebar-item">
+            <div style="font-size: 22px; color: white;">🎒</div>
+            <div class="tooltip">Inventario</div>
+        </div>
+        <div class="sidebar-item">
+            <div style="font-size: 22px; color: white;">📸</div>
+            <div class="tooltip">Álbum</div>
+        </div>
+    </div>
+    
+    <hr style="margin: 50px 0; border: 2px solid rgba(255,255,255,0.2);">
+    
+    <!-- 🎯 OPCIÓN 3: DOCK ESTILO MAC -->
+    <div class="dock-menu">
+        <div class="dock-items">
+            <div class="dock-item" onclick="alert('Comida!')">
+                <img src="./images/ui/badge_hunger.png" alt="Comida">
+            </div>
+            <div class="dock-item disabled">
+                <img src="./images/ui/badge_dirty.png" alt="Limpiar">
+            </div>
+            <div class="dock-item disabled">
+                <img src="./images/ui/badge_medicine.png" alt="Medicina">
+            </div>
+            <div class="dock-item">
+                <img src="./images/ui/badge_play.png" alt="Jugar">
+            </div>
+            <div class="dock-item">
+                <div style="font-size: 26px; color: white;">🎒</div>
+            </div>
+            <div class="dock-item">
+                <div style="font-size: 26px; color: white;">📸</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Menú circular expandible
+        let menuOpen = false;
+        
+        function toggleMenu() {
+            const menu = document.getElementById('circularMenu');
+            menuOpen = !menuOpen;
+            
+            if (menuOpen) {
+                menu.classList.add('active');
+                document.querySelector('.menu-center-icon').textContent = '✕';
+            } else {
+                menu.classList.remove('active');
+                document.querySelector('.menu-center-icon').textContent = '🎮';
+            }
+        }
+        
+        // Simular fondo acuático
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        function drawBackground() {
+            // Gradiente acuático
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#0b1b2b');
+            gradient.addColorStop(1, '#133754');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Burbujas de fondo
+            ctx.save();
+            ctx.globalAlpha = 0.3;
+            for (let i = 0; i < 8; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const size = 5 + Math.random() * 15;
+                
+                ctx.fillStyle = '#87CEEB';
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+        
+        function animate() {
+            drawBackground();
+            requestAnimationFrame(animate);
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        animate();
+    </script>
+</body>
+</html>
+

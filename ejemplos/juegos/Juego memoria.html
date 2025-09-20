@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Memoflip — Simple Marino (centrado robusto)</title>
+<style>
+  :root{
+    --bg:#072334; --text:#e9f6ff;
+    --ui:#1d4b6b; --ui2:#2a6287; --ok:#1bb37a;
+    --card:#0e3855; --card2:#144a6d;
+    --gap:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;}
+  #wrap{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto}
+  #top,#bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px}
+  .pill{padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.10);font-weight:700}
+  .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:var(--ui);color:var(--text);font-weight:700}
+  .btn:active{transform:translateY(1px);background:var(--ui2)}
+  #boardWrap{display:flex;align-items:center;justify-content:center;padding:12px}
+  /* El tablero tendrá tamaño explícito desde JS para cuadrar y centrar */
+  #board{
+    display:grid;
+    place-content:center;
+    gap:var(--gap);
+    /* tamaño puesto por JS */
+  }
+  /* Carta */
+  .card{position:relative;width:100%;height:100%;border-radius:14px;transform-style:preserve-3d;transition:transform .28s ease;cursor:pointer;outline:none}
+  .card.flipped{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;border-radius:14px;display:grid;place-items:center;backface-visibility:hidden}
+  .front{background:linear-gradient(145deg,var(--card),var(--card2));}
+  .back{transform:rotateY(180deg);background:linear-gradient(165deg,#113e5d,#0a2c45);border:2px solid rgba(255,255,255,.12)}
+  .emoji{font-size:clamp(28px,7.5vw,56px);filter:drop-shadow(0 6px 12px rgba(0,0,0,.35))}
+  /* Modal */
+  #win{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45)}
+  #winCard{background:#0b304d;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:18px;max-width:92vw;text-align:center}
+</style>
+</head>
+<body>
+  <div id="wrap">
+    <div id="top">
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="pill">⏱ <span id="time">00:00</span></div>
+        <div class="pill">🌀 <span id="moves">0</span></div>
+        <div class="pill">⭐ <span id="stars">0</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="gridSel" class="pill" style="padding:8px 12px">
+          <option value="3x4">3×4</option>
+          <option value="4x4">4×4</option>
+          <option value="4x5">4×5</option>
+          <option value="4x6">4×6</option>
+        </select>
+        <button id="btnReset" class="btn">↺ Reiniciar</button>
+      </div>
+    </div>
+
+    <div id="boardWrap">
+      <div id="board" aria-label="Tablero de memoria"></div>
+    </div>
+
+    <div id="bottom">
+      <button id="btnStart" class="btn" style="margin:0 auto">▶️ Empezar</button>
+    </div>
+  </div>
+
+  <!-- Modal victoria -->
+  <div id="win">
+    <div id="winCard">
+      <h2>¡Victoria marina! 🐠</h2>
+      <p>Tiempo: <b id="wtime">00:00</b> · Movs: <b id="wmoves">0</b></p>
+      <p>⭐ +1 (total: <b id="wstars">0</b>)</p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:10px">
+        <button id="again" class="btn">Otra partida</button>
+        <button id="closeWin" class="btn" style="background:var(--ok)">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(()=>{
+  const SEA = ["🐟","🐠","🐡","🦈","🐬","🐳","🐋","🐙","🦑","🦐","🦞","🦀","🪼","🪸","🐚","⚓","🌊","🛟"];
+  const gap = 10;
+  let cols=3, rows=4;
+
+  const board = document.getElementById("board");
+  const movesEl = document.getElementById("moves");
+  const timeEl = document.getElementById("time");
+  const starsEl = document.getElementById("stars");
+  const gridSel = document.getElementById("gridSel");
+  const btnStart = document.getElementById("btnStart");
+  const btnReset = document.getElementById("btnReset");
+
+  const win = document.getElementById("win");
+  const wtime = document.getElementById("wtime");
+  const wmoves = document.getElementById("wmoves");
+  const wstars = document.getElementById("wstars");
+  const again = document.getElementById("again");
+  const closeWin = document.getElementById("closeWin");
+
+  let deck=[], first=null, second=null, lock=false, moves=0, matched=0, totalPairs=0;
+  let t0=0, timer=null;
+
+  function fmt(sec){ const m=Math.floor(sec/60), s=sec%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+  function startClock(){ stopClock(); t0=Date.now(); timer=setInterval(()=>{ timeEl.textContent = fmt(Math.floor((Date.now()-t0)/1000)); },500); }
+  function stopClock(){ if (timer) clearInterval(timer), timer=null; }
+
+  // Medición y centrado: calcula tamaño exacto del tablero y cartas
+  function sizeBoard(){
+    const wrap = document.getElementById("boardWrap");
+    const wrapStyles = getComputedStyle(wrap);
+    const padH = parseFloat(wrapStyles.paddingLeft) + parseFloat(wrapStyles.paddingRight);
+    const padV = parseFloat(wrapStyles.paddingTop) + parseFloat(wrapStyles.paddingBottom);
+    const availW = wrap.clientWidth - padH;
+    const availH = wrap.clientHeight - padV;
+
+    const cellW = Math.floor((availW - gap*(cols-1)) / cols);
+    const cellH = Math.floor((availH - gap*(rows-1)) / rows);
+    const cell = Math.max(36, Math.min(cellW, cellH)); // mínimo 36px
+
+    const width = cell*cols + gap*(cols-1);
+    const height = cell*rows + gap*(rows-1);
+
+    board.style.width = width + "px";
+    board.style.height = height + "px";
+    board.style.gridTemplateColumns = `repeat(${cols}, ${cell}px)`;
+    board.style.gridTemplateRows = `repeat(${rows}, ${cell}px)`;
+    board.style.gap = gap + "px";
+  }
+  window.addEventListener("resize", sizeBoard);
+  window.addEventListener("orientationchange", sizeBoard);
+
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+  function makeDeck(){
+    const need = (cols*rows)/2;
+    totalPairs = need; matched=0;
+    const base = SEA.slice(0, need);
+    deck = shuffle([...base, ...base]);
+  }
+
+  function build(){
+    board.innerHTML="";
+    makeDeck();
+    sizeBoard();
+    deck.forEach((emoji, i)=>{
+      const card = document.createElement("button");
+      card.className = "card";
+      card.setAttribute("aria-label","carta marina");
+      const front = document.createElement("div");
+      front.className="face front"; front.textContent="💧";
+      const back = document.createElement("div");
+      back.className="face back";
+      const span = document.createElement("div");
+      span.className="emoji"; span.textContent=emoji;
+      back.appendChild(span);
+      card.append(front, back);
+      card.addEventListener("click", ()=>flip(card,i));
+      board.appendChild(card);
+    });
+    // vistazo inicial breve
+    const all=[...board.children]; all.forEach(c=>c.classList.add("flipped"));
+    setTimeout(()=>all.forEach(c=>c.classList.remove("flipped")), 600);
+  }
+
+  function flip(card, i){
+    if (lock || card.classList.contains("flipped")) return;
+    card.classList.add("flipped");
+    if (!first){ first={i, el:card, v:deck[i]}; return; }
+    if (!second){ second={i, el:card, v:deck[i]}; moves++; movesEl.textContent=moves; check(); }
+  }
+
+  function check(){
+    lock=true;
+    if (first.v===second.v){
+      setTimeout(()=>{
+        matched++;
+        first=null; second=null; lock=false;
+        if (matched===totalPairs) winGame();
+      }, 180);
+    }else{
+      setTimeout(()=>{
+        first.el.classList.remove("flipped");
+        second.el.classList.remove("flipped");
+        first=second=null; lock=false;
+      }, 500);
+    }
+  }
+
+  const STARS_KEY="memoflip_simple_stars";
+  function getStars(){ return Number(localStorage.getItem(STARS_KEY)||0); }
+  function addStar(){ const n=getStars()+1; localStorage.setItem(STARS_KEY,String(n)); starsEl.textContent=n; return n; }
+
+  function winGame(){
+    stopClock();
+    const secs = Math.floor((Date.now()-t0)/1000);
+    wtime.textContent = fmt(secs);
+    wmoves.textContent = moves;
+    const total = addStar();
+    wstars.textContent = total;
+    win.style.display="grid";
+  }
+
+  function reset(start=false){
+    stopClock(); timeEl.textContent="00:00"; moves=0; movesEl.textContent="0"; first=second=null; lock=false;
+    build();
+    if(start) startClock();
+  }
+
+  // UI
+  btnStart.addEventListener("click", ()=> reset(true));
+  btnReset.addEventListener("click", ()=> reset(true));
+  again.addEventListener("click", ()=>{ win.style.display="none"; reset(true); });
+  closeWin.addEventListener("click", ()=>{ win.style.display="none"; });
+
+  gridSel.addEventListener("change", (e)=>{
+    const [c,r]=e.target.value.split("x").map(Number);
+    cols=c; rows=r;
+    reset(false); sizeBoard();
+  });
+
+  // Init
+  starsEl.textContent = getStars();
+  build(); // primera construcción sin reloj
+  // tamaño definitivo tras paint
+  requestAnimationFrame(sizeBoard);
+})();
+</script>
+</body>
+</html>

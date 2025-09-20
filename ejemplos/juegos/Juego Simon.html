@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Simón Marino — Muerte súbita</title>
+<style>
+  :root{
+    --bg:#062130; --text:#e9f6ff; --ui:#1d4b6b; --ui2:#2a6287; --ok:#1bb37a; --warn:#ffb347;
+    --pad1:#1e88e5; --pad2:#43a047; --pad3:#f4511e; --pad4:#fdd835;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:radial-gradient(120% 90% at 50% 100%, #0a3552, var(--bg));color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;}
+  #wrap{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr auto}
+  #top,#bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px}
+  .pill{padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.10);font-weight:700;white-space:nowrap}
+  .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:var(--ui);color:var(--text);font-weight:700}
+  .btn:active{transform:translateY(1px);background:var(--ui2)}
+  #boardWrap{display:grid;place-items:center;padding:12px}
+  /* Tablero 2x2 centrado/escalable */
+  #board{display:grid;grid-template-columns:repeat(2,min(38vw,180px));grid-auto-rows:min(38vw,180px);gap:12px}
+  .pad{display:grid;place-items:center;border-radius:18px;color:#062130;font-size:clamp(28px,8vw,44px);font-weight:900;user-select:none;touch-action:manipulation;box-shadow:0 10px 24px rgba(0,0,0,.35);opacity:.95}
+  .pad:active{transform:translateY(1px)}
+  #p1{background:linear-gradient(145deg,var(--pad1),#1565c0)}  /* pez */
+  #p2{background:linear-gradient(145deg,var(--pad2),#2e7d32)}  /* concha */
+  #p3{background:linear-gradient(145deg,var(--pad3),#d84315)}  /* estrella */
+  #p4{background:linear-gradient(145deg,var(--pad4),#f9a825)}  /* ola */
+  .lit{filter:brightness(1.35) contrast(1.05)}
+  /* Modal */
+  #modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45)}
+  #card{background:#0b304d;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:18px;max-width:92vw;text-align:center}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="top">
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="pill">Ronda: <b id="round">0</b></div>
+      <div class="pill">Récord: <b id="best">0</b></div>
+      <div class="pill">⭐ <span id="stars">0</span></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button id="btnStart" class="btn">▶️ Empezar</button>
+    </div>
+  </div>
+
+  <div id="boardWrap">
+    <div id="board" aria-label="Tablero Simón Marino">
+      <button id="p1" class="pad" aria-label="pez">🐟</button>
+      <button id="p2" class="pad" aria-label="concha">🐚</button>
+      <button id="p3" class="pad" aria-label="estrella de mar">⭐</button>
+      <button id="p4" class="pad" aria-label="ola">🌊</button>
+    </div>
+  </div>
+
+  <div id="bottom">
+    <div class="pill" id="msg">Regla: un fallo = fin de partida. Busca tu mejor racha.</div>
+  </div>
+</div>
+
+<!-- Modal fin -->
+<div id="modal">
+  <div id="card">
+    <h2 id="title">Fin de partida</h2>
+    <p>Llegaste a la ronda <b id="mround">0</b>.</p>
+    <p>Récord: <b id="mbest">0</b></p>
+    <p id="starline" style="display:none">⭐ ¡Nuevo récord! +1 estrella (total: <b id="mstars">0</b>)</p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:10px">
+      <button id="again" class="btn">Jugar de nuevo</button>
+      <button id="close" class="btn" style="background:var(--ok)">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+  const pads = [null,
+    document.getElementById('p1'),
+    document.getElementById('p2'),
+    document.getElementById('p3'),
+    document.getElementById('p4')
+  ];
+  const roundEl = document.getElementById('round');
+  const bestEl  = document.getElementById('best');
+  const starsEl = document.getElementById('stars');
+  const msgEl   = document.getElementById('msg');
+  const btnStart= document.getElementById('btnStart');
+
+  const modal = document.getElementById('modal');
+  const title = document.getElementById('title');
+  const mround= document.getElementById('mround');
+  const mbest = document.getElementById('mbest');
+  const starline = document.getElementById('starline');
+  const mstars = document.getElementById('mstars');
+  const again = document.getElementById('again');
+  const close = document.getElementById('close');
+
+  // Audio
+  const ctx = new (window.AudioContext||window.webkitAudioContext)();
+  const freqs = {1:392, 2:523, 3:659, 4:784};
+  function beep(id, dur=0.28){
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type='sine'; o.frequency.value=freqs[id]||440;
+    o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.16, ctx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+dur);
+    o.start(); o.stop(ctx.currentTime+dur);
+  }
+
+  // Persistencia
+  const BEST_KEY="simon_sea_best";
+  const STARS_KEY="simon_sea_stars";
+  function getBest(){ return Number(localStorage.getItem(BEST_KEY)||0); }
+  function setBest(v){ localStorage.setItem(BEST_KEY,String(v)); }
+  function getStars(){ return Number(localStorage.getItem(STARS_KEY)||0); }
+  function addStar(){ const n=getStars()+1; localStorage.setItem(STARS_KEY,String(n)); starsEl.textContent=n; mstars.textContent=n; }
+
+  let seq=[], userIdx=0, round=0, playingBack=false;
+
+  function rand4(){ return 1+Math.floor(Math.random()*4); }
+
+  function flash(id, t=320){
+    const el = pads[id];
+    el.classList.add('lit'); beep(id, t/1000*0.9);
+    setTimeout(()=> el.classList.remove('lit'), t);
+  }
+
+  async function playSequence(){
+    playingBack=true;
+    msgEl.textContent = "Mira la secuencia…";
+    const pace = Math.max(160, 520 - round*24);
+    for (let i=0;i<seq.length;i++){
+      flash(seq[i], pace*0.8);
+      await new Promise(r=>setTimeout(r, pace));
+    }
+    playingBack=false;
+    msgEl.textContent = "Tu turno. Un fallo = fin.";
+  }
+
+  function nextRound(){
+    round++; roundEl.textContent=round;
+    seq.push(rand4()); userIdx=0;
+    playSequence();
+  }
+
+  function start(){
+    ctx.resume && ctx.resume();
+    seq=[]; userIdx=0; round=0;
+    msgEl.textContent = "Vamos allá.";
+    nextRound();
+  }
+
+  function gameOver(win=false){
+    const bestPrev = getBest();
+    const newBest = Math.max(bestPrev, round);
+    const isRecord = newBest > bestPrev;
+    if (isRecord){ setBest(newBest); addStar(); }
+    bestEl.textContent = newBest;
+    title.textContent = win ? "¡Maestr@ del arrecife!" : "Fin de partida";
+    mround.textContent = round;
+    mbest.textContent = newBest;
+    starline.style.display = isRecord ? "block" : "none";
+    modal.style.display = "grid";
+  }
+
+  function handlePress(id){
+    if (playingBack) return;
+    flash(id, 220);
+    if (seq[userIdx] === id){
+      userIdx++;
+      if (userIdx === seq.length){
+        // No hay fallos: seguimos
+        setTimeout(nextRound, 500);
+      }
+    } else {
+      // Muerte súbita
+      gameOver(false);
+    }
+  }
+
+  pads.slice(1).forEach((el, i)=> el.addEventListener('click', ()=> handlePress(i+1)) );
+  btnStart.addEventListener('click', start);
+  again.addEventListener('click', ()=>{ modal.style.display="none"; start(); });
+  close.addEventListener('click', ()=>{ modal.style.display="none"; });
+
+  // Init
+  bestEl.textContent = getBest();
+  starsEl.textContent = getStars();
+})();
+</script>
+</body>
+</html>

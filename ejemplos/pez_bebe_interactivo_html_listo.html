@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pecera — v4.4 (cola alineada + chupete bebé + ojo grande)</title>
+<style>
+  html,body{margin:0;height:100%;background:#0d6aa1;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
+  #app{position:fixed;inset:0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+let app=null, ctx, renderer, fishes=[];
+function start(){
+  const host=document.getElementById('app');
+  const canvas=document.createElement('canvas');
+  host.appendChild(canvas);
+  ctx=canvas.getContext('2d');
+  renderer={width:host.clientWidth||360,height:host.clientHeight||640,canvas};
+  app={view:canvas,canvas,renderer};
+  window.app=app;
+  function resize(){
+    const dpr=window.devicePixelRatio||1;
+    const w=host.clientWidth,h=host.clientHeight;
+    canvas.width=w*dpr;canvas.height=h*dpr;
+    canvas.style.width=w+'px';canvas.style.height=h+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    renderer.width=w;renderer.height=h;
+  }
+  window.addEventListener('resize',resize);resize();
+
+  function makeFish(age, x, y, baseScale, palette){
+    const traits = {
+      baby:   { eye:1.55, fin:0.7, tail:0.8, speed:85,  accel:0.45, pacifier:true },
+      young:  { eye:1.15,fin:1.0, tail:1.0, speed:105, accel:0.50, pacifier:false },
+      adult:  { eye:0.95,fin:1.25,tail:1.2, speed:125, accel:0.55, pacifier:false }
+    }[age];
+    return {
+      age, x, y, scale: baseScale, vx:0, vy:0,
+      target:{x:x,y:y}, palette, traits, wobble: Math.random()*1000
+    };
+  }
+
+  const PAL = {
+    baby:  { body:'#f5efff', shadow:'#e0d2ff', fin:'#ccb9ff', eye:'#0a0a0a' },
+    young: { body:'#ddcaff', shadow:'#b89dff', fin:'#a887ff', eye:'#0a0a0a' },
+    adult: { body:'#b89dff', shadow:'#986fff', fin:'#8658ff', eye:'#0a0a0a' }
+  };
+
+  fishes=[
+    makeFish('baby',  renderer.width*0.28, renderer.height*0.62, 0.42, PAL.baby),
+    makeFish('young', renderer.width*0.55, renderer.height*0.52, 0.52, PAL.young),
+    makeFish('adult', renderer.width*0.78, renderer.height*0.44, 0.68, PAL.adult)
+  ];
+
+  function pickNewTarget(f){ f.target.x=60+Math.random()*(renderer.width-120); f.target.y=60+Math.random()*(renderer.height-120); }
+  function separationForce(f, others){ let fx=0,fy=0;const desired=70;for(const o of others){if(o===f)continue;const dx=f.x-o.x,dy=f.y-o.y;const d=Math.hypot(dx,dy);if(d>0&&d<desired){const s=(desired-d)/desired;fx+=(dx/d)*s;fy+=(dy/d)*s;}}return {x:fx,y:fy}; }
+
+  function moveFish(f,dt){
+    const dx=f.target.x-f.x, dy=f.target.y-f.y; const dist=Math.hypot(dx,dy)||1; const ux=dx/dist, uy=dy/dist;
+    const sep=separationForce(f,fishes);
+    f.vx+=(ux*f.traits.speed*f.traits.accel+sep.x*60)*dt;
+    f.vy+=(uy*f.traits.speed*f.traits.accel+sep.y*60)*dt;
+    f.x+=f.vx*dt; f.y+=f.vy*dt;
+    f.vx*=0.985; f.vy*=0.985;
+    if(dist<28) pickNewTarget(f);
+    const pad=20,W=renderer.width,H=renderer.height;
+    if(f.x<pad){f.x=pad;if(f.vx<0)f.vx=0;} if(f.x>W-pad){f.x=W-pad;if(f.vx>0)f.vx=0;}
+    if(f.y<pad){f.y=pad;if(f.vy<0)f.vy=0;} if(f.y>H-pad){f.y=H-pad;if(f.vy>0)f.vy=0;}
+  }
+
+  function ellipse(cx,cy,rx,ry){ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.fill();}
+  function path(draw){ctx.beginPath();const p={moveTo:(x,y)=>ctx.moveTo(x,y),bez:(x1,y1,x2,y2,x3,y3)=>ctx.bezierCurveTo(x1,y1,x2,y2,x3,y3),lineTo:(x,y)=>ctx.lineTo(x,y)};draw(p);ctx.fill();}
+  function circle(cx,cy,r){ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();}
+
+  function drawPacifier(s){
+    ctx.save(); ctx.lineWidth=4*s; ctx.strokeStyle='rgba(255,255,255,0.95)'; ctx.beginPath(); ctx.arc(65*s,8*s,6*s,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.85)'; ellipse(58*s,8*s,10*s,6*s);
+    ctx.fillStyle='rgba(220,180,255,0.95)'; ellipse(70*s,7*s,5*s,4*s);
+    ctx.restore();
+  }
+
+  function drawOneFish(f){
+    const pal=f.palette,s=f.scale,finK=f.traits.fin,tailK=f.traits.tail,eyeK=f.traits.eye;
+    const now=performance.now()+f.wobble;
+    const bob=Math.sin(now/400)*6*s;
+    const tailWag=Math.sin(now/140)*0.18;
+
+    ctx.save();ctx.translate(f.x,f.y+bob);ctx.scale((f.vx>=0?1:-1),1);
+    ctx.globalAlpha=0.12;ctx.fillStyle='#000';ellipse(0,40*s,50*s,10*s);ctx.globalAlpha=1;
+    ctx.fillStyle=pal.body;ellipse(0,0,80*s,50*s);
+    ctx.globalAlpha=0.45;ctx.fillStyle=pal.shadow;ellipse(-10*s,10*s,60*s,30*s);ctx.globalAlpha=1;
+    ctx.fillStyle=pal.fin;path(p=>{p.moveTo(-8*s,-25*s*finK);p.bez(-32*s*finK,-50*s*finK,6*s,-52*s*finK,20*s,-25*s*finK);p.lineTo(-8*s,-25*s*finK);});
+    ctx.save();ctx.rotate(Math.sin(now/300)*0.25);path(p=>{ctx.fillStyle=pal.fin;p.moveTo(-12*s,8*s);p.bez(-28*s*finK,24*s*finK,-14*s*finK,36*s*finK,4*s,26*s*finK);p.lineTo(-12*s,8*s);});ctx.restore();
+    // Cola ahora más cerca del cuerpo (traslado -60*s en vez de -70*s)
+    ctx.save();ctx.translate(-60*s,0);ctx.rotate(tailWag);
+    path(p=>{ctx.fillStyle=pal.fin;p.moveTo(-60*s,0);p.bez(-85*s*tailK,-20*s*tailK,-85*s*tailK,20*s*tailK,-60*s,0);});
+    ctx.globalAlpha=0.8;ctx.fillStyle=pal.shadow;path(p=>{p.moveTo(-64*s,0);p.bez(-105*s*tailK,-32*s*tailK,-105*s*tailK,32*s*tailK,-64*s,0);});ctx.globalAlpha=1;ctx.restore();
+    const eyeBase=12*s*eyeK;ctx.fillStyle='#fff';circle(38*s,-6*s,eyeBase*1.2);ctx.fillStyle=pal.eye;circle(38*s,-6*s,eyeBase*0.55);ctx.fillStyle='#fff';ctx.globalAlpha=.9;circle(34*s,-9*s,Math.max(1.5,eyeBase*0.18));ctx.globalAlpha=1;
+    if(f.traits.pacifier) drawPacifier(s);
+    ctx.lineWidth=3*s;ctx.strokeStyle='#ffffffcc';ctx.beginPath();ctx.moveTo(60*s,10*s);ctx.quadraticCurveTo(70*s,18*s,82*s,10*s);ctx.stroke();
+    ctx.restore();
+  }
+
+  let last=performance.now();
+  function frame(){
+    requestAnimationFrame(frame);
+    const now=performance.now();const dt=Math.min(0.033,(now-last)/1000);last=now;
+    const g=ctx.createLinearGradient(0,0,0,renderer.height);g.addColorStop(0,'#3aa1c9');g.addColorStop(1,'#0d6aa1');ctx.fillStyle=g;ctx.fillRect(0,0,renderer.width,renderer.height);
+    for(const f of fishes){moveFish(f,dt);} const order=['adult','young','baby'];for(const age of order){const f=fishes.find(x=>x.age===age);if(f)drawOneFish(f);}
+  }
+  frame();
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',start,{once:true});}else{start();}
+})();
+</script>
+</body>
+</html>

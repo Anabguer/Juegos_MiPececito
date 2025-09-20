@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Atrapa Burbujas — Emojis DOM (v6)</title>
+<style>
+  :root{
+    --bg:#0a3d66; --sea:#0e5a92; --text:#e9f6ff;
+    --ui:#1d4b6b; --ui2:#2a6287; --ok:#1bb37a;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;}
+  #wrap{position:fixed;inset:0;display:grid;grid-template-rows:auto auto 1fr auto;background:var(--bg)}
+  /* Top compacta */
+  #top{display:flex;align-items:center;gap:8px;padding:8px 10px;white-space:nowrap;overflow:hidden}
+  #stats{flex:1;min-width:0;display:flex;gap:8px;align-items:center}
+  .mini{font-size:.92rem;background:rgba(255,255,255,.10);border-radius:10px;padding:6px 10px;font-weight:700}
+  .pipe{opacity:.6}
+  .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:var(--ui);color:var(--text);font-weight:800}
+  .btn:active{transform:translateY(1px);background:var(--ui2)}
+  /* Leyenda una línea */
+  #legend{display:flex;gap:12px;align-items:center;padding:6px 10px;background:rgba(255,255,255,.08);white-space:nowrap;overflow:auto}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.10);font-weight:800}
+  /* Zona de juego */
+  #stageWrap{padding:8px}
+  #stage{position:relative;border-radius:12px;background:var(--sea);height:100%;border:1px solid rgba(255,255,255,.15);overflow:hidden}
+  /* Burbuja DOM */
+  .bubble{
+    position:absolute; left:0; top:0; transform:translate(-9999px,-9999px);
+    display:grid; place-items:center;
+    border-radius:50%;
+    background:radial-gradient(120% 100% at 30% 25%, rgba(255,255,255,.18), rgba(255,255,255,.06) 55%, rgba(255,255,255,.02) 70%);
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,.25), 0 10px 24px rgba(0,0,0,.25);
+    user-select:none; -webkit-user-select:none; touch-action:manipulation;
+  }
+  .bubble.good{outline:2px solid rgba(33,201,137,.35)}
+  .bubble.bad{outline:2px solid rgba(229,95,102,.35)}
+  .emoji{
+    font-size: clamp(24px, 6.5vw, 46px);
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
+    transform: translateZ(0);
+  }
+  /* Mensaje inferior */
+  #bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px}
+  /* Modal */
+  #modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45)}
+  #card{background:#0b304d;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:18px;max-width:92vw;text-align:center}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="top">
+    <div id="stats" class="mini">
+      <span>Pts <b id="score">0</b></span>
+      <span class="pipe">|</span>
+      <span>Rec <b id="best">0</b></span>
+      <span class="pipe">|</span>
+      <span>Glob <b id="global">—</b></span>
+      <span class="pipe">|</span>
+      <span>⭐ <b id="stars">0</b></span>
+    </div>
+    <button id="btnStart" class="btn">▶️ JUGAR</button>
+  </div>
+
+  <div id="legend" title="Toca BUENAS, evita MALAS">
+    <div class="chip">BUENAS: 🐟 🐠 🐚 🪸 ⭐</div>
+    <div class="chip">MALAS: 💀 🦈 ⚠️ 🧨 🪝</div>
+  </div>
+
+  <div id="stageWrap">
+    <div id="stage" aria-label="Atrapa Burbujas (DOM)"></div>
+  </div>
+
+  <div id="bottom"><div class="mini" style="flex:1">Toca BUENAS. Si tocas una MALA o dejas escapar una BUENA, pierdes.</div></div>
+</div>
+
+<!-- Modal fin -->
+<div id="modal">
+  <div id="card">
+    <h2 id="title">Fin de partida</h2>
+    <p>Puntos: <b id="mscore">0</b></p>
+    <p>Récord: <b id="mbest">0</b> · Global: <b id="mglobal">—</b></p>
+    <p>⭐ Ganadas: <b id="mstars">0</b></p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:10px">
+      <button id="again" class="btn">Otra</button>
+      <button id="close" class="btn" style="background:var(--ok)">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+  // ===== Persistencia =====
+  const BEST_KEY = "bubbles_best";
+  const STARS_KEY= "bubbles_stars";
+  const GLOBAL_KEY= "bubbles_global_best";
+  const getBest = () => Number(localStorage.getItem(BEST_KEY)||0);
+  const setBest = v => localStorage.setItem(BEST_KEY,String(v));
+  const getStars= () => Number(localStorage.getItem(STARS_KEY)||0);
+  const addStars= n => { const t=getStars()+n; localStorage.setItem(STARS_KEY,String(t)); return t; };
+  const getGlobal= () => { const g=localStorage.getItem(GLOBAL_KEY); return g===null?null:Number(g); };
+
+  // ===== UI =====
+  const scoreEl = document.getElementById("score");
+  const bestEl  = document.getElementById("best");
+  const globalEl= document.getElementById("global");
+  const starsEl = document.getElementById("stars");
+  const btnStart= document.getElementById("btnStart");
+  const stage   = document.getElementById("stage");
+  const modal = document.getElementById("modal");
+  const mscore= document.getElementById("mscore");
+  const mbest = document.getElementById("mbest");
+  const mglobal= document.getElementById("mglobal");
+  const mstars= document.getElementById("mstars");
+  const again = document.getElementById("again");
+  const close = document.getElementById("close");
+
+  bestEl.textContent = getBest();
+  const g = getGlobal(); globalEl.textContent = (g===null?"—":g);
+  starsEl.textContent = getStars();
+
+  // ===== Juego DOM =====
+  const GOOD = ["🐟","🐠","🐚","🪸","⭐"];
+  const BAD  = ["💀","🦈","⚠️","🧨","🪝"];
+
+  let running=false, score=0, lastSpawn=0, spawnEvery=800;
+  let rafId=null, t0=0;
+  const bubbles=[]; // {el, x,y, r, vy, vx, good}
+
+  // tamaño stage
+  let W=0, H=0;
+  function measure(){
+    const rect = stage.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+  }
+  new ResizeObserver(measure).observe(stage);
+
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+
+  function makeBubble(now){
+    if (now - lastSpawn < spawnEvery) return;
+    lastSpawn = now;
+    const good = Math.random() < 0.7;
+    const r = Math.floor(rand(28, 44)); // px
+    const x = Math.floor(rand(r, W-r));
+    const y = H + r + rand(0, 60);
+    const speed = rand(60, 110) + score*0.7; // px/s
+    const drift = rand(-20, 20); // px/s
+    const el = document.createElement("div");
+    el.className = "bubble " + (good? "good":"bad");
+    el.style.width = el.style.height = (r*2)+"px";
+    const span = document.createElement("div");
+    span.className = "emoji";
+    span.textContent = (good? GOOD[Math.floor(Math.random()*GOOD.length)] : BAD[Math.floor(Math.random()*BAD.length)]);
+    el.appendChild(span);
+    stage.appendChild(el);
+
+    const b = {el, x, y, r, vy:-speed, vx:drift, good};
+    bubbles.push(b);
+    positionBubble(b);
+    // interacción
+    el.addEventListener("pointerdown", (e)=>{
+      e.preventDefault();
+      if (!running) return;
+      if (b.good){
+        // sumar y eliminar
+        score++; scoreEl.textContent = score;
+        killBubble(b, true);
+      } else {
+        // mala → fin
+        end(false, "Tocaste una mala.");
+      }
+    }, {passive:false});
+    // acelerar spawns
+    spawnEvery = Math.max(280, 800 - score*8);
+  }
+
+  function positionBubble(b){
+    el = b.el;
+    el.style.transform = `translate(${Math.round(b.x - b.r)}px, ${Math.round(b.y - b.r)}px)`;
+  }
+
+  function killBubble(b, silent){
+    const idx = bubbles.indexOf(b);
+    if (idx>=0) bubbles.splice(idx,1);
+    // animación mini "pop"
+    if (!silent){
+      b.el.style.transition = "transform 180ms ease, opacity 180ms ease";
+      b.el.style.opacity = "0";
+      b.el.style.transform += " scale(0.8)";
+      setTimeout(()=> b.el.remove(), 200);
+    }else{
+      b.el.remove();
+    }
+  }
+
+  function loop(now){
+    if (!running) return;
+    if (!t0) t0 = now;
+    const dt = (now - t0)/1000; t0 = now;
+
+    makeBubble(now);
+    // mover
+    for (let i=bubbles.length-1;i>=0;i--){
+      const b = bubbles[i];
+      b.y += b.vy*dt;
+      b.x += b.vx*dt;
+      // leve vaivén
+      b.vx += Math.sin(now/400 + i)*4*dt;
+      // paredes
+      if (b.x - b.r < 0 || b.x + b.r > W){ b.vx *= -0.9; }
+      positionBubble(b);
+      // salió por arriba
+      if (b.y + b.r < 0){
+        killBubble(b, true);
+        if (b.good){
+          end(false, "Dejaste escapar una buena.");
+          return;
+        }
+      }
+    }
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function awardStars(finalScore){
+    const bestPrev = getBest();
+    const global = getGlobal();
+    let starsWon = 1;
+    if (finalScore > bestPrev){
+      starsWon = 2;
+      if (global !== null && finalScore > global) starsWon = 3;
+      setBest(finalScore);
+    }
+    const total = addStars(starsWon);
+    bestEl.textContent = getBest();
+    starsEl.textContent = total;
+    return starsWon;
+  }
+
+  function end(win, reason){
+    running=false;
+    cancelAnimationFrame(rafId);
+    // limpiar burbujas
+    bubbles.splice(0).forEach(b=> b.el.remove());
+    const s = score;
+    const starsWon = awardStars(s);
+    document.getElementById("title").textContent = win ? "¡Perfecto!" : "Fin de partida";
+    mscore.textContent = s;
+    mbest.textContent = getBest();
+    const g = getGlobal(); mglobal.textContent = (g===null?"—":g);
+    mstars.textContent = starsWon;
+    modal.style.display = "grid";
+  }
+
+  function start(){
+    measure();
+    running=true; score=0; scoreEl.textContent=score;
+    lastSpawn=0; spawnEvery=800; t0=0;
+    modal.style.display="none";
+    // limpiar restos
+    bubbles.splice(0).forEach(b=> b.el.remove());
+    requestAnimationFrame(loop);
+  }
+
+  // botones
+  btnStart.addEventListener("click", start);
+  again.addEventListener("click", start);
+  close.addEventListener("click", ()=>{ modal.style.display="none"; });
+
+  // init
+  measure();
+})();</script>
+</body>
+</html>

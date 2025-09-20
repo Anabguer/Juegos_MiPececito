@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Debug Huevo 00</title>
+    <style>
+        body { margin: 0; background: #08243a; color: white; font-family: system-ui; padding: 20px; }
+        .debug { background: rgba(0,0,0,0.8); padding: 10px; margin: 10px 0; border-radius: 5px; }
+        img { border: 2px solid white; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Debug Huevo 00</h1>
+    
+    <div class="debug" id="status">Verificando egg_00...</div>
+    
+    <h2>🥚 Huevo 00 específico:</h2>
+    <img id="egg00" src="images/fish/egg_00_clean.png" alt="Huevo 00" width="150" 
+         onload="egg00Loaded()" onerror="egg00Error()">
+    
+    <h2>📊 Comparación:</h2>
+    <img src="images/fish/egg_00_clean.png" alt="00" width="100">
+    <img src="images/fish/egg_01_clean.png" alt="01" width="100">
+    <img src="images/fish/egg_02_clean.png" alt="02" width="100">
+    <img src="images/fish/egg_03_clean.png" alt="03" width="100">
+    <img src="images/fish/egg_04_clean.png" alt="04" width="100">
+    
+    <script>
+        function egg00Loaded() {
+            document.getElementById('status').innerHTML = `
+                <strong style="color: #4caf50;">✅ egg_00_clean.png SE CARGA CORRECTAMENTE</strong><br>
+                Tamaño: ${document.getElementById('egg00').naturalWidth}x${document.getElementById('egg00').naturalHeight}<br>
+                Ruta: ${document.getElementById('egg00').src}
+            `;
+            console.log('✅ egg_00_clean.png cargado exitosamente');
+        }
+        
+        function egg00Error() {
+            document.getElementById('status').innerHTML = `
+                <strong style="color: #f44336;">❌ ERROR: egg_00_clean.png NO SE PUEDE CARGAR</strong><br>
+                Ruta intentada: ${document.getElementById('egg00').src}<br>
+                Verificar que el archivo existe en images/fish/
+            `;
+            console.log('❌ ERROR: egg_00_clean.png no se puede cargar');
+        }
+        
+        console.log('🧪 Debug de egg_00 iniciado');
+        console.log('📁 URL base:', window.location.href);
+    </script>
+</body>
+</html>
+

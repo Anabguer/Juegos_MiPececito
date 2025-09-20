@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test Imágenes</title>
+    <style>
+        body {
+            margin: 0;
+            background: #08243a;
+            color: white;
+            font-family: system-ui;
+            padding: 20px;
+        }
+        .test-img {
+            margin: 10px;
+            border: 2px solid white;
+            display: inline-block;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Carga de Imágenes</h1>
+    
+    <div class="status" id="status">Cargando imágenes...</div>
+    
+    <h2>🥚 Huevos:</h2>
+    <img class="test-img" src="images/fish/egg_01_clean.png" alt="Huevo 1" width="100" onload="imageLoaded(this)" onerror="imageError(this)">
+    <img class="test-img" src="images/fish/egg_02_clean.png" alt="Huevo 2" width="100" onload="imageLoaded(this)" onerror="imageError(this)">
+    <img class="test-img" src="images/fish/egg_03_clean.png" alt="Huevo 3" width="100" onload="imageLoaded(this)" onerror="imageError(this)">
+    <img class="test-img" src="images/fish/egg_04_clean.png" alt="Huevo 4" width="100" onload="imageLoaded(this)" onerror="imageError(this)">
+    
+    <h2>🏞️ Fondo:</h2>
+    <img class="test-img" src="images/backgrounds/bg_basic.png" alt="Fondo básico" width="200" onload="imageLoaded(this)" onerror="imageError(this)">
+    
+    <div id="results"></div>
+    
+    <script>
+        let loaded = 0;
+        let failed = 0;
+        const total = 5;
+        
+        function imageLoaded(img) {
+            loaded++;
+            console.log('✅ Imagen cargada:', img.src);
+            updateStatus();
+        }
+        
+        function imageError(img) {
+            failed++;
+            console.log('❌ Error cargando:', img.src);
+            img.style.border = '2px solid red';
+            updateStatus();
+        }
+        
+        function updateStatus() {
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = `
+                <strong>Estado de carga:</strong><br>
+                ✅ Cargadas: ${loaded}/${total}<br>
+                ❌ Fallidas: ${failed}/${total}<br>
+                ⏳ Pendientes: ${total - loaded - failed}/${total}
+            `;
+            
+            if (loaded + failed === total) {
+                if (loaded === total) {
+                    statusEl.innerHTML += '<br><strong style="color: #4caf50;">🎉 ¡Todas las imágenes cargadas correctamente!</strong>';
+                } else {
+                    statusEl.innerHTML += '<br><strong style="color: #f44336;">⚠️ Algunas imágenes fallaron</strong>';
+                }
+            }
+        }
+        
+        console.log('🧪 Test de imágenes iniciado');
+        console.log('📁 Ruta base:', window.location.href);
+    </script>
+</body>
+</html>
+

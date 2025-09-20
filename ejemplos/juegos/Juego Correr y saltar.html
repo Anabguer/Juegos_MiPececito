@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<title>Dragón Marino — Runner offline</title>
+<style>
+  :root{ --bg:#072a44; --sea:#0d4670; --sea2:#0a3758; --text:#e9f6ff; --ui:#1d4b6b; --ui2:#2a6287; --ok:#1bb37a; }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;}
+  #wrap{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr;gap:6px;padding:6px}
+  #top{display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
+  .pill{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.10);font-weight:700}
+  .btn{appearance:none;border:0;border-radius:999px;padding:8px 12px;background:var(--ui);color:var(--text);font-weight:800}
+  .btn:active{transform:translateY(1px);background:var(--ui2)}
+  #stage{position:relative;border-radius:14px;border:1px solid rgba(255,255,255,.15);overflow:hidden;background:linear-gradient(#083457,#0b4e7b)}
+  #c{display:block;width:100%;height:100%}
+  #hint{position:absolute;inset:auto 0 8px 0;text-align:center;opacity:.7;font-size:14px}
+  #modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45)}
+  #card{background:#0b304d;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:18px;max-width:92vw;text-align:center}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="top">
+    <div class="pill">Pts <b id="score">0</b></div>
+    <div class="pill">Rec <b id="best">0</b></div>
+    <div class="pill">⭐ <b id="stars">0</b></div>
+    <button id="btnNew" class="btn">↺</button>
+  </div>
+  <div id="stage">
+    <canvas id="c" aria-label="Runner del dragón marino"></canvas>
+    <div id="hint">Toca / pulsa espacio para saltar</div>
+  </div>
+</div>
+
+<div id="modal">
+  <div id="card">
+    <h2>Fin de partida</h2>
+    <p>Puntuación: <b id="mscore">0</b></p>
+    <p>Récord: <b id="mbest">0</b></p>
+    <p>⭐ Ganadas: <b id="mstars">0</b></p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:10px">
+      <button id="again" class="btn">Otra</button>
+      <button id="close" class="btn" style="background:var(--ok)">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Persistencia
+  var BEST_KEY="dragon_best"; var STARS_KEY="dragon_stars";
+  function getBest(){ var v=localStorage.getItem(BEST_KEY); return v?Number(v):0; }
+  function setBest(v){ localStorage.setItem(BEST_KEY,String(v)); }
+  function getStars(){ var v=localStorage.getItem(STARS_KEY); return v?Number(v):0; }
+  function addStars(n){ var t=getStars()+n; localStorage.setItem(STARS_KEY,String(t)); return t; }
+
+  // Refs
+  var stage=document.getElementById('stage');
+  var canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+  var scoreEl=document.getElementById('score');
+  var bestEl=document.getElementById('best');
+  var starsEl=document.getElementById('stars');
+  var btnNew=document.getElementById('btnNew');
+  var modal=document.getElementById('modal');
+  var mscore=document.getElementById('mscore');
+  var mbest=document.getElementById('mbest');
+  var mstars=document.getElementById('mstars');
+
+  bestEl.textContent=getBest();
+  starsEl.textContent=getStars();
+
+  // Layout canvas
+  function sizeCanvas(){
+    var r=stage.getBoundingClientRect();
+    canvas.width = Math.floor(r.width);
+    canvas.height= Math.floor(r.height);
+  }
+  window.addEventListener('resize', sizeCanvas);
+
+  // Mundo
+  var running=false, t=0, last=0, speed=240; // px/s
+  var score=0, groundY=0, gravity=1800, jumpV=-620, dragon, obstacles=[], clouds=[];
+  function reset(){
+    t=0; last=0; score=0; speed=240; obstacles=[]; clouds=[];
+    groundY = canvas.height*0.78;
+    dragon={x:canvas.width*0.18, y:groundY, vy:0, w:48, h:42, onGround:true, flap:0};
+    spawnClouds();
+  }
+
+  function spawnClouds(){
+    for (var i=0;i<5;i++){
+      clouds.push({x: Math.random()*canvas.width, y: 40+Math.random()*canvas.height*0.5, s: 0.2+Math.random()*0.5});
+    }
+  }
+
+  function spawnObstacle(){
+    var type = Math.random()<0.6 ? "coral" : (Math.random()<0.5?"erizo":"medusa");
+    var baseH = (type==="coral")? (30+Math.random()*40) : (type==="erizo"? 36: 44);
+    var w = (type==="coral")? 28: (type==="erizo"? 36: 32);
+    var h = baseH;
+    obstacles.push({x: canvas.width+10, y: groundY, w:w, h:h, type:type});
+  }
+
+  function update(dt){
+    // velocidad sube con el tiempo
+    speed += dt*8;
+
+    // dragón física
+    dragon.vy += gravity*dt;
+    dragon.y += dragon.vy*dt;
+    if (dragon.y >= groundY){ dragon.y=groundY; dragon.vy=0; dragon.onGround=true; }
+    dragon.flap += dt*9;
+
+    // obstáculos
+    for (var i=obstacles.length-1;i>=0;i--){
+      obstacles[i].x -= speed*dt;
+      if (obstacles[i].x + obstacles[i].w < 0) obstacles.splice(i,1);
+    }
+    // spawn aleatorio con separación mínima
+    if (obstacles.length===0 || (canvas.width - obstacles[obstacles.length-1].x) > 220 + Math.random()*120){
+      if (Math.random()<0.02 + Math.min(0.08, t/60000)) spawnObstacle();
+    }
+
+    // nubes parallax
+    for (var j=0;j<clouds.length;j++){
+      clouds[j].x -= clouds[j].s*30*dt;
+      if (clouds[j].x < -60) clouds[j].x = canvas.width + Math.random()*80;
+    }
+
+    // score
+    score += Math.floor(dt*speed*0.1);
+    scoreEl.textContent=score;
+
+    // colisiones
+    for (var k=0;k<obstacles.length;k++){
+      var o=obstacles[k];
+      var dx = (dragon.x+dragon.w*0.5) - (o.x+o.w*0.5);
+      var dy = (dragon.y-dragon.h*0.5) - (o.y-o.h*0.5);
+      var sx = (dragon.w*0.5) + (o.w*0.5);
+      var sy = (dragon.h*0.5) + (o.h*0.5);
+      if (Math.abs(dx)<sx && Math.abs(dy)<sy){
+        gameOver();
+        return;
+      }
+    }
+  }
+
+  function draw(){
+    // fondo mar
+    var w=canvas.width, h=canvas.height;
+    ctx.clearRect(0,0,w,h);
+    // franjas
+    var grad=ctx.createLinearGradient(0,0,0,h);
+    grad.addColorStop(0,"#0a3d66"); grad.addColorStop(1,"#0e5a92");
+    ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
+
+    // nubes/burbujas
+    ctx.fillStyle="rgba(255,255,255,0.25)";
+    for (var i=0;i<clouds.length;i++){
+      var c=clouds[i]; ctx.beginPath(); ctx.arc(c.x, c.y, 18, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(c.x+16, c.y+6, 10, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(c.x-14, c.y+8, 12, 0, Math.PI*2); ctx.fill();
+    }
+
+    // suelo
+    ctx.fillStyle="#062b46"; ctx.fillRect(0, groundY+12, w, h-groundY-12);
+    // olas suelo
+    ctx.strokeStyle="rgba(255,255,255,0.12)"; ctx.lineWidth=2;
+    ctx.beginPath();
+    for (var x=0;x<w;x+=18){ var y=groundY+10 + Math.sin((x+t*0.3)*0.04)*3; ctx.lineTo(x,y); }
+    ctx.stroke();
+
+    // obstáculos
+    for (var k=0;k<obstacles.length;k++){
+      var o=obstacles[k];
+      if (o.type==="coral"){
+        ctx.fillStyle="#ff7a6e";
+        ctx.fillRect(o.x, o.y-o.h, o.w, o.h);
+        ctx.fillStyle="#ff9ab3";
+        ctx.fillRect(o.x+6, o.y-o.h-10, Math.max(4,o.w-12), 12);
+      }else if (o.type==="erizo"){
+        ctx.fillStyle="#c44d3b";
+        ctx.beginPath(); ctx.moveTo(o.x, o.y);
+        ctx.lineTo(o.x+o.w*0.5, o.y-o.h);
+        ctx.lineTo(o.x+o.w, o.y);
+        ctx.closePath(); ctx.fill();
+      }else{ // medusa flotante
+        ctx.fillStyle="#8b7bff";
+        ctx.beginPath(); ctx.arc(o.x+o.w*0.5, o.y-o.h, o.w*0.55, 0, Math.PI, true); ctx.fill();
+        ctx.fillRect(o.x+o.w*0.5-10, o.y-o.h, 20, o.h);
+      }
+    }
+
+    // dragón marino (dibujito simple)
+    var x=dragon.x, y=dragon.y, w2=dragon.w, h2=dragon.h;
+    ctx.save();
+    ctx.translate(x, y-h2*0.5);
+    ctx.fillStyle="#5bd0ff"; // cuerpo
+    ctx.beginPath();
+    ctx.ellipse(0, h2*0.5, w2*0.6, h2*0.45, 0, 0, Math.PI*2);
+    ctx.fill();
+    // ojo
+    ctx.fillStyle="#072a44"; ctx.beginPath(); ctx.arc(w2*0.1, h2*0.3, 3, 0, Math.PI*2); ctx.fill();
+    // aleta ondulante
+    var fl = Math.sin(dragon.flap)*8;
+    ctx.fillStyle="#3dbef1"; ctx.beginPath();
+    ctx.moveTo(-w2*0.4, h2*0.4);
+    ctx.quadraticCurveTo(-w2*0.6, h2*0.2+fl, -w2*0.3, 0+fl);
+    ctx.quadraticCurveTo(-w2*0.1, h2*0.1+fl, -w2*0.4, h2*0.4);
+    ctx.fill();
+    ctx.restore();
+
+    // marcador sombra
+    ctx.fillStyle="rgba(0,0,0,0.35)";
+    ctx.fillRect(0,0,100,36);
+    ctx.fillStyle="#e9f6ff"; ctx.font="bold 16px system-ui, sans-serif"; ctx.textBaseline="top";
+    ctx.fillText("Pts "+score, 8, 8);
+  }
+
+  function loop(ts){
+    if (!running){ return; }
+    if (!last) last=ts;
+    var dt = Math.min(0.05,(ts-last)/1000); last=ts;
+    t += dt*1000;
+    update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  function jump(){
+    if (dragon.onGround){
+      dragon.vy = jumpV;
+      dragon.onGround=false;
+    }else if (dragon.y < groundY - 12 && dragon.vy>jumpV*0.45){
+      // salto amortiguado (tap corto) si suelta rápido
+      dragon.vy = jumpV*0.45;
+    }
+  }
+
+  // Controles
+  canvas.addEventListener('touchstart', function(e){ e.preventDefault(); jump(); }, {passive:false});
+  canvas.addEventListener('mousedown', function(){ jump(); });
+  window.addEventListener('keydown', function(e){ if (e.code==="Space" || e.key===" ") jump(); });
+
+  function awardStars(finalScore){
+    var prev=getBest(); var stars=1;
+    if(finalScore>prev){ stars=2; setBest(finalScore); }
+    var total=addStars(stars);
+    bestEl.textContent=getBest(); starsEl.textContent=total;
+    return stars;
+  }
+
+  function gameOver(){
+    running=false;
+    var stars=awardStars(score);
+    mscore.textContent=score; mbest.textContent=getBest(); mstars.textContent=stars;
+    modal.style.display="grid";
+  }
+
+  function start(){
+    modal.style.display="none";
+    sizeCanvas(); reset(); running=true; loop.last=0;
+    requestAnimationFrame(loop);
+  }
+
+  document.getElementById('again').addEventListener('click', start);
+  document.getElementById('close').addEventListener('click', function(){ modal.style.display="none"; });
+  btnNew.addEventListener('click', start);
+
+  // Inicio
+  start();
+})();</script>
+</body>
+</html>

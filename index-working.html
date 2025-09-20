@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐟 Mi Pececito - Completo</title>
+    <style>
+        body {
+            margin: 0;
+            background: #08243a;
+            color: white;
+            font-family: system-ui;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        canvas {
+            position: fixed;
+            inset: 0;
+            touch-action: none;
+        }
+        #controls {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+        .btn {
+            padding: 6px 12px;
+            background: #1d4b6b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .btn:hover {
+            background: #2a6287;
+        }
+        #turbo {
+            position: fixed;
+            right: 12px;
+            top: 12px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(4px);
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.15s;
+            pointer-events: none;
+        }
+        #turbo.active {
+            opacity: 1;
+        }
+        #info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div id="turbo">TURBO 💨</div>
+    
+    <div id="controls">
+        <button class="btn" onclick="setTimer(5000)">⏰ 5s</button>
+        <button class="btn" onclick="setTimer(30000)">⏰ 30s</button>
+        <button class="btn" onclick="forceHatch()">🐣 Eclosionar</button>
+        <button class="btn" onclick="dropFood()">🍎 Comida</button>
+        <button class="btn" onclick="resetGame()">🔄 Reset</button>
+    </div>
+    
+    <div id="info">
+        <div>Etapa: <span id="stage">Huevo</span></div>
+        <div>Progreso: <span id="progress">0%</span></div>
+        <div>Tiempo: <span id="timer">24:00:00</span></div>
+        
+        <!-- 📊 BARRAS DE NECESIDADES SIMPLES -->
+        <div style="margin-top: 10px; padding: 8px; background: linear-gradient(135deg, rgba(0, 50, 100, 0.8), rgba(0, 100, 150, 0.8)); border-radius: 8px;">
+            <div style="display: flex; gap: 15px; font-size: 12px; color: white;">
+                <div>🍎 Hambre: <span id="hungerValue" style="color: #ff6b6b;">80</span>%</div>
+                <div>🧹 Suciedad: <span id="dirtValue" style="color: #51cf66;">65</span>%</div>
+                <div>🎉 Diversión: <span id="funValue" style="color: #74c0fc;">70</span>%</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN DEL JUEGO (todo en un archivo)
+        const GAME_CONFIG = {
+            eggDuration: 24 * 60 * 60 * 1000, // 24 horas
+            evolution: {
+                babyDuration: 7 * 24 * 60 * 60 * 1000,  // 7 días
+                youngDuration: 7 * 24 * 60 * 60 * 1000   // 7 días más
+            }
+        };
+        
+        const FISH_CONFIGS = {
+            baby: {
+                size: 46,
+                body: '#d9ccff',
+                tail: '#ff9ecf', 
+                fin: '#ffd0e2',
+                stripeColor: '#ffba7a',
+                eyeScale: 1.6,
+                stripeWidth: 0.32,
+                hasChupete: true,
+                baseSpeed: 120,
+                followSpeed: 260,
+                wobbleFreq: 6
+            },
+            young: {
+                size: 52,
+                body: '#b1a1ff',
+                tail: '#f191cd',
+                fin: '#f1c4e4', 
+                stripeColor: '#ffa960',
+                eyeScale: 1.25,
+                stripeWidth: 0.20,
+                hasChupete: false,
+                baseSpeed: 130,
+                followSpeed: 270,
+                wobbleFreq: 6
+            },
+            adult: {
+                size: 60,
+                body: '#5a48c8',
+                tail: '#d073c6',
+                fin: '#e2a8d6',
+                stripeColor: '#ff9745',
+                eyeScale: 0.95,
+                stripeWidth: 0.12,
+                hasChupete: false,
+                baseSpeed: 125,
+                followSpeed: 265,
+                wobbleFreq: 5.6
+            }
+        };
+        
+        // ESTADO DEL JUEGO
+        const gameState = {
+            stage: 'egg',
+            eggStartTime: Date.now(),
+            birthTime: null,
+            fishName: null,
+            
+            // Animaciones
+            hatching: false,
+            hatchStart: 0,
+            hatchProgress: 0,
+            
+            evolving: false,
+            evolutionStart: 0,
+            evolutionProgress: 0
+        };
+        
+        // CANVAS Y CONTEXTO
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Reposicionar elementos
+            if (gameState.stage !== 'egg') {
+                fish.x = canvas.width * 0.5;
+                fish.y = canvas.height * 0.65;
+            }
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        
+        // HUEVO
+        const egg = {
+            x: 0,
+            y: 0,
+            floatTime: 0,
+            size: 90
+        };
+        
+        // PEZ
+        const fish = {
+            x: canvas.width * 0.5,
+            y: canvas.height * 0.65,
+            vx: 110,
+            vy: 8,
+            angle: 0,
+            target: null,
+            turbo: false,
+            wobbleT: Math.random() * 10,
+            bubbleTimer: 0.4,
+            
+            // Animación de nacimiento
+            birthAnimation: {
+                active: false,
+                progress: 0,
+                startTime: 0
+            }
+        };
+        
+        // BURBUJAS
+        const bgBubbles = [];
+        const mouthBubbles = [];
+        const explosionBubbles = []; // Burbujas de explosión de eclosión
+        
+        // Crear burbujas de fondo
+        for (let i = 0; i < 20; i++) {
+            bgBubbles.push({
+                x: Math.random() * canvas.width,
+                y: canvas.height + Math.random() * canvas.height,
+                r: 1 + Math.random() * 3,
+                speed: 12 + Math.random() * 24,
+                opacity: 0.3 + Math.random() * 0.4
+            });
+        }
+        
+        // Crear explosión de burbujas para la eclosión
+        function createExplosionBubbles() {
+            explosionBubbles.length = 0; // Limpiar array
+            
+            // Crear MONTÓN de burbujas desde el centro del huevo
+            for (let i = 0; i < 40; i++) {
+                const angle = (i / 40) * Math.PI * 2 + Math.random() * 0.5;
+                const speed = 50 + Math.random() * 100;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed - 20; // Bias hacia arriba
+                
+                explosionBubbles.push({
+                    x: egg.x,
+                    y: egg.y,
+                    vx: vx,
+                    vy: vy,
+                    r: 2 + Math.random() * 6,
+                    life: 1.5 + Math.random() * 1.0,
+                    maxLife: 1.5 + Math.random() * 1.0,
+                    gravity: 20 + Math.random() * 30
+                });
+            }
+            
+            console.log('💥 ¡Explosión de burbujas creada!');
+        }
+        
+        // UTILIDADES
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+        
+        function clampAngle(angle) {
+            const maxAngle = 70 * Math.PI / 180;
+            return Math.max(-maxAngle, Math.min(maxAngle, angle));
+        }
+        
+        function randomBetween(min, max) {
+            return min + Math.random() * (max - min);
+        }
+        
+        function getEggProgress() {
+            const elapsed = Date.now() - gameState.eggStartTime;
+            return Math.min(1, elapsed / GAME_CONFIG.eggDuration);
+        }
+        
+        function getTimeRemaining() {
+            const elapsed = Date.now() - gameState.eggStartTime;
+            return Math.max(0, GAME_CONFIG.eggDuration - elapsed);
+        }
+        
+        function formatTime(ms) {
+            const totalSeconds = Math.ceil(ms / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // LÓGICA DE EVOLUCIÓN
+        function checkEvolution() {
+            if (gameState.evolving) return;
+            
+            const now = Date.now();
+            
+            if (gameState.stage === 'egg') {
+                const progress = getEggProgress();
+                if (progress >= 1 && !gameState.hatching) {
+                    startHatching();
+                }
+            } else if (gameState.stage === 'baby' && gameState.birthTime) {
+                const age = now - gameState.birthTime;
+                if (age >= GAME_CONFIG.evolution.babyDuration) {
+                    startEvolution('young');
+                }
+            } else if (gameState.stage === 'young' && gameState.birthTime) {
+                const totalAge = now - gameState.birthTime;
+                const youngThreshold = GAME_CONFIG.evolution.babyDuration + GAME_CONFIG.evolution.youngDuration;
+                if (totalAge >= youngThreshold) {
+                    startEvolution('adult');
+                }
+            }
+        }
+        
+        function startHatching() {
+            if (gameState.hatching) return;
+            gameState.hatching = true;
+            gameState.hatchStart = Date.now();
+            console.log('🐣 Iniciando eclosión!');
+        }
+        
+        function startEvolution(newStage) {
+            if (gameState.evolving) return;
+            console.log(`🎭 Evolucionando a ${newStage}`);
+            gameState.evolving = true;
+            gameState.evolutionStart = Date.now();
+            gameState.targetStage = newStage;
+        }
+        
+        function completeEvolution() {
+            gameState.stage = gameState.targetStage;
+            gameState.evolving = false;
+            console.log(`✅ Evolución completada: ${gameState.stage}`);
+        }
+        
+        // CONTROLES
+        let pointer = null;
+        
+        canvas.addEventListener('pointerdown', (e) => {
+            pointer = { x: e.clientX, y: e.clientY };
+            
+            if (gameState.stage !== 'egg') {
+                fish.target = pointer;
+                fish.turbo = true;
+                document.getElementById('turbo').classList.add('active');
+            }
+        });
+        
+        canvas.addEventListener('pointermove', (e) => {
+            if (pointer) {
+                pointer.x = e.clientX;
+                pointer.y = e.clientY;
+            }
+        });
+        
+        canvas.addEventListener('pointerup', () => {
+            pointer = null;
+            if (gameState.stage !== 'egg') {
+                fish.target = null;
+                fish.turbo = false;
+                document.getElementById('turbo').classList.remove('active');
+            }
+        });
+        
+        canvas.addEventListener('pointercancel', () => {
+            pointer = null;
+            if (gameState.stage !== 'egg') {
+                fish.target = null;
+                fish.turbo = false;
+                document.getElementById('turbo').classList.remove('active');
+            }
+        });
+        
+        // FUNCIONES DE CONTROL
+        function setTimer(milliseconds) {
+            gameState.eggStartTime = Date.now() - (GAME_CONFIG.eggDuration - milliseconds);
+            gameState.hatching = false;
+            gameState.hatchProgress = 0;
+            console.log(`⏰ Timer ajustado a ${milliseconds/1000} segundos`);
+        }
+        
+        function forceHatch() {
+            if (gameState.stage === 'egg') {
+                startHatching();
+            }
+        }
+        
+        function resetGame() {
+            gameState.stage = 'egg';
+            gameState.eggStartTime = Date.now();
+            gameState.birthTime = null;
+            gameState.hatching = false;
+            gameState.evolving = false;
+            fish.birthAnimation.active = false;
+            console.log('🔄 Juego reiniciado');
+        }
+        
+        // ACTUALIZACIÓN
+        function update(deltaTime) {
+            // Verificar evolución
+            checkEvolution();
+            
+            if (gameState.stage === 'egg') {
+                updateEgg(deltaTime);
+            } else {
+                updateFish(deltaTime);
+            }
+            
+            updateBubbles(deltaTime);
+            updateAnimations(deltaTime);
+            updateUI();
+        }
+        
+        function updateEgg(deltaTime) {
+            egg.x = canvas.width / 2;
+            egg.y = canvas.height * 0.7;
+            egg.floatTime += deltaTime;
+        }
+        
+        function updateFish(deltaTime) {
+            const config = FISH_CONFIGS[gameState.stage] || FISH_CONFIGS.baby;
+            
+            // Movimiento
+            let desiredVx = (Math.sign(fish.vx) || 1) * config.baseSpeed;
+            let desiredVy = fish.vy;
+            
+            if (fish.target) {
+                const dx = fish.target.x - fish.x;
+                const dy = fish.target.y - fish.y;
+                const len = Math.hypot(dx, dy) || 1;
+                const spd = config.followSpeed * 1.6;
+                desiredVx = (dx / len) * spd;
+                desiredVy = (dy / len) * spd;
+            } else {
+                fish.wobbleT += deltaTime;
+                desiredVy = fish.vy + Math.sin(fish.wobbleT * 1.6) * 10 * deltaTime;
+            }
+            
+            fish.vx = lerp(fish.vx, desiredVx, Math.min(1, deltaTime * 3.0));
+            fish.vy = lerp(fish.vy, desiredVy, Math.min(1, deltaTime * 3.0));
+            
+            fish.x += fish.vx * deltaTime;
+            fish.y += fish.vy * deltaTime;
+            
+            // Colisiones
+            const pad = 70;
+            if (fish.x < pad) { fish.x = pad; fish.vx = Math.abs(fish.vx); }
+            if (fish.x > canvas.width - pad) { fish.x = canvas.width - pad; fish.vx = -Math.abs(fish.vx); }
+            if (fish.y < canvas.height * 0.35) { fish.y = canvas.height * 0.35; fish.vy = Math.abs(fish.vy); }
+            if (fish.y > canvas.height - pad * 0.7) { fish.y = canvas.height - pad * 0.7; fish.vy = -Math.abs(fish.vy); }
+            
+            fish.angle = clampAngle(Math.atan2(fish.vy, Math.abs(fish.vx)));
+            
+            // Burbujas de la boca
+            fish.bubbleTimer -= deltaTime * (fish.target ? 2.6 : 1.0);
+            if (fish.bubbleTimer <= 0) {
+                addMouthBubble(!!fish.target);
+                if (fish.target) {
+                    if (Math.random() < 0.8) addMouthBubble(true);
+                    if (Math.random() < 0.55) addMouthBubble(true);
+                }
+                fish.bubbleTimer = randomBetween(0.45, 1.1);
+            }
+        }
+        
+        function updateBubbles(deltaTime) {
+            // Burbujas de fondo
+            for (const bubble of bgBubbles) {
+                bubble.y -= bubble.speed * deltaTime;
+                if (bubble.y < canvas.height * 0.1) {
+                    bubble.y = canvas.height + 10;
+                    bubble.x = Math.random() * canvas.width;
+                }
+            }
+            
+            // Burbujas de la boca
+            for (let i = mouthBubbles.length - 1; i >= 0; i--) {
+                const bubble = mouthBubbles[i];
+                bubble.y -= bubble.v * deltaTime;
+                bubble.life -= deltaTime;
+                if (bubble.life <= 0) {
+                    mouthBubbles.splice(i, 1);
+                }
+            }
+            
+            // Burbujas de explosión de eclosión
+            for (let i = explosionBubbles.length - 1; i >= 0; i--) {
+                const bubble = explosionBubbles[i];
+                
+                // Física de las burbujas
+                bubble.x += bubble.vx * deltaTime;
+                bubble.y += bubble.vy * deltaTime;
+                bubble.vy += bubble.gravity * deltaTime; // Gravedad
+                
+                // Resistencia del agua
+                bubble.vx *= 0.98;
+                bubble.vy *= 0.98;
+                
+                // Vida de la burbuja
+                bubble.life -= deltaTime;
+                
+                if (bubble.life <= 0) {
+                    explosionBubbles.splice(i, 1);
+                }
+            }
+        }
+        
+        function updateAnimations(deltaTime) {
+            // Animación de eclosión
+            if (gameState.hatching) {
+                const elapsed = Date.now() - gameState.hatchStart;
+                gameState.hatchProgress = Math.min(1, elapsed / 2000); // 2 segundos más rápido
+                
+                // A los 1.5 segundos (75% progreso), explosión de burbujas MIENTRAS se ve el huevo
+                if (gameState.hatchProgress >= 0.75 && gameState.hatchProgress < 0.8 && gameState.stage === 'egg') {
+                    // Crear explosión de burbujas MIENTRAS el huevo está visible
+                    createExplosionBubbles();
+                    console.log('💥 ¡Burbujas explotan mientras el huevo se rompe!');
+                }
+                
+                // A los 2 segundos (progreso 100%), cambiar a bebé
+                if (gameState.hatchProgress >= 1.0 && gameState.stage === 'egg') {
+                    // Cambiar a bebé
+                    gameState.stage = 'baby';
+                    gameState.birthTime = Date.now();
+                    
+                    // Posicionar pez en el centro
+                    fish.x = canvas.width * 0.5;
+                    fish.y = canvas.height * 0.65;
+                    fish.vx = randomBetween(80, 120);
+                    fish.vy = randomBetween(-20, 20);
+                    
+                    // Iniciar animación de nacimiento inmediatamente
+                    fish.birthAnimation.active = true;
+                    fish.birthAnimation.startTime = Date.now();
+                    console.log('🐣 ¡Pez bebé apareciendo!');
+                }
+                
+                if (gameState.hatchProgress >= 1) {
+                    // Completar eclosión
+                    gameState.hatching = false;
+                    console.log('✅ ¡Eclosión completada!');
+                }
+            }
+            
+            // Animación de nacimiento del pez
+            if (fish.birthAnimation.active) {
+                const elapsed = Date.now() - fish.birthAnimation.startTime;
+                fish.birthAnimation.progress = Math.min(1, elapsed / 2000);
+                
+                if (fish.birthAnimation.progress >= 1) {
+                    fish.birthAnimation.active = false;
+                }
+            }
+            
+            // Animación de evolución
+            if (gameState.evolving) {
+                const elapsed = Date.now() - gameState.evolutionStart;
+                gameState.evolutionProgress = Math.min(1, elapsed / 2000);
+                
+                if (gameState.evolutionProgress >= 1) {
+                    completeEvolution();
+                }
+            }
+        }
+        
+        function updateUI() {
+            const progress = getEggProgress();
+            const timeRemaining = getTimeRemaining();
+            
+            document.getElementById('stage').textContent = gameState.hatching ? 'Eclosionando' : 
+                (gameState.evolving ? `Evolucionando a ${gameState.targetStage}` : gameState.stage);
+            document.getElementById('progress').textContent = Math.round(progress * 100) + '%';
+            document.getElementById('timer').textContent = formatTime(timeRemaining);
+        }
+        
+        function addMouthBubble(turboMul) {
+            const config = FISH_CONFIGS[gameState.stage] || FISH_CONFIGS.baby;
+            const dir = Math.sign(fish.vx) || 1;
+            const mouthX = fish.x + (dir > 0 ? config.size * 0.70 : -config.size * 0.70);
+            
+            mouthBubbles.push({
+                x: mouthX,
+                y: fish.y,
+                v: randomBetween(22, 34) * (turboMul ? 1.25 : 1),
+                r: randomBetween(1.2, 2.4) * (turboMul ? 1.15 : 1),
+                life: randomBetween(0.9, 1.4) * (turboMul ? 1.2 : 1)
+            });
+        }
+        
+        // RENDERIZADO
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Fondo con agua
+            drawWaterBackground();
+            
+            // Burbujas
+            drawBubbles();
+            
+            // Durante la eclosión, mostrar huevo rompiéndose CON burbujas
+            if (gameState.hatching) {
+                // Mostrar huevo rompiéndose (hasta 90% del progreso)
+                if (gameState.hatchProgress < 0.9) {
+                    ctx.save();
+                    // El huevo se mantiene visible más tiempo para ver las burbujas
+                    ctx.globalAlpha = 1 - (gameState.hatchProgress / 0.9);
+                    drawEggDuringHatch();
+                    ctx.restore();
+                }
+                
+                // Mostrar pez apareciendo (desde 80% del progreso)
+                if (gameState.hatchProgress > 0.8 && gameState.stage === 'baby') {
+                    ctx.save();
+                    ctx.globalAlpha = (gameState.hatchProgress - 0.8) / 0.2;
+                    drawFish();
+                    ctx.restore();
+                }
+            } else if (gameState.stage === 'egg') {
+                drawEgg();
+            } else {
+                drawFish();
+            }
+            
+            drawUI();
+        }
+        
+        function drawEggDuringHatch() {
+            const progress = getEggProgress();
+            const floatY = egg.y + Math.sin(egg.floatTime * 0.8) * 6;
+            
+            ctx.save();
+            ctx.translate(egg.x, floatY);
+            
+            // Efecto de explosión MÁS INTENSO
+            const shake = Math.sin(Date.now() * 0.05) * 12 * gameState.hatchProgress;
+            const shakeY = Math.cos(Date.now() * 0.04) * 10 * gameState.hatchProgress;
+            ctx.translate(shake, shakeY);
+            
+            // Blur súper intenso
+            ctx.shadowBlur = 30 * gameState.hatchProgress;
+            ctx.shadowColor = '#f4f2e7';
+            
+            // Cuerpo del huevo temblando
+            ctx.fillStyle = '#f4f2e7';
+            ctx.strokeStyle = 'rgba(40, 50, 60, 0.4)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, egg.size * 0.7, egg.size * 0.9, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // GRIETAS SÚPER INTENSAS - mostrar según progreso real de eclosión
+            const crackProgress = Math.min(1, 0.25 + gameState.hatchProgress * 0.75);
+            drawCracks(crackProgress);
+            
+            // Efecto de resplandor interno (como si hubiera luz dentro)
+            if (gameState.hatchProgress > 0.7) {
+                ctx.globalAlpha = (gameState.hatchProgress - 0.7) / 0.3;
+                ctx.fillStyle = '#fff8dc';
+                ctx.shadowBlur = 40;
+                ctx.shadowColor = '#fff8dc';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, egg.size * 0.5, egg.size * 0.7, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawWaterBackground() {
+            // Cielo
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 0.3);
+            skyGradient.addColorStop(0, '#87CEEB');
+            skyGradient.addColorStop(1, '#4682B4');
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height * 0.3);
+            
+            // Agua
+            const waterGradient = ctx.createLinearGradient(0, canvas.height * 0.3, 0, canvas.height);
+            waterGradient.addColorStop(0, '#0b304d');
+            waterGradient.addColorStop(1, '#061726');
+            ctx.fillStyle = waterGradient;
+            ctx.fillRect(0, canvas.height * 0.3, canvas.width, canvas.height * 0.7);
+            
+            // Superficie del agua
+            ctx.strokeStyle = 'rgba(135, 206, 235, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 0; x <= canvas.width; x += 10) {
+                const waveY = canvas.height * 0.3 + Math.sin((x + performance.now() * 0.001) * 0.01) * 3;
+                if (x === 0) ctx.moveTo(x, waveY);
+                else ctx.lineTo(x, waveY);
+            }
+            ctx.stroke();
+        }
+        
+        function drawBubbles() {
+            ctx.save();
+            
+            // Burbujas de fondo
+            for (const bubble of bgBubbles) {
+                if (bubble.y > canvas.height * 0.3) {
+                    ctx.globalAlpha = bubble.opacity;
+                    ctx.fillStyle = '#cfe9ff';
+                    ctx.beginPath();
+                    ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Burbujas de explosión de eclosión (MUY VISTOSAS)
+            for (const bubble of explosionBubbles) {
+                const lifeRatio = bubble.life / bubble.maxLife;
+                ctx.globalAlpha = lifeRatio;
+                
+                // Color que cambia con el tiempo
+                const hue = 180 + (1 - lifeRatio) * 60; // De azul a dorado
+                ctx.fillStyle = `hsl(${hue}, 70%, 70%)`;
+                ctx.strokeStyle = `hsl(${hue}, 80%, 90%)`;
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Brillo interior
+                ctx.fillStyle = `hsl(${hue}, 50%, 90%)`;
+                ctx.beginPath();
+                ctx.arc(bubble.x - bubble.r * 0.3, bubble.y - bubble.r * 0.3, bubble.r * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Burbujas de la boca
+            ctx.globalAlpha = 1;
+            for (const bubble of mouthBubbles) {
+                ctx.globalAlpha = Math.max(0, Math.min(1, bubble.life));
+                ctx.strokeStyle = 'rgba(200, 220, 255, 0.9)';
+                ctx.lineWidth = 1.6;
+                ctx.beginPath();
+                ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawEgg() {
+            const progress = getEggProgress();
+            const floatY = egg.y + Math.sin(egg.floatTime * 0.8) * 6;
+            
+            ctx.save();
+            ctx.translate(egg.x, floatY);
+            
+            // Efecto de eclosión
+            if (gameState.hatching) {
+                const shake = Math.sin(Date.now() * 0.02) * 3 * gameState.hatchProgress;
+                ctx.translate(shake, 0);
+                ctx.shadowBlur = 10 * gameState.hatchProgress;
+                ctx.shadowColor = '#f4f2e7';
+            }
+            
+            // Cuerpo del huevo
+            ctx.fillStyle = '#f4f2e7';
+            ctx.strokeStyle = 'rgba(40, 50, 60, 0.4)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, egg.size * 0.7, egg.size * 0.9, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Sombra interna
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#e8e6db';
+            ctx.beginPath();
+            ctx.ellipse(-15, -20, egg.size * 0.35, egg.size * 0.45, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            
+            // Grietas dinámicas
+            drawCracks(progress);
+            
+            ctx.restore();
+            
+            // NO DIBUJAR BASE MARRÓN - queda feo
+        }
+        
+        function drawCracks(progress) {
+            if (progress < 0.25) return;
+            
+            const crackIntensity = (progress - 0.25) / 0.75;
+            
+            // Grieta principal realista (25% progreso)
+            if (crackIntensity > 0) {
+                ctx.strokeStyle = 'rgba(80, 60, 40, 0.9)';
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                // Grieta zigzag realista desde arriba
+                ctx.moveTo(-8, -45);
+                ctx.lineTo(-12, -35);
+                ctx.lineTo(-5, -25);
+                ctx.lineTo(-10, -15);
+                ctx.lineTo(-3, -5);
+                ctx.lineTo(-8, 5);
+                ctx.lineTo(-2, 15);
+                ctx.globalAlpha = Math.min(1, crackIntensity * 1.5);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+            
+            // Segunda grieta (50% progreso)
+            if (crackIntensity > 0.3) {
+                ctx.strokeStyle = 'rgba(70, 50, 30, 0.9)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                // Grieta desde el lado
+                ctx.moveTo(35, -20);
+                ctx.lineTo(25, -15);
+                ctx.lineTo(30, -5);
+                ctx.lineTo(20, 5);
+                ctx.lineTo(25, 15);
+                ctx.lineTo(15, 25);
+                ctx.globalAlpha = Math.min(1, (crackIntensity - 0.3) * 1.5);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+            
+            // Grietas que se conectan (70% progreso)
+            if (crackIntensity > 0.6) {
+                ctx.strokeStyle = 'rgba(60, 40, 20, 1)';
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                // Conectar las grietas principales
+                ctx.moveTo(-25, -10);
+                ctx.lineTo(-15, -8);
+                ctx.lineTo(-8, -12);
+                ctx.moveTo(18, 8);
+                ctx.lineTo(12, 12);
+                ctx.lineTo(8, 6);
+                // Grieta horizontal que une
+                ctx.moveTo(-20, 0);
+                ctx.lineTo(20, -2);
+                ctx.globalAlpha = Math.min(1, (crackIntensity - 0.6) * 2);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+            
+            // GRIETAS FINALES - huevo a punto de romperse (85% progreso)
+            if (crackIntensity > 0.8) {
+                ctx.strokeStyle = 'rgba(50, 30, 10, 1)';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                // Grieta grande vertical que parte el huevo
+                ctx.moveTo(0, -50);
+                ctx.lineTo(-3, -30);
+                ctx.lineTo(2, -10);
+                ctx.lineTo(-1, 10);
+                ctx.lineTo(3, 30);
+                ctx.lineTo(0, 50);
+                
+                // Grietas laterales que se abren
+                ctx.moveTo(-40, -10);
+                ctx.lineTo(-20, -8);
+                ctx.lineTo(-10, -12);
+                ctx.moveTo(40, 10);
+                ctx.lineTo(20, 8);
+                ctx.lineTo(10, 12);
+                
+                ctx.globalAlpha = Math.min(1, (crackIntensity - 0.8) * 3);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+            
+            // ROTURA TOTAL (95% progreso)
+            if (crackIntensity > 0.95) {
+                ctx.strokeStyle = 'rgba(40, 20, 0, 1)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                // El huevo se parte por la mitad
+                ctx.moveTo(-45, -25);
+                ctx.lineTo(-25, -20);
+                ctx.lineTo(-5, -25);
+                ctx.lineTo(15, -20);
+                ctx.lineTo(35, -25);
+                ctx.lineTo(45, -15);
+                
+                // Separación visible
+                ctx.moveTo(-45, 25);
+                ctx.lineTo(-25, 20);
+                ctx.lineTo(-5, 25);
+                ctx.lineTo(15, 20);
+                ctx.lineTo(35, 25);
+                ctx.lineTo(45, 15);
+                
+                ctx.globalAlpha = 1;
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        function drawFish() {
+            const config = FISH_CONFIGS[gameState.stage] || FISH_CONFIGS.baby;
+            const s = config.size;
+            const flip = fish.vx < 0 ? -1 : 1;
+            
+            ctx.save();
+            ctx.translate(fish.x, fish.y);
+            ctx.scale(flip, 1);
+            ctx.rotate(clampAngle(fish.angle));
+            
+            // Animación de nacimiento
+            if (fish.birthAnimation.active) {
+                const scale = 0.3 + fish.birthAnimation.progress * 0.7;
+                const alpha = fish.birthAnimation.progress;
+                ctx.scale(scale, scale);
+                ctx.globalAlpha = alpha;
+            }
+            
+            // Animación de evolución
+            if (gameState.evolving) {
+                const pulse = 1 + Math.sin(Date.now() * 0.01) * 0.1;
+                ctx.scale(pulse, pulse);
+            }
+            
+            const rx = s * 1.05;
+            const ry = s * 0.78;
+            
+            // Cuerpo
+            ctx.fillStyle = config.body;
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Franja vertical
+            drawStripeVertical(rx, ry, config.stripeColor, config.stripeWidth);
+            
+            // Cola
+            const time = performance.now() / 1000;
+            const flap = Math.sin(time * config.wobbleFreq + fish.wobbleT) * 0.38;
+            ctx.save();
+            ctx.translate(-rx, 0);
+            ctx.rotate(flap);
+            ctx.fillStyle = config.tail;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            
+            if (gameState.stage === 'adult') {
+                ctx.quadraticCurveTo(-s * 0.58, -s * 0.70, s * 0.18, -s * 0.28);
+                ctx.quadraticCurveTo(-s * 0.58, s * 0.70, 0, 0);
+            } else if (gameState.stage === 'young') {
+                ctx.quadraticCurveTo(-s * 0.5, -s * 0.6, s * 0.14, -s * 0.24);
+                ctx.quadraticCurveTo(-s * 0.5, s * 0.6, 0, 0);
+            } else {
+                ctx.quadraticCurveTo(-s * 0.48, -s * 0.58, s * 0.12, -s * 0.22);
+                ctx.quadraticCurveTo(-s * 0.48, s * 0.58, 0, 0);
+            }
+            ctx.fill();
+            ctx.restore();
+            
+            // Aleta
+            const finFlap = Math.sin(time * (config.wobbleFreq + 2.5) + fish.wobbleT) * 0.27;
+            ctx.save();
+            
+            if (gameState.stage === 'adult') {
+                ctx.translate(-s * 0.02, s * 0.10);
+            } else if (gameState.stage === 'young') {
+                ctx.translate(-s * 0.05, s * 0.12);
+            } else {
+                ctx.translate(-s * 0.1, s * 0.16);
+            }
+            
+            ctx.rotate(finFlap);
+            ctx.fillStyle = config.fin;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            
+            if (gameState.stage === 'adult') {
+                ctx.quadraticCurveTo(s * 0.14, s * 0.95, s * 0.34, s * 0.26);
+                ctx.quadraticCurveTo(s * 0.10, s * 0.34, 0, 0);
+            } else if (gameState.stage === 'young') {
+                ctx.quadraticCurveTo(s * 0.10, s * 0.80, s * 0.28, s * 0.22);
+                ctx.quadraticCurveTo(s * 0.08, s * 0.30, 0, 0);
+            } else {
+                ctx.quadraticCurveTo(s * 0.06, s * 0.58, s * 0.2, s * 0.13);
+                ctx.quadraticCurveTo(s * 0.06, s * 0.25, 0, 0);
+            }
+            ctx.fill();
+            ctx.restore();
+            
+            // Ojo
+            const e = 0.22 * config.eyeScale;
+            const p = 0.11 * config.eyeScale;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(s * 0.46, 0, s * e, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#111';
+            ctx.beginPath();
+            ctx.arc(s * 0.53, 0, s * p, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Chupete (solo bebé)
+            if (config.hasChupete) {
+                const mouthTipX = rx + s * 0.06;
+                const mouthTipY = 0;
+                ctx.strokeStyle = '#ff78c2';
+                ctx.lineWidth = 3.2;
+                ctx.beginPath();
+                ctx.arc(mouthTipX, mouthTipY, s * 0.18, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.fillStyle = '#ffb5de';
+                ctx.beginPath();
+                ctx.ellipse(mouthTipX - s * 0.09, mouthTipY, s * 0.17, s * 0.13, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawStripeVertical(rx, ry, color, widthRatio) {
+            const halfW = rx * widthRatio;
+            const margin = 2;
+            const rxIn = rx - margin;
+            const ryIn = ry - margin;
+            
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.95;
+            ctx.beginPath();
+            
+            const steps = 48;
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const x = -halfW + t * (2 * halfW);
+                const y = ryIn * Math.sqrt(Math.max(0, 1 - (x * x) / (rxIn * rxIn)));
+                if (i === 0) ctx.moveTo(x, -y);
+                else ctx.lineTo(x, -y);
+            }
+            for (let i = steps; i >= 0; i--) {
+                const t = i / steps;
+                const x = -halfW + t * (2 * halfW);
+                const y = ryIn * Math.sqrt(Math.max(0, 1 - (x * x) / (rxIn * rxIn)));
+                ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+        
+        function drawUI() {
+            if (gameState.stage === 'egg') {
+                const timeRemaining = getTimeRemaining();
+                const timeText = formatTime(timeRemaining);
+                
+                ctx.font = 'bold 18px system-ui';
+                ctx.textAlign = 'center';
+                ctx.shadowColor = 'rgba(0,0,0,0.7)';
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetY = 2;
+                
+                if (gameState.hatching) {
+                    ctx.fillStyle = Math.sin(Date.now() * 0.01) > 0 ? '#ffeb3b' : '#ff9800';
+                    ctx.fillText('¡ECLOSIONANDO! 🐣', canvas.width / 2, 60);
+                } else if (timeRemaining > 0) {
+                    ctx.fillStyle = '#e9f6ff';
+                    ctx.fillText(`Eclosión en: ${timeText}`, canvas.width / 2, 60);
+                } else {
+                    ctx.fillStyle = '#4caf50';
+                    ctx.fillText('¡Listo para eclosionar!', canvas.width / 2, 60);
+                }
+                
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        // GAME LOOP
+        let lastTime = performance.now();
+        function gameLoop(currentTime) {
+            const deltaTime = Math.min(0.033, (currentTime - lastTime) / 1000);
+            lastTime = currentTime;
+            
+            update(deltaTime);
+            render();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        console.log('✅ Mi Pececito iniciado correctamente');
+        
+        // 🍎 SISTEMA DE COMIDA SIMPLE PERO FUNCIONAL
+        let food = [];
+        let needs = { hunger: 80, dirt: 65, fun: 70 };
+        
+        // Colores realistas para pellets
+        const PELLET_COLORS = [
+            {fill: '#ffd166', stroke: '#cc8400'}, {fill: '#ff8c42', stroke: '#cc5500'}, 
+            {fill: '#ff6b35', stroke: '#cc3300'}, {fill: '#f77f00', stroke: '#cc5500'},
+            {fill: '#fcbf49', stroke: '#cc8800'}, {fill: '#d4a574', stroke: '#aa7744'},
+            {fill: '#bc6c25', stroke: '#884400'}
+        ];
+        
+        function dropFood() {
+            const x = Math.random() * canvas.width;
+            const colorSet = PELLET_COLORS[Math.floor(Math.random() * PELLET_COLORS.length)];
+            const size = 3 + Math.random() * 2;
+            
+            food.push({
+                x: x, y: 20, vx: 0, vy: 60 + Math.random() * 40, 
+                size: size, colorFill: colorSet.fill, colorStroke: colorSet.stroke,
+                bottomTime: 0
+            });
+            console.log('🍎 Comida soltada');
+        }
+        
+        function updateFood(dt) {
+            for (let i = food.length - 1; i >= 0; i--) {
+                const f = food[i];
+                
+                if (f.bottomTime > 0) {
+                    f.bottomTime += dt;
+                    if (f.bottomTime > 8) { food.splice(i, 1); continue; }
+                } else {
+                    f.y += f.vy * dt;
+                    if (f.y > canvas.height - 20) {
+                        f.y = canvas.height - 20; f.vy = 0; f.bottomTime = 0.01;
+                    }
+                }
+                
+                // Colisión con pez
+                if (fish && Math.hypot(fish.x - f.x, fish.y - f.y) < 25) {
+                    food.splice(i, 1);
+                    needs.hunger = Math.max(0, needs.hunger - 30);
+                    needs.dirt = Math.min(100, needs.dirt + 5);
+                    
+                    // Actualizar UI
+                    document.getElementById('hungerValue').textContent = needs.hunger;
+                    document.getElementById('dirtValue').textContent = needs.dirt;
+                    
+                    console.log('🍎 ¡Pez comió! Hambre:', needs.hunger);
+                }
+            }
+        }
+        
+        function drawFood() {
+            ctx.save();
+            for (const f of food) {
+                ctx.fillStyle = f.colorFill;
+                ctx.strokeStyle = f.colorStroke;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+        
+        // Integrar en el loop principal
+        const originalRender = render;
+        render = function() {
+            updateFood(0.016);
+            originalRender();
+            drawFood();
+        };
+        
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>

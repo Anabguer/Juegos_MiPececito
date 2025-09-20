@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<title>Secuencia de Mareas (memoriza y repite)</title>
+<style>
+  :root{ --bg:#072a44; --text:#e9f6ff; --ui:#1d4b6b; --ui2:#2a6287; --ok:#1bb37a; }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;}
+  #wrap{position:fixed;inset:0;display:grid;grid-template-columns:32px 1fr;gap:6px;padding:6px}
+  /* Barra vertical de tiempo */
+  #timebar{background:#0a2f4f;border-radius:8px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.18)}
+  #fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(#25c3ea,#0ea5c6);transition:height .18s ease}
+  #tick{position:absolute;top:4px;left:0;right:0;text-align:center;font-weight:700;font-size:11px;opacity:.9}
+  /* Panel derecho */
+  #right{position:relative;display:grid;grid-template-rows:auto auto 1fr;gap:6px;min-height:0}
+  #top{display:flex;gap:6px;align-items:center;white-space:nowrap;overflow:hidden}
+  .pill{padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.10);font-weight:700;font-size:13px}
+  .btn{appearance:none;border:0;border-radius:999px;padding:6px 10px;background:var(--ui);color:var(--text);font-weight:700;font-size:13px}
+  .btn:active{transform:translateY(1px);background:var(--ui2)}
+  #hint{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.06);border-radius:12px;padding:6px 8px;font-weight:800;min-height:40px}
+  #stage{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  /* Tablero */
+  #board{ display:grid; gap:0; width:100%; height:100%; background:transparent; }
+  .cell{ position:relative; display:grid; place-items:center; user-select:none; cursor:pointer; aspect-ratio:1/1; background:transparent; touch-action:manipulation; }
+  .token{ display:grid; place-items:center; border-radius:50%; transition:transform .08s ease, opacity .12s ease, box-shadow .12s ease; }
+  .emoji{ line-height:1; filter:none; transform-origin:center; will-change:transform; }
+  /* Paleta marina (consistente con otros minijuegos) */
+  .t0{ background:#e9d8a6; } /* pez: arena claro */
+  .t1{ background:#0b5cab; } /* estrella: azul océano oscuro */
+  .t2{ background:#5a4d8a; } /* pulpo: violeta marino */
+  .t3{ background:#20c5c9; } /* coral: turquesa agua clara */
+  .t4{ background:#2a9d65; } /* cangrejo: verde marino */
+  .good{ box-shadow:0 0 8px rgba(27,179,122,.5); transform:scale(0.96); }
+  .bad{  box-shadow:0 0 10px rgba(240,68,56,.55); transform:scale(1.06); }
+  .fade{ opacity:.15; }
+  .disabled{ pointer-events:none; opacity:.7; }
+  /* Modal */
+  #modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45)}
+  #card{background:#0b304d;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:16px;max-width:92vw;text-align:center}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="timebar"><div id="fill"></div><div id="tick">100%</div></div>
+  <div id="right">
+    <div id="top">
+      <div class="pill">Ronda <b id="round">0</b></div>
+      <div class="pill">Pts <b id="score">0</b></div>
+      <div class="pill">Rec <b id="best">0</b></div>
+      <div class="pill">⭐ <b id="stars">0</b></div>
+      <button id="btnStart" class="btn">Empezar</button>
+    </div>
+    <div id="hint">Mira la secuencia...</div>
+    <div id="stage">
+      <div id="board" aria-label="Tablero Secuencia de Mareas"></div>
+    </div>
+  </div>
+</div>
+
+<div id="modal">
+  <div id="card">
+    <h2>Fin de partida</h2>
+    <p>Ronda: <b id="mround">0</b></p>
+    <p>Puntuación: <b id="mscore">0</b></p>
+    <p>Récord: <b id="mbest">0</b></p>
+    <p>⭐ Ganadas: <b id="mstars">0</b></p>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
+      <button id="again" class="btn">Otra</button>
+      <button id="close" class="btn" style="background:var(--ok)">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var BEST_KEY="mareas_best"; var STARS_KEY="mareas_stars";
+  function getBest(){ var v=localStorage.getItem(BEST_KEY); return v?Number(v):0; }
+  function setBest(v){ localStorage.setItem(BEST_KEY,String(v)); }
+  function getStars(){ var v=localStorage.getItem(STARS_KEY); return v?Number(v):0; }
+  function addStars(n){ var t=getStars()+n; localStorage.setItem(STARS_KEY,String(t)); return t; }
+
+  var ICONS=["🐟","⭐","🐙","🪸","🦀"];
+  var R=4, C=4; // tablero inicial 4x4
+  var boardEl=document.getElementById('board'), stage=document.getElementById('stage');
+  var hint=document.getElementById('hint');
+  var roundEl=document.getElementById('round'), scoreEl=document.getElementById('score'), bestEl=document.getElementById('best'), starsEl=document.getElementById('stars');
+  var btnStart=document.getElementById('btnStart');
+  var fill=document.getElementById('fill'), tick=document.getElementById('tick');
+  var modal=document.getElementById('modal');
+  var mround=document.getElementById('mround'), mscore=document.getElementById('mscore'), mbest=document.getElementById('mbest'), mstars=document.getElementById('mstars');
+
+  bestEl.textContent=getBest();
+  starsEl.textContent=getStars();
+
+  var seq=[], idx=0, round=0, score=0;
+  var showing=false, playing=false;
+  var timeLeft=100, timer=null;
+  var showSpeed=550; // ms por icono mostrado
+
+  function calcAndApplySizes(){
+    var rect = stage.getBoundingClientRect();
+    var safeW = Math.max(0, rect.width - 2);
+    var safeH = Math.max(0, rect.height - 2);
+    var cell = Math.floor(Math.min(safeW / C, safeH / R));
+    if (cell < 10) cell = 10;
+    boardEl.style.gridTemplateColumns = "repeat("+C+", "+cell+"px)";
+    boardEl.style.gridAutoRows = cell + "px";
+    boardEl.style.width = (cell*C) + "px";
+    boardEl.style.height = (cell*R) + "px";
+    var token = Math.floor(cell * 0.99);
+    var font  = Math.floor(cell * 0.72);
+    var tokens = boardEl.querySelectorAll('.token');
+    var emojis = boardEl.querySelectorAll('.emoji');
+    for (var i=0;i<tokens.length;i++){ tokens[i].style.width = token+"px"; tokens[i].style.height = token+"px"; }
+    for (var j=0;j<emojis.length;j++){ emojis[j].style.fontSize = font+"px"; }
+  }
+  window.addEventListener('resize', calcAndApplySizes);
+  if (window.visualViewport){
+    window.visualViewport.addEventListener('resize', calcAndApplySizes);
+    window.visualViewport.addEventListener('scroll',  calcAndApplySizes);
+  }
+
+  function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+  function rnd(n){ return Math.floor(Math.random()*n); }
+
+  function makeCell(t){
+    var d=document.createElement('div'); d.className='cell';
+    var tok=document.createElement('div'); tok.className='token t'+t;
+    var em=document.createElement('div'); em.className='emoji'; em.textContent=ICONS[t];
+    tok.appendChild(em); d.appendChild(tok);
+    d.addEventListener('click', function(){
+      if(!playing || showing) return;
+      if(t===seq[idx]){
+        d.classList.add('good'); setTimeout(()=>d.classList.remove('good'),100);
+        idx++; score+=10; scoreEl.textContent=score;
+        timeLeft=Math.min(100, timeLeft+0.2); updateBar();
+        if(idx===seq.length){ nextRound(); }
+      }else{
+        d.classList.add('bad'); setTimeout(()=>d.classList.remove('bad'),200);
+        end();
+      }
+    });
+    return d;
+  }
+
+  function buildBoard(){
+    boardEl.innerHTML="";
+    // Garantiza al menos 1 de cada icono de la secuencia
+    var needed = {}; seq.forEach(t=>needed[t]=(needed[t]||0)+1);
+    var cells = R*C; var arr=[];
+    // Coloca las necesarias
+    Object.keys(needed).forEach(k=>{
+      for (var i=0;i<Math.max(1, needed[k]); i++){ arr.push(Number(k)); }
+    });
+    // Rellena con aleatorios
+    while(arr.length<cells){ arr.push(rnd(ICONS.length)); }
+    // Mezcla
+    for (var i=arr.length-1;i>0;i--){ var j=rnd(i+1); var tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp; }
+    // Render
+    for (var i=0;i<arr.length;i++){ boardEl.appendChild(makeCell(arr[i])); }
+    calcAndApplySizes();
+  }
+
+  async function showSequence(){
+    showing=true; hint.textContent="Mira la secuencia…";
+    boardEl.classList.add('disabled');
+    var row=document.createElement('div');
+    row.style.display='flex'; row.style.gap='6px'; row.style.alignItems='center';
+    row.style.fontSize='22px'; row.style.flexWrap='wrap';
+    hint.innerHTML="Secuencia: "; hint.appendChild(row);
+    for (let i=0;i<seq.length;i++){
+      var span=document.createElement('span'); span.textContent=ICONS[seq[i]]; span.style.padding='4px 6px';
+      span.style.borderRadius='8px'; span.style.background='rgba(255,255,255,.08)';
+      row.appendChild(span);
+      await sleep(Math.max(250, showSpeed - round*20));
+    }
+    await sleep(400);
+    hint.textContent="Tu turno: repite la secuencia";
+    boardEl.classList.remove('disabled');
+    showing=false;
+  }
+
+  function addStep(){ seq.push(rnd(ICONS.length)); }
+
+  function startTimer(){
+    clearInterval(timer); timeLeft=100; updateBar();
+    timer=setInterval(function(){
+      // drena más con la ronda, pero no exagerado
+      var drain = 0.6 + Math.min(0.6, round*0.04);
+      timeLeft -= drain;
+      if(timeLeft<=0){ timeLeft=0; updateBar(); clearInterval(timer); end(); return; }
+      updateBar();
+    },300);
+  }
+  function updateBar(){ fill.style.height=Math.floor(timeLeft)+'%'; tick.textContent=Math.floor(timeLeft)+'%'; }
+
+  function start(){
+    seq=[]; idx=0; round=0; score=0; showSpeed=550;
+    playing=true; modal.style.display='none';
+    roundEl.textContent='0'; scoreEl.textContent='0';
+    nextRound(true);
+    startTimer();
+  }
+
+  function nextRound(first=false){
+    round++; roundEl.textContent=round;
+    addStep(); idx=0;
+    // Bonus pequeño por pasar ronda
+    timeLeft=Math.min(100, timeLeft+2); updateBar();
+    // Crece el tablero cada 3 rondas (hasta 5x6)
+    if(!first && round%3===0){ if(C<6) C++; else if(R<5) R++; }
+    buildBoard();
+    showSequence();
+  }
+
+  function awardStars(finalScore){
+    var prev=getBest(), stars=1; if(finalScore>prev){ stars=2; setBest(finalScore); }
+    var total=addStars(stars); bestEl.textContent=getBest(); starsEl.textContent=total; return stars;
+  }
+
+  function end(){
+    playing=false; clearInterval(timer);
+    var stars=awardStars(score);
+    mround.textContent=round; mscore.textContent=score; mbest.textContent=getBest(); mstars.textContent=stars;
+    modal.style.display='grid';
+  }
+
+  document.getElementById('again').addEventListener('click', start);
+  document.getElementById('close').addEventListener('click', ()=>modal.style.display='none');
+  btnStart.addEventListener('click', start);
+
+  // Arranque inicial
+  buildBoard(); calcAndApplySizes();
+})();</script>
+</body>
+</html>

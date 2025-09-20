@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<title>Caza de Peces (toca el objetivo)</title>
+<style>
+  :root{ --bg:#072a44; --text:#e9f6ff; --ui:#1d4b6b; --ui2:#2a6287; --ok:#1bb37a; }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;}
+  #wrap{position:fixed;inset:0;display:grid;grid-template-columns:32px 1fr;gap:6px;padding:6px}
+  /* Barra vertical de agua/tiempo */
+  #timebar{background:#0a2f4f;border-radius:8px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.18)}
+  #fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(#25c3ea,#0ea5c6);transition:height .18s ease}
+  #tick{position:absolute;top:4px;left:0;right:0;text-align:center;font-weight:700;font-size:11px;opacity:.9}
+  /* Panel derecho */
+  #right{position:relative;display:grid;grid-template-rows:auto auto 1fr;gap:6px;min-height:0}
+  #top{display:flex;gap:4px;align-items:center;white-space:nowrap;overflow:hidden}
+  .pill{padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.10);font-weight:700;font-size:13px}
+  .btn{appearance:none;border:0;border-radius:999px;padding:6px 10px;background:var(--ui);color:var(--text);font-weight:700;font-size:13px}
+  .btn:active{transform:translateY(1px);background:var(--ui2)}
+  #objective{display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,.06);border-radius:12px;font-weight:800}
+  #objective .token{width:28px;height:28px;border-radius:999px;display:grid;place-items:center}
+  /* Tablero */
+  #stage{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  #board{ display:grid; gap:0; width:100%; height:100%; background:transparent; }
+  .cell{ position:relative; display:grid; place-items:center; user-select:none; cursor:pointer; aspect-ratio:1/1; background:transparent; touch-action:manipulation; }
+  .token{ display:grid; place-items:center; border-radius:50%; transition:transform .08s ease, opacity .12s ease, box-shadow .12s ease; }
+  .emoji{ line-height:1; filter:none; transform-origin:center; will-change:transform; }
+  /* Paleta marina coherente (de v16b) */
+  .t0{ background:#e9d8a6; } /* pez: arena claro */
+  .t1{ background:#0b5cab; } /* estrella: azul océano oscuro */
+  .t2{ background:#5a4d8a; } /* pulpo: violeta marino */
+  .t3{ background:#20c5c9; } /* coral: turquesa agua clara */
+  .t4{ background:#2a9d65; } /* cangrejo: verde marino */
+  /* Feedback */
+  .good{ box-shadow:0 0 8px rgba(27,179,122,.5); transform:scale(0.96); }
+  .bad{  box-shadow:0 0 10px rgba(240,68,56,.55); transform:scale(1.06); }
+  .fade{ opacity:.15; }
+  /* Modal */
+  #modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45)}
+  #card{background:#0b304d;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:16px;max-width:92vw;text-align:center}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="timebar"><div id="fill"></div><div id="tick">100%</div></div>
+  <div id="right">
+    <div id="top">
+      <div class="pill">Pts <b id="score">0</b></div>
+      <div class="pill">Ronda <b id="round">1</b></div>
+      <div class="pill">Rec <b id="best">0</b></div>
+      <div class="pill">⭐ <b id="stars">0</b></div>
+      <button id="btnNew" class="btn">↺</button>
+    </div>
+    <div id="objective">Objetivo: <span id="objWrap" class="token"><span id="objEmoji" class="emoji">🐟</span></span></div>
+    <div id="stage">
+      <div id="board" aria-label="Tablero Caza de Peces"></div>
+    </div>
+  </div>
+</div>
+
+<div id="modal">
+  <div id="card">
+    <h2>Fin de partida</h2>
+    <p>Puntuación: <b id="mscore">0</b></p>
+    <p>Ronda: <b id="mround">1</b></p>
+    <p>Récord: <b id="mbest">0</b></p>
+    <p>⭐ Ganadas: <b id="mstars">0</b></p>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
+      <button id="again" class="btn">Otra</button>
+      <button id="close" class="btn" style="background:var(--ok)">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var BEST_KEY="hunt_best"; var STARS_KEY="hunt_stars";
+  function getBest(){ var v=localStorage.getItem(BEST_KEY); return v?Number(v):0; }
+  function setBest(v){ localStorage.setItem(BEST_KEY,String(v)); }
+  function getStars(){ var v=localStorage.getItem(STARS_KEY); return v?Number(v):0; }
+  function addStars(n){ var t=getStars()+n; localStorage.setItem(STARS_KEY,String(t)); return t; }
+
+  var R=8, C=6; // tablero inicial
+  var ICONS=["🐟","⭐","🐙","🪸","🦀"];
+  var boardEl=document.getElementById('board');
+  var stage=document.getElementById('stage');
+  var scoreEl=document.getElementById('score');
+  var bestEl=document.getElementById('best');
+  var starsEl=document.getElementById('stars');
+  var roundEl=document.getElementById('round');
+  var objEmoji=document.getElementById('objEmoji');
+  var objWrap=document.getElementById('objWrap');
+  var fill=document.getElementById('fill'); var tick=document.getElementById('tick');
+  var modal=document.getElementById('modal'); var mscore=document.getElementById('mscore'); var mround=document.getElementById('mround'); var mbest=document.getElementById('mbest'); var mstars=document.getElementById('mstars');
+
+  bestEl.textContent=getBest();
+  starsEl.textContent=getStars();
+
+  var grid=[], score=0, timer=null, timeLeft=100, busy=false;
+  var round=1, target=0, remainTargets=0, drain=0.6; // drain base, sube con rondas
+
+  function calcAndApplySizes(){
+    var rect = stage.getBoundingClientRect();
+    var safeW = Math.max(0, rect.width - 2);
+    var safeH = Math.max(0, rect.height - 2);
+    var cell = Math.floor(Math.min(safeW / C, safeH / R));
+    if (cell < 10) cell = 10;
+    boardEl.style.gridTemplateColumns = "repeat("+C+", "+cell+"px)";
+    boardEl.style.gridAutoRows = cell + "px";
+    boardEl.style.width = (cell*C) + "px";
+    boardEl.style.height = (cell*R) + "px";
+    var token = Math.floor(cell * 0.99);
+    var font  = Math.floor(cell * 0.72);
+    var tokens = boardEl.querySelectorAll('.token');
+    var emojis = boardEl.querySelectorAll('.emoji');
+    for (var i=0;i<tokens.length;i++){ tokens[i].style.width = token+"px"; tokens[i].style.height = token+"px"; }
+    for (var j=0;j<emojis.length;j++){ emojis[j].style.fontSize = font+"px"; }
+    // Objetivo mini
+    objWrap.style.width="28px"; objWrap.style.height="28px";
+  }
+  window.addEventListener('resize', calcAndApplySizes);
+  if (window.visualViewport){
+    window.visualViewport.addEventListener('resize', calcAndApplySizes);
+    window.visualViewport.addEventListener('scroll',  calcAndApplySizes);
+  }
+
+  function makeCell(r,c,t){
+    var d=document.createElement('div'); d.className='cell'; d.setAttribute('data-r',r); d.setAttribute('data-c',c);
+    var tok=document.createElement('div'); tok.className='token t'+t;
+    var em=document.createElement('div'); em.className='emoji'; em.textContent=ICONS[t];
+    tok.appendChild(em); d.appendChild(tok);
+    d.addEventListener('click', function(){
+      if(busy) return;
+      if(t===target){
+        d.classList.add('good'); setTimeout(()=>d.classList.remove('good'),80);
+        d.classList.add('fade'); d.style.pointerEvents="none";
+        score += 10; scoreEl.textContent=score;
+        timeLeft = Math.min(100, timeLeft + 0.4); // recarga mínima por acierto
+        updateBar();
+        remainTargets--;
+        if(remainTargets<=0){ nextRound(); }
+      }else{
+        d.classList.add('bad'); setTimeout(()=>d.classList.remove('bad'),160);
+        end(); // fallo termina la partida
+      }
+    });
+    return d;
+  }
+
+  function rnd(n){ return Math.floor(Math.random()*n); }
+
+  function buildGrid(){
+    grid=new Array(R); boardEl.innerHTML=""; remainTargets=0;
+    // elige objetivo distinto de la ronda anterior idealmente
+    var prev=target; do{ target=rnd(ICONS.length); }while(ICONS.length>1 && target===prev);
+    objEmoji.textContent=ICONS[target];
+    objWrap.className='token t'+target;
+
+    // número de objetivos en tablero
+    var total=R*C;
+    var targets = Math.max(4, Math.min( Math.floor(total*0.22), 18 )); // ~22% objetivos
+    var pos = []; for (var i=0;i<total;i++) pos.push(i);
+    for (var i=pos.length-1;i>0;i--){ var j=rnd(i+1); var tmp=pos[i]; pos[i]=pos[j]; pos[j]=tmp; }
+    var targSet = new Set(pos.slice(0, targets));
+    remainTargets = targets;
+
+    for (var r=0;r<R;r++){ grid[r]=new Array(C);
+      for (var c=0;c<C;c++){
+        var idx = r*C + c;
+        var t = targSet.has(idx) ? target : rnd(ICONS.length);
+        if(targSet.has(idx)===false && t===target){ t = (target+1+ rnd(ICONS.length-1))%ICONS.length; } // evita falsos objetivos
+        var el=makeCell(r,c,t); grid[r][c]={t:t, el:el}; boardEl.appendChild(el);
+      }
+    }
+  }
+
+  function start(){
+    score=0; round=1; drain=0.6; timeLeft=100; updateBar();
+    scoreEl.textContent=0; roundEl.textContent=1;
+    modal.style.display="none";
+    buildGrid(); calcAndApplySizes();
+    clearInterval(timer);
+    timer=setInterval(function(){
+      timeLeft-=drain; if(timeLeft<=0){ timeLeft=0; updateBar(); clearInterval(timer); end(); return; } updateBar();
+    },300);
+  }
+
+  function nextRound(){
+    round++; roundEl.textContent=round;
+    // pequeña recarga por completar ronda
+    timeLeft = Math.min(100, timeLeft + 2);
+    // aumento de dificultad: más drenaje y tablero más grande cada 3 rondas
+    drain = Math.min(1.2, drain + 0.06);
+    if(round%3===0 && (C<8 || R<10)){
+      if(C<8) C++;
+      else if(R<10) R++;
+    }
+    buildGrid(); calcAndApplySizes();
+  }
+
+  function updateBar(){ fill.style.height=Math.floor(timeLeft)+"%"; tick.textContent=Math.floor(timeLeft)+"%"; }
+
+  function awardStars(finalScore){
+    var prev=getBest(), stars=1; if(finalScore>prev){ stars=2; setBest(finalScore); }
+    var total=addStars(stars); bestEl.textContent=getBest(); starsEl.textContent=total; return stars;
+  }
+
+  function end(){
+    clearInterval(timer);
+    var s=score, r=round;
+    var stars=awardStars(s);
+    document.getElementById('mscore').textContent=s;
+    document.getElementById('mround').textContent=r;
+    document.getElementById('mbest').textContent=getBest();
+    document.getElementById('mstars').textContent=stars;
+    modal.style.display="grid";
+  }
+
+  document.getElementById('again').addEventListener('click', start);
+  document.getElementById('close').addEventListener('click', ()=>modal.style.display="none");
+  document.getElementById('btnNew').addEventListener('click', start);
+
+  start();
+})();</script>
+</body>
+</html>

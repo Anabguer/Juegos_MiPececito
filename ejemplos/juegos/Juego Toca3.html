@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<title>Toca‑3 Marino v16b (pez en arena funcional)</title>
+<style>
+  :root{ --bg:#072a44; --text:#e9f6ff; --ui:#1d4b6b; --ui2:#2a6287; --ok:#1bb37a; }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;}
+  #wrap{position:fixed;inset:0;display:grid;grid-template-columns:32px 1fr;gap:6px;padding:6px}
+  /* Barra vertical de agua/tiempo */
+  #timebar{background:#0a2f4f;border-radius:8px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.18)}
+  #fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(#25c3ea,#0ea5c6);transition:height .18s ease}
+  #tick{position:absolute;top:4px;left:0;right:0;text-align:center;font-weight:700;font-size:11px;opacity:.9}
+  /* Panel derecho */
+  #right{position:relative;display:grid;grid-template-rows:auto 1fr;gap:6px;min-height:0}
+  #top{display:flex;gap:4px;align-items:center;white-space:nowrap;overflow:hidden}
+  .pill{padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.10);font-weight:700;font-size:13px}
+  .btn{appearance:none;border:0;border-radius:999px;padding:6px 10px;background:var(--ui);color:var(--text);font-weight:700;font-size:13px}
+  .btn:active{transform:translateY(1px);background:var(--ui2)}
+  #stage{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  /* Tablero */
+  #board{ display:grid; gap:0; width:100%; height:100%; background:transparent; }
+  .cell{ position:relative; display:grid; place-items:center; user-select:none; cursor:pointer; aspect-ratio:1/1; background:transparent; touch-action:manipulation; }
+  .token{ display:grid; place-items:center; border-radius:50%; transition:transform .12s ease, opacity .15s ease, box-shadow .15s ease; }
+  .emoji{ line-height:1; filter:none; transform-origin:center; will-change:transform; }
+  /* Paleta marina v16b */
+  .t0{ background:#e9d8a6; } /* pez: fondo arena claro */
+  .t1{ background:#0b5cab; } /* estrella: azul océano oscuro */
+  .t2{ background:#5a4d8a; } /* pulpo: violeta marino */
+  .t3{ background:#20c5c9; } /* coral: turquesa agua clara */
+  .t4{ background:#2a9d65; } /* cangrejo: verde marino */
+  /* Estados suaves */
+  .glow .token{ box-shadow:0 0 6px rgba(255,255,255,.18); }
+  .pulse .token{ transform:scale(1.04); }
+  .fade  .token{ opacity:.15; }
+  /* Modal */
+  #modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45)}
+  #card{background:#0b304d;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:16px;max-width:92vw;text-align:center}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="timebar"><div id="fill"></div><div id="tick">100%</div></div>
+  <div id="right">
+    <div id="top">
+      <div class="pill">Pts <b id="score">0</b></div>
+      <div class="pill">Rec <b id="best">0</b></div>
+      <div class="pill">⭐ <b id="stars">0</b></div>
+      <button id="btnNew" class="btn">↺</button>
+    </div>
+    <div id="stage">
+      <div id="board" aria-label="Tablero Toca‑3"></div>
+    </div>
+  </div>
+</div>
+
+<div id="modal">
+  <div id="card">
+    <h2>Fin de partida</h2>
+    <p>Puntuación: <b id="mscore">0</b></p>
+    <p>Récord: <b id="mbest">0</b></p>
+    <p>⭐ Ganadas: <b id="mstars">0</b></p>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
+      <button id="again" class="btn">Otra</button>
+      <button id="close" class="btn" style="background:var(--ok)">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var BEST_KEY="tap3_best"; var STARS_KEY="tap3_stars";
+  function getBest(){ var v=localStorage.getItem(BEST_KEY); return v?Number(v):0; }
+  function setBest(v){ localStorage.setItem(BEST_KEY,String(v)); }
+  function getStars(){ var v=localStorage.getItem(STARS_KEY); return v?Number(v):0; }
+  function addStars(n){ var t=getStars()+n; localStorage.setItem(STARS_KEY,String(t)); return t; }
+
+  var R=10, C=8;
+  var ICONS=["🐟","⭐","🐙","🪸","🦀"];
+
+  var boardEl=document.getElementById('board');
+  var stage=document.getElementById('stage');
+  var scoreEl=document.getElementById('score');
+  var bestEl=document.getElementById('best');
+  var starsEl=document.getElementById('stars');
+  var modal=document.getElementById('modal');
+  var mscore=document.getElementById('mscore');
+  var mbest=document.getElementById('mbest');
+  var mstars=document.getElementById('mstars');
+  var fill=document.getElementById('fill');
+  var tick=document.getElementById('tick');
+
+  bestEl.textContent=getBest();
+  starsEl.textContent=getStars();
+
+  var grid=[], score=0, timeLeft=100, timer=null, busy=false;
+
+  function calcAndApplySizes(){
+    var rect = stage.getBoundingClientRect();
+    var safeW = Math.max(0, rect.width - 2);
+    var safeH = Math.max(0, rect.height - 2);
+    var cell = Math.floor(Math.min(safeW / C, safeH / R));
+    if (cell < 10) cell = 10;
+    boardEl.style.gridTemplateColumns = "repeat("+C+", "+cell+"px)";
+    boardEl.style.gridAutoRows = cell + "px";
+    boardEl.style.width = (cell*C) + "px";
+    boardEl.style.height = (cell*R) + "px";
+    var token = Math.floor(cell * 0.99);
+    var font  = Math.floor(cell * 0.72);
+    var tokens = boardEl.querySelectorAll('.token');
+    var emojis = boardEl.querySelectorAll('.emoji');
+    for (var i=0;i<tokens.length;i++){ tokens[i].style.width = token+"px"; tokens[i].style.height = token+"px"; }
+    for (var j=0;j<emojis.length;j++){ emojis[j].style.fontSize = font+"px"; }
+  }
+  window.addEventListener('resize', calcAndApplySizes);
+  if (window.visualViewport){
+    window.visualViewport.addEventListener('resize', calcAndApplySizes);
+    window.visualViewport.addEventListener('scroll',  calcAndApplySizes);
+  }
+
+  function makeCell(r,c,t){
+    var d=document.createElement('div'); d.className='cell'; d.setAttribute('data-r',r); d.setAttribute('data-c',c);
+    var tok=document.createElement('div'); tok.className='token t'+t;
+    var em=document.createElement('div'); em.className='emoji'; em.textContent=ICONS[t];
+    tok.appendChild(em); d.appendChild(tok);
+    d.addEventListener('click', function(){ onTap(r,c); });
+    return d;
+  }
+
+  function rndType(){ return Math.floor(Math.random()*ICONS.length); }
+
+  function init(){
+    grid=new Array(R); boardEl.innerHTML="";
+    for (var r=0;r<R;r++){ grid[r]=new Array(C);
+      for (var c=0;c<C;c++){ var t=rndType(); var el=makeCell(r,c,t); grid[r][c]={t:t, el:el}; boardEl.appendChild(el); }
+    }
+    calcAndApplySizes();
+    ensurePlayable();
+    markAllGroups();
+  }
+
+  function neighbors(r,c){ return [[1,0],[-1,0],[0,1],[0,-1]].map(d=>({r:r+d[0],c:c+d[1]})); }
+
+  function flood(r,c,T){
+    var seen={}, stack=[{r:r,c:c}], group=[];
+    while(stack.length){ var p=stack.pop(), key=p.r+","+p.c; if(seen[key]) continue; seen[key]=true;
+      if(p.r<0||p.c<0||p.r>=R||p.c>=C) continue;
+      if(grid[p.r][p.c].t!==T) continue;
+      group.push(p); neighbors(p.r,p.c).forEach(n=>stack.push(n)); }
+    return group;
+  }
+
+  function allGroups(){
+    var seen={}, groups=[];
+    for (var r=0;r<R;r++) for (var c=0;c<C;c++){
+      var key=r+","+c; if(seen[key]) continue;
+      var T=grid[r][c].t; var g=flood(r,c,T);
+      for (var i=0;i<g.length;i++){ seen[g[i].r+","+g[i].c]=true; }
+      if (g.length>=3) groups.push(g);
+    }
+    return groups;
+  }
+
+  function markAllGroups(){
+    for (var r=0;r<R;r++) for (var c=0;c<C;c++) grid[r][c].el.classList.remove('glow');
+    var gs = allGroups();
+    for (var k=0;k<gs.length;k++){ var g=gs[k]; for (var i=0;i<g.length;i++){ grid[g[i].r][g[i].c].el.classList.add('glow'); } }
+  }
+
+  function ensurePlayable(){
+    var guard=0;
+    while (allGroups().length===0 && guard<20){
+      var vals=[]; for (var r=0;r<R;r++) for (var c=0;c<C;c++) vals.push(grid[r][c].t);
+      for (var i=vals.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=vals[i]; vals[i]=vals[j]; vals[j]=t; }
+      var idx=0;
+      for (var r=0;r<R;r++) for (var c=0;c<C;c++){ grid[r][c].t=vals[idx++]; var tok=grid[r][c].el.querySelector('.token'); var em=grid[r][c].el.querySelector('.emoji'); em.textContent=ICONS[grid[r][c].t]; tok.className='token t'+grid[r][c].t; }
+      guard++;
+    }
+  }
+
+  function pulse(group){ for (var i=0;i<group.length;i++){ grid[group[i].r][group[i].c].el.classList.add('pulse'); } setTimeout(function(){ for (var i=0;i<group.length;i++){ grid[group[i].r][group[i].c].el.classList.remove('pulse'); } },120); }
+
+  function onTap(r,c){
+    if(busy) return;
+    var T=grid[r][c].t, group=flood(r,c,T);
+    if(group.length<3){ pulse(group); return; }
+    busy=true; pulse(group);
+    setTimeout(function(){
+      for (var i=0;i<group.length;i++){ var p=group[i]; grid[p.r][p.c].t=-1; grid[p.r][p.c].el.classList.add('fade'); grid[p.r][p.c].el.classList.remove('glow'); }
+      score += group.length*10; scoreEl.textContent=score;
+      // Recarga mínima
+      timeLeft = Math.min(100, timeLeft + group.length * 0.1);
+      updateBar();
+      dropAndRefill();
+    },120);
+  }
+
+  function dropAndRefill(){
+    for (var c=0;c<C;c++){
+      var write=R-1;
+      for (var r=R-1;r>=0;r--){
+        if(grid[r][c].t!==-1){
+          grid[write][c].t=grid[r][c].t;
+          var tok=grid[write][c].el.querySelector('.token');
+          var em=grid[write][c].el.querySelector('.emoji');
+          em.textContent=ICONS[grid[r][c].t];
+          tok.className='token t'+grid[r][c].t;
+          grid[write][c].el.classList.remove('fade');
+          write--;
+        }
+      }
+      for (var r=write;r>=0;r--){
+        var t=rndType(); grid[r][c].t=t;
+        var tok=grid[r][c].el.querySelector('.token');
+        var em=grid[r][c].el.querySelector('.emoji');
+        em.textContent=ICONS[t];
+        tok.className='token t'+t;
+        grid[r][c].el.classList.add('fade'); (function(el){ setTimeout(()=>el.classList.remove('fade'),60); })(grid[r][c].el);
+      }
+    }
+    calcAndApplySizes();
+    ensurePlayable();
+    markAllGroups();
+    busy=false;
+  }
+
+  var timeLeft=100, timer=null, score=0;
+  function startTimer(){
+    clearInterval(timer); timeLeft=100; updateBar();
+    timer=setInterval(function(){ timeLeft-=0.6; if(timeLeft<=0){ timeLeft=0; updateBar(); clearInterval(timer); end(); return; } updateBar(); },300);
+  }
+  function updateBar(){ fill.style.height=Math.floor(timeLeft)+"%"; tick.textContent=Math.floor(timeLeft)+"%"; }
+
+  function awardStars(finalScore){
+    var prev=getBest(), stars=1; if(finalScore>prev){ stars=2; setBest(finalScore); }
+    var total=addStars(stars); bestEl.textContent=getBest(); starsEl.textContent=total; return stars;
+  }
+  function end(){
+    var s=score, stars=awardStars(s);
+    document.getElementById('mscore').textContent=s;
+    document.getElementById('mbest').textContent=getBest();
+    document.getElementById('mstars').textContent=stars;
+    modal.style.display="grid";
+  }
+
+  function start(){ modal.style.display="none"; score=0; scoreEl.textContent=0; init(); startTimer(); }
+
+  document.getElementById('again').addEventListener('click', start);
+  document.getElementById('close').addEventListener('click', ()=>modal.style.display="none");
+  document.getElementById('btnNew').addEventListener('click', start);
+
+  start();
+})();</script>
+</body>
+</html>

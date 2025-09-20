@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Bebé — franja VERTICAL</title>
+<style>
+  :root { --bg:#08243a; --ui:#1d4b6b; --ui2:#2a6287; --text:#e9f6ff;}
+  html,body{height:100%;margin:0;background:var(--bg);}
+  canvas{position:fixed;inset:0;touch-action:none}
+  #turbo{position:fixed;right:12px;top:12px;padding:6px 10px;border-radius:999px;
+         background:rgba(255,255,255,.12);backdrop-filter:blur(4px);font-weight:700;opacity:0;transition:opacity .15s}
+  #turbo.on{opacity:1}
+</style>
+</head>
+<body>
+<div id="turbo">TURBO 💨</div>
+<canvas id="tank"></canvas>
+<script>
+(()=>{
+const canvas=document.getElementById('tank');
+const ctx=canvas.getContext('2d',{alpha:false});
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}resize();
+addEventListener('resize',resize);
+const turboBadge=document.getElementById('turbo');
+
+const rand=(a,b)=>a+Math.random()*(b-a);
+const lerp=(a,b,t)=>a+(b-a)*t;
+const clampAngle=(a)=>{const m=70*Math.PI/180;return Math.max(-m,Math.min(m,a));};
+
+const bgBubbles=Array.from({length:24},()=>({x:Math.random()*innerWidth,y:innerHeight+Math.random()*innerHeight,r:1+Math.random()*3,s:12+Math.random()*24}));
+const mouthBubbles=[];
+
+const BABY={size:46,body:'#d9ccff',tail:'#ff9ecf',fin:'#ffd0e2',eyeScale:1.6,stripeColor:'#ffba7a',stripeWidth:0.32};
+
+let fish={x:canvas.width*0.5,y:canvas.height*0.55,vx:rand(80,120),vy:rand(-20,20),baseSpeed:120,followSpeed:260,wobbleT:Math.random()*10,angle:0,target:null,bubbleTimer:rand(0.2,0.8),turbo:false};
+
+let pointer=null;
+canvas.addEventListener('pointerdown',e=>{pointer={x:e.clientX,y:e.clientY};fish.target=pointer;fish.turbo=true;turboBadge.classList.add('on');});
+canvas.addEventListener('pointermove',e=>{if(pointer){pointer.x=e.clientX;pointer.y=e.clientY;}});
+canvas.addEventListener('pointerup',()=>{pointer=null;fish.target=null;fish.turbo=false;turboBadge.classList.remove('on');});
+canvas.addEventListener('pointercancel',()=>{pointer=null;fish.target=null;fish.turbo=false;turboBadge.classList.remove('on');});
+
+function addMouthBubble(turboMul){
+  const dir=Math.sign(fish.vx)||1;
+  const mouthX=fish.x+(dir>0?BABY.size*0.70:-BABY.size*0.70);
+  mouthBubbles.push({x:mouthX,y:fish.y,v:rand(22,34)*(turboMul?1.25:1),r:rand(1.2,2.4)*(turboMul?1.15:1),life:rand(0.9,1.4)*(turboMul?1.2:1)});
+}
+
+function drawStripeVertical(rx,ry,color,widthRatio){
+  const halfW=rx*widthRatio;
+  const margin=2;
+  const rxIn=rx-margin,ryIn=ry-margin;
+  ctx.save();ctx.fillStyle=color;ctx.globalAlpha=0.95;ctx.beginPath();
+  const steps=48;
+  for(let i=0;i<=steps;i++){
+    const t=i/steps;
+    const x=-halfW+t*(2*halfW);
+    const y=ryIn*Math.sqrt(Math.max(0,1-(x*x)/(rxIn*rxIn)));
+    if(i===0)ctx.moveTo(x,-y);else ctx.lineTo(x,-y);
+  }
+  for(let i=steps;i>=0;i--){
+    const t=i/steps;
+    const x=-halfW+t*(2*halfW);
+    const y=ryIn*Math.sqrt(Math.max(0,1-(x*x)/(rxIn*rxIn)));
+    ctx.lineTo(x,y);
+  }
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+
+function drawFish(time){
+  const s=BABY.size,flip=fish.vx<0?-1:1;
+  ctx.save();ctx.translate(fish.x,fish.y);ctx.scale(flip,1);ctx.rotate(clampAngle(fish.angle));
+  const rx=s*1.05,ry=s*0.78;
+  ctx.fillStyle=BABY.body;ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=3;
+  ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+  // franja VERTICAL barriga
+  drawStripeVertical(rx,ry,BABY.stripeColor,BABY.stripeWidth);
+  // cola
+  const flap=Math.sin(time*6+fish.wobbleT)*0.38;
+  ctx.save();ctx.translate(-rx,0);ctx.rotate(flap);
+  ctx.fillStyle=BABY.tail;ctx.beginPath();ctx.moveTo(0,0);
+  ctx.quadraticCurveTo(-s*0.48,-s*0.58,s*0.12,-s*0.22);
+  ctx.quadraticCurveTo(-s*0.48,s*0.58,0,0);ctx.fill();ctx.restore();
+  // aleta
+  const finFlap=Math.sin(time*8.5+fish.wobbleT)*0.27;
+  ctx.save();ctx.translate(-s*0.1,s*0.16);ctx.rotate(finFlap);
+  ctx.fillStyle=BABY.fin;ctx.beginPath();ctx.moveTo(0,0);
+  ctx.quadraticCurveTo(s*0.06,s*0.58,s*0.2,s*0.13);
+  ctx.quadraticCurveTo(s*0.06,s*0.25,0,0);ctx.fill();ctx.restore();
+  // ojo
+  const e=0.22*BABY.eyeScale,p=0.11*BABY.eyeScale;
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s*0.46,0,s*e,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#111';ctx.beginPath();ctx.arc(s*0.53,0,s*p,0,Math.PI*2);ctx.fill();
+  // chupete borde
+  const mouthTipX=rx+s*0.06,mouthTipY=0;
+  ctx.strokeStyle='#ff78c2';ctx.lineWidth=3.2;
+  ctx.beginPath();ctx.arc(mouthTipX,mouthTipY,s*0.18,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='#ffb5de';ctx.beginPath();
+  ctx.ellipse(mouthTipX-s*0.09,mouthTipY,s*0.17,s*0.13,0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+
+let last=performance.now();
+function tick(t){
+  const dt=Math.min(0.033,(t-last)/1000);last=t;
+  ctx.fillStyle='#08243a';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.globalAlpha=0.35;ctx.fillStyle='#cfe9ff';
+  for(const b of bgBubbles){b.y-=b.s*dt;if(b.y<-10){b.y=canvas.height+10;b.x=Math.random()*canvas.width;}ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=1;
+  for(let i=mouthBubbles.length-1;i>=0;i--){const m=mouthBubbles[i];m.y-=m.v*dt;m.life-=dt;if(m.life<=0){mouthBubbles.splice(i,1);continue;}ctx.globalAlpha=Math.max(0,Math.min(1,m.life));ctx.strokeStyle='rgba(200,220,255,.9)';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
+  const pad=70;let desiredVx=(Math.sign(fish.vx)||1)*fish.baseSpeed,desiredVy=fish.vy;
+  if(fish.target){const dx=fish.target.x-fish.x,dy=fish.target.y-fish.y;const len=Math.hypot(dx,dy)||1;const spd=fish.followSpeed*1.6;desiredVx=(dx/len)*spd;desiredVy=(dy/len)*spd;}
+  else{fish.wobbleT+=dt;desiredVy=fish.vy+Math.sin(fish.wobbleT*1.6)*10*dt;}
+  fish.bubbleTimer-=dt*(fish.target?2.6:1.0);if(fish.bubbleTimer<=0){addMouthBubble(!!fish.target);if(fish.target){if(Math.random()<0.8)addMouthBubble(true);if(Math.random()<0.55)addMouthBubble(true);}fish.bubbleTimer=rand(0.45,1.1);}
+  fish.vx=lerp(fish.vx,desiredVx,Math.min(1,dt*3.0));fish.vy=lerp(fish.vy,desiredVy,Math.min(1,dt*3.0));
+  fish.x+=fish.vx*dt;fish.y+=fish.vy*dt;
+  if(fish.x<pad){fish.x=pad;fish.vx=Math.abs(fish.vx);}if(fish.x>canvas.width-pad){fish.x=canvas.width-pad;fish.vx=-Math.abs(fish.vx);}
+  if(fish.y<pad*0.7){fish.y=pad*0.7;fish.vy=Math.abs(fish.vy);}if(fish.y>canvas.height-pad*0.7){fish.y=canvas.height-pad*0.7;fish.vy=-Math.abs(fish.vy);}
+  fish.angle=clampAngle(Math.atan2(fish.vy,Math.abs(fish.vx)));
+  drawFish(performance.now()/1000);
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🥚 Huevo con Imágenes PNG</title>
+    <style>
+        body {
+            margin: 0;
+            background: #08243a;
+            color: white;
+            font-family: system-ui;
+            overflow: hidden;
+        }
+        canvas {
+            position: fixed;
+            inset: 0;
+        }
+        #controls {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+        .btn {
+            padding: 8px 16px;
+            background: #1d4b6b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn:hover { background: #2a6287; }
+        
+        .btn-small {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 2px 4px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 8px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.2s;
+            margin: 1px;
+        }
+        .btn-small:hover { 
+            background: #5a6268; 
+            transform: translateY(-1px);
+        }
+        #turbo {
+            position: fixed;
+            right: 12px;
+            top: 60px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(4px);
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        #turbo.active { opacity: 1; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div id="turbo">TURBO 💨</div>
+    
+    <div id="controls">
+        <div style="font-weight: bold; margin-bottom: 8px;">⏰ Tiempos:</div>
+        <button class="btn" onclick="setTimer(5000)">5s</button>
+        <button class="btn" onclick="setTimer(30000)">30s</button>
+        <button class="btn" onclick="setTimer(60000)">1m</button>
+        
+        <div style="font-weight: bold; margin: 10px 0 5px 0;">🥚 Etapas Huevo:</div>
+        <button class="btn" onclick="setEggStage(0)">Huevo 0 (inicial)</button>
+        <button class="btn" onclick="setEggStage(0.25)">Huevo 1 (limpio)</button>
+        <button class="btn" onclick="setEggStage(0.45)">Huevo 2 (grietas)</button>
+        <button class="btn" onclick="setEggStage(0.65)">Huevo 3 (más grietas)</button>
+        <button class="btn" onclick="setEggStage(0.85)">Huevo 4 (agrietado)</button>
+        
+        <div style="font-weight: bold; margin: 10px 0 5px 0;">🎬 Acciones:</div>
+        <button class="btn" onclick="forceHatch()">🐣 Eclosionar</button>
+        <button class="btn" onclick="resetGame()">🔄 Reset</button>
+        
+        <div style="font-weight: bold; margin: 10px 0 3px 0; font-size: 11px;">🐠 Debug Movimientos:</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; margin-bottom: 2px;">
+            <button class="btn-small" onclick="setFishPattern('float')">🎈</button>
+            <button class="btn-small" onclick="setFishPattern('diagonal')">↗️</button>
+            <button class="btn-small" onclick="setFishPattern('circle')">🔄</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; margin-bottom: 2px;">
+            <button class="btn-small" onclick="setFishPattern('zigzag')">〰️</button>
+            <button class="btn-small" onclick="setFishPattern('vertical')">↕️</button>
+            <button class="btn-small" onclick="setFishPattern('pause')">⏸️</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px;">
+            <button class="btn-small" onclick="setFishPattern('burst')">💨</button>
+            <button class="btn-small" onclick="setFishPattern('spin8')" style="background: #ff6b6b;">🎪</button>
+            <button class="btn-small" onclick="setFishPattern('loop')" style="background: #4ecdc4;">🎡</button>
+        </div>
+        
+        <div style="font-size: 12px; margin-top: 10px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px;">
+            <div>Progreso: <span id="progress">0%</span></div>
+            <div>Tiempo: <span id="timer">24:00:00</span></div>
+            <div>Imagen: <span id="currentImg">egg_01</span></div>
+            <div>Estado: <span id="status">Huevo</span></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        
+        // Estado del juego
+        let gameState = {
+            eggStartTime: Date.now(),
+            eggDuration: 24 * 60 * 60 * 1000,
+            stage: 'egg',
+            hatching: false,
+            hatchStart: 0,
+            hatchProgress: 0,
+            bubblesCreated: false
+        };
+        
+        // Huevo
+        let egg = {
+            x: 0,
+            y: 0,
+            floatTime: 0,
+            size: 180  // MÁS GRANDE
+        };
+        
+        // Pez bebé - SISTEMA MEJORADO como el demo
+        let fish = {
+            x: 0, y: 0, 
+            dir: 0, // Dirección en radianes (como en el demo)
+            speed: 50, // Velocidad base
+            targetSpeed: 50,
+            target: null, turbo: false,
+            wobbleT: 0, birthTime: 0, visible: false,
+            // Movimiento más natural
+            patternTimer: 0,
+            currentPattern: 'wander'
+        };
+        
+        // Burbujas
+        let bgBubbles = [];
+        let explosionBubbles = [];
+        
+        // Crear burbujas de fondo
+        for (let i = 0; i < 15; i++) {
+            bgBubbles.push({
+                x: Math.random() * canvas.width,
+                y: canvas.height + Math.random() * canvas.height,
+                r: 1 + Math.random() * 3,
+                speed: 15 + Math.random() * 25
+            });
+        }
+        
+        // CARGAR IMÁGENES DE HUEVOS (empezando por egg_00)
+        const eggImages = {};
+        const imageData = [
+            { name: 'egg_00_clean.png', key: 'stage0' },  // INICIAL
+            { name: 'egg_01_clean.png', key: 'stage1' },
+            { name: 'egg_02_clean.png', key: 'stage2' },
+            { name: 'egg_03_clean.png', key: 'stage3' },
+            { name: 'egg_04_clean.png', key: 'stage4' }
+        ];
+        
+        let imagesLoaded = 0;
+        
+        imageData.forEach(({ name, key }) => {
+            const img = new Image();
+            img.onload = () => {
+                imagesLoaded++;
+                console.log(`✅ ${name} cargada correctamente (${imagesLoaded}/${imageData.length})`);
+                console.log(`📐 Tamaño: ${img.naturalWidth}x${img.naturalHeight}`);
+            };
+            img.onerror = () => {
+                console.log(`❌ ERROR cargando ${name} desde ./images/fish/${name}`);
+            };
+            img.src = `./images/fish/${name}`;
+            console.log(`📁 Cargando: ./images/fish/${name}`);
+            eggImages[key] = img;
+        });
+        
+        function getCurrentEggImage() {
+            const progress = getEggProgress();
+            
+            // Progreso silencioso
+            
+            // EMPEZAR POR EL 00 (INICIAL)
+            if (progress < 0.2) {
+                // egg_00_clean.png
+                return eggImages.stage0;       // 0-20%: egg_00_clean.png
+            }
+            if (progress < 0.4) {
+                // egg_01_clean.png
+                return eggImages.stage1;       // 20-40%: egg_01_clean.png
+            }
+            if (progress < 0.6) {
+                // egg_02_clean.png
+                return eggImages.stage2;       // 40-60%: egg_02_clean.png  
+            }
+            if (progress < 0.8) {
+                // egg_03_clean.png
+                return eggImages.stage3;       // 60-80%: egg_03_clean.png
+            }
+                // egg_04_clean.png
+            return eggImages.stage4;           // 80-100%: egg_04_clean.png
+        }
+        
+        function getEggProgress() {
+            const elapsed = Date.now() - gameState.eggStartTime;
+            return Math.min(1, elapsed / gameState.eggDuration);
+        }
+        
+        function getTimeRemaining() {
+            const elapsed = Date.now() - gameState.eggStartTime;
+            return Math.max(0, gameState.eggDuration - elapsed);
+        }
+        
+        function formatTime(ms) {
+            const totalSeconds = Math.ceil(ms / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function startHatching() {
+            if (gameState.hatching || gameState.stage === 'baby') return; // EVITAR BUCLE
+            gameState.hatching = true;
+            gameState.hatchStart = Date.now();
+            gameState.bubblesCreated = false;
+            console.log('🐣 Iniciando eclosión ÚNICA');
+        }
+        
+        let explosionHappened = false; // Para que solo pase UNA VEZ
+        
+        // RAYOS DE LUZ para la explosión
+        let lightRays = [];
+        
+        function createExplosionBubbles() {
+            if (explosionHappened) return; // NO repetir
+            
+            explosionBubbles.length = 0;
+            lightRays.length = 0; // Limpiar rayos anteriores
+            explosionHappened = true; // Marcar como hecho
+            console.log('💥💥💥 EXPLOSIÓN MASIVA CON RAYOS DE LUZ 💥💥💥');
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height * 0.7;
+            
+            // ✨ CREAR RAYOS DE LUZ RADIANTES
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2;
+                lightRays.push({
+                    angle: angle,
+                    length: 0,
+                    maxLength: 150 + Math.random() * 100,
+                    width: 2 + Math.random() * 4,
+                    life: 3,
+                    maxLife: 3,
+                    color: `hsl(${45 + Math.random() * 30}, 100%, ${70 + Math.random() * 20}%)`, // Dorado brillante
+                    opacity: 0.8 + Math.random() * 0.2
+                });
+            }
+            
+            // EXPLOSIÓN MASIVA - 200 BURBUJAS que llenen toda la pantalla
+            for (let i = 0; i < 200; i++) {
+                const angle = (i / 200) * Math.PI * 2 + Math.random() * 0.5;
+                const speed = 60 + Math.random() * 200; // Velocidades muy variadas
+                
+                explosionBubbles.push({
+                    x: centerX + (Math.random() - 0.5) * 40,
+                    y: centerY + (Math.random() - 0.5) * 40,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 50,
+                    r: 1 + Math.random() * 12,  // Tamaños muy variados
+                    life: 2 + Math.random() * 2,  // Vida 2-4 segundos
+                    maxLife: 2 + Math.random() * 2,
+                    sparkle: Math.random() > 0.5,  // 50% brillan
+                    isLight: Math.random() > 0.8   // 20% son partículas de luz
+                });
+            }
+            
+            // ONDAS DE CHOQUE - Burbujas que van en todas direcciones
+            for (let ring = 0; ring < 3; ring++) {
+                const ringRadius = (ring + 1) * 60;
+                const bubblesInRing = 30;
+                
+                for (let i = 0; i < bubblesInRing; i++) {
+                    const angle = (i / bubblesInRing) * Math.PI * 2;
+                    const speed = 40 + ring * 30;
+                    
+                    explosionBubbles.push({
+                        x: centerX,
+                        y: centerY,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        r: 3 + Math.random() * 6,
+                        life: 1.5 + ring * 0.5,
+                        maxLife: 1.5 + ring * 0.5,
+                        sparkle: true,
+                        isRing: true
+                    });
+                }
+            }
+            
+            console.log(`🌊 TOTAL: ${explosionBubbles.length} burbujas + ${lightRays.length} rayos de luz`);
+            console.log('✨ Rayos de luz creados:', lightRays);
+        }
+        
+        function update(deltaTime) {
+            // Posición del huevo (CENTRO de la pantalla)
+            egg.x = canvas.width / 2;
+            egg.y = canvas.height * 0.7; // Dentro del agua
+            egg.floatTime += deltaTime;
+            
+            // Burbujas de fondo
+            for (const bubble of bgBubbles) {
+                bubble.y -= bubble.speed * deltaTime;
+                if (bubble.y < canvas.height * 0.1) {
+                    bubble.y = canvas.height + 10;
+                    bubble.x = Math.random() * canvas.width;
+                }
+            }
+            
+            // Actualizar burbujas de explosión (siempre, para que se vean)
+            for (let i = explosionBubbles.length - 1; i >= 0; i--) {
+                const bubble = explosionBubbles[i];
+                bubble.x += bubble.vx * deltaTime;
+                bubble.y += bubble.vy * deltaTime;
+                bubble.vy += 40 * deltaTime;
+                bubble.vx *= 0.98;
+                bubble.vy *= 0.98;
+                bubble.life -= deltaTime;
+                
+                if (bubble.life <= 0) {
+                    explosionBubbles.splice(i, 1);
+                }
+            }
+            
+            // ✨ ACTUALIZAR RAYOS DE LUZ
+            for (let i = lightRays.length - 1; i >= 0; i--) {
+                const ray = lightRays[i];
+                
+                // Los rayos crecen rápidamente
+                if (ray.length < ray.maxLength) {
+                    ray.length += ray.maxLength * deltaTime * 0.0015;
+                }
+                
+                ray.life -= deltaTime;
+                ray.opacity = 0.8 + Math.sin(ray.life * 0.003) * 0.2;
+                
+                if (ray.life <= 0) {
+                    lightRays.splice(i, 1);
+                }
+            }
+            
+            // Verificar eclosión
+            const progress = getEggProgress();
+            if (progress >= 1 && !gameState.hatching) {
+                startHatching();
+            }
+            
+            // Proceso de eclosión
+            if (gameState.hatching) {
+                const elapsed = Date.now() - gameState.hatchStart;
+                gameState.hatchProgress = Math.min(1, elapsed / 3000);
+                
+                // EXPLOSIÓN MASIVA al 50% - UNA SOLA VEZ
+                if (gameState.hatchProgress >= 0.5 && !gameState.bubblesCreated) {
+                    createExplosionBubbles();
+                    gameState.bubblesCreated = true;
+                }
+                
+                // Pez aparece al 80% - ACTIVAR PEZ
+                if (gameState.hatchProgress >= 0.8 && gameState.stage === 'egg') {
+                    gameState.stage = 'baby';
+                    gameState.hatching = false;
+                    
+                    // ACTIVAR Y POSICIONAR PEZ INMEDIATAMENTE
+                    fish.visible = true;
+                    fish.x = canvas.width * 0.5;
+                    fish.y = canvas.height * 0.5;
+                    fish.vx = (Math.random() > 0.5 ? 1 : -1) * (40 + Math.random() * 20);
+                    fish.vy = (Math.random() - 0.5) * 20;
+                    fish.birthTime = Date.now();
+                    fish.wobbleT = Math.random() * 10;
+                    fish.welcomeSequence = false;
+                    fish.patternTimer = 0;
+                    
+                    console.log(`🐠 ¡PEZ ACTIVADO! Pos: (${Math.round(fish.x)}, ${Math.round(fish.y)}) Visible: ${fish.visible}`);
+                }
+            }
+            
+            // DEBUG: Estado del pez (SOLO si visible)
+            if (gameState.stage === 'baby' && fish.visible) {
+                console.log(`🐠 DEBUG: fish.visible=${fish.visible}, pos=(${Math.round(fish.x)}, ${Math.round(fish.y)})`);
+            }
+            
+            // Actualizar pez bebé
+            if (fish.visible) {
+                fish.wobbleT += deltaTime;
+                const wobble = Math.sin(fish.wobbleT * 1.5) * 8;
+                fish.y = canvas.height * 0.6 + wobble;
+                
+                // Movimiento si tiene target
+                if (fish.target) {
+                    const dx = fish.target.x - fish.x;
+                    const dy = fish.target.y - fish.y;
+                    const len = Math.hypot(dx, dy) || 1;
+                    fish.vx = (dx / len) * 200;
+                    fish.vy = (dy / len) * 200;
+                    fish.x += fish.vx * deltaTime * 0.001;
+                    fish.y += fish.vy * deltaTime * 0.001;
+                }
+            }
+            
+            // Actualizar UI
+            const progressPercent = getEggProgress();
+            let currentImgName = 'egg_01';
+            if (progressPercent >= 0.75) currentImgName = 'egg_04';
+            else if (progressPercent >= 0.5) currentImgName = 'egg_03';
+            else if (progressPercent >= 0.25) currentImgName = 'egg_02';
+            
+            document.getElementById('progress').textContent = Math.round(progressPercent * 100) + '%';
+            document.getElementById('timer').textContent = formatTime(getTimeRemaining());
+            document.getElementById('currentImg').textContent = currentImgName;
+        }
+        
+        function render() {
+            // Limpiar
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Fondo con agua
+            drawBackground();
+            
+            // Burbujas
+            drawAllBubbles();
+            
+            // Huevo (SOLO si NO es bebé)
+            if (gameState.stage === 'egg') {
+                drawEggWithImage();
+            }
+            
+            // Pez bebé (SOLO si es visible Y la etapa es baby)
+            if (fish.visible && gameState.stage === 'baby') {
+                drawBabyFish();
+            }
+            
+            // Timer
+            drawTimer();
+        }
+        
+        // Cargar fondo bg_basic
+        const bgBasic = new Image();
+        bgBasic.onload = () => {
+            console.log('✅ bg_basic.png cargado');
+        };
+        bgBasic.onerror = () => {
+            console.log('❌ Error cargando bg_basic.png');
+        };
+        bgBasic.src = './images/backgrounds/bg_basic.png';
+        
+        function drawBackground() {
+            // Usar bg_basic si está cargado
+            if (bgBasic.complete && bgBasic.naturalWidth > 0) {
+                ctx.drawImage(bgBasic, 0, 0, canvas.width, canvas.height);
+            } else {
+                // Fallback: fondo degradado
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, '#0b304d');
+                gradient.addColorStop(1, '#061726');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Texto de carga
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.font = '12px system-ui';
+                ctx.textAlign = 'center';
+                ctx.fillText('Cargando fondo...', canvas.width / 2, canvas.height - 30);
+            }
+        }
+        
+        function drawAllBubbles() {
+            ctx.save();
+            
+            // ✨ DIBUJAR RAYOS DE LUZ PRIMERO (detrás de las burbujas)
+            if (lightRays.length > 0) {
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height * 0.7;
+                
+                for (const ray of lightRays) {
+                    const alpha = ray.life / ray.maxLife;
+                    ctx.globalAlpha = alpha * ray.opacity;
+                    
+                    // Configurar gradiente para el rayo
+                    const gradient = ctx.createLinearGradient(
+                        centerX, centerY,
+                        centerX + Math.cos(ray.angle) * ray.length,
+                        centerY + Math.sin(ray.angle) * ray.length
+                    );
+                    gradient.addColorStop(0, ray.color);
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    
+                    // Dibujar rayo con brillo MÁS VISIBLE
+                    ctx.strokeStyle = gradient;
+                    ctx.lineWidth = ray.width * 2; // MÁS GRUESO
+                    ctx.lineCap = 'round';
+                    ctx.shadowBlur = 30; // MÁS BRILLO
+                    ctx.shadowColor = '#ffdd44'; // COLOR FIJO MÁS VISIBLE
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.lineTo(
+                        centerX + Math.cos(ray.angle) * ray.length,
+                        centerY + Math.sin(ray.angle) * ray.length
+                    );
+                    ctx.stroke();
+                    
+                    ctx.shadowBlur = 0;
+                }
+            }
+            
+            // Burbujas de fondo
+            ctx.globalAlpha = 0.4;
+            ctx.fillStyle = '#cfe9ff';
+            for (const bubble of bgBubbles) {
+                if (bubble.y > canvas.height * 0.3) {
+                    ctx.beginPath();
+                    ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Burbujas de explosión ESPECTACULARES
+            if (explosionBubbles.length > 0) {
+                for (const bubble of explosionBubbles) {
+                    const alpha = bubble.life / bubble.maxLife;
+                    ctx.globalAlpha = alpha;
+                    
+                    if (bubble.isLight) {
+                        // Partículas de luz brillantes
+                        const intensity = alpha * 2;
+                        ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
+                        ctx.shadowBlur = 8;
+                        ctx.shadowColor = '#fff';
+                        ctx.beginPath();
+                        ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    } else {
+                        // Burbujas coloridas normales
+                        const hue = 180 + (1 - alpha) * 80; // Más rango de colores
+                        ctx.fillStyle = `hsl(${hue}, 85%, 75%)`;
+                        
+                        if (bubble.sparkle) {
+                            // Burbujas que brillan
+                            ctx.strokeStyle = '#fff';
+                            ctx.lineWidth = 2;
+                            ctx.shadowBlur = 4;
+                            ctx.shadowColor = `hsl(${hue}, 100%, 90%)`;
+                        } else {
+                            ctx.strokeStyle = `hsl(${hue}, 90%, 90%)`;
+                            ctx.lineWidth = 1;
+                        }
+                        
+                        ctx.beginPath();
+                        ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+                    }
+                }
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawEggWithImage() {
+            // FORZAR posición en el centro
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height * 0.7;
+            const floatY = centerY + Math.sin(egg.floatTime * 0.8) * 6;
+            const currentImage = getCurrentEggImage();
+            
+            ctx.save();
+            ctx.translate(centerX, floatY);
+            
+            // Efecto de eclosión
+            if (gameState.hatching) {
+                const shake = Math.sin(Date.now() * 0.02) * 5 * gameState.hatchProgress;
+                ctx.translate(shake, 0);
+                
+                // Blur effect
+                ctx.filter = `blur(${8 * gameState.hatchProgress}px)`;
+            }
+            
+            // Dibujar imagen del huevo
+            if (currentImage && currentImage.complete && currentImage.naturalWidth > 0) {
+                console.log(`🖼️ DIBUJANDO: ${currentImage.src}`);
+                ctx.drawImage(
+                    currentImage,
+                    -egg.size / 2,
+                    -egg.size / 2,
+                    egg.size,
+                    egg.size
+                );
+            } else {
+                console.log(`❌ Imagen no disponible. CurrentImage:`, currentImage);
+                console.log(`📊 Estado de imágenes cargadas: ${imagesLoaded}/${imageData.length}`);
+                // Fallback: huevo vectorial bonito mientras carga
+                ctx.fillStyle = '#f4f2e7';
+                ctx.strokeStyle = 'rgba(40, 50, 60, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, egg.size * 0.4, egg.size * 0.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Sombra
+                ctx.globalAlpha = 0.3;
+                ctx.fillStyle = '#e0ddd0';
+                ctx.beginPath();
+                ctx.ellipse(-8, -10, egg.size * 0.2, egg.size * 0.25, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                
+                // Texto de estado
+                ctx.fillStyle = 'white';
+                ctx.font = '12px system-ui';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Imágenes: ${imagesLoaded}/${imageData.length}`, 0, egg.size * 0.7);
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawBabyFish() {
+            const age = Date.now() - fish.birthTime;
+            let birthAlpha = Math.min(1, age / 2000); // Aparece en 2 segundos
+            
+            ctx.save();
+            ctx.translate(fish.x, fish.y);
+            
+            // ANIMACIÓN DE NACIMIENTO BONITA (pequeño → grande)
+            const birthScale = 0.3 + birthAlpha * 0.7; // De 0.3 a 1.0
+            ctx.scale(birthScale, birthScale);
+            ctx.globalAlpha = birthAlpha;
+            
+            const s = 46; // Tamaño bebé
+            const flip = fish.vx < 0 ? -1 : 1;
+            ctx.scale(flip, 1);
+            
+            // Rotación suave del pez
+            const angle = Math.atan2(fish.vy, Math.abs(fish.vx));
+            const maxAngle = 70 * Math.PI / 180;
+            const clampedAngle = Math.max(-maxAngle, Math.min(maxAngle, angle));
+            ctx.rotate(clampedAngle);
+            
+            const rx = s * 1.05;
+            const ry = s * 0.78;
+            
+            // Cuerpo
+            ctx.fillStyle = '#d9ccff';
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Franja vertical ANCHA (bebé)
+            drawStripeVertical(rx, ry, '#ffba7a', 0.32);
+            
+            // Cola con aleteo
+            const time = performance.now() / 1000;
+            const flap = Math.sin(time * 6 + fish.wobbleT) * 0.38;
+            ctx.save();
+            ctx.translate(-rx, 0);
+            ctx.rotate(flap);
+            ctx.fillStyle = '#ff9ecf';
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(-s * 0.48, -s * 0.58, s * 0.12, -s * 0.22);
+            ctx.quadraticCurveTo(-s * 0.48, s * 0.58, 0, 0);
+            ctx.fill();
+            ctx.restore();
+            
+            // Aleta lateral
+            const finFlap = Math.sin(time * 8.5 + fish.wobbleT) * 0.27;
+            ctx.save();
+            ctx.translate(-s * 0.1, s * 0.16);
+            ctx.rotate(finFlap);
+            ctx.fillStyle = '#ffd0e2';
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(s * 0.06, s * 0.58, s * 0.2, s * 0.13);
+            ctx.quadraticCurveTo(s * 0.06, s * 0.25, 0, 0);
+            ctx.fill();
+            ctx.restore();
+            
+            // Ojo GRANDE (bebé)
+            const e = 0.22 * 1.6; // eyeScale del bebé
+            const p = 0.11 * 1.6;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(s * 0.46, 0, s * e, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#111';
+            ctx.beginPath();
+            ctx.arc(s * 0.53, 0, s * p, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // CHUPETE en la punta (como en el original)
+            const mouthTipX = rx + s * 0.06;
+            const mouthTipY = 0;
+            ctx.strokeStyle = '#ff78c2';
+            ctx.lineWidth = 3.2;
+            ctx.beginPath();
+            ctx.arc(mouthTipX, mouthTipY, s * 0.18, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = '#ffb5de';
+            ctx.beginPath();
+            ctx.ellipse(mouthTipX - s * 0.09, mouthTipY, s * 0.17, s * 0.13, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        // Función para dibujar franja vertical (como en el original)
+        function drawStripeVertical(rx, ry, color, widthRatio) {
+            const halfW = rx * widthRatio;
+            const margin = 2;
+            const rxIn = rx - margin;
+            const ryIn = ry - margin;
+            
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.95;
+            ctx.beginPath();
+            
+            const steps = 48;
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const x = -halfW + t * (2 * halfW);
+                const y = ryIn * Math.sqrt(Math.max(0, 1 - (x * x) / (rxIn * rxIn)));
+                if (i === 0) ctx.moveTo(x, -y);
+                else ctx.lineTo(x, -y);
+            }
+            for (let i = steps; i >= 0; i--) {
+                const t = i / steps;
+                const x = -halfW + t * (2 * halfW);
+                const y = ryIn * Math.sqrt(Math.max(0, 1 - (x * x) / (rxIn * rxIn)));
+                ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+        
+        function drawTimer() {
+            // SOLO mostrar timer si es huevo, NO durante eclosión ni con pez bebé
+            if (gameState.stage !== 'egg' || gameState.hatching) {
+                return; // No mostrar nada
+            }
+            
+            const timeRemaining = getTimeRemaining();
+            
+            ctx.font = 'bold 18px system-ui';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetY = 2;
+            
+            if (timeRemaining > 0) {
+                ctx.fillStyle = '#e9f6ff';
+                ctx.fillText(`Eclosión en: ${formatTime(timeRemaining)}`, canvas.width / 2, 50);
+            } else {
+                ctx.fillStyle = '#4caf50';
+                ctx.fillText('¡Listo para eclosionar!', canvas.width / 2, 50);
+            }
+            
+            ctx.shadowBlur = 0;
+        }
+        
+        function update(deltaTime) {
+            egg.floatTime += deltaTime;
+            
+            // Burbujas de fondo
+            for (const bubble of bgBubbles) {
+                bubble.y -= bubble.speed * deltaTime;
+                if (bubble.y < canvas.height * 0.1) {
+                    bubble.y = canvas.height + 10;
+                    bubble.x = Math.random() * canvas.width;
+                }
+            }
+            
+            // Actualizar burbujas de explosión (siempre, para que se vean)
+            for (let i = explosionBubbles.length - 1; i >= 0; i--) {
+                const bubble = explosionBubbles[i];
+                bubble.x += bubble.vx * deltaTime;
+                bubble.y += bubble.vy * deltaTime;
+                bubble.vy += 40 * deltaTime;
+                bubble.vx *= 0.98;
+                bubble.vy *= 0.98;
+                bubble.life -= deltaTime;
+                
+                if (bubble.life <= 0) {
+                    explosionBubbles.splice(i, 1);
+                }
+            }
+            
+            // ✨ ACTUALIZAR RAYOS DE LUZ
+            for (let i = lightRays.length - 1; i >= 0; i--) {
+                const ray = lightRays[i];
+                
+                // Los rayos crecen rápidamente
+                if (ray.length < ray.maxLength) {
+                    ray.length += ray.maxLength * deltaTime * 0.0015;
+                }
+                
+                ray.life -= deltaTime;
+                ray.opacity = 0.8 + Math.sin(ray.life * 0.003) * 0.2;
+                
+                if (ray.life <= 0) {
+                    lightRays.splice(i, 1);
+                }
+            }
+            
+            // Verificar eclosión
+            const progress = getEggProgress();
+            if (progress >= 1 && !gameState.hatching) {
+                startHatching();
+            }
+            
+            // Proceso de eclosión
+            if (gameState.hatching) {
+                const elapsed = Date.now() - gameState.hatchStart;
+                gameState.hatchProgress = Math.min(1, elapsed / 3000);
+                
+                // Burbujas al 50%
+                if (gameState.hatchProgress >= 0.5 && !gameState.bubblesCreated) {
+                    createExplosionBubbles();
+                    gameState.bubblesCreated = true;
+                }
+                
+                // Pez aparece al 80%
+                // ELIMINADO - Solo se usa la lógica de arriba al 80%
+                
+                if (gameState.hatchProgress >= 1) {
+                    gameState.hatching = false;
+                }
+            }
+            
+            // Actualizar pez bebé (MOVIMIENTOS VARIADOS Y DIVERTIDOS)
+            if (fish.visible) {
+                const baseSpeed = 120;
+                const followSpeed = 260;
+                
+                // Velocidad deseada - NO FORZAR horizontal
+                let desiredVx = fish.vx; // Mantener velocidad actual
+                let desiredVy = fish.vy; // Mantener velocidad actual
+                
+                if (fish.target) {
+                    // Seguir dedo en modo turbo
+                    const dx = fish.target.x - fish.x;
+                    const dy = fish.target.y - fish.y;
+                    const len = Math.hypot(dx, dy) || 1;
+                    const spd = followSpeed * 1.6;
+                    desiredVx = (dx / len) * spd;
+                    desiredVy = (dy / len) * spd;
+                } else {
+                    // MOVIMIENTO SIMPLE QUE FUNCIONABA (MÁS LENTO)
+                    fish.wobbleT += deltaTime;
+                    
+                    // CAMBIO DE MOVIMIENTO CADA 6 SEGUNDOS
+                    if (!fish.patternTimer) fish.patternTimer = 0;
+                    fish.patternTimer -= deltaTime;
+                    
+                    if (fish.patternTimer <= 0) {
+                        fish.patternTimer = 6000 + Math.random() * 3000; // 6-9 segundos
+                        
+                        // VELOCIDADES MÁS LENTAS
+                        const moveType = Math.random();
+                        
+                        if (moveType < 0.25) {
+                            // 1. FLOTACIÓN (MÁS LENTA)
+                            fish.vx = (Math.random() - 0.5) * 40; // 40 en lugar de 60
+                            fish.vy = -30 - Math.random() * 20; // 30 en lugar de 45
+                            fish.currentPattern = 'float';
+                            console.log('🎈 Flotación lenta');
+                        } else if (moveType < 0.5) {
+                            // 2. VERTICAL (MÁS LENTA)
+                            fish.vx = (Math.random() - 0.5) * 35; // 35 en lugar de 50
+                            fish.vy = (Math.random() > 0.5 ? 1 : -1) * (50 + Math.random() * 30); // 50 en lugar de 70
+                            fish.currentPattern = 'vertical';
+                            console.log('↕️ Vertical lenta');
+                        } else if (moveType < 0.75) {
+                            // 3. DIAGONAL (MÁS LENTA)
+                            const angle = Math.random() * Math.PI * 2;
+                            const speed = 50 + Math.random() * 25; // 50 en lugar de 80
+                            fish.vx = Math.cos(angle) * speed;
+                            fish.vy = Math.sin(angle) * speed;
+                            fish.currentPattern = 'diagonal';
+                            console.log('↗️ Diagonal lenta');
+                        } else {
+                            // 4. HORIZONTAL (MÁS LENTA)
+                            fish.vx = (Math.random() > 0.5 ? 1 : -1) * (50 + Math.random() * 25); // 50 en lugar de 80
+                            fish.vy = (Math.random() - 0.5) * 30; // 30 en lugar de 40
+                            fish.currentPattern = 'horizontal';
+                            console.log('➡️ Horizontal lenta');
+                        }
+                    }
+                    
+                    // Ejecutar patrón actual
+                    if (fish.currentPattern === 'circle' && fish.circleCenter) {
+                        fish.circleAngle += deltaTime * 0.001;
+                        const radius = 80;
+                        desiredVx = (Math.cos(fish.circleAngle) * radius - (fish.x - fish.circleCenter.x)) * 2;
+                        desiredVy = (Math.sin(fish.circleAngle) * radius - (fish.y - fish.circleCenter.y)) * 2;
+                    } else if (fish.currentPattern === 'zigzag') {
+                        desiredVy = Math.sin(fish.wobbleT * 4) * 80;
+                    } else if (fish.currentPattern === 'spin8' && fish.spin8Center) {
+                        // ¡PIRUETA EN FIGURA DE 8! (Lemniscata)
+                        fish.spin8Time += deltaTime * 0.001 * fish.spin8Speed;
+                        const t = fish.spin8Time;
+                        const scale = 80; // Tamaño del 8
+                        
+                        // Ecuación paramétrica de la lemniscata (figura de 8)
+                        const targetX = fish.spin8Center.x + scale * Math.cos(t) / (1 + Math.sin(t) * Math.sin(t));
+                        const targetY = fish.spin8Center.y + scale * Math.sin(t) * Math.cos(t) / (1 + Math.sin(t) * Math.sin(t));
+                        
+                        // Velocidad hacia el punto objetivo
+                        desiredVx = (targetX - fish.x) * 3;
+                        desiredVy = (targetY - fish.y) * 3;
+                        
+                        // Figura de 8 silenciosa
+                    } else if (fish.currentPattern === 'loop' && fish.loopCenter) {
+                        // ¡PIRUETA CIRCULAR RÁPIDA!
+                        fish.loopAngle += deltaTime * 0.001 * fish.loopSpeed;
+                        
+                        const targetX = fish.loopCenter.x + Math.cos(fish.loopAngle) * fish.loopRadius;
+                        const targetY = fish.loopCenter.y + Math.sin(fish.loopAngle) * fish.loopRadius;
+                        
+                        // Velocidad hacia el punto objetivo
+                        desiredVx = (targetX - fish.x) * 4;
+                        desiredVy = (targetY - fish.y) * 4;
+                        
+                        // Loop circular silencioso
+                    }
+                    
+                    // Añadir wobble sutil al movimiento actual
+                    desiredVy += Math.sin(fish.wobbleT * 1.6) * 10;
+                }
+                
+                // Suavizar movimiento AÚN MÁS (transiciones más suaves = menos mareante)
+                fish.vx = lerp(fish.vx, desiredVx, Math.min(1, deltaTime * 2.0)); // Más suave
+                fish.vy = lerp(fish.vy, desiredVy, Math.min(1, deltaTime * 2.0)); // Más suave
+                
+                // Actualizar posición (deltaTime está en ms, convertir a segundos)
+                fish.x += fish.vx * deltaTime * 0.001;
+                fish.y += fish.vy * deltaTime * 0.001;
+                
+                // Colisiones con bordes
+                const pad = 70;
+                if (fish.x < pad) { fish.x = pad; fish.vx = Math.abs(fish.vx); }
+                if (fish.x > canvas.width - pad) { fish.x = canvas.width - pad; fish.vx = -Math.abs(fish.vx); }
+                if (fish.y < canvas.height * 0.35) { fish.y = canvas.height * 0.35; fish.vy = Math.abs(fish.vy); }
+                if (fish.y > canvas.height - pad * 0.7) { fish.y = canvas.height - pad * 0.7; fish.vy = -Math.abs(fish.vy); }
+            }
+            
+            // UI
+            const uiProgress = getEggProgress();
+            let currentImgName = 'egg_00';
+            if (uiProgress >= 0.8) currentImgName = 'egg_04';
+            else if (uiProgress >= 0.6) currentImgName = 'egg_03';
+            else if (uiProgress >= 0.4) currentImgName = 'egg_02';
+            else if (uiProgress >= 0.2) currentImgName = 'egg_01';
+            
+            document.getElementById('progress').textContent = Math.round(uiProgress * 100) + '%';
+            document.getElementById('timer').textContent = formatTime(getTimeRemaining());
+            document.getElementById('currentImg').textContent = currentImgName;
+            document.getElementById('status').textContent = gameState.hatching ? 'Eclosionando' : 
+                (gameState.stage === 'baby' ? 'Pez Bebé' : 'Huevo');
+        }
+        
+        // Controles
+        let pointer = null;
+        
+        canvas.addEventListener('pointerdown', (e) => {
+            pointer = { x: e.clientX, y: e.clientY };
+            if (fish.visible) {
+                fish.target = pointer;
+                fish.turbo = true;
+                document.getElementById('turbo').classList.add('active');
+            }
+        });
+        
+        canvas.addEventListener('pointermove', (e) => {
+            if (pointer) {
+                pointer.x = e.clientX;
+                pointer.y = e.clientY;
+            }
+        });
+        
+        canvas.addEventListener('pointerup', () => {
+            pointer = null;
+            if (fish.visible) {
+                fish.target = null;
+                fish.turbo = false;
+                document.getElementById('turbo').classList.remove('active');
+            }
+        });
+        
+        function setTimer(ms) {
+            gameState.eggStartTime = Date.now() - (gameState.eggDuration - ms);
+            gameState.hatching = false;
+            gameState.stage = 'egg';
+            fish.visible = false;
+            explosionBubbles.length = 0;
+        }
+        
+        function forceHatch() {
+            startHatching();
+        }
+        
+        function resetGame() {
+            gameState.eggStartTime = Date.now();
+            gameState.stage = 'egg';
+            gameState.hatching = false;
+            gameState.bubblesCreated = false;
+            fish.visible = false;
+            explosionBubbles.length = 0;
+        }
+        
+        // Game loop
+        let lastTime = performance.now();
+        function gameLoop(currentTime) {
+            const deltaTime = Math.min(0.033, (currentTime - lastTime) / 1000);
+            lastTime = currentTime;
+            
+            update(deltaTime);
+            render();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Funciones de control (que faltaban)
+        function setTimer(ms) {
+            gameState.eggStartTime = Date.now() - (gameState.eggDuration - ms);
+            gameState.hatching = false;
+            gameState.stage = 'egg';
+            fish.visible = false;
+            explosionBubbles.length = 0;
+            gameState.bubblesCreated = false;
+            console.log(`⏰ Timer ajustado a ${ms/1000} segundos`);
+        }
+        
+        function forceHatch() {
+            startHatching();
+        }
+        
+        function resetGame() {
+            gameState.eggStartTime = Date.now();
+            gameState.stage = 'egg';
+            gameState.hatching = false;
+            gameState.bubblesCreated = false;
+            gameState.hatchProgress = 0;
+            fish.visible = false;
+            explosionBubbles.length = 0;
+            console.log('🔄 Juego reiniciado');
+        }
+        
+        // Función lerp que faltaba
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+        
+        // NUEVA FUNCIÓN: Establecer etapa específica del huevo
+        function setEggStage(progressTarget) {
+            // Calcular tiempo necesario para llegar a ese progreso
+            const targetTime = progressTarget * gameState.eggDuration;
+            gameState.eggStartTime = Date.now() - targetTime;
+            gameState.hatching = false;
+            gameState.stage = 'egg';
+            fish.visible = false;
+            explosionBubbles.length = 0;
+            gameState.bubblesCreated = false;
+            
+            console.log(`🥚 Huevo ajustado a ${Math.round(progressTarget * 100)}% de progreso`);
+            
+            // Actualizar UI inmediatamente
+            setTimeout(() => {
+                const progress = getEggProgress();
+                let imgName = 'egg_00';
+                if (progress >= 0.8) imgName = 'egg_04';
+                else if (progress >= 0.6) imgName = 'egg_03';
+                else if (progress >= 0.4) imgName = 'egg_02';
+                else if (progress >= 0.2) imgName = 'egg_01';
+                
+                document.getElementById('progress').textContent = Math.round(progress * 100) + '%';
+                document.getElementById('currentImg').textContent = imgName;
+                document.getElementById('status').textContent = progress >= 1 ? 'Listo para eclosionar' : 'Desarrollándose';
+            }, 100);
+        }
+        
+        // Mejorar función de reset
+        function resetGame() {
+            gameState = {
+                eggStartTime: Date.now(),
+                eggDuration: 24 * 60 * 60 * 1000,
+                stage: 'egg',
+                hatching: false,
+                hatchStart: 0,
+                hatchProgress: 0,
+                bubblesCreated: false
+            };
+            fish.visible = false;
+            fish.welcomeSequence = false; // Sin secuencia
+            explosionBubbles.length = 0;
+            lightRays.length = 0; // Limpiar rayos de luz
+            explosionHappened = false; // RESETEAR explosión
+            console.log('🔄 Juego reiniciado completamente');
+            
+            // Actualizar UI
+            document.getElementById('status').textContent = 'Huevo';
+        }
+        
+        // 🎮 FUNCIONES DE DEBUG PARA MOVIMIENTOS
+        function setFishPattern(pattern) {
+            if (!fish.visible) {
+                console.log('⚠️ El pez debe estar visible para cambiar patrones');
+                alert('⚠️ Primero haz eclosionar el huevo para ver los movimientos del pez');
+                return;
+            }
+            
+            // Forzar el patrón inmediatamente
+            fish.currentPattern = pattern;
+            fish.patternTimer = 10000; // 10 segundos para ver bien el patrón
+            
+            console.log(`🎮 DEBUG: Forzando patrón ${pattern} por 8 segundos`);
+            
+            // Configurar patrón inmediatamente
+            switch(pattern) {
+                case 'float':
+                    fish.vx = (Math.random() - 0.5) * 60;
+                    fish.vy = -40 - Math.random() * 40;
+                    console.log('🎈 DEBUG: Flotación activada - El pez flotará hacia arriba');
+                    break;
+                case 'diagonal':
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 80 + Math.random() * 60;
+                    fish.vx = Math.cos(angle) * speed;
+                    fish.vy = Math.sin(angle) * speed * 0.7;
+                    console.log('↗️ DEBUG: Diagonal activada - Movimiento en ángulo');
+                    break;
+                case 'circle':
+                    fish.circleCenter = { x: fish.x, y: fish.y };
+                    fish.circleAngle = 0;
+                    console.log('🔄 DEBUG: Círculo activado - Nadará en círculo');
+                    break;
+                case 'zigzag':
+                    fish.vx = (Math.random() > 0.5 ? 1 : -1) * (80 + Math.random() * 40);
+                    console.log('〰️ DEBUG: Zigzag activado - Movimiento ondulado');
+                    break;
+                case 'vertical':
+                    fish.vx = (Math.random() - 0.5) * 40;
+                    fish.vy = (Math.random() > 0.5 ? 1 : -1) * (60 + Math.random() * 40);
+                    console.log('↕️ DEBUG: Vertical activado - Subirá y bajará');
+                    break;
+                case 'pause':
+                    fish.vx = (Math.random() - 0.5) * 30;
+                    fish.vy = (Math.random() - 0.5) * 30;
+                    console.log('⏸️ DEBUG: Pausa activada - Movimiento muy lento');
+                    break;
+                case 'burst':
+                    const burstAngle = Math.random() * Math.PI * 2;
+                    const burstSpeed = 150 + Math.random() * 100;
+                    fish.vx = Math.cos(burstAngle) * burstSpeed;
+                    fish.vy = Math.sin(burstAngle) * burstSpeed;
+                    console.log('💨 DEBUG: Burst activado - ¡Ráfaga de velocidad!');
+                    break;
+                case 'spin8':
+                    fish.spin8Center = { x: fish.x, y: fish.y };
+                    fish.spin8Time = 0;
+                    fish.spin8Speed = 1.5 + Math.random() * 1;
+                    console.log('🎪 DEBUG: ¡PIRUETA EN 8 ACTIVADA! - Figura de lemniscata');
+                    break;
+                case 'loop':
+                    fish.loopCenter = { x: fish.x, y: fish.y };
+                    fish.loopAngle = 0;
+                    fish.loopRadius = 60 + Math.random() * 40;
+                    fish.loopSpeed = 2 + Math.random() * 2;
+                    console.log('🎡 DEBUG: ¡PIRUETA CIRCULAR ACTIVADA! - Loop acrobático');
+                    break;
+            }
+        }
+        
+        console.log('✅ Huevo con imágenes PNG iniciado');
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>

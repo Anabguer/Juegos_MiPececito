@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Huevo — Animación suave (crossfade + bobbing)</title>
+  <style>
+    :root{ --bg1:#0b1b2b; --bg2:#123149; --txt:#e9f7ff; }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--txt);font-family:system-ui,Segoe UI,Roboto,Inter,Arial}
+    .wrap{min-height:100%;display:grid;place-items:center;padding:24px}
+    .card{position:relative;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px 18px 28px;box-shadow:0 10px 28px rgba(0,0,0,.35);}
+    .stage{position:relative;width:300px;height:300px;overflow:hidden}
+    .layer{position:absolute;inset:0;display:grid;place-items:center;will-change:transform,opacity}
+    .layer img{width:256px;height:256px;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.35));}
+    .controls{display:flex;gap:8px;justify-content:center;margin-top:12px}
+    button{padding:8px 12px;border-radius:10px;border:0;cursor:pointer;background:#205b86;color:white}
+    button:hover{filter:brightness(1.1)}
+    .hint{font-size:12px;opacity:.8;text-align:center;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="stage">
+        <div class="layer" id="L1"><img id="img1" alt=""></div>
+        <div class="layer" id="L2" style="opacity:0"><img id="img2" alt=""></div>
+      </div>
+      <div class="controls">
+        <button id="play">▶️ Reproducir</button>
+        <button id="pause">⏸️ Pausa</button>
+        <button id="faster">⏩ +Vel</button>
+        <button id="slower">⏪ -Vel</button>
+      </div>
+      <div class="hint">Se aplica <b>crossfade</b> entre frames, con <b>bobbing</b> (sube/baja) y ligera <b>rotación</b> para continuidad visual.</div>
+    </div>
+  </div>
+
+  <script>
+    const frames = ["egg1.png","egg2.png","egg3.png"]; // ponlos junto al HTML
+    const img1 = document.getElementById('img1');
+    const img2 = document.getElementById('img2');
+    const L1   = document.getElementById('L1');
+    const L2   = document.getElementById('L2');
+
+    // preload
+    frames.forEach(src => { const i = new Image(); i.src = src; });
+
+    let i = 0, next = 1;
+    let t = 0;
+    let playing = true;
+    let fps = 3.2;               // menor fps (frames “clave”)
+    let fadeTime = 0.35;         // seg
+    let holdTime = 0.9;          // seg de “sujeción” por frame (para imitar keyframes)
+    let bobAmp = 6;              // px
+    let rotAmp = 1.8 * Math.PI/180; // rad
+    let fade = 0;                // 0..1 progreso de fundido
+    let state = "hold";          // hold -> fade
+
+    function setSources(){
+      img1.src = frames[i];
+      img2.src = frames[next];
+    }
+    function step(dt){
+      t += dt;
+      // Bobbing + rotación continua en ambas capas (da continuidad aunque cambie el arte)
+      const y = Math.sin(t*1.6) * bobAmp;
+      const r = Math.sin(t*1.3) * rotAmp;
+      L1.style.transform = `translateY(${y}px) rotate(${r}rad)`;
+      L2.style.transform = `translateY(${y}px) rotate(${r}rad)`;
+
+      if(!playing) return;
+
+      if(state==="hold"){
+        fade = 0;
+        L2.style.opacity = 0;
+        if(t >= holdTime){ t = 0; state = "fade"; }
+      } else {
+        fade += dt / fadeTime;
+        const e = Math.min(1, fade);
+        // suavizado (ease-in-out)
+        const ease = e<0.5 ? 2*e*e : -1+(4-2*e)*e;
+        L2.style.opacity = ease;
+        if(e >= 1){
+          // swap capas
+          i = next;
+          next = (next+1) % frames.length;
+          img1.src = frames[i];
+          img2.src = frames[next];
+          L2.style.opacity = 0;
+          state = "hold";
+          t = 0;
+        }
+      }
+    }
+
+    function loop(now){
+      if(!loop.last) loop.last = now;
+      const dt = Math.min(0.033, (now - loop.last)/1000);
+      loop.last = now;
+      step(dt);
+      requestAnimationFrame(loop);
+    }
+    setSources();
+    requestAnimationFrame(loop);
+
+    document.getElementById('play').onclick = ()=> playing = true;
+    document.getElementById('pause').onclick = ()=> playing = false;
+    document.getElementById('faster').onclick = ()=> { holdTime = Math.max(0.2, holdTime - 0.15); };
+    document.getElementById('slower').onclick = ()=> { holdTime = Math.min(2.0, holdTime + 0.15); };
+  </script>
+</body>
+</html>
