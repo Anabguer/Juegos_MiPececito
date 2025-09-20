@@ -10138,8 +10138,216 @@ Comida premium y de cumpleaños
             elements.bestEl.textContent = getBest();
             elements.starsEl.textContent = getStars();
             
-            // Lógica del juego simplificada por espacio...
-            console.log('🎮 Juego de burbujas inicializado');
+            // 🫧 CREAR BURBUJA
+            function createBubble(now) {
+                if (now - gameState.lastSpawn < gameState.spawnEvery) return;
+                gameState.lastSpawn = now;
+                
+                const isGood = Math.random() < 0.7;
+                const size = 35 + Math.random() * 25; // 35-60px
+                const stageRect = elements.stage.getBoundingClientRect();
+                const x = size + Math.random() * (stageRect.width - size * 2);
+                const y = stageRect.height + size;
+                const speed = 80 + Math.random() * 60 + gameState.score * 0.8;
+                const drift = (Math.random() - 0.5) * 40;
+                
+                const bubbleEl = document.createElement('div');
+                bubbleEl.className = 'game-bubble ' + (isGood ? 'good' : 'bad');
+                bubbleEl.innerHTML = `<div class="bubble-emoji">${isGood ? 
+                    GOOD_EMOJIS[Math.floor(Math.random() * GOOD_EMOJIS.length)] : 
+                    BAD_EMOJIS[Math.floor(Math.random() * BAD_EMOJIS.length)]
+                }</div>`;
+                
+                // Estilo de la burbuja
+                bubbleEl.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    border-radius: 50%;
+                    background: radial-gradient(120% 100% at 30% 25%, 
+                        rgba(255,255,255,0.25), 
+                        rgba(255,255,255,0.08) 55%, 
+                        rgba(255,255,255,0.03) 70%);
+                    border: 2px solid ${isGood ? 'rgba(76, 175, 80, 0.4)' : 'rgba(244, 67, 54, 0.4)'};
+                    box-shadow: 
+                        0 8px 32px rgba(0, 0, 0, 0.3),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                    cursor: pointer;
+                    user-select: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transform: translate(${x - size/2}px, ${y - size/2}px);
+                    transition: transform 0.1s ease;
+                `;
+                
+                bubbleEl.querySelector('.bubble-emoji').style.cssText = `
+                    font-size: ${size * 0.5}px;
+                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+                `;
+                
+                elements.stage.appendChild(bubbleEl);
+                
+                const bubble = { el: bubbleEl, x, y, size, vy: -speed, vx: drift, isGood };
+                gameState.bubbles.push(bubble);
+                
+                // Click en burbuja
+                bubbleEl.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (!gameState.running) return;
+                    
+                    if (bubble.isGood) {
+                        gameState.score++;
+                        elements.scoreEl.textContent = gameState.score;
+                        removeBubble(bubble, true);
+                        bubbleEl.style.transform += ' scale(1.2)';
+                        bubbleEl.style.opacity = '0';
+                        setTimeout(() => bubbleEl.remove(), 200);
+                    } else {
+                        endGame(false, "¡Tocaste una mala!");
+                    }
+                });
+                
+                gameState.spawnEvery = Math.max(300, 800 - gameState.score * 10);
+            }
+            
+            // 🗑️ REMOVER BURBUJA
+            function removeBubble(bubble, silent = false) {
+                const index = gameState.bubbles.indexOf(bubble);
+                if (index >= 0) {
+                    gameState.bubbles.splice(index, 1);
+                    if (!silent) {
+                        bubble.el.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+                        bubble.el.style.opacity = '0';
+                        bubble.el.style.transform += ' scale(0.8)';
+                        setTimeout(() => bubble.el.remove(), 200);
+                    } else {
+                        bubble.el.remove();
+                    }
+                }
+            }
+            
+            // 🎮 LOOP DEL JUEGO
+            function gameLoop(now) {
+                if (!gameState.running) return;
+                
+                if (!gameState.startTime) gameState.startTime = now;
+                const deltaTime = (now - gameState.startTime) / 1000;
+                gameState.startTime = now;
+                
+                createBubble(now);
+                
+                // Mover burbujas
+                for (let i = gameState.bubbles.length - 1; i >= 0; i--) {
+                    const bubble = gameState.bubbles[i];
+                    bubble.y += bubble.vy * deltaTime;
+                    bubble.x += bubble.vx * deltaTime;
+                    bubble.vx += Math.sin(now / 400 + i) * 50 * deltaTime;
+                    
+                    const stageRect = elements.stage.getBoundingClientRect();
+                    if (bubble.x - bubble.size/2 < 0 || bubble.x + bubble.size/2 > stageRect.width) {
+                        bubble.vx *= -0.9;
+                    }
+                    
+                    bubble.el.style.transform = `translate(${bubble.x - bubble.size/2}px, ${bubble.y - bubble.size/2}px)`;
+                    
+                    if (bubble.y + bubble.size/2 < 0) {
+                        if (bubble.isGood) {
+                            endGame(false, "¡Dejaste escapar una buena!");
+                            return;
+                        } else {
+                            removeBubble(bubble, true);
+                        }
+                    }
+                }
+                
+                gameState.rafId = requestAnimationFrame(gameLoop);
+            }
+            
+            // 🏆 TERMINAR JUEGO
+            function endGame(won, reason) {
+                gameState.running = false;
+                if (gameState.rafId) cancelAnimationFrame(gameState.rafId);
+                
+                gameState.bubbles.forEach(bubble => bubble.el.remove());
+                gameState.bubbles = [];
+                
+                const finalScore = gameState.score;
+                const bestPrev = getBest();
+                let starsWon = 1;
+                
+                if (finalScore > bestPrev) {
+                    starsWon = 2;
+                    setBest(finalScore);
+                }
+                
+                const totalStars = addStars(starsWon);
+                elements.bestEl.textContent = getBest();
+                elements.starsEl.textContent = totalStars;
+                
+                // Mostrar resultados
+                gameModal.querySelector('#results-title').textContent = won ? "¡Perfecto!" : "Fin de partida";
+                gameModal.querySelector('#final-score').textContent = finalScore;
+                gameModal.querySelector('#final-best').textContent = getBest();
+                gameModal.querySelector('#final-stars').textContent = starsWon;
+                
+                elements.resultsModal.style.display = 'flex';
+                elements.resultsModal.style.cssText += `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.8);
+                    backdrop-filter: blur(10px);
+                    align-items: center;
+                    justify-content: center;
+                    animation: fadeIn 0.3s ease;
+                `;
+                
+                console.log(`🏆 Juego terminado: ${finalScore} puntos, ${starsWon} estrellas`);
+                
+                // Agregar estrellas al pez
+                if (window.game && window.game.gameState) {
+                    window.game.gameState.stars = (window.game.gameState.stars || 0) + starsWon;
+                    window.game.saveGame();
+                }
+            }
+            
+            // 🚀 INICIAR JUEGO
+            function startGame() {
+                gameState.running = true;
+                gameState.score = 0;
+                gameState.lastSpawn = 0;
+                gameState.spawnEvery = 800;
+                gameState.startTime = 0;
+                
+                elements.scoreEl.textContent = '0';
+                elements.resultsModal.style.display = 'none';
+                
+                gameState.bubbles.forEach(bubble => bubble.el.remove());
+                gameState.bubbles = [];
+                
+                console.log('🫧 ¡Juego iniciado!');
+                requestAnimationFrame(gameLoop);
+            }
+            
+            // 📱 EVENT LISTENERS
+            elements.startBtn.addEventListener('click', startGame);
+            gameModal.querySelector('#bubble-again-btn').addEventListener('click', startGame);
+            
+            const closeGame = () => {
+                if (gameState.rafId) cancelAnimationFrame(gameState.rafId);
+                gameState.running = false;
+                gameModal.remove();
+                console.log('🫧 Juego cerrado');
+            };
+            
+            elements.closeBtn.addEventListener('click', closeGame);
+            elements.backBtn.addEventListener('click', closeGame);
+            gameModal.querySelector('#bubble-finish-btn').addEventListener('click', closeGame);
+            
+            console.log('🎮 Juego de burbujas inicializado completamente');
         }
     </script>
 </body>
