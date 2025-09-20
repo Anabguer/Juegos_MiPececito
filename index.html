@@ -3474,8 +3474,16 @@
             
             document.getElementById('timeAdvanceBtn').addEventListener('click', () => {
                 if (game) {
-                    game.advanceGameTime(1); // Avanzar 1 hora
-                    console.log('⏰ Tiempo del juego avanzado +1 hora');
+                    // Simular el paso de 1 hora (3600 segundos) de necesidades
+                    const oneHourInSeconds = 3600;
+                    game.updateAutoNeeds(oneHourInSeconds);
+                    game.updateCrisisFlags();
+                    game.updateNeedBars();
+                    console.log('⏰ Simulado +1 hora de necesidades');
+                    console.log('📊 Nuevos valores:', 
+                        'Hambre:', game.gameState.needs.hunger.toFixed(1),
+                        'Suciedad:', game.gameState.needs.dirt.toFixed(1), 
+                        'Diversión:', game.gameState.needs.fun.toFixed(1));
                 }
             });
             
@@ -9119,13 +9127,13 @@ Comida premium y de cumpleaños
         
         // 🔧 FUNCIONES QUE FALTAN PARA EL SISTEMA REALISTA
             updateAutoNeeds(deltaTime) {
-                // Incremento automático de necesidades
+                // Incremento automático de necesidades (MÁS RÁPIDO PARA TESTING)
                 const minutes = deltaTime / 60;
                 const oldHunger = this.gameState.needs.hunger;
                 
-                this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger + 0.1 * minutes, 0, 100);
-                this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + (1/15) * minutes, 0, 100);
-                this.gameState.needs.fun = this.clamp(this.gameState.needs.fun - (1/8) * minutes, 0, 100);
+                this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger + 0.3 * minutes, 0, 100); // Más hambre
+                this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + (1/10) * minutes, 0, 100); // Más suciedad
+                this.gameState.needs.fun = this.clamp(this.gameState.needs.fun - (1/5) * minutes, 0, 100); // Menos diversión
                 
                 // Log cada 5 segundos para debug
                 if (Math.random() < 0.02) {
@@ -9502,7 +9510,7 @@ Comida premium y de cumpleaños
                 this.backgroundMusic = null;
                 this.isMuted = localStorage.getItem('miPececito_muted') === 'true';
                 this.volume = parseFloat(localStorage.getItem('miPececito_volume')) || 0.7;
-                this.musicVolume = 0.15; // Música de fondo muy bajita
+                this.musicVolume = 0.35; // Música de fondo más audible
                 this.effectsVolume = 0.4; // Efectos a volumen medio
                 
                 this.initAudioContext();
