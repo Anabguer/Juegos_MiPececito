@@ -8366,8 +8366,10 @@ Comida premium y de cumpleaños
                         f.y += f.vy * deltaTime;
                         f.x += f.vx * deltaTime;
                         f.vx *= drag;
-                        if (f.y > h - 12) {
-                            f.y = h - 12;
+                        // LÍMITE MÁS ALTO para que el pez pueda alcanzar la comida
+                        const bottomLimit = h - 120; // 120px desde abajo (zona del pez)
+                        if (f.y > bottomLimit) {
+                            f.y = bottomLimit;
                             f.vy = 0;
                             f.vx = 0;
                             f.bottomT = 0.001;
