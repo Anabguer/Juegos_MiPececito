@@ -2198,6 +2198,32 @@
             justify-content: center;
             z-index: 1100;
             padding: var(--mobile-padding);
+            overflow: hidden;
+        }
+
+        /* 🌊 EFECTOS MARINOS DE FONDO */
+        #welcomeScreen::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 2px, transparent 2px),
+                radial-gradient(circle at 80% 30%, rgba(255,255,255,0.08) 1px, transparent 1px),
+                radial-gradient(circle at 40% 70%, rgba(255,255,255,0.06) 3px, transparent 3px),
+                radial-gradient(circle at 90% 80%, rgba(255,255,255,0.1) 2px, transparent 2px);
+            background-size: 100px 100px, 150px 150px, 200px 200px, 120px 120px;
+            animation: float-bubbles 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float-bubbles {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-20px, -30px) rotate(5deg); }
+            50% { transform: translate(30px, -20px) rotate(-3deg); }
+            75% { transform: translate(-10px, 40px) rotate(2deg); }
         }
 
         /* 📱 Ocultar header durante bienvenida */
@@ -2230,14 +2256,43 @@
             margin-bottom: 24px;
         }
         
-        .welcome-features {
-            margin: 24px 0;
+        /* 🎓 TUTORIAL STEPS */
+        .welcome-tutorial {
+            margin: 20px 0;
+            text-align: left;
         }
         
-        .feature {
+        .tutorial-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             padding: 8px 0;
             font-size: 14px;
-            opacity: 0.8;
+            opacity: 0.9;
+            animation: tutorial-fade-in 0.6s ease-out forwards;
+        }
+        
+        .tutorial-step:nth-child(1) { animation-delay: 0.2s; opacity: 0; }
+        .tutorial-step:nth-child(2) { animation-delay: 0.4s; opacity: 0; }
+        .tutorial-step:nth-child(3) { animation-delay: 0.6s; opacity: 0; }
+        .tutorial-step:nth-child(4) { animation-delay: 0.8s; opacity: 0; }
+        .tutorial-step:nth-child(5) { animation-delay: 1.0s; opacity: 0; }
+        
+        .tutorial-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+        }
+        
+        .tutorial-text {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        @keyframes tutorial-fade-in {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 0.9; transform: translateX(0); }
         }
         
         .start-button {
@@ -2587,13 +2642,38 @@
             <h1>¡Bienvenido a<br>Mi Pececito!</h1>
             <p>Tu aventura de mascota virtual comienza aquí</p>
             
-            <!-- 🌊 BURBUJAS ANIMADAS DE FONDO -->
+            <!-- 🎓 TUTORIAL BÁSICO -->
+            <div class="welcome-tutorial">
+                <div class="tutorial-step">
+                    <span class="tutorial-icon">🥚</span>
+                    <span class="tutorial-text">Primero aparecerá tu huevo</span>
+                </div>
+                <div class="tutorial-step">
+                    <span class="tutorial-icon">⏰</span>
+                    <span class="tutorial-text">Espera a que nazca tu pez</span>
+                </div>
+                <div class="tutorial-step">
+                    <span class="tutorial-icon">🍎</span>
+                    <span class="tutorial-text">Dale comida cuando tenga hambre</span>
+                </div>
+                <div class="tutorial-step">
+                    <span class="tutorial-icon">🧹</span>
+                    <span class="tutorial-text">Limpia cuando esté sucio</span>
+                </div>
+                <div class="tutorial-step">
+                    <span class="tutorial-icon">👆</span>
+                    <span class="tutorial-text">Tócalo para que se divierta</span>
+                </div>
+            </div>
+            
+            <!-- 🌊 BURBUJAS DECORATIVAS MEJORADAS -->
             <div class="welcome-bubbles">
                 <div class="bubble bubble-1">🫧</div>
-                <div class="bubble bubble-2">🫧</div>
+                <div class="bubble bubble-2">💙</div>
                 <div class="bubble bubble-3">🫧</div>
-                <div class="bubble bubble-4">🫧</div>
+                <div class="bubble bubble-4">🐟</div>
                 <div class="bubble bubble-5">🫧</div>
+                <div class="bubble bubble-6">⭐</div>
             </div>
             
             <button id="startGameBtn" class="start-button">🥚 ¡Cuidar mi huevo!</button>
@@ -2865,10 +2945,8 @@
                 // LÓGICA CORRECTA: Solo bienvenida si NO hay pez
                 if (isFirstTime) {
                     // Primera vez: mostrar bienvenida
-                    console.log('🪟 FORZANDO MODAL DE BIENVENIDA...');
+                    console.log('🪟 Mostrando bienvenida (primera vez)...');
                     welcomeScreen.style.display = 'flex';
-                    welcomeScreen.style.visibility = 'visible';
-                    welcomeScreen.style.opacity = '1';
                     setupWelcomeFlow();
                 } else {
                     // Ya tiene pez: mostrar pantalla de carga personalizada
@@ -2896,7 +2974,7 @@
             
             // Botón "Empezar Aventura"
             startGameBtn.addEventListener('click', () => {
-                console.log('🚀 Empezar aventura clickeado');
+                console.log('🚀 Empezar aventura clickeado - OCULTANDO MODAL');
                 welcomeScreen.style.display = 'none';
                 
                 // Marcar como jugado
@@ -3141,7 +3219,12 @@
             });
             
             // 🍎 BOTÓN DE ALIMENTACIÓN (UNA BOLITA COMO EN ORIGINAL)
-            document.getElementById('feedBtn').addEventListener('click', () => {
+            document.getElementById('feedBtn').addEventListener('click', (e) => {
+                const button = e.target.closest('.menu-btn');
+                if (button && button.classList.contains('disabled')) {
+                    console.log('❌ Botón de comida DESHABILITADO - No hacer nada');
+                    return;
+                }
                 if (game && game.fish && !game.fish.isDepressed) {
                     game.dropFood(); // UNA SOLA BOLITA
                     console.log('🍎 Una bolita pequeña soltada');
@@ -3149,7 +3232,12 @@
             });
             
             // 🧹 BOTÓN DE LIMPIEZA
-            document.getElementById('cleanBtn').addEventListener('click', () => {
+            document.getElementById('cleanBtn').addEventListener('click', (e) => {
+                const button = e.target.closest('.menu-btn');
+                if (button && button.classList.contains('disabled')) {
+                    console.log('❌ Botón de limpieza DESHABILITADO - No hacer nada');
+                    return;
+                }
                 if (game && game.fish && !game.fish.isDepressed) {
                     game.startCleaning();
                     console.log('🧹 Limpiando la pecera...');
@@ -3337,7 +3425,13 @@
             constructor() {
                 this.canvas = document.getElementById('gameCanvas');
                 this.ctx = this.canvas.getContext('2d');
+                
+                // 🫧 CAPA OFFSCREEN PARA BURBUJAS (FIX DPR)
+                this.bubLayer = null;
+                this.bubCtx = null;
+                
                 this.setupCanvas();
+                this.ensureBubLayer(); // INICIALIZAR CAPA OFFSCREEN
                 
                 // Estado del juego
                 this.gameState = {
@@ -3443,16 +3537,19 @@
             
             setupCanvas() {
                 const resize = () => {
-                    this.canvas.width = window.innerWidth;
+                    // DPR CORRECTO
+                    const dpr = window.devicePixelRatio || 1;
+                    this.canvas.width = Math.floor(window.innerWidth * dpr);
+                    this.canvas.height = Math.floor((window.innerHeight - 130) * dpr);
                     
                     // CANVAS SIEMPRE DESDE EL HEADER (SIN ESPACIO AZUL)
-                    this.canvas.height = window.innerHeight - 130; // 70px header + 60px botones
                     this.canvas.style.top = '70px'; // SIEMPRE PEGADO AL HEADER
-                    
                     this.canvas.style.position = 'fixed';
                     this.canvas.style.left = '0';
                     this.canvas.style.right = '0';
                     this.canvas.style.bottom = '60px'; // Espacio para botones compactos
+                    
+                    this.resizeBubLayer(); // ACTUALIZAR CAPA OFFSCREEN
                 };
                 window.addEventListener('resize', resize);
                 resize();
@@ -3588,7 +3685,7 @@
                     this.updateLabels(deltaTime);          // 🍎 LABELS ("Ñam")
                     
                     // Actualizar UI cada pocos segundos
-                    if (Math.random() < 0.01) {
+                    if (Math.random() < 0.05) { // MÁS FRECUENTE PARA DEBUG (era 0.01)
                         this.updateUI();
                         this.checkForAlbumEvents(); // Verificar eventos del álbum
                         this.checkEvolution(); // Verificar evolución
@@ -3607,12 +3704,17 @@
                 // }
             }
             
-            render() {
-                // Limpiar canvas (SIN DPR fix que causa problemas de tamaño)
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                // Composición normal
-                this.ctx.globalCompositeOperation = 'source-over';
+        render() {
+            // 1) Limpiar en device pixels
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            
+            // 2) Fijar DPR para dibujar en "mundo" (CSS px)
+            const dpr = window.devicePixelRatio || 1;
+            this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            
+            // 3) Asegurar modo composición normal
+            this.ctx.globalCompositeOperation = 'source-over';
                 
                 // Fondo
                 if (this.bgImage && this.bgImage.complete) {
@@ -3813,8 +3915,10 @@
                 // Burbujas de necesidades (DESACTIVADAS)  
                 // this.drawNeedBubbles();
                 
-                // 🧹 DIBUJAR BURBUJAS DE LIMPIEZA ESPECTACULARES
-                this.drawCleanBubbles();
+                // 🧹 DIBUJAR BURBUJAS EN CAPA OFFSCREEN Y PEGARLA
+                this.drawBubblesLayer();
+                const w = this.viewW(), h = this.viewH();
+                this.ctx.drawImage(this.bubLayer, 0, 0, this.bubLayer.width, this.bubLayer.height, 0, 0, w, h);
                 
                 // 💖 DIBUJAR CORAZONES VOLADORES
                 this.drawFlyers();
@@ -4870,13 +4974,14 @@
                         targetV = {vx: Math.sin(fish.swimPhase) * 6, vy: Math.cos(fish.swimPhase * 1.2) * 3};
                     }
                 }
-                // 🧹 CRISIS SUCIEDAD + comida (come pero lento)
-                else if (inDirt && this.food.length) {
+                // 🧹 CRISIS SUCIEDAD + comida (come pero lento) - SOLO SI TIENE HAMBRE
+                else if (inDirt && this.food.length && this.gameState.needs.hunger > 20) {
                     const best = this.nearestFood();
                     if (best) { // VERIFICAR QUE EXISTE
                         const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 0.6);
                         speedMul = 0.85;
                         targetV = {vx: s.vx, vy: s.vy};
+                        console.log('🧹 Crisis suciedad + comida disponible (con hambre)');
                     }
                 }
                 // 🧹 CRISIS SUCIEDAD sin comida (esquina inferior)
@@ -4913,8 +5018,8 @@
                         this.launchHeartToFun(fish.x, fish.y); // Corazón volador desde el pez
                     }
                 }
-                // 🍎 HAY COMIDA (ir a comer)
-                else if (this.food.length) {
+                // 🍎 HAY COMIDA (ir a comer) - SOLO SI TIENE HAMBRE
+                else if (this.food.length && this.gameState.needs.hunger > 20) {
                     const f = this.nearestFood();
                     if (f) { // VERIFICAR QUE EXISTE
                         const d = this.dist(fish.x, fish.y, f.x, f.y);
@@ -4952,41 +5057,50 @@
                 fish.x += fish.vx * deltaTime;
                 fish.y += fish.vy * deltaTime;
                 
-                // 🚧 LÍMITES MÓVIL - ACCESO A BORDES PARA COMIDA
+                // 🚧 LÍMITES MÓVIL - SEGUROS PARA TODOS LOS DISPOSITIVOS
                 const fishSize = 60; // Tamaño del pez
-                const safePad = 20; // REDUCIDO para que llegue a bordes
+                const fishHalfSize = fishSize / 2; // 30px - radio del pez
                 const W = this.canvas.width;
                 const H = this.canvas.height;
                 
                 // ZONA SEGURA: Header = 70px, Botones = 60px (nuevo compacto)
                 const topLimit = 70 + 30; // Header + más espacio para necesidades
                 const bottomLimit = H - 60 - 30; // MÁS ESPACIO ABAJO para comida
-                const leftLimit = 10; // CASI al borde para comida
-                const rightLimit = W - 10; // CASI al borde para comida
+                const leftLimit = fishHalfSize + 5; // 35px - PEZ NUNCA SE SALE
+                const rightLimit = W - fishHalfSize - 5; // W-35px - PEZ NUNCA SE SALE
                 
                 // LÍMITES HORIZONTALES
                 if (fish.x < leftLimit) { 
                     fish.x = leftLimit; 
                     fish.vx = Math.abs(fish.vx) * 0.8; // Rebote suave hacia adentro
+                    console.log(`🚧 LÍMITE IZQUIERDO: Pez reposicionado a x=${leftLimit}`);
                 }
                 if (fish.x > rightLimit) { 
                     fish.x = rightLimit; 
                     fish.vx = -Math.abs(fish.vx) * 0.8; // Rebote suave hacia adentro
+                    console.log(`🚧 LÍMITE DERECHO: Pez reposicionado a x=${rightLimit}`);
                 }
                 
                 // LÍMITES VERTICALES
                 if (fish.y < topLimit) { 
                     fish.y = topLimit; 
                     fish.vy = Math.abs(fish.vy) * 0.8; // Rebote suave hacia abajo
+                    console.log(`🚧 LÍMITE SUPERIOR: Pez reposicionado a y=${topLimit}`);
                 }
                 if (fish.y > bottomLimit) { 
                     fish.y = bottomLimit; 
                     fish.vy = -Math.abs(fish.vy) * 0.8; // Rebote suave hacia arriba
+                    console.log(`🚧 LÍMITE INFERIOR: Pez reposicionado a y=${bottomLimit}`);
                 }
                 
                 // 🔄 ORIENTACIÓN (cambiar facing solo con movimiento significativo)
                 if (Math.abs(fish.vx) > 2) {
                     fish.facing = fish.vx > 0 ? 1 : -1;
+                }
+                
+                // 📊 DEBUG POSICIÓN (cada 3 segundos aprox)
+                if (Math.random() < 0.005) {
+                    console.log(`🐟 POSICIÓN: x=${fish.x.toFixed(1)}, y=${fish.y.toFixed(1)} | Límites: L=${leftLimit}, R=${rightLimit}, T=${topLimit}, B=${bottomLimit} | Canvas: ${W}x${H}`);
                 }
                 
                 // Actualizar posición Lottie
@@ -6013,11 +6127,16 @@
                 }
                 
                 // Verificar necesidades BASADAS EN LOS VALORES REALES
-                const needsFood = this.gameState.needs.hunger > 50; // Si hambre > 50%, activar botón
-                const needsCleaning = this.gameState.needs.dirt > 20; // Si suciedad > 20%, activar botón  
+                const needsFood = this.gameState.needs.hunger > 20; // Si hambre > 20%, activar botón (AJUSTADO)
+                const needsCleaning = true; // LIMPIEZA SIEMPRE HABILITADA (como sugieres)  
                 const needsMedicine = this.gameState.lastMedicine && (currentTime - this.gameState.lastMedicine) > medicineThreshold;
                 
                 // Actualizar botones (MEDICINA ELIMINADA)
+                console.log('🔘 BOTONES DEBUG:', 
+                    'Hambre:', this.gameState.needs.hunger.toFixed(1) + '% →', 
+                    'needsFood:', needsFood,
+                    'Suciedad:', this.gameState.needs.dirt.toFixed(1) + '% →',
+                    'needsCleaning:', needsCleaning);
                 this.toggleButton('feedBtn', needsFood);
                 this.toggleButton('cleanBtn', needsCleaning);
                 // this.toggleButton('medicineBtn', needsMedicine); // ELIMINADO
@@ -6026,10 +6145,16 @@
             // 🔘 HABILITAR/DESHABILITAR BOTÓN
             toggleButton(buttonId, enabled) {
                 const button = document.getElementById(buttonId);
-                if (!button) return;
+                if (!button) {
+                    console.log(`❌ toggleButton: Botón ${buttonId} NO ENCONTRADO`);
+                    return;
+                }
+                
+                console.log(`🔘 toggleButton: ${buttonId} → ${enabled ? 'HABILITADO' : 'DESHABILITADO'}`);
                 
                 if (enabled) {
                     button.classList.remove('disabled');
+                    console.log(`✅ ${buttonId}: Clase 'disabled' REMOVIDA`);
                     button.onclick = () => {
                         switch(buttonId) {
                             case 'feedBtn': this.dropFood(); break; // USAR SISTEMA NUEVO
@@ -6039,6 +6164,7 @@
                     };
                 } else {
                     button.classList.add('disabled');
+                    console.log(`❌ ${buttonId}: Clase 'disabled' AÑADIDA`);
                     button.onclick = () => {
                         console.log(`❌ ${buttonId}: El pez no necesita esto ahora`);
                     };
@@ -6913,7 +7039,7 @@
                     this.startEggAppearanceAnimation();
                     
                     console.log('🥚 ¡Huevo + cronómetro iniciados!');
-                }, 2200);
+                }, 800); // MUCHO MÁS RÁPIDO (era 2200ms)
                 
                 // PASO 3: Desactivar efectos gradualmente (6s total)
                 setTimeout(() => {
@@ -8252,20 +8378,19 @@ Comida premium y de cumpleaños
                     const baseX = (i + 0.5) * (W / vents) + (Math.random() - 0.5) * 8;
                     
                     for (let k = 0; k < perVent; k++) {
-                        const vy = 150 + Math.random() * 100; // Velocidad más lenta para debug
-                        const y0 = H - 5; // MÁS ADENTRO del canvas
-                        const dur = (H + 50) / vy; // Duración más larga
+                        const vy = 260 + Math.random() * 120;       // px/s reales
+                        const y0 = H - 1.5 + Math.random() * 0.5;   // pegadas al borde inferior
+                        const dur = (H + 24) / vy;                 // tiempo hasta salir
                         const x0 = this.clamp(baseX + (Math.random() - 0.5) * 6, 2, W - 2);
                         
                         this.cleanBubbles.push({
-                            x: x0, y: y0, x0: x0, y0: y0, // Posición inicial
+                            x: x0, y: y0, x0, y0,
                             r: 1.5 + Math.random() * 2.8,
-                            t: 0, dur: dur, // Tiempo paramétrico
+                            vy, t: 0, dur, age: 0,
                             wob: Math.random() * Math.PI * 2,
                             wobSpd: 1.5 + Math.random() * 1.2,
                             wobAmp: 6 + Math.random() * 10,
-                            from: "clean",
-                            _kick: false // Micro-empujón primer frame
+                            from: 'clean'
                         });
                     }
                 }
@@ -8297,27 +8422,27 @@ Comida premium y de cumpleaños
                 }
                 
                 // 🎯 ACTUALIZAR BURBUJAS PARAMÉTRICAS (SIN y -= vy*dt)
+                // 🎯 MOVIMIENTO PARAMÉTRICO (CHATGPT VERSION)
+                for (const b of this.cleanBubbles) {
+                    if (!b._kick) { b._kick = true; b.t += 0.016; }  // empujón primer frame
+                    b.t += deltaTime;
+                    b.age = (b.age || 0) + deltaTime;
+                    const p = Math.min(1, b.t / b.dur);
+                    b.y = b.y0 - p * (this.viewH() + 24); // TRAYECTORIA PARAMÉTRICA
+                    b.x = b.x0 + Math.sin(this.gameTime * b.wobSpd + b.wob) * b.wobAmp;
+                }
+                
+                // Purga por fin de vida o seguridad
                 for (let i = this.cleanBubbles.length - 1; i >= 0; i--) {
                     const b = this.cleanBubbles[i];
-                    
-                    // Micro-empujón primer frame
-                    if (!b._kick) { 
-                        b._kick = true; 
-                        b.t += 0.016; 
-                    }
-                    
-                    b.t += deltaTime;
-                    const p = Math.min(1, b.t / b.dur);
-                    
-                    // 🎯 TRAYECTORIA PARAMÉTRICA: Sin parones ni saltos
-                    b.y = b.y0 - p * (this.viewH() + 24);
-                    b.x = b.x0 + Math.sin(this.gameTime * b.wobSpd + b.wob) * b.wobAmp;
-                    
-                    // Eliminar cuando termine O salga de pantalla
-                    if (b.t >= b.dur || b.y < -50) {
+                    if (b.t >= b.dur || b.age > 10) {
                         this.cleanBubbles.splice(i, 1);
-                        continue;
                     }
+                }
+                
+                // Si ya no quedan burbujas, garantizar suciedad = 0
+                if (!this.cleaningActive && this.gameState.needs.dirt > 0 && this.cleanBubbles.length === 0) {
+                    this.gameState.needs.dirt = 0;
                 }
             }
             
@@ -8609,8 +8734,63 @@ Comida premium y de cumpleaños
             }
             
             // 🎯 VIEW HELPERS - COORDENADAS SIMPLES 
-            viewW() { return this.canvas.width; }
-            viewH() { return this.canvas.height; }
+        // 🌍 TAMAÑO "MUNDO" EN CSS PX (FIX DPR)
+        viewW() { return this.canvas.width / (window.devicePixelRatio || 1); }
+        viewH() { return this.canvas.height / (window.devicePixelRatio || 1); }
+        
+        // 🫧 GESTIÓN CAPA OFFSCREEN
+        ensureBubLayer() {
+            if (!this.bubLayer) {
+                this.bubLayer = document.createElement('canvas');
+                this.bubCtx = this.bubLayer.getContext('2d');
+            }
+            this.resizeBubLayer();
+        }
+        
+        resizeBubLayer() {
+            if (!this.bubLayer) return;
+            const dpr = window.devicePixelRatio || 1;
+            const w = this.viewW(), h = this.viewH();
+            this.bubLayer.width = Math.max(1, Math.floor(w * dpr));
+            this.bubLayer.height = Math.max(1, Math.floor(h * dpr));
+            this.bubLayer.style.width = w + 'px';
+            this.bubLayer.style.height = h + 'px';
+        }
+        
+        // 🫧 DIBUJAR BURBUJAS EN CAPA OFFSCREEN
+        drawBubblesLayer() {
+            this.ensureBubLayer();
+            const dpr = window.devicePixelRatio || 1;
+            
+            // Limpiar offscreen en device px y fijar su DPR
+            this.bubCtx.setTransform(1, 0, 0, 1, 0, 0);
+            this.bubCtx.clearRect(0, 0, this.bubLayer.width, this.bubLayer.height);
+            this.bubCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            
+            // Tiny bubbles (respiración)
+            for (const b of this.tinyBubbles) {
+                this.bubCtx.globalAlpha = Math.max(0.2, b.a || 0.8);
+                this.bubCtx.beginPath(); 
+                this.bubCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                this.bubCtx.fillStyle = '#e8fbff'; 
+                this.bubCtx.fill();
+                this.bubCtx.lineWidth = 0.7; 
+                this.bubCtx.strokeStyle = 'rgba(255,255,255,0.8)'; 
+                this.bubCtx.stroke();
+            }
+            
+            // Limpieza
+            for (const b of this.cleanBubbles) {
+                this.bubCtx.globalAlpha = 0.95;
+                this.bubCtx.beginPath(); 
+                this.bubCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                this.bubCtx.fillStyle = '#dff7ff'; 
+                this.bubCtx.fill();
+                this.bubCtx.lineWidth = 0.9; 
+                this.bubCtx.strokeStyle = 'rgba(255,255,255,0.75)'; 
+                this.bubCtx.stroke();
+            }
+        }
             
             // 🔧 FUNCIONES QUE FALTAN PARA EL SISTEMA REALISTA
             updateAutoNeeds(deltaTime) {
