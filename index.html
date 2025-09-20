@@ -1079,26 +1079,23 @@
             background: linear-gradient(90deg, #5ce1e6, #9be7ff);
         }
         
-        /* 📊 BARRA DE NECESIDADES DEBAJO DE CABECERA */
+        /* 📊 BARRA DE NECESIDADES COMPACTA DEBAJO DE CABECERA */
         .needs-header-bar {
             background: linear-gradient(135deg, rgba(0, 80, 120, 0.9), rgba(0, 120, 180, 0.9)) !important;
             backdrop-filter: blur(10px);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 12px 20px;
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 15px;
+            display: none; /* OCULTA POR DEFECTO - SOLO VISIBLE CON PEZ */
             justify-content: center;
             align-items: center;
-            gap: 30px;
-            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.5);
+            gap: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             z-index: 999;
             position: fixed;
             top: 70px;
             left: 0;
             right: 0;
-            height: 50px;
+            height: 35px; /* MÁS COMPACTA */
         }
         
         .need-compact {
@@ -3419,12 +3416,12 @@
             setupCanvas() {
                 const resize = () => {
                     this.canvas.width = window.innerWidth;
-                    // Ajustar altura para las barras de necesidades (70px header + 50px barras = 120px)
-                    this.canvas.height = window.innerHeight - 120; // Espacio para header + barras
+                    // Ajustar altura para las barras de necesidades (70px header + 35px barras = 105px)
+                    this.canvas.height = window.innerHeight - 105; // Espacio para header + barras compactas
                     
                     // Posicionar canvas debajo de las barras
                     this.canvas.style.position = 'fixed';
-                    this.canvas.style.top = '120px';
+                    this.canvas.style.top = '105px';
                     this.canvas.style.left = '0';
                     this.canvas.style.right = '0';
                     this.canvas.style.bottom = '90px'; // Espacio para botones
@@ -4620,17 +4617,24 @@
                 
                 console.log('🍎 Pez nació con hambre - Crisis activada');
                 
+                // 📊 MOSTRAR BARRAS DE NECESIDADES CUANDO NACE EL PEZ
+                const needsBar = document.getElementById('needsHeaderBar');
+                if (needsBar) {
+                    needsBar.style.display = 'flex';
+                    console.log('📊 Barras de necesidades activadas');
+                }
+                
                 // Bonus de bienvenida
                 this.gameState.bubbles += 5; // 5 burbujas de regalo por nacer
                 this.gameState.stars += 1;   // 1 estrella de regalo
                 
-                // 🎆 EFECTOS VISUALES DE NACIMIENTO
-                setTimeout(() => {
-                    this.showRewardEffect('bubbles', 5);
-                    setTimeout(() => {
-                        this.showRewardEffect('stars', 1);
-                    }, 1000);
-                }, 2000);
+                // 🎆 EFECTOS VISUALES DE NACIMIENTO (DESACTIVADOS - ICONOS SOBRAN)
+                // setTimeout(() => {
+                //     this.showRewardEffect('bubbles', 5);
+                //     setTimeout(() => {
+                //         this.showRewardEffect('stars', 1);
+                //     }, 1000);
+                // }, 2000);
                 
                 console.log('🐠 ¡PEZ LOTTIE NACIDO! +5 🫧 +1 ⭐ de regalo');
                 this.updateUI();
