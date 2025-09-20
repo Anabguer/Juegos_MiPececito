@@ -41,7 +41,7 @@
           --fish-baby-size: 46px;
           --fish-young-size: 52px;
           --fish-adult-size: 60px;
-          --egg-size: 120px; /* CASI EL DOBLE (era 64px) */
+          --egg-size: 240px; /* EL DOBLE DE GRANDE (era 120px) */
           --pellet-size: 16px;
           --star-size: 32px;
           --transition-fast: 0.15s ease;
@@ -2941,6 +2941,9 @@
                 const modal = document.getElementById('eggPlacementModal');
                 modal.style.display = 'none';
                 
+                // RESETEAR FLAG para evitar bucles futuros
+                if (game) game.eggModalShown = false;
+                
                 // Iniciar colocación del huevo
                 if (game && game.startEggPlacement) {
                     game.startEggPlacement();
@@ -3404,6 +3407,9 @@
                     album: [],
                     lastEventTime: Date.now()
                 };
+                
+                // 🚫 CONTROL DE MODALES (evitar bucles)
+                this.eggModalShown = false; // Para evitar bucle infinito
                 
                 // Sistema de huevo
                 this.egg = {
@@ -8445,11 +8451,13 @@ Comida premium y de cumpleaños
                     return;
                 }
                 
-                // Solo mostrar si no está ya visible
+                // Solo mostrar si no está ya visible Y no se ha mostrado antes
                 if (modal.style.display === 'flex') return;
+                if (this.eggModalShown) return; // EVITAR BUCLE
                 
                 modal.style.display = 'flex';
-                console.log('🥚 Modal de colocación de huevo mostrada');
+                this.eggModalShown = true; // MARCAR COMO MOSTRADA
+                console.log('🥚 Modal de colocación de huevo mostrada (solo una vez)');
             }
             
             // 🍎 ACTUALIZAR Y DIBUJAR LABELS ("Ñam", etc.)
