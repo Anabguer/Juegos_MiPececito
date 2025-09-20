@@ -8618,8 +8618,8 @@ Comida premium y de cumpleaños
             
             // 🫧 EMITIR BURBUJAS PARAMÉTRICAS (SOLUCIÓN DPR)
             emitCleanBubbles() {
-                const W = this.viewW(); // CSS PX
-                const H = this.viewH(); // CSS PX
+                const W = this.canvas.width; // CORREGIDO: usar canvas.width directamente
+                const H = this.canvas.height; // CORREGIDO: usar canvas.height directamente
                 const vents = Math.max(16, Math.floor(W/24)); // Respiraderos
                 const perVent = 2; // Burbujas por respiradero por frame
                 
@@ -8639,7 +8639,8 @@ Comida premium y de cumpleaños
                             life: 3 + Math.random() * 2, // 3-5 segundos de vida
                             wobble: Math.random() * 6.28,
                             opacity: 0.7 + Math.random() * 0.3,
-                            color: `hsla(${190 + Math.random() * 40}, 85%, 88%, ${0.6 + Math.random() * 0.4})`
+                            color: `hsla(${190 + Math.random() * 40}, 85%, 88%, ${0.6 + Math.random() * 0.4})`,
+                            from: 'clean' // IDENTIFICADOR PARA DISTINGUIR DE OTRAS BURBUJAS
                         });
                     }
                 }
