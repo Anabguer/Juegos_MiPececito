@@ -2499,7 +2499,7 @@
         </button>
         <button class="menu-btn" id="resetButton" title="Cuidar otro pececito">
             <div class="btn-icon">
-                <img src="./images/ui/badge_calavera.png" alt="Reset" class="menu-icon">
+                <img src="./images/ui/badge_caravera.png" alt="Reset" class="menu-icon">
             </div>
         </button>
     </div>
@@ -3412,12 +3412,22 @@
             setupCanvas() {
                 const resize = () => {
                     this.canvas.width = window.innerWidth;
-                    // Ajustar altura para las barras de necesidades (70px header + 35px barras = 105px)
-                    this.canvas.height = window.innerHeight - 105; // Espacio para header + barras compactas
                     
-                    // Posicionar canvas debajo de las barras
+                    // AJUSTAR DINÁMICAMENTE SEGÚN SI HAY PEZ O HUEVO
+                    const needsBar = document.getElementById('needsHeaderBar');
+                    const hasNeedsBar = needsBar && needsBar.style.display !== 'none';
+                    
+                    if (hasNeedsBar) {
+                        // CON BARRAS: 70px header + 35px barras = 105px
+                        this.canvas.height = window.innerHeight - 105;
+                        this.canvas.style.top = '105px';
+                    } else {
+                        // SIN BARRAS: Solo 70px header
+                        this.canvas.height = window.innerHeight - 70;
+                        this.canvas.style.top = '70px';
+                    }
+                    
                     this.canvas.style.position = 'fixed';
-                    this.canvas.style.top = '105px';
                     this.canvas.style.left = '0';
                     this.canvas.style.right = '0';
                     this.canvas.style.bottom = '90px'; // Espacio para botones
@@ -4655,7 +4665,8 @@
                 const needsBar = document.getElementById('needsHeaderBar');
                 if (needsBar) {
                     needsBar.style.display = 'flex';
-                    console.log('📊 Barras de necesidades activadas');
+                    this.setupCanvas(); // REAJUSTAR CANVAS CON BARRAS
+                    console.log('📊 Barras de necesidades activadas + Canvas reajustado');
                 }
                 
                 // Bonus de bienvenida
@@ -7997,16 +8008,20 @@ Comida premium y de cumpleaños
                 const needsBar = document.getElementById('needsHeaderBar');
                 if (needsBar) {
                     needsBar.style.display = 'none';
-                    console.log('📊 Barras ocultas con huevo');
+                    this.setupCanvas(); // REAJUSTAR CANVAS SIN BARRAS
+                    console.log('📊 Barras ocultas con huevo + Canvas reajustado');
                 }
                 
-                // 🎆 BURBUJITAS BLANCAS PARA EL HUEVO (EFECTO QUE QUERÍAS)
+                // 🎆 BURBUJITAS BLANCAS PRIMERO, LUEGO HUEVO
                 this.createEggBubbles();
-                this.egg.x = x || this.canvas.width / 2;
-                this.egg.y = y || this.canvas.height * 0.6;
                 
-                // 🎆 SOLO ANIMACIÓN DE APARICIÓN DEL HUEVO (efectos ya creados antes)
-                this.startEggAppearanceAnimation();
+                // ESPERAR 1 SEGUNDO PARA QUE SE VEAN LAS BURBUJAS PRIMERO
+                setTimeout(() => {
+                    this.egg.x = x || this.canvas.width / 2;
+                    this.egg.y = y || this.canvas.height * 0.6;
+                    this.startEggAppearanceAnimation();
+                    console.log('🥚 Huevo aparece DESPUÉS de las burbujas');
+                }, 1000);
                 
                 this.saveGame(); // Guardar al colocar huevo
                 console.log(`🥚 Huevo colocado - Stage cambiado a 'egg'`);
