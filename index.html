@@ -5346,7 +5346,7 @@
                 
                 // ZONA SEGURA: Header = 70px + Necesidades = 35px, Botones = 60px
                 const topLimit = 70 + 35 + 20; // Header + barra necesidades + margen = 125px
-                const bottomLimit = H - 60 - 50; // Más espacio para alcanzar comida en el fondo
+                const bottomLimit = H - 60 - 100; // MUCHO más espacio - pez puede bajar hasta 160px del fondo
                 const leftLimit = fishHalfSize + 15; // 55px - MÁS MARGEN IZQUIERDO
                 const rightLimit = W - fishHalfSize - 15; // W-55px - MÁS MARGEN DERECHO
                 
@@ -5372,9 +5372,12 @@
                     }
                 }
                 if (fish.y > bottomLimit) { 
-                    fish.y = bottomLimit; 
+                    fish.y = bottomLimit - 5; // -5px de margen para evitar bucles
                     fish.vy = -Math.abs(fish.vy) * 0.8; // Rebote suave hacia arriba
-                    console.log(`🚧 LÍMITE INFERIOR: Pez reposicionado a y=${bottomLimit}`);
+                    // Reducir logs para evitar spam
+                    if (Math.random() < 0.005) {
+                        console.log(`🚧 LÍMITE INFERIOR: Pez reposicionado a y=${bottomLimit - 5}`);
+                    }
                 }
                 
                 // 🔄 ORIENTACIÓN (cambiar facing solo con movimiento significativo)
@@ -8811,7 +8814,7 @@ Comida premium y de cumpleaños
                         f.x += f.vx * deltaTime;
                         f.vx *= drag;
                 // LÍMITE MÁS ALTO para que el pez pueda alcanzar la comida
-                const bottomLimit = h - 180; // 180px desde abajo (más alto para que el pez alcance)
+                const bottomLimit = h - 200; // 200px desde abajo - MUCHO más alto para alcanzar comida
                         if (f.y > bottomLimit) {
                             f.y = bottomLimit;
                             f.vy = 0;
