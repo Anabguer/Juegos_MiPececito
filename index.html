@@ -3739,6 +3739,9 @@
                 // 🫧 BURBUJITAS SUTILES DEL AGUA (AMBIENTE)
                 this.drawAmbientBubbles();
                 
+                // 🍎 DIBUJAR COMIDA ANTES DEL PEZ (COMO DICE CHAT)
+                this.drawFood();
+                
                 // Burbujas de fondo (sistema original - DESACTIVADO)
                 // this.drawBackgroundBubbles();
                 
@@ -3775,11 +3778,11 @@
                     this.updateLottiePosition();
                 }
                 
-                // Partículas de comida
-                this.drawFoodParticles();
+                // Partículas de comida (DESACTIVADO - CONFLICTO)
+                // this.drawFoodParticles();
                 
-                // Comida cayendo
-                this.drawFallingFood();
+                // Comida cayendo (DESACTIVADO - CONFLICTO)  
+                // this.drawFallingFood();
                 
                 // Burbujas de limpieza
                 this.drawCleaningBubbles();
@@ -3799,8 +3802,7 @@
                 // 💖 DIBUJAR CORAZONES VOLADORES
                 this.drawFlyers();
                 
-                // 🍎 DIBUJAR COMIDA DEL DOCUMENTO
-                this.drawFood();
+                // 🍎 COMIDA YA SE DIBUJA ANTES DEL PEZ (LÍNEA 3743)
             }
             
             // 🖌️ MÉTODOS DE RENDERIZADO
@@ -5475,11 +5477,10 @@
                 });
             }
             
-            // 🍽️ ALIMENTAR DESDE BOTÓN (COMIDA CAYENDO)
+            // 🍽️ ALIMENTAR DESDE BOTÓN (SISTEMA ANTIGUO - DESACTIVADO)
             startFeeding() {
-                if (!this.fish) return;
-                
-                console.log('🍽️ Iniciando alimentación - Comida cayendo desde arriba');
+                console.log('🍽️ startFeeding() DESACTIVADO - Usar dropFood() en su lugar');
+                return;
                 
                 // Crear 3 bolitas con MEJOR ESPACIADO
                 setTimeout(() => {
@@ -5556,14 +5557,15 @@
                     size: 3 + Math.random() * 3
                 };
                 
-                // Añadir a array de partículas (si no existe, crear)
-                if (!this.foodParticles) this.foodParticles = [];
-                this.foodParticles.push(particle);
+                // Añadir a array de partículas (DESACTIVADO - SISTEMA ANTIGUO)
+                // if (!this.foodParticles) this.foodParticles = [];
+                // this.foodParticles.push(particle);
             }
             
             // 🍖 CREAR COMIDA CON POSICIONES ESTRATÉGICAS
             createFallingFood(foodNumber) {
-                if (!this.fallingFood) this.fallingFood = [];
+                // SISTEMA ANTIGUO - DESACTIVADO
+                return;
                 
                 let startX;
                 if (this.fish) {
@@ -6016,7 +6018,7 @@
                     button.classList.remove('disabled');
                     button.onclick = () => {
                         switch(buttonId) {
-                            case 'feedBtn': this.startFeeding(); break;
+                            case 'feedBtn': this.dropFood(); break; // USAR SISTEMA NUEVO
                             case 'cleanBtn': this.startCleaning(); break;
                             // case 'medicineBtn': this.giveMedicine(); break; // ELIMINADO
                         }
