@@ -1081,15 +1081,19 @@
         
         /* 📊 BARRA DE NECESIDADES EN HEADER */
         .needs-header-bar {
-            background: linear-gradient(135deg, rgba(0, 50, 100, 0.8), rgba(0, 100, 150, 0.8));
+            background: linear-gradient(135deg, rgba(0, 50, 100, 0.9), rgba(0, 100, 150, 0.9)) !important;
             backdrop-filter: blur(10px);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            padding: 8px 20px;
-            display: flex;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
             justify-content: center;
             align-items: center;
             gap: 25px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+            z-index: 1001;
+            position: relative;
         }
         
         .need-compact {
@@ -3550,16 +3554,16 @@
                     }
                 }
                 
-                // Actualizar burbujas de necesidades
-                for (let i = this.needBubbles.length - 1; i >= 0; i--) {
-                    const bubble = this.needBubbles[i];
-                    bubble.life -= deltaTime;
-                    bubble.y += Math.sin(bubble.life * 3) * 10 * deltaTime;
-                    
-                    if (bubble.life <= 0) {
-                        this.needBubbles.splice(i, 1);
-                    }
-                }
+                // Actualizar burbujas de necesidades (DESACTIVADO - ICONOS SOBRAN)
+                // for (let i = this.needBubbles.length - 1; i >= 0; i--) {
+                //     const bubble = this.needBubbles[i];
+                //     bubble.life -= deltaTime;
+                //     bubble.y += Math.sin(bubble.life * 3) * 10 * deltaTime;
+                //     
+                //     if (bubble.life <= 0) {
+                //         this.needBubbles.splice(i, 1);
+                //     }
+                // }
             }
             
             render() {
