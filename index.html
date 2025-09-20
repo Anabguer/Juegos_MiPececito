@@ -8234,6 +8234,15 @@ Comida premium y de cumpleaños
             }
             
             updateFood(deltaTime) {
+                if (!this.food) {
+                    console.log('🍎 updateFood: Array food no existe');
+                    return;
+                }
+                
+                if (this.food.length > 0) {
+                    console.log('🍎 updateFood: Actualizando', this.food.length, 'pellets');
+                }
+                
                 const h = this.canvas.height;
                 const drag = 0.99;
                 
@@ -8288,8 +8297,18 @@ Comida premium y de cumpleaños
             }
             
             drawFood() {
+                if (!this.food || this.food.length === 0) {
+                    // console.log('🍎 drawFood: No hay comida que dibujar');
+                    return;
+                }
+                
+                console.log('🍎 drawFood: Dibujando', this.food.length, 'pellets');
+                
                 this.ctx.save();
-                for (const f of this.food) {
+                for (let i = 0; i < this.food.length; i++) {
+                    const f = this.food[i];
+                    console.log(`🍎 Dibujando pellet ${i}:`, f.x, f.y, f.r);
+                    
                     this.ctx.beginPath();
                     this.ctx.arc(f.x, f.y, f.r || 3, 0, Math.PI * 2);
                     this.ctx.fillStyle = f.colorFill || '#ffd166';
