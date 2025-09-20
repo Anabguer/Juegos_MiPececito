@@ -4630,6 +4630,7 @@
                 
                 // 🎆 EFECTOS VISUALES DE NACIMIENTO - SOLO BURBUJAS CHULAS (SIN ICONOS)
                 setTimeout(() => {
+                    this.explosionHappened = false; // RESETEAR FLAG PARA QUE FUNCIONE
                     this.createExplosionBubbles(); // ESTAS SON LAS BURBUJAS CHULAS
                     // this.showRewardEffect('bubbles', 5); // ESTAS TIENEN ICONOS - DESACTIVADAS
                     // setTimeout(() => {
