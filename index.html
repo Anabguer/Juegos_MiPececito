@@ -41,7 +41,7 @@
           --fish-baby-size: 46px;
           --fish-young-size: 52px;
           --fish-adult-size: 60px;
-          --egg-size: 160px; /* TAMAÑO PERFECTO (ni muy grande ni pequeño) */
+          --egg-size: 100px; /* TAMAÑO MÓVIL (era 160px muy grande) */
           --pellet-size: 16px;
           --star-size: 32px;
           --transition-fast: 0.15s ease;
@@ -3601,15 +3601,10 @@
             }
             
             render() {
-                // 🎯 DPR FIX: Limpiar con identidad en píxeles físicos
-                this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+                // Limpiar canvas (SIN DPR fix que causa problemas de tamaño)
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 
-                // 🎯 DPR FIX: Re-aplicar DPR para dibujar en coordenadas "mundo" (CSS px)
-                const dpr = window.devicePixelRatio || 1;
-                this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                
-                // 🎯 DPR FIX: Asegurar modo de composición por defecto
+                // Composición normal
                 this.ctx.globalCompositeOperation = 'source-over';
                 
                 // Fondo
@@ -4051,7 +4046,7 @@
                 
                 // Countdown principal
                 this.ctx.fillStyle = '#fff';
-                this.ctx.font = 'bold 24px system-ui';
+                this.ctx.font = 'bold 18px system-ui'; // MÁS PEQUEÑO PARA MÓVIL
                 
                 let timeText;
                 if (hours > 0) {
@@ -6031,7 +6026,7 @@
                 
                 // Verificar necesidades BASADAS EN LOS VALORES REALES
                 const needsFood = this.gameState.needs.hunger > 50; // Si hambre > 50%, activar botón
-                const needsCleaning = this.gameState.needs.dirt > 50; // Si suciedad > 50%, activar botón  
+                const needsCleaning = this.gameState.needs.dirt > 30; // Si suciedad > 30%, activar botón  
                 const needsMedicine = this.gameState.lastMedicine && (currentTime - this.gameState.lastMedicine) > medicineThreshold;
                 
                 // Actualizar botones (MEDICINA ELIMINADA)
@@ -8269,9 +8264,9 @@ Comida premium y de cumpleaños
                     const baseX = (i + 0.5) * (W / vents) + (Math.random() - 0.5) * 8;
                     
                     for (let k = 0; k < perVent; k++) {
-                        const vy = 260 + Math.random() * 120; // Velocidad real en px/s
-                        const y0 = H - 1.5 + Math.random() * 0.5; // DENTRO del canvas
-                        const dur = (H + 24) / vy; // Tiempo total hasta salir
+                        const vy = 150 + Math.random() * 100; // Velocidad más lenta para debug
+                        const y0 = H - 5; // MÁS ADENTRO del canvas
+                        const dur = (H + 50) / vy; // Duración más larga
                         const x0 = this.clamp(baseX + (Math.random() - 0.5) * 6, 2, W - 2);
                         
                         this.cleanBubbles.push({
@@ -8330,9 +8325,10 @@ Comida premium y de cumpleaños
                     b.y = b.y0 - p * (this.viewH() + 24);
                     b.x = b.x0 + Math.sin(this.gameTime * b.wobSpd + b.wob) * b.wobAmp;
                     
-                    // Eliminar cuando termine
-                    if (b.t >= b.dur) {
+                    // Eliminar cuando termine O salga de pantalla
+                    if (b.t >= b.dur || b.y < -50) {
                         this.cleanBubbles.splice(i, 1);
+                        continue;
                     }
                 }
             }
@@ -8622,9 +8618,9 @@ Comida premium y de cumpleaños
                 this.ctx.restore();
             }
             
-            // 🎯 VIEW HELPERS - COORDENADAS CSS PX (SOLUCIÓN DPR)
-            viewW() { return this.canvas.width / (window.devicePixelRatio || 1); }
-            viewH() { return this.canvas.height / (window.devicePixelRatio || 1); }
+            // 🎯 VIEW HELPERS - COORDENADAS SIMPLES 
+            viewW() { return this.canvas.width; }
+            viewH() { return this.canvas.height; }
             
             // 🔧 FUNCIONES QUE FALTAN PARA EL SISTEMA REALISTA
             updateAutoNeeds(deltaTime) {
