@@ -3601,8 +3601,16 @@
             }
             
             render() {
-                // Limpiar canvas
+                // 🎯 DPR FIX: Limpiar con identidad en píxeles físicos
+                this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 🎯 DPR FIX: Re-aplicar DPR para dibujar en coordenadas "mundo" (CSS px)
+                const dpr = window.devicePixelRatio || 1;
+                this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                
+                // 🎯 DPR FIX: Asegurar modo de composición por defecto
+                this.ctx.globalCompositeOperation = 'source-over';
                 
                 // Fondo
                 if (this.bgImage && this.bgImage.complete) {
@@ -8250,10 +8258,10 @@ Comida premium y de cumpleaños
                 console.log('🧹 Pecera limpiándose con burbujas espectaculares!');
             }
             
-            // 🫧 EMITIR BURBUJAS DE LIMPIEZA (DESDE EL SUELO)
+            // 🫧 EMITIR BURBUJAS PARAMÉTRICAS (SOLUCIÓN DPR)
             emitCleanBubbles() {
-                const W = this.canvas.width;
-                const H = this.canvas.height;
+                const W = this.viewW(); // CSS PX
+                const H = this.viewH(); // CSS PX
                 const vents = Math.max(16, Math.floor(W/24)); // Respiraderos
                 const perVent = 2; // Burbujas por respiradero por frame
                 
@@ -8261,20 +8269,20 @@ Comida premium y de cumpleaños
                     const baseX = (i + 0.5) * (W / vents) + (Math.random() - 0.5) * 8;
                     
                     for (let k = 0; k < perVent; k++) {
-                        const vy = 260 + Math.random() * 120; // Subida rápida
-                        const y0 = H - 1.5 + Math.random() * 0.5; // Nacen del suelo
-                        const dur = (H + 24) / vy; // Duración exacta
+                        const vy = 260 + Math.random() * 120; // Velocidad real en px/s
+                        const y0 = H - 1.5 + Math.random() * 0.5; // DENTRO del canvas
+                        const dur = (H + 24) / vy; // Tiempo total hasta salir
                         const x0 = this.clamp(baseX + (Math.random() - 0.5) * 6, 2, W - 2);
                         
                         this.cleanBubbles.push({
-                            x: x0, y: y0, x0: x0, y0: y0,
+                            x: x0, y: y0, x0: x0, y0: y0, // Posición inicial
                             r: 1.5 + Math.random() * 2.8,
-                            vy: vy,
-                            t: 0, dur: dur,
+                            t: 0, dur: dur, // Tiempo paramétrico
                             wob: Math.random() * Math.PI * 2,
                             wobSpd: 1.5 + Math.random() * 1.2,
                             wobAmp: 6 + Math.random() * 10,
-                            from: "clean"
+                            from: "clean",
+                            _kick: false // Micro-empujón primer frame
                         });
                     }
                 }
@@ -8305,41 +8313,54 @@ Comida premium y de cumpleaños
                     console.log('🧹 ¡Limpieza completada! Suciedad:', this.gameState.needs.dirt);
                 }
                 
-                // Mover burbujas con cinemática paramétrica
+                // 🎯 ACTUALIZAR BURBUJAS PARAMÉTRICAS (SIN y -= vy*dt)
                 for (let i = this.cleanBubbles.length - 1; i >= 0; i--) {
                     const b = this.cleanBubbles[i];
-                    if (b.dur) {
-                        b.t += deltaTime;
-                        const t = b.t / b.dur;
-                        
-                        if (t >= 1) {
-                            this.cleanBubbles.splice(i, 1);
-                            continue;
-                        }
-                        
-                        // Movimiento paramétrico suave
-                        b.y = b.y0 - b.vy * b.t;
-                        b.x = b.x0 + Math.sin(b.wob + b.wobSpd * b.t) * b.wobAmp * t;
+                    
+                    // Micro-empujón primer frame
+                    if (!b._kick) { 
+                        b._kick = true; 
+                        b.t += 0.016; 
+                    }
+                    
+                    b.t += deltaTime;
+                    const p = Math.min(1, b.t / b.dur);
+                    
+                    // 🎯 TRAYECTORIA PARAMÉTRICA: Sin parones ni saltos
+                    b.y = b.y0 - p * (this.viewH() + 24);
+                    b.x = b.x0 + Math.sin(this.gameTime * b.wobSpd + b.wob) * b.wobAmp;
+                    
+                    // Eliminar cuando termine
+                    if (b.t >= b.dur) {
+                        this.cleanBubbles.splice(i, 1);
                     }
                 }
             }
             
-            // 🫧 DIBUJAR BURBUJAS DE LIMPIEZA
+            // 🫧 DIBUJAR BURBUJAS DE LIMPIEZA (COMPOSICIÓN NORMAL)
             drawCleanBubbles() {
                 if (!this.cleanBubbles || this.cleanBubbles.length === 0) return;
                 
                 this.ctx.save();
                 
+                // 🎯 COMPOSICIÓN NORMAL (SIN BLENDS RAROS)
+                this.ctx.globalCompositeOperation = 'source-over';
+                
                 for (const b of this.cleanBubbles) {
-                    const t = b.t / b.dur;
-                    const alpha = Math.sin(Math.PI * t) * 0.7; // Fade in/out
+                    // Alpha constante sin fade complejo
+                    this.ctx.globalAlpha = 0.95;
                     
-                    this.ctx.globalAlpha = alpha;
-                    this.ctx.strokeStyle = 'rgba(200, 220, 255, 0.9)';
-                    this.ctx.lineWidth = 1.6;
-                    
+                    // 🎯 DIBUJO NORMAL: Fill + Stroke
                     this.ctx.beginPath();
-                    this.ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                    this.ctx.arc(b.x, b.y, 2 + Math.random() * 2.5, 0, Math.PI * 2);
+                    
+                    // Fill azul claro
+                    this.ctx.fillStyle = '#dff7ff';
+                    this.ctx.fill();
+                    
+                    // Stroke blanco suave
+                    this.ctx.lineWidth = 0.9;
+                    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
                     this.ctx.stroke();
                 }
                 
@@ -8600,6 +8621,10 @@ Comida premium y de cumpleaños
                 
                 this.ctx.restore();
             }
+            
+            // 🎯 VIEW HELPERS - COORDENADAS CSS PX (SOLUCIÓN DPR)
+            viewW() { return this.canvas.width / (window.devicePixelRatio || 1); }
+            viewH() { return this.canvas.height / (window.devicePixelRatio || 1); }
             
             // 🔧 FUNCIONES QUE FALTAN PARA EL SISTEMA REALISTA
             updateAutoNeeds(deltaTime) {
