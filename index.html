@@ -5196,17 +5196,50 @@
                 let targetV = {vx: 0, vy: 0};
                 let speedMul = 1.0;
                 
+                // 🔥 TURBO DE DEDO (decaimiento)
+                fish.fingerBoostT = Math.max(0, (fish.fingerBoostT || 0) - deltaTime);
+                
                 // 🚨 ESTADOS DE CRISIS
                 const inHunger = this.gameState.crisis.hunger;
                 const inDirt = this.gameState.crisis.dirt;
                 const inBored = this.gameState.crisis.bored;
                 
-                // === DECISIÓN DE MOVIMIENTO (prioridad PEZ F1) ===
+                // === DECISIÓN DE MOVIMIENTO (prioridad DEDO PRIMERO) ===
                 const isDirty = inDirt;
                 const foodExists = this.food.length > 0;
                 
-                // 🏎️ 1) SIEMPRE: si hay comida, perseguir a tope (sucio = más lento)
-                if (foodExists) {
+                // 👆 1) DEDO: prioridad máxima (si no hay hambre grave/aburrido)
+                if (fish.desire && !inHunger && !inBored) {
+                    const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y,
+                                      fish.maxSpeed * (isDirty ? 0.80 : 1.30));
+                    // ⚡ SIN factor 't' por distancia; velocidad completa
+                    targetV = { vx: s.vx, vy: s.vy };
+                    speedMul = 1.0;
+                    // que no "robe" prioridad una celebración previa
+                    fish.happyBurst = 0;
+                    
+                    if (s.dist < 22) {
+                        fish.desire = null;
+                        // 💖 LANZAR CORAZÓN SOLO SI SE SOLICITÓ
+                        if (fish.shouldLaunchHeart) {
+                            this.launchHeartToFun(); // Sin coordenadas - usar posición del pez
+                            fish.shouldLaunchHeart = false;
+                            
+                            // 🔊 SONIDO DE CORAZÓN
+                            if (window.audioManager) {
+                                window.audioManager.playSound('heart');
+                            }
+                            
+                            console.log('💖 ¡Pez llegó al dedo! Lanzando corazón...');
+                        }
+                    }
+                    
+                    if (Math.random() < 0.02) { // Log ocasional
+                        console.log(`👆 DEDO TURBO: ${(fish.maxSpeed * (isDirty ? 0.80 : 1.30)).toFixed(0)}px/s ${isDirty ? '(sucio)' : '(rápido)'}`);
+                    }
+                }
+                // 🏎️ 2) COMIDA: si hay pellets, perseguir (siempre), más lento si está sucio
+                else if (foodExists) {
                     const target = this.nearestFood(); // helper existente
                     if (target) {
                         // velocidad máxima: rápido normal o capado por suciedad
@@ -5222,7 +5255,7 @@
                         }
                     }
                 }
-                // 🎉 2) Si no hay comida pero hay celebración activa → giros (no bloquea persecución)
+                // 🎉 3) CELEBRACIÓN: solo si no hay dedo ni comida
                 else if (fish.happyBurst > 0) {
                     const w = (fish.spinKind === "clean") ? 13.0 : 6.0;
                     const R = (fish.spinKind === "clean") ? 140 : 55;
@@ -5231,7 +5264,7 @@
                     speedMul = (fish.spinKind === "clean") ? 1.8 : 1.25;
                     fish.happyBurst = Math.max(0, fish.happyBurst - (fish.spinKind === "clean" ? 0.6 : 1.6) * deltaTime);
                 }
-                // 🍎 3) Crisis sin comida → esquinas
+                // 🍎 4) CRISIS sin comida/ni dedo → esquinas
                 else if (inHunger) {
                     // Crisis hambre sin comida (esquina superior)
                     const home = {x: 70, y: 70}; // Esquina superior
@@ -5263,28 +5296,6 @@
                         targetV = {vx: s.vx * 0.6, vy: s.vy * 0.6};
                     } else {
                         targetV = {vx: Math.sin(fish.swimPhase) * 7, vy: Math.cos(fish.swimPhase * 1.5) * 3};
-                    }
-                }
-                // 👆 4) Dedo (si no hay crisis)
-                else if (fish.desire) {
-                    const desireSpeed = fish.desireSpeed || fish.maxSpeed; // Usar velocidad rápida si está disponible
-                    const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y, desireSpeed);
-                    targetV = { vx: s.vx, vy: s.vy };
-                    if (s.dist < 22) {
-                        fish.desire = null;
-                        targetV = {vx: 0, vy: 0};
-                        // 💖 LANZAR CORAZÓN SOLO SI SE SOLICITÓ
-                        if (fish.shouldLaunchHeart) {
-                            this.launchHeartToFun(); // Sin coordenadas - usar posición del pez
-                            fish.shouldLaunchHeart = false;
-                            
-                            // 🔊 SONIDO DE CORAZÓN
-                            if (window.audioManager) {
-                                window.audioManager.playSound('heart');
-                            }
-                            
-                            console.log('💖 ¡Pez llegó al dedo! Lanzando corazón...');
-                        }
                     }
                 }
                 // 🏊 MOVIMIENTO LIBRE (vagabundeo natural)
@@ -5524,31 +5535,25 @@
                 }
                 
                 const rect = this.canvas.getBoundingClientRect();
-                const clickX = event.clientX - rect.left;
-                const clickY = event.clientY - rect.top;
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
                 
-                // SISTEMA DEL DEMO: fish.desire con límites
-                this.fish.desire = { 
-                    x: Math.max(30, Math.min(this.canvas.width - 30, clickX)), 
-                    y: Math.max(30, Math.min(this.canvas.height - 30, clickY)) 
+                // 🚨 GUARDACOSTAS: Ignorar dedo en hambre grave/aburrido
+                if (this.gameState.crisis.hunger || this.gameState.crisis.bored) {
+                    console.log('😔 Click ignorado - Pez demasiado triste (hambre grave/aburrido)');
+                    return;
+                }
+                
+                // 👆 DEDO CON COORDENADAS CSS Y TURBO
+                this.fish.desire = {
+                    x: this.clamp(x, 24, this.viewW() - 24),
+                    y: this.clamp(y, 24, this.viewH() - 24)
                 };
-                
-                this.fish.excited = true;
-                
-                // 💖 SISTEMA DE CORAZONES - AUMENTA DIVERSIÓN
-                this.fish.happyBurst = 3; // 3 segundos de felicidad
+                this.fish.fingerBoostT = 1.6;   // turbo temporal de dedo
+                this.fish.returnToBottom = false; // apagar cualquier regreso al fondo
                 this.fish.shouldLaunchHeart = true; // Marcar para lanzar corazón cuando llegue
                 
-                // 🎯 VELOCIDAD RÁPIDA AL DEDO (usar maxSpeed del sistema original)
-                this.fish.desireSpeed = this.fish.maxSpeed * 1.5; // 1.5x la velocidad máxima
-                
-                console.log(`👆 ¡Pez DESIRE hacia el dedo! (${clickX.toFixed(0)}, ${clickY.toFixed(0)}) + 💖 Corazón!`);
-                
-                // Quitar emoción después de llegar
-                setTimeout(() => {
-                    this.fish.excited = false;
-                    this.fish.desireSpeed = null; // Volver a velocidad normal (maxSpeed)
-                }, 3000);
+                console.log(`👆 ¡TURBO AL DEDO! (${x.toFixed(0)}, ${y.toFixed(0)}) - Boost: 1.6s`);
             }
             
             // 💖 LANZAR CORAZÓN QUE AUMENTA DIVERSIÓN
