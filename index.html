@@ -41,7 +41,7 @@
           --fish-baby-size: 46px;
           --fish-young-size: 52px;
           --fish-adult-size: 60px;
-          --egg-size: 150px; /* UN POQUITO MÁS GRANDE (era 130px) */
+            --egg-size: 130px; /* Tamaño ajustado para móvil */
           --pellet-size: 16px;
           --star-size: 32px;
           --transition-fast: 0.15s ease;
@@ -2964,7 +2964,14 @@
                 if (isFirstTime) {
                     // Primera vez: mostrar bienvenida
                     console.log('🪟 Mostrando bienvenida (primera vez)...');
-                    welcomeScreen.style.display = 'flex';
+                    console.log('🪟 welcomeScreen encontrado:', !!welcomeScreen);
+                    if (welcomeScreen) {
+                        welcomeScreen.style.display = 'flex';
+                        welcomeScreen.style.visibility = 'visible';
+                        welcomeScreen.style.opacity = '1';
+                        welcomeScreen.style.zIndex = '9999';
+                        console.log('🪟 Modal forzada a visible');
+                    }
                     setupWelcomeFlow();
                 } else {
                     // Ya tiene pez: mostrar pantalla de carga personalizada
@@ -4316,12 +4323,12 @@
                 
                 // Título más sutil SIN EMOJI
                 this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                this.ctx.font = 'bold 18px system-ui'; // MÁS GRANDE (era 14px)
+                this.ctx.font = 'bold 16px system-ui'; // Reducido para móvil
                 this.ctx.fillText('Nacerá en:', centerX, timerY - 20);
                 
                 // Countdown principal
                 this.ctx.fillStyle = '#fff';
-                this.ctx.font = 'bold 24px system-ui'; // MÁS GRANDE (era 18px)
+                this.ctx.font = 'bold 20px system-ui'; // Reducido para móvil
                 
                 let timeText;
                 if (hours > 0) {
@@ -5229,7 +5236,7 @@
                 
                 // ZONA SEGURA: Header = 70px, Botones = 60px (nuevo compacto)
                 const topLimit = 70 + 30; // Header + más espacio para necesidades
-                const bottomLimit = H - 60 - 30; // MÁS ESPACIO ABAJO para comida
+                const bottomLimit = H - 60 - 50; // Más espacio para alcanzar comida en el fondo
                 const leftLimit = fishHalfSize + 15; // 55px - MÁS MARGEN IZQUIERDO
                 const rightLimit = W - fishHalfSize - 15; // W-55px - MÁS MARGEN DERECHO
                 
@@ -6292,7 +6299,7 @@
                 
                 // Verificar necesidades BASADAS EN LOS VALORES REALES
                 const needsFood = this.gameState.needs.hunger > 20; // Si hambre > 20%, activar botón (AJUSTADO)
-                const needsCleaning = true; // LIMPIEZA SIEMPRE HABILITADA (como sugieres)  
+                const needsCleaning = this.gameState.needs.dirt > 20; // Limpieza cuando suciedad > 20%  
                 const needsMedicine = this.gameState.lastMedicine && (currentTime - this.gameState.lastMedicine) > medicineThreshold;
                 
                 // Actualizar botones (MEDICINA ELIMINADA)
@@ -8679,8 +8686,8 @@ Comida premium y de cumpleaños
                         f.y += f.vy * deltaTime;
                         f.x += f.vx * deltaTime;
                         f.vx *= drag;
-                        // LÍMITE MÁS ALTO para que el pez pueda alcanzar la comida
-                        const bottomLimit = h - 120; // 120px desde abajo (zona del pez)
+                // LÍMITE MÁS ALTO para que el pez pueda alcanzar la comida
+                const bottomLimit = h - 180; // 180px desde abajo (más alto para que el pez alcance)
                         if (f.y > bottomLimit) {
                             f.y = bottomLimit;
                             f.vy = 0;
@@ -8696,7 +8703,7 @@ Comida premium y de cumpleaños
                     if (this.fish && this.dist(this.fish.x, this.fish.y, f.x, f.y) < 22) {
                         this.food.splice(i, 1);
                         this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - 35, 0, 100);
-                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 3, 0, 100); // MENOS SUCIEDAD AL COMER (era +8)
+                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 1.5, 0, 100); // MUCHO MENOS SUCIEDAD AL COMER
                         
                         this.labels.push({
                             x: this.fish.x,
