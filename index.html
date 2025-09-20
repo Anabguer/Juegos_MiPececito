@@ -6467,74 +6467,7 @@
                 }
             }
             
-            // 🧽 LIMPIAR ACUARIO - EFECTO COMPLETO CON BURBUJAS Y TIRABUZONES
-            startCleaning() {
-                console.log('🧽 Limpiando acuario...');
-                
-                // Actualizar stats
-                this.gameState.lastClean = Date.now();
-                this.gameState.cleanliness = Math.min(100, this.gameState.cleanliness + 30);
-                
-                // EFECTO DE LIMPIEZA: Burbujas que rodean al pez
-                this.fish.isCleaning = true;
-                this.fish.cleaningTime = 0;
-                this.fish.cleaningDuration = 5; // 5 segundos de limpieza
-                
-                // Crear MUCHAS burbujas de limpieza
-                this.cleaningBubbles = [];
-                for (let i = 0; i < 60; i++) {
-                    this.createCleaningBubble();
-                }
-                
-                // Más burbujas cada 200ms durante la limpieza
-                this.cleaningInterval = setInterval(() => {
-                    if (this.fish.isCleaning) {
-                        for (let i = 0; i < 8; i++) {
-                            this.createCleaningBubble();
-                        }
-                    }
-                }, 200);
-                
-                // Terminar limpieza después de 5 segundos
-                setTimeout(() => {
-                    this.finishCleaning();
-                }, 5000);
-                
-                console.log('✨ ¡Efecto de limpieza iniciado! Burbujas y tirabuzones');
-            }
-            
-            createCleaningBubble() {
-                if (!this.cleaningBubbles) this.cleaningBubbles = [];
-                
-                // Burbujas que aparecen cerca del pez
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 30 + Math.random() * 100;
-                
-                this.cleaningBubbles.push({
-                    x: this.fish.x + Math.cos(angle) * distance,
-                    y: this.fish.y + Math.sin(angle) * distance,
-                    size: 3 + Math.random() * 8,
-                    vx: (Math.random() - 0.5) * 40,
-                    vy: -20 - Math.random() * 30,
-                    life: 3 + Math.random() * 2,
-                    maxLife: 3 + Math.random() * 2,
-                    sparkle: Math.random() < 0.3
-                });
-            }
-            
-            finishCleaning() {
-                this.fish.isCleaning = false;
-                this.fish.cleaningTime = 0;
-                
-                // Parar creación de nuevas burbujas
-                if (this.cleaningInterval) {
-                    clearInterval(this.cleaningInterval);
-                    this.cleaningInterval = null;
-                }
-                
-                // Las burbujas existentes seguirán hasta desaparecer naturalmente
-                console.log('✨ Limpieza terminada - Acuario brillante');
-            }
+            // 🧽 FUNCIÓN DUPLICADA ELIMINADA - SE USA LA DEL EFECTO ESPECTACULAR
             
             // 🫧 SISTEMA DE BURBUJAS CON ICONOS DE NECESIDADES
             updateNeedBubbles(deltaTime) {
