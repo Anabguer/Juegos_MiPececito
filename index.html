@@ -4840,9 +4840,12 @@
                 // 🍎 CRISIS HAMBRE + comida disponible
                 else if (inHunger && this.food.length) {
                     const best = this.nearestFood();
-                    const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.0);
-                    speedMul = 1.25;
-                    targetV = {vx: s.vx, vy: s.vy};
+                    if (best) { // VERIFICAR QUE EXISTE
+                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.0);
+                        speedMul = 1.25;
+                        targetV = {vx: s.vx, vy: s.vy};
+                        console.log('🍎 Pez persiguiendo comida en:', best.x, best.y);
+                    }
                 }
                 // 🍎 CRISIS HAMBRE sin comida (esquina superior)
                 else if (inHunger) {
@@ -4858,9 +4861,11 @@
                 // 🧹 CRISIS SUCIEDAD + comida (come pero lento)
                 else if (inDirt && this.food.length) {
                     const best = this.nearestFood();
-                    const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 0.6);
-                    speedMul = 0.85;
-                    targetV = {vx: s.vx, vy: s.vy};
+                    if (best) { // VERIFICAR QUE EXISTE
+                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 0.6);
+                        speedMul = 0.85;
+                        targetV = {vx: s.vx, vy: s.vy};
+                    }
                 }
                 // 🧹 CRISIS SUCIEDAD sin comida (esquina inferior)
                 else if (inDirt) {
@@ -4899,10 +4904,13 @@
                 // 🍎 HAY COMIDA (ir a comer)
                 else if (this.food.length) {
                     const f = this.nearestFood();
-                    const d = this.dist(fish.x, fish.y, f.x, f.y);
-                    const s = this.seek(fish.x, fish.y, f.x, f.y, fish.maxSpeed * 0.9);
-                    const t = this.clamp(d / 90, 0.35, 1);
-                    targetV = {vx: s.vx * t, vy: s.vy * t};
+                    if (f) { // VERIFICAR QUE EXISTE
+                        const d = this.dist(fish.x, fish.y, f.x, f.y);
+                        const s = this.seek(fish.x, fish.y, f.x, f.y, fish.maxSpeed * 0.9);
+                        const t = this.clamp(d / 90, 0.35, 1);
+                        targetV = {vx: s.vx * t, vy: s.vy * t};
+                        console.log('🍎 Pez va hacia comida:', f.x, f.y);
+                    }
                 }
                 // 🏊 MOVIMIENTO LIBRE (vagabundeo natural)
                 else {
