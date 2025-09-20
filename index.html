@@ -5018,7 +5018,7 @@
                     facing: 1, // Dirección (-1 izquierda, 1 derecha)
                     baseSpeed: 140, // Velocidad base EXACTA
                     maxSpeed: 300, // Velocidad máxima EXACTA
-                    maxAccel: 900, // Aceleración máxima EXACTA
+                    maxAccel: 1100, // Aceleración máxima MEJORADA (era 900)
                     wanderTimer: 0, // Timer para cambio de dirección
                     wanderDir: {x: 1, y: 0}, // Dirección de vagabundeo
                     swimPhase: 0, // Fase de natación para ondulación
@@ -5201,50 +5201,50 @@
                 const inDirt = this.gameState.crisis.dirt;
                 const inBored = this.gameState.crisis.bored;
                 
-                // 🎉 CELEBRACIÓN (giros de felicidad)
-                if (fish.happyBurst > 0) {
+                // === DECISIÓN DE MOVIMIENTO (prioridad PEZ F1) ===
+                const isDirty = inDirt;
+                const foodExists = this.food.length > 0;
+                
+                // 🏎️ 1) SIEMPRE: si hay comida, perseguir a tope (sucio = más lento)
+                if (foodExists) {
+                    const target = this.nearestFood(); // helper existente
+                    if (target) {
+                        // velocidad máxima: rápido normal o capado por suciedad
+                        const chaseMax = fish.maxSpeed * (isDirty ? 0.60 : 1.30);
+                        const s = this.seek(fish.x, fish.y, target.x, target.y, chaseMax);
+                        
+                        // Nada de "t = clamp(d/90, …)" que frena al acercarte:
+                        targetV = { vx: s.vx, vy: s.vy };
+                        speedMul = 1.0;
+                        
+                        if (Math.random() < 0.02) { // Log ocasional
+                            console.log(`🏎️ PEZ F1: Persiguiendo comida a ${chaseMax.toFixed(0)}px/s ${isDirty ? '(sucio-lento)' : '(turbo)'}`);
+                        }
+                    }
+                }
+                // 🎉 2) Si no hay comida pero hay celebración activa → giros (no bloquea persecución)
+                else if (fish.happyBurst > 0) {
                     const w = (fish.spinKind === "clean") ? 13.0 : 6.0;
                     const R = (fish.spinKind === "clean") ? 140 : 55;
                     const a = this.gameTime * w;
-                    targetV = {vx: Math.cos(a) * R * 0.65, vy: Math.sin(a) * R * 0.65};
+                    targetV = { vx: Math.cos(a) * R * 0.65, vy: Math.sin(a) * R * 0.65 };
                     speedMul = (fish.spinKind === "clean") ? 1.8 : 1.25;
                     fish.happyBurst = Math.max(0, fish.happyBurst - (fish.spinKind === "clean" ? 0.6 : 1.6) * deltaTime);
                 }
-                // 🍎 CRISIS HAMBRE + comida disponible
-                else if (inHunger && this.food.length) {
-                    const best = this.nearestFood();
-                    if (best) { // VERIFICAR QUE EXISTE
-                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.0);
-                        speedMul = 1.25;
-                        targetV = {vx: s.vx, vy: s.vy};
-                        console.log('🍎 Pez persiguiendo comida en:', best.x, best.y);
-                    }
-                }
-                // 🍎 CRISIS HAMBRE sin comida (esquina superior)
+                // 🍎 3) Crisis sin comida → esquinas
                 else if (inHunger) {
+                    // Crisis hambre sin comida (esquina superior)
                     const home = {x: 70, y: 70}; // Esquina superior
                     const s = this.seek(fish.x, fish.y, home.x, home.y, 60);
                     speedMul = 0.5;
                     if (s.dist > 20) {
                         targetV = {vx: s.vx * 0.5, vy: s.vy * 0.5};
-                } else {
+                    } else {
                         targetV = {vx: Math.sin(fish.swimPhase) * 6, vy: Math.cos(fish.swimPhase * 1.2) * 3};
                     }
                 }
-                // 🧹 CRISIS SUCIEDAD + comida (come pero lento) - SOLO SI TIENE HAMBRE
-                else if (inDirt && this.food.length && this.gameState.needs.hunger > 15) { // Bajado de 20 a 15 para consistencia
-                    const best = this.nearestFood();
-                    if (best) { // VERIFICAR QUE EXISTE
-                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 0.6);
-                        speedMul = 0.85;
-                        targetV = {vx: s.vx, vy: s.vy};
-                        if (Math.random() < 0.02) { // Log menos frecuente
-                            console.log('🧹 Crisis suciedad + comida disponible (con hambre)');
-                        }
-                    }
-                }
-                // 🧹 CRISIS SUCIEDAD sin comida (esquina inferior)
                 else if (inDirt) {
+                    // Crisis suciedad sin comida (esquina inferior)
                     const home = {x: this.canvas.width - 70, y: this.canvas.height - 70}; // Esquina inferior
                     const s = this.seek(fish.x, fish.y, home.x, home.y, 70);
                     speedMul = 0.7;
@@ -5254,8 +5254,8 @@
                         targetV = {vx: Math.sin(fish.swimPhase) * 5, vy: Math.cos(fish.swimPhase * 1.2) * 2};
                     }
                 }
-                // 😴 CRISIS ABURRIMIENTO (centro, pasa de clicks)
                 else if (inBored) {
+                    // Crisis aburrimiento (centro, pasa de clicks)
                     const home = {x: this.canvas.width * 0.5, y: this.canvas.height - 70};
                     const s = this.seek(fish.x, fish.y, home.x, home.y, 80);
                     speedMul = 0.9;
@@ -5265,12 +5265,11 @@
                         targetV = {vx: Math.sin(fish.swimPhase) * 7, vy: Math.cos(fish.swimPhase * 1.5) * 3};
                     }
                 }
-                // 👆 CLICK del usuario (ir al dedo) - VELOCIDAD RÁPIDA
+                // 👆 4) Dedo (si no hay crisis)
                 else if (fish.desire) {
                     const desireSpeed = fish.desireSpeed || fish.maxSpeed; // Usar velocidad rápida si está disponible
                     const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y, desireSpeed);
-                    const t = this.clamp(s.dist / 120, 0.25, 1);
-                    targetV = {vx: s.vx * t, vy: s.vy * t};
+                    targetV = { vx: s.vx, vy: s.vy };
                     if (s.dist < 22) {
                         fish.desire = null;
                         targetV = {vx: 0, vy: 0};
@@ -5285,21 +5284,6 @@
                             }
                             
                             console.log('💖 ¡Pez llegó al dedo! Lanzando corazón...');
-                        }
-                    }
-                }
-                // 🍎 HAY COMIDA (ir a comer) - SOLO SI TIENE HAMBRE
-                else if (this.food.length && this.gameState.needs.hunger > 15) { // Bajado de 20 a 15 para más sensibilidad
-                    const f = this.nearestFood();
-                    if (f) { // VERIFICAR QUE EXISTE
-                        const d = this.dist(fish.x, fish.y, f.x, f.y);
-                        const s = this.seek(fish.x, fish.y, f.x, f.y, fish.maxSpeed * 1.1); // Aumentado de 0.9 a 1.1 para más velocidad
-                        const t = this.clamp(d / 90, 0.35, 1);
-                        targetV = {vx: s.vx * t, vy: s.vy * t};
-                        
-                        // Log menos frecuente para evitar spam
-                        if (Math.random() < 0.05) { // Solo 5% de las veces
-                            console.log(`🍎 Pez persigue comida en (${f.x.toFixed(1)}, ${f.y.toFixed(1)}) - Distancia: ${d.toFixed(1)} - Hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
                         }
                     }
                 }
@@ -8819,9 +8803,10 @@ Comida premium y de cumpleaños
                             console.log('🍎 Pez tocó comida pero no tenía hambre - sin efectos');
                         }
                         
-                        if (this.gameState.crisis.hunger) {
-                            this.gameState.needs.hunger = Math.min(this.gameState.needs.hunger, 60);
-                        }
+                        // ⚠️ ELIMINADO: No limitar hambre en crisis para que siga persiguiendo
+                        // if (this.gameState.crisis.hunger) {
+                        //     this.gameState.needs.hunger = Math.min(this.gameState.needs.hunger, 60);
+                        // }
                         
                         this.updateCrisisFlags();
                         this.updateNeedBars();
