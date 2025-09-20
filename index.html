@@ -2592,7 +2592,7 @@
             </div>
             <!-- 🔊 BOTÓN DE VOLUMEN BONITO -->
             <button id="volumeBtn" class="volume-button" title="Controlar sonido">
-                <img id="volumeIcon" src="./images/ui/sonidoon.png" alt="Sonido" class="volume-icon">
+                <img id="volumeIcon" src="./images/ui/sonidoOn.png" alt="Sonido" class="volume-icon">
             </button>
         </div>
     </div>
@@ -9733,7 +9733,7 @@ Comida premium y de cumpleaños
                 const volumeIcon = document.getElementById('volumeIcon');
                 
                 if (volumeBtn && volumeIcon) {
-                    volumeIcon.src = this.isMuted ? './images/ui/sonidooff.png' : './images/ui/sonidoon.png';
+                    volumeIcon.src = this.isMuted ? './images/ui/sonidoOff.png' : './images/ui/sonidoOn.png';
                     volumeBtn.title = this.isMuted ? 'Activar sonido' : 'Silenciar sonido';
                     volumeBtn.classList.toggle('muted', this.isMuted);
                 }
