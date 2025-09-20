@@ -1136,7 +1136,7 @@
         }
         
         .need-fill-mini.dirt {
-            background: linear-gradient(90deg, #4caf50, #ff9800, #8d6e63); /* VERDE→NARANJA→MARRÓN */
+            background: linear-gradient(90deg, #4caf50, #ff9800, #f44336); /* VERDE→NARANJA→ROJO (como hambre) */
         }
         
         .need-fill-mini.fun {
@@ -2472,7 +2472,7 @@
             </div>
         </div>
         
-        <div class="need-compact" title="Suciedad: MÁS VERDE = MÁS SUCIO">
+        <div class="need-compact" title="Suciedad: MÁS ROJO = MÁS SUCIO">
             <img src="./images/ui/barra_limpieza.png" alt="Limpieza" class="need-icon" style="width: 22px; height: 22px;">
             <div class="need-bar-mini">
                 <div class="need-fill-mini dirt" id="dirtBarHeader" style="width: 65%"></div>
@@ -3752,8 +3752,8 @@
                 // 🍎 DIBUJAR COMIDA ANTES DEL PEZ (COMO DICE CHAT)
                 this.drawFood();
                 
-                // Burbujas de fondo (sistema original - DESACTIVADO)
-                // this.drawBackgroundBubbles();
+                // Burbujas de fondo (sistema original - REACTIVADO)
+                this.drawBackgroundBubbles();
                 
                 // Haces de luz ocasionales durante el juego
                 this.drawOccasionalLightRays();
@@ -3818,7 +3818,9 @@
             // 🖌️ MÉTODOS DE RENDERIZADO
             
             drawBackgroundBubbles() {
-                // SISTEMA COPIADO DEL TEST QUE FUNCIONA
+                // SISTEMA SIMPLE Y FUNCIONAL
+                this.ctx.save();
+                
                 for (let i = this.bgBubbles.length - 1; i >= 0; i--) {
                     const bubble = this.bgBubbles[i];
                     
@@ -3897,6 +3899,8 @@
                     // }
                     this.ctx.restore();
                 }
+                
+                this.ctx.restore(); // CERRAR SAVE INICIAL
             }
             
             drawEgg() {
@@ -4535,15 +4539,16 @@
             startHatching() {
                 if (this.gameState.stage !== 'egg') return;
                 
-                console.log('🐣 ¡ECLOSIÓN INICIADA!');
-                this.gameState.stage = 'hatching';
+                console.log('🐣 ¡ECLOSIÓN SIMULTÁNEA!');
+                
+                // CREAR PEZ INMEDIATAMENTE (simultáneo con burbujas)
+                this.createFish();
+                this.gameState.stage = 'baby';
+                
+                // Burbujas de eclosión al mismo tiempo
                 this.createExplosionBubbles();
                 
-                // Crear pez MÁS TEMPRANO - después de 1 segundo
-                setTimeout(() => {
-                    this.createFish();
-                    this.gameState.stage = 'baby';
-                }, 1000); // Reducido de 2000ms a 1000ms
+                console.log('🥚➡️🐟 Huevo desaparece y pez aparece AL MISMO TIEMPO');
             }
             
             createEggBubbles() {
@@ -6017,8 +6022,8 @@
                 }
                 
                 // Verificar necesidades BASADAS EN LOS VALORES REALES
-                const needsFood = this.gameState.needs.hunger > 60; // Si hambre > 60%, activar botón
-                const needsCleaning = this.gameState.needs.dirt > 70; // Si suciedad > 70%, activar botón  
+                const needsFood = this.gameState.needs.hunger > 50; // Si hambre > 50%, activar botón
+                const needsCleaning = this.gameState.needs.dirt > 50; // Si suciedad > 50%, activar botón  
                 const needsMedicine = this.gameState.lastMedicine && (currentTime - this.gameState.lastMedicine) > medicineThreshold;
                 
                 // Actualizar botones (MEDICINA ELIMINADA)
