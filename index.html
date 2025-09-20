@@ -8693,13 +8693,13 @@ Comida premium y de cumpleaños
                         const x0 = this.clamp(baseX + (Math.random() - 0.5) * 6, 2, W - 2);
                         
                         this.cleanBubbles.push({
-                            x: x0, y: y0, x0, y0,
-                            r: 1.5 + Math.random() * 2.8,
-                            vy, t: 0, dur, age: 0,
-                            wob: Math.random() * Math.PI * 2,
-                            wobSpd: 1.5 + Math.random() * 1.2,
-                            wobAmp: 6 + Math.random() * 10,
-                            from: 'clean'
+                            x: x0, 
+                            y: y0,
+                            r: 2 + Math.random() * 3,
+                            life: 3 + Math.random() * 2, // 3-5 segundos de vida
+                            wobble: Math.random() * 6.28,
+                            opacity: 0.7 + Math.random() * 0.3,
+                            color: `hsla(${190 + Math.random() * 40}, 85%, 88%, ${0.6 + Math.random() * 0.4})`
                         });
                     }
                 }
@@ -8730,21 +8730,18 @@ Comida premium y de cumpleaños
                     console.log('🧹 ¡Limpieza completada! Suciedad:', this.gameState.needs.dirt);
                 }
                 
-                // 🎯 ACTUALIZAR BURBUJAS PARAMÉTRICAS (SIN y -= vy*dt)
-                // 🎯 MOVIMIENTO PARAMÉTRICO (CHATGPT VERSION)
+                // 🎯 MOVIMIENTO SIMPLE Y EFECTIVO DE BURBUJAS
                 for (const b of this.cleanBubbles) {
-                    if (!b._kick) { b._kick = true; b.t += 0.016; }  // empujón primer frame
-                    b.t += deltaTime;
-                    b.age = (b.age || 0) + deltaTime;
-                    const p = Math.min(1, b.t / b.dur);
-                    b.y = b.y0 - p * (this.viewH() + 24); // TRAYECTORIA PARAMÉTRICA
-                    b.x = b.x0 + Math.sin(this.gameTime * b.wobSpd + b.wob) * b.wobAmp;
+                    // Movimiento simple hacia arriba
+                    b.y -= 120 * deltaTime; // 120px/segundo hacia arriba
+                    b.x += Math.sin(Date.now() * 0.003 + b.wobble) * 30 * deltaTime; // Oscilación suave
+                    b.life -= deltaTime;
                 }
                 
-                // Purga por fin de vida o seguridad
+                // Purga por fin de vida o posición
                 for (let i = this.cleanBubbles.length - 1; i >= 0; i--) {
                     const b = this.cleanBubbles[i];
-                    if (b.t >= b.dur || b.age > 10) {
+                    if (b.life <= 0 || b.y < -50) { // Eliminar si se acabó la vida o salió de pantalla
                         this.cleanBubbles.splice(i, 1);
                     }
                 }
@@ -8765,18 +8762,18 @@ Comida premium y de cumpleaños
                 this.ctx.globalCompositeOperation = 'source-over';
                 
                 for (const b of this.cleanBubbles) {
-                    // Alpha constante sin fade complejo
-                    this.ctx.globalAlpha = 0.95;
+                    // Alpha basado en vida restante
+                    this.ctx.globalAlpha = b.opacity || 0.8;
                     
-                    // 🎯 DIBUJO NORMAL: Fill + Stroke
+                    // Dibujo simple de burbuja
                     this.ctx.beginPath();
-                    this.ctx.arc(b.x, b.y, 2 + Math.random() * 2.5, 0, Math.PI * 2);
+                    this.ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
                     
-                    // Fill azul claro
-                    this.ctx.fillStyle = '#dff7ff';
+                    // Color de la burbuja
+                    this.ctx.fillStyle = b.color || '#dff7ff';
                     this.ctx.fill();
                     
-                    // Stroke blanco suave
+                    // Borde suave
                     this.ctx.lineWidth = 0.9;
                     this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
                     this.ctx.stroke();
