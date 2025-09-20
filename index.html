@@ -3195,13 +3195,25 @@
                 // Inicializar estado del botón
                 audioManager.updateVolumeButton();
                 
-                // Iniciar música de fondo si no está silenciado
-                if (!audioManager.isMuted) {
-                    // Retrasar un poco para mejor experiencia de usuario
-                    setTimeout(() => {
+                // 🎵 INICIAR MÚSICA AUTOMÁTICAMENTE TRAS PRIMERA INTERACCIÓN
+                let musicStarted = false;
+                const startMusicOnInteraction = () => {
+                    if (!musicStarted && audioManager && !audioManager.isMuted) {
                         audioManager.startBackgroundMusic();
-                    }, 1000);
-                }
+                        musicStarted = true;
+                        console.log('🎵 Música iniciada tras interacción del usuario');
+                        
+                        // Remover listeners después de usar
+                        document.removeEventListener('click', startMusicOnInteraction);
+                        document.removeEventListener('touchstart', startMusicOnInteraction);
+                        document.removeEventListener('keydown', startMusicOnInteraction);
+                    }
+                };
+                
+                // Escuchar cualquier interacción del usuario
+                document.addEventListener('click', startMusicOnInteraction);
+                document.addEventListener('touchstart', startMusicOnInteraction);
+                document.addEventListener('keydown', startMusicOnInteraction);
             }
             
         // Event listeners de la cabecera
@@ -9676,12 +9688,21 @@ Comida premium y de cumpleaños
             startBackgroundMusic() {
                 if (this.isMuted || !this.backgroundMusic) return;
                 
-                try {
-                    this.backgroundMusic.volume = this.musicVolume * this.volume;
-                    this.backgroundMusic.play();
-                    console.log('🎵 Música de fondo iniciada');
-                } catch (error) {
-                    console.warn('⚠️ Error iniciando música de fondo:', error);
+                this.backgroundMusic.volume = this.musicVolume * this.volume;
+                
+                const playPromise = this.backgroundMusic.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            console.log('🎵 Música de fondo iniciada correctamente');
+                        })
+                        .catch(error => {
+                            console.warn('⚠️ Autoplay bloqueado por el navegador:', error);
+                            console.log('🎵 La música se iniciará tras la primera interacción del usuario');
+                        });
+                } else {
+                    console.log('🎵 Música de fondo iniciada (navegador antiguo)');
                 }
             }
             
