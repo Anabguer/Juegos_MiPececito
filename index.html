@@ -4458,13 +4458,13 @@
                 // USAR EL MISMO SISTEMA QUE LAS BARRAS
                 const dirtValue = this.gameState.needs.dirt; // 0-100
                 
-                if (dirtValue > 20) { // Solo mostrar efecto si está sucio
+                if (dirtValue > 30) { // Efecto visual más tarde que el botón
                     // Calcular nivel de suciedad (0 a 1)
-                    const dirtLevel = Math.min(dirtValue / 100, 1);
+                    const dirtLevel = Math.min((dirtValue - 30) / 70, 1); // Escala desde 30-100
                     
-                    // Crear overlay de suciedad
+                    // Crear overlay de suciedad MÁS SUTIL
                     this.ctx.save();
-                    this.ctx.globalAlpha = dirtLevel * 0.3; // Máximo 30% opacidad
+                    this.ctx.globalAlpha = dirtLevel * 0.15; // Máximo 15% opacidad (más sutil)
                     this.ctx.globalCompositeOperation = 'multiply';
                     
                     // Gradiente de suciedad
@@ -5186,7 +5186,12 @@
                     if (s.dist < 22) {
                         fish.desire = null;
                         targetV = {vx: 0, vy: 0};
-                        this.launchHeartToFun(fish.x, fish.y); // Corazón volador desde el pez
+                        // 💖 LANZAR CORAZÓN SOLO SI SE SOLICITÓ
+                        if (fish.shouldLaunchHeart) {
+                            this.launchHeartToFun(); // Sin coordenadas - usar posición del pez
+                            fish.shouldLaunchHeart = false;
+                            console.log('💖 ¡Pez llegó al dedo! Lanzando corazón...');
+                        }
                     }
                 }
                 // 🍎 HAY COMIDA (ir a comer) - SOLO SI TIENE HAMBRE
@@ -5444,9 +5449,7 @@
                 
                 // 💖 SISTEMA DE CORAZONES - AUMENTA DIVERSIÓN
                 this.fish.happyBurst = 3; // 3 segundos de felicidad
-                
-                // 💖 LANZAR CORAZÓN FLOTANTE
-                this.launchHeartToFun(clickX, clickY);
+                this.fish.shouldLaunchHeart = true; // Marcar para lanzar corazón cuando llegue
                 
                 // 🎯 VELOCIDAD RÁPIDA AL DEDO (usar maxSpeed del sistema original)
                 this.fish.desireSpeed = this.fish.maxSpeed * 1.5; // 1.5x la velocidad máxima
@@ -5462,10 +5465,14 @@
             
             // 💖 LANZAR CORAZÓN QUE AUMENTA DIVERSIÓN
             launchHeartToFun(x, y) {
+                // Si no se pasan coordenadas, usar posición del pez
+                const startX = x !== undefined ? x : this.fish.x;
+                const startY = y !== undefined ? y : this.fish.y;
+                
                 // Crear corazón visual
                 const heart = {
-                    x: x,
-                    y: y,
+                    x: startX,
+                    y: startY,
                     vx: (Math.random() - 0.5) * 50, // Velocidad horizontal aleatoria
                     vy: -80, // Velocidad hacia arriba
                     life: 2.0, // 2 segundos de vida
