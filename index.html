@@ -9987,8 +9987,8 @@ Comida premium y de cumpleaños
                             </div>
                         </div>
                         <div class="results-buttons">
-                            <button id="bubble-again-btn" class="bubble-btn primary">🔄 OTRA</button>
-                            <button id="bubble-finish-btn" class="bubble-btn secondary">🏠 SALIR</button>
+                            <button id="bubble-again-btn" class="bubble-btn primary">OTRA</button>
+                            <button id="bubble-finish-btn" class="bubble-btn secondary">SALIR</button>
                         </div>
                     </div>
                 </div>
@@ -10472,10 +10472,10 @@ Comida premium y de cumpleaños
                     right: 0;
                     bottom: 0;
                     background: linear-gradient(135deg, 
-                        rgba(79, 195, 247, 0.3) 0%, 
-                        rgba(129, 212, 250, 0.2) 50%, 
-                        rgba(41, 182, 246, 0.3) 100%);
-                    backdrop-filter: blur(20px) saturate(180%);
+                        rgba(25, 30, 40, 0.85) 0%, 
+                        rgba(20, 25, 35, 0.9) 50%, 
+                        rgba(15, 20, 30, 0.95) 100%);
+                    backdrop-filter: blur(12px) saturate(100%);
                     align-items: center;
                     justify-content: center;
                     animation: fadeIn 0.5s ease;
@@ -10485,20 +10485,20 @@ Comida premium y de cumpleaños
                 const resultsContent = gameModal.querySelector('.results-content');
                 resultsContent.style.cssText = `
                     background: linear-gradient(145deg, 
-                        rgba(79, 195, 247, 0.4) 0%, 
-                        rgba(129, 212, 250, 0.3) 50%, 
-                        rgba(255, 255, 255, 0.2) 100%);
-                    backdrop-filter: blur(25px);
-                    border: 3px solid rgba(255, 255, 255, 0.4);
+                        rgba(35, 40, 50, 0.9) 0%, 
+                        rgba(30, 35, 45, 0.95) 50%, 
+                        rgba(25, 30, 40, 1) 100%);
+                    backdrop-filter: blur(15px);
+                    border: 2px solid rgba(255, 255, 255, 0.2);
                     border-radius: 25px;
                     padding: 35px;
                     text-align: center;
                     color: white;
                     max-width: 320px;
                     box-shadow: 
-                        0 25px 80px rgba(79, 195, 247, 0.4),
-                        0 0 60px rgba(129, 212, 250, 0.3),
-                        inset 0 2px 0 rgba(255, 255, 255, 0.5);
+                        0 15px 40px rgba(0, 0, 0, 0.3),
+                        0 0 30px rgba(0, 0, 0, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
                     animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
                 `;
                 
@@ -10509,8 +10509,8 @@ Comida premium y de cumpleaños
                     font-weight: 800;
                     margin-bottom: 20px;
                     text-shadow: 
-                        0 3px 8px rgba(79, 195, 247, 0.8),
-                        0 0 25px rgba(129, 212, 250, 0.6);
+                        0 2px 4px rgba(0, 0, 0, 0.5),
+                        0 0 8px rgba(255, 255, 255, 0.1);
                     color: ${won ? '#4caf50' : '#ff9800'};
                 `;
                 
@@ -10528,10 +10528,10 @@ Comida premium y de cumpleaños
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        background: rgba(255, 255, 255, 0.15);
+                        background: rgba(255, 255, 255, 0.08);
                         border-radius: 15px;
                         padding: 12px 18px;
-                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
                         font-weight: 600;
                     `;
                 });
