@@ -8725,7 +8725,11 @@ Comida premium y de cumpleaños
             drawCleanBubbles() {
                 if (!this.cleanBubbles || this.cleanBubbles.length === 0) return;
                 const ctx = this.ctx;
+                
+                // 🎯 ESCALAR CONTEXTO SOLO PARA BURBUJAS (sistema híbrido)
                 ctx.save();
+                const r = this.getDPR();
+                ctx.setTransform(r, 0, 0, r, 0, 0);
                 ctx.globalCompositeOperation = 'source-over';
 
                 for (const b of this.cleanBubbles) {
@@ -8738,6 +8742,9 @@ Comida premium y de cumpleaños
                     ctx.strokeStyle = 'rgba(255,255,255,0.75)';
                     ctx.stroke();
                 }
+                
+                // 🔄 RESTAURAR CONTEXTO NORMAL
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.restore();
             }
             
