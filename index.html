@@ -2863,9 +2863,9 @@
                     setupWelcomeFlow();
                 } else {
                     // Ya tiene pez: mostrar pantalla de carga personalizada
-                    this.showLoadingWithFishName();
+                    game.showLoadingWithFishName();
                     // Añadir botón reset al menú
-                    this.addResetButtonToMenu();
+                    game.addResetButtonToMenu();
                 }
                 
                 console.log('✅ ¡Juego listo!', isFirstTime ? '(Primera vez)' : '(Jugador veterano)');
@@ -8203,11 +8203,13 @@ Comida premium y de cumpleaños
             }
             
             dropFood() {
+                console.log('🍎 dropFood() llamado - Array food existe:', !!this.food);
+                
                 const x = Math.random() * this.canvas.width;
                 const col = this.pelletColors();
                 const r = 2.6 + Math.random() * 1.2;
                 
-                this.food.push({
+                const pellet = {
                     x: x,
                     y: 10,
                     vx: 0,
@@ -8216,9 +8218,19 @@ Comida premium y de cumpleaños
                     colorFill: col.fill,
                     colorStroke: col.stroke,
                     r: r
-                });
+                };
                 
-                console.log('🍎 Comida soltada:', x, r, 'Total food:', this.food.length);
+                this.food.push(pellet);
+                console.log('🍎 Pellet añadido:', pellet, 'Total food:', this.food.length);
+            }
+            
+            startCleaning() {
+                console.log('🧹 startCleaning() llamado');
+                // Método básico de limpieza
+                this.gameState.needs.dirt = Math.max(0, this.gameState.needs.dirt - 30);
+                this.updateCrisisFlags();
+                this.updateNeedBars();
+                console.log('🧹 Limpieza realizada, suciedad:', this.gameState.needs.dirt);
             }
             
             updateFood(deltaTime) {
