@@ -3802,22 +3802,20 @@
             }
             
         render() {
-            // Limpiar canvas (VERSIÓN SIMPLE QUE FUNCIONABA)
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            
-            // Composición normal
-            this.ctx.globalCompositeOperation = 'source-over';
+            // 🎯 USAR NUEVO SISTEMA DE COORDENADAS CSS
+            this.beginFrame();
                 
-                // Fondo
+                // Fondo (en coordenadas CSS)
+                const W = this.viewW(), H = this.viewH();
                 if (this.bgImage && this.bgImage.complete) {
-                    this.ctx.drawImage(this.bgImage, 0, 0, this.canvas.width, this.canvas.height);
+                    this.ctx.drawImage(this.bgImage, 0, 0, W, H);
                 } else {
                     // Fondo degradado como fallback
-                    const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                    const gradient = this.ctx.createLinearGradient(0, 0, 0, H);
                     gradient.addColorStop(0, '#0b1b2b');
                     gradient.addColorStop(1, '#133754');
                     this.ctx.fillStyle = gradient;
-                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.ctx.fillRect(0, 0, W, H);
                 }
                 
                 // ✨ EFECTOS MÁGICOS: MUCHAS BURBUJITAS QUE TAPAN EL HUEVO
@@ -8534,6 +8532,30 @@ Comida premium y de cumpleaños
                 return Math.hypot(x2 - x1, y2 - y1);
             }
             
+            // === Helpers de canvas/DPR (CSS px coherentes) ===
+            getDPR() { 
+                return window.devicePixelRatio || 1; 
+            }
+            
+            viewW() { 
+                return this.canvas.width / this.getDPR(); // ancho en CSS px
+            }
+            
+            viewH() { 
+                return this.canvas.height / this.getDPR(); // alto en CSS px
+            }
+            
+            // Llamar al principio de cada render()
+            beginFrame() {
+                const ctx = this.ctx;
+                // limpiar en píxeles físicos
+                ctx.setTransform(1,0,0,1,0,0);
+                ctx.clearRect(0,0,this.canvas.width, this.canvas.height);
+                // reescalar a CSS px
+                const r = this.getDPR();
+                ctx.setTransform(r,0,0,r,0,0);
+            }
+            
             seek(fx, fy, tx, ty, maxSpeed) {
                 const dx = tx - fx;
                 const dy = ty - fy;
@@ -8602,137 +8624,121 @@ Comida premium y de cumpleaños
             // 🧹 LIMPIEZA ESPECTACULAR CON BURBUJAS (DEL DOCUMENTO)
             startCleaning() {
                 console.log('🧹 ¡LIMPIEZA ESPECTACULAR INICIADA!');
-                
-                // 🔊 SONIDO DE LIMPIEZA
-                if (window.audioManager) {
-                    window.audioManager.playSound('clean');
-                }
-                
-                // Sistema del documento original
+                if (window.audioManager) window.audioManager.playSound('clean');
+
                 this.cleaningActive = true;
-                this.cleanEmitT = 2.6; // 2.6 segundos emitiendo burbujas
-                this.dirtStart = this.gameState.needs.dirt; // Guardar suciedad inicial
-                
-                // Pez feliz con giros de limpieza
-                if (this.fish) {
-                    this.fish.happyBurst = 3.2;
-                    this.fish.spinKind = "clean";
-                }
-                
-                // Crear arrays si no existen
-                if (!this.cleanBubbles) this.cleanBubbles = [];
-                
-                // Lote inicial inmediato
+                this.cleanEmitT = 2.6;
+                this.dirtStart = this.gameState.needs.dirt;
+
+                this._time = this._time || 0;       // reloj del juego (segundos)
+                this.cleanBubbles = this.cleanBubbles || [];
+
+                if (this.fish) { this.fish.happyBurst = 3.2; this.fish.spinKind = "clean"; }
+
+                // Lote inicial (nacen DENTRO del canvas, pegadas al borde)
                 this.emitCleanBubbles();
                 
-                console.log('🧹 Pecera limpiándose con burbujas espectaculares!');
+                // 🧪 MINI TEST PARA VERIFICAR MOVIMIENTO
+                setTimeout(() => {
+                    const ys = this.cleanBubbles.map(b => b.y);
+                    const minY = Math.min(...ys), maxY = Math.max(...ys);
+                    console.log('[TEST] Burbujas y-range justo tras inicio:', {minY, maxY});
+                }, 50);
+
+                setTimeout(() => {
+                    const ys = this.cleanBubbles.map(b => b.y);
+                    const minY = Math.min(...ys), maxY = Math.max(...ys);
+                    console.log('[TEST] Burbujas y-range tras 1s:', {minY, maxY});
+                }, 1000);
             }
             
-            // 🫧 EMITIR BURBUJAS PARAMÉTRICAS (SOLUCIÓN DPR)
             emitCleanBubbles() {
-                const W = this.canvas.width; // CORREGIDO: usar canvas.width directamente
-                const H = this.canvas.height; // CORREGIDO: usar canvas.height directamente
-                const vents = Math.max(16, Math.floor(W/24)); // Respiraderos
-                const perVent = 2; // Burbujas por respiradero por frame
-                
+                const W = this.viewW();   // CSS px
+                const H = this.viewH();   // CSS px
+                const vents = Math.max(16, Math.floor(W / 24));
+                const perVent = 2;
+
                 for (let i = 0; i < vents; i++) {
                     const baseX = (i + 0.5) * (W / vents) + (Math.random() - 0.5) * 8;
-                    
+
                     for (let k = 0; k < perVent; k++) {
-                        const vy = 260 + Math.random() * 120;       // px/s reales
-                        const y0 = H - 1.5 + Math.random() * 0.5;   // pegadas al borde inferior
-                        const dur = (H + 24) / vy;                 // tiempo hasta salir
-                        const x0 = this.clamp(baseX + (Math.random() - 0.5) * 6, 2, W - 2);
-                        
+                        const vy  = 260 + Math.random() * 120;     // velocidad vertical (CSS px/s)
+                        const y0  = H - 1 + Math.random() * 0.5;   // nacen pegadas al fondo
+                        const dur = (H + 24) / vy;                 // tiempo exacto hasta salir por arriba
+                        const x0  = this.clamp(baseX + (Math.random() - 0.5) * 6, 2, W - 2);
+
                         this.cleanBubbles.push({
-                            x: x0, 
-                            y: y0,
-                            r: 2 + Math.random() * 3,
-                            life: 3 + Math.random() * 2, // 3-5 segundos de vida
-                            wobble: Math.random() * 6.28,
-                            opacity: 0.7 + Math.random() * 0.3,
-                            color: `hsla(${190 + Math.random() * 40}, 85%, 88%, ${0.6 + Math.random() * 0.4})`,
-                            from: 'clean' // IDENTIFICADOR PARA DISTINGUIR DE OTRAS BURBUJAS
+                            // guardo origen (x0,y0) y movimiento paramétrico por tiempo
+                            x: x0, y: y0,
+                            x0, y0, dur, t: 0,
+                            r: 1.5 + Math.random() * 2.8,
+                            wobble: Math.random() * Math.PI * 2,
+                            wobSpd: 1.5 + Math.random() * 1.2,
+                            wobAmp: 6 + Math.random() * 10,
+                            from: 'clean'
                         });
                     }
                 }
-                
-                // Control de memoria (máximo 1400 burbujas)
+
+                // Límite de memoria
                 if (this.cleanBubbles.length > 1400) {
                     this.cleanBubbles.splice(0, this.cleanBubbles.length - 1400);
                 }
             }
             
-            // 🧹 ACTUALIZAR SISTEMA DE LIMPIEZA
             updateCleaning(deltaTime) {
-                if (!this.cleaningActive) return;
-                
-                this.cleanEmitT -= deltaTime;
-                this.emitCleanBubbles(); // Emitir más burbujas cada frame
-                
-                // Progreso de limpieza (0-1)
-                const progress = this.clamp(1 - Math.max(this.cleanEmitT, 0) / 2.6, 0, 1);
-                
-                // Bajar suciedad gradualmente
-                this.gameState.needs.dirt = this.clamp((1 - progress) * this.dirtStart, 0, 100);
-                this.updateNeedBars();
-                
-                // Terminar limpieza
-                if (this.cleanEmitT <= 0) {
-                    this.cleaningActive = false;
-                    console.log('🧹 ¡Limpieza completada! Suciedad:', this.gameState.needs.dirt);
+                this._time = (this._time || 0) + deltaTime;
+
+                if (this.cleaningActive) {
+                    this.cleanEmitT -= deltaTime;
+                    this.emitCleanBubbles();
+
+                    const progress = this.clamp(1 - Math.max(this.cleanEmitT, 0) / 2.6, 0, 1);
+                    this.gameState.needs.dirt = this.clamp((1 - progress) * this.dirtStart, 0, 100);
+                    this.updateNeedBars();
+
+                    if (this.cleanEmitT <= 0) this.cleaningActive = false;
                 }
-                
-                // 🎯 MOVIMIENTO SIMPLE Y EFECTIVO DE BURBUJAS
+
+                // Movimiento paramétrico: y = y0 - p*(H+24)
+                const H = this.viewH();
                 for (const b of this.cleanBubbles) {
-                    // Movimiento simple hacia arriba
-                    b.y -= 120 * deltaTime; // 120px/segundo hacia arriba
-                    b.x += Math.sin(Date.now() * 0.003 + b.wobble) * 30 * deltaTime; // Oscilación suave
-                    b.life -= deltaTime;
+                    b.t += deltaTime;
+                    const p = Math.min(1, b.t / (b.dur || 1));       // 0→1
+                    b.y = b.y0 - p * (H + 24);
+                    b.x = b.x0 + Math.sin(this._time * b.wobSpd + b.wobble) * b.wobAmp;
                 }
-                
-                // Purga por fin de vida o posición
+
+                // Purga: cuando terminen la trayectoria o por seguridad (edad larga)
                 for (let i = this.cleanBubbles.length - 1; i >= 0; i--) {
                     const b = this.cleanBubbles[i];
-                    if (b.life <= 0 || b.y < -50) { // Eliminar si se acabó la vida o salió de pantalla
-                        this.cleanBubbles.splice(i, 1);
-                    }
+                    if (b.t >= (b.dur || 1) || b.y < -12) this.cleanBubbles.splice(i, 1);
                 }
-                
-                // Si ya no quedan burbujas, garantizar suciedad = 0
+
+                // Garantía: si ya no emitimos y no quedan burbujas, suciedad 0
                 if (!this.cleaningActive && this.gameState.needs.dirt > 0 && this.cleanBubbles.length === 0) {
                     this.gameState.needs.dirt = 0;
+                    this.updateNeedBars();
                 }
             }
             
-            // 🫧 DIBUJAR BURBUJAS DE LIMPIEZA (COMPOSICIÓN NORMAL)
             drawCleanBubbles() {
                 if (!this.cleanBubbles || this.cleanBubbles.length === 0) return;
-                
-                this.ctx.save();
-                
-                // 🎯 COMPOSICIÓN NORMAL (SIN BLENDS RAROS)
-                this.ctx.globalCompositeOperation = 'source-over';
-                
+                const ctx = this.ctx;
+                ctx.save();
+                ctx.globalCompositeOperation = 'source-over';
+
                 for (const b of this.cleanBubbles) {
-                    // Alpha basado en vida restante
-                    this.ctx.globalAlpha = b.opacity || 0.8;
-                    
-                    // Dibujo simple de burbuja
-                    this.ctx.beginPath();
-                    this.ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-                    
-                    // Color de la burbuja
-                    this.ctx.fillStyle = b.color || '#dff7ff';
-                    this.ctx.fill();
-                    
-                    // Borde suave
-                    this.ctx.lineWidth = 0.9;
-                    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)';
-                    this.ctx.stroke();
+                    ctx.globalAlpha = 0.9;
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                    ctx.fillStyle = '#dff7ff';
+                    ctx.fill();
+                    ctx.lineWidth = 0.9;
+                    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+                    ctx.stroke();
                 }
-                
-                this.ctx.restore();
+                ctx.restore();
             }
             
             updateFood(deltaTime) {
