@@ -41,7 +41,7 @@
           --fish-baby-size: 46px;
           --fish-young-size: 52px;
           --fish-adult-size: 60px;
-          --egg-size: 100px; /* TAMAÑO MÓVIL (era 160px muy grande) */
+          --egg-size: 130px; /* TAMAÑO PERFECTO MÓVIL (ni muy grande ni pequeño) */
           --pellet-size: 16px;
           --star-size: 32px;
           --transition-fast: 0.15s ease;
@@ -4171,33 +4171,14 @@
                 console.log(`☀️ Reflejos del sol creados (${numRays} rayos desde arriba)`);
             }
             
-            // 🦠 EFECTO DE SUCIEDAD EN TODA LA PECERA
+            // 🦠 EFECTO DE SUCIEDAD UNIFICADO (BASADO EN BARRAS)
             drawDirtyEffect() {
-                if (!this.gameState.lastClean) return;
+                // USAR EL MISMO SISTEMA QUE LAS BARRAS
+                const dirtValue = this.gameState.needs.dirt; // 0-100
                 
-                const currentTime = Date.now();
-                const timeSinceClean = currentTime - this.gameState.lastClean;
-                const currentStage = this.gameState.stage;
-                
-                // Umbrales de suciedad según la edad
-                let dirtyThreshold;
-                switch(currentStage) {
-                    case 'baby':
-                        dirtyThreshold = 24 * 60 * 60 * 1000; // 1 día
-                        break;
-                    case 'young':
-                        dirtyThreshold = 2 * 24 * 60 * 60 * 1000; // 2 días
-                        break;
-                    case 'adult':
-                        dirtyThreshold = 3 * 24 * 60 * 60 * 1000; // 3 días
-                        break;
-                    default:
-                        dirtyThreshold = 24 * 60 * 60 * 1000;
-                }
-                
-                if (timeSinceClean > dirtyThreshold) {
+                if (dirtValue > 20) { // Solo mostrar efecto si está sucio
                     // Calcular nivel de suciedad (0 a 1)
-                    const dirtLevel = Math.min((timeSinceClean - dirtyThreshold) / dirtyThreshold, 1);
+                    const dirtLevel = Math.min(dirtValue / 100, 1);
                     
                     // Crear overlay de suciedad
                     this.ctx.save();
@@ -4276,7 +4257,7 @@
                     
                     // Log ocasional
                     if (Math.random() < 0.005) {
-                        console.log(`🦠 Pecera sucia - Nivel: ${(dirtLevel * 100).toFixed(0)}%`);
+                        console.log(`🦠 Pecera sucia - Nivel: ${dirtValue.toFixed(1)}% (barra unificada)`);
                     }
                 } else {
                     // Limpiar partículas cuando no está sucio
