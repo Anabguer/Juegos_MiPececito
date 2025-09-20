@@ -3109,11 +3109,11 @@
                 }
             });
             
-            // 🍎 BOTÓN DE ALIMENTACIÓN
+            // 🍎 BOTÓN DE ALIMENTACIÓN (UNA BOLITA COMO EN ORIGINAL)
             document.getElementById('feedBtn').addEventListener('click', () => {
                 if (game && game.fish && !game.fish.isDepressed) {
-                    game.startFeeding();
-                    console.log('🍎 Alimentando al pez...');
+                    game.dropFood(); // UNA SOLA BOLITA
+                    console.log('🍎 Una bolita pequeña soltada');
                 }
             });
             
@@ -8119,6 +8119,25 @@ Comida premium y de cumpleaños
             vary(val, amt, min, max) {
                 const v = val + (Math.random() * 2 - 1) * amt;
                 return this.clamp(v, min, max);
+            }
+            
+            // 🍎 SOLO LA FUNCIÓN DROPFOOD (PASO 1)
+            dropFood() {
+                const x = Math.random() * this.canvas.width;
+                const r = 2.6 + Math.random() * 1.2; // TAMAÑO PEQUEÑO COMO EN ORIGINAL
+                
+                this.food.push({
+                    x: x,
+                    y: 10,
+                    vx: 0,
+                    vy: 6 + Math.random() * 6,
+                    bottomT: 0,
+                    colorFill: '#ffd166', // Color simple por ahora
+                    colorStroke: '#cc8400',
+                    r: r
+                });
+                
+                console.log('🍎 Comida soltada (pequeña):', r);
             }
             
             // 🍎 FUNCIONES DE COMIDA
