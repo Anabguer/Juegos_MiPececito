@@ -8637,7 +8637,14 @@ Comida premium y de cumpleaños
             dropFood() {
                 console.log('🍎 dropFood() llamado - Array food existe:', !!this.food);
                 
-                const x = Math.random() * this.canvas.width;
+                // ZONA ACCESIBLE PARA EL PEZ (evitar extremos)
+                const fishSize = 80;
+                const fishHalfSize = fishSize / 2;
+                const leftLimit = fishHalfSize + 15; // 55px
+                const rightLimit = this.canvas.width - fishHalfSize - 15; // W-55px
+                const accessibleWidth = rightLimit - leftLimit;
+                
+                const x = leftLimit + Math.random() * accessibleWidth; // Solo en zona accesible
                 const col = this.pelletColors();
                 const r = 2.6 + Math.random() * 1.2;
                 
@@ -8653,7 +8660,9 @@ Comida premium y de cumpleaños
                 };
                 
                 this.food.push(pellet);
-                console.log('🍎 Pellet añadido:', pellet, 'Total food:', this.food.length);
+                console.log('🍎 Pellet añadido en ZONA SEGURA:', 
+                    `x=${x.toFixed(1)} (rango: ${leftLimit}-${rightLimit})`,
+                    'Total food:', this.food.length);
             }
             
             // 🧹 LIMPIEZA ESPECTACULAR CON BURBUJAS (DEL DOCUMENTO)
