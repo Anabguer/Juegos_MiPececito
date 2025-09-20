@@ -8162,19 +8162,37 @@ Comida premium y de cumpleaños
                 return this.clamp(v, min, max);
             }
             
-            // 🍎 SISTEMA DE COMIDA EXACTO DEL DOCUMENTO
+            // 🍎 SISTEMA DE COMIDA SEGÚN CHAT
+            pelletColors() {
+                const PELLET_FAMILIES = [
+                    {h:38,s:85,l:62},{h:30,s:80,l:58},{h:46,s:68,l:70},
+                    {h:28,s:60,l:55},{h:60,s:35,l:65},{h:22,s:55,l:54}
+                ];
+                const b = PELLET_FAMILIES[Math.floor(Math.random() * PELLET_FAMILIES.length)];
+                const h = this.vary(b.h, 5, 10, 70);
+                const s = this.vary(b.s, 10, 20, 95);
+                const l = this.vary(b.l, 8, 35, 85);
+                const strokeL = Math.max(10, l - 22);
+                const strokeS = Math.max(25, Math.round(s * 0.85));
+                return { 
+                    fill: `hsl(${Math.round(h)} ${Math.round(s)}% ${Math.round(l)}%)`, 
+                    stroke: `hsl(${Math.round(h)} ${Math.round(strokeS)}% ${Math.round(strokeL)}%)` 
+                };
+            }
+            
             dropFood() {
                 const x = Math.random() * this.canvas.width;
+                const col = this.pelletColors();
                 const r = 2.6 + Math.random() * 1.2;
                 
                 this.food.push({
                     x: x,
                     y: 10,
                     vx: 0,
-                    vy: 6 + Math.random() * 6,
+                    vy: 6 + Math.random() * 6, // CAÍDA LENTA COMO EN ORIGINAL
                     bottomT: 0,
-                    colorFill: '#ffd166',
-                    colorStroke: '#cc8400',
+                    colorFill: col.fill,
+                    colorStroke: col.stroke,
                     r: r
                 });
                 
