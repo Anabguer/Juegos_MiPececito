@@ -2482,24 +2482,25 @@
                 <img src="./images/ui/badge_dirty.png" alt="Limpiar" class="menu-icon">
             </div>
         </button>
-        <button class="menu-btn disabled" id="medicineBtn">
-            <div class="btn-icon">
-                <img src="./images/ui/badge_medicine.png" alt="Medicina" class="menu-icon">
-            </div>
-        </button>
         <button class="menu-btn" id="playButton">
             <div class="btn-icon">
                 <img src="./images/ui/badge_play.png" alt="Jugar" class="menu-icon">
             </div>
         </button>
         <button class="menu-btn" id="inventoryButton">
-            <div class="btn-icon">🎒</div>
+            <div class="btn-icon">
+                <img src="./images/ui/badge_inventario.png" alt="Inventario" class="menu-icon">
+            </div>
         </button>
         <button class="menu-btn" id="albumButton">
-            <div class="btn-icon">📸</div>
+            <div class="btn-icon">
+                <img src="./images/ui/badge_fotos.png" alt="Álbum" class="menu-icon">
+            </div>
         </button>
         <button class="menu-btn" id="resetButton" title="Cuidar otro pececito">
-            <div class="btn-icon">💀</div>
+            <div class="btn-icon">
+                <img src="./images/ui/badge_calavera.png" alt="Reset" class="menu-icon">
+            </div>
         </button>
     </div>
 
@@ -3126,12 +3127,7 @@
             });
             
             // 💊 BOTÓN DE MEDICINA
-            document.getElementById('medicineBtn').addEventListener('click', () => {
-                if (game && game.fish && !game.fish.isDepressed) {
-                    game.giveMedicine();
-                    console.log('💊 Dando medicina al pez...');
-                }
-            });
+            // 💊 BOTÓN DE MEDICINA - ELIMINADO (YA NO SE USA)
             
             // Botón de reset se añade dinámicamente
             
@@ -4515,6 +4511,40 @@
                     this.createFish();
                     this.gameState.stage = 'baby';
                 }, 1000); // Reducido de 2000ms a 1000ms
+            }
+            
+            createEggBubbles() {
+                console.log('🥚 Creando burbujitas blancas para el huevo');
+                
+                this.explosionBubbles.length = 0;
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height * 0.6;
+                
+                // BURBUJITAS BLANCAS SUAVES (COMO LAS DE NACIMIENTO PERO MÁS BLANCAS)
+                for (let i = 0; i < 80; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 15 + Math.random() * 40; // Más suaves
+                    const size = 2 + Math.random() * 8; // Más pequeñas
+                    const life = 3 + Math.random() * 2;
+                    
+                    // COLORES MÁS BLANCOS
+                    const colors = ['#FFFFFF', '#F8FCFF', '#F0F8FF', '#E8F4FF', '#E0F0FF'];
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    this.explosionBubbles.push({
+                        x: centerX + (Math.random() - 0.5) * 30,
+                        y: centerY + (Math.random() - 0.5) * 30,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - 20,
+                        r: size,
+                        life: life,
+                        maxLife: life,
+                        color: color,
+                        alpha: 0.8
+                    });
+                }
+                
+                console.log('🥚 80 burbujitas blancas creadas para el huevo');
             }
             
             createExplosionBubbles() {
@@ -5945,10 +5975,10 @@
                 const needsCleaning = this.gameState.needs.dirt > 70; // Si suciedad > 70%, activar botón  
                 const needsMedicine = this.gameState.lastMedicine && (currentTime - this.gameState.lastMedicine) > medicineThreshold;
                 
-                // Actualizar botones
+                // Actualizar botones (MEDICINA ELIMINADA)
                 this.toggleButton('feedBtn', needsFood);
                 this.toggleButton('cleanBtn', needsCleaning);
-                this.toggleButton('medicineBtn', needsMedicine);
+                // this.toggleButton('medicineBtn', needsMedicine); // ELIMINADO
             }
             
             // 🔘 HABILITAR/DESHABILITAR BOTÓN
@@ -5962,7 +5992,7 @@
                         switch(buttonId) {
                             case 'feedBtn': this.startFeeding(); break;
                             case 'cleanBtn': this.startCleaning(); break;
-                            case 'medicineBtn': this.giveMedicine(); break;
+                            // case 'medicineBtn': this.giveMedicine(); break; // ELIMINADO
                         }
                     };
                 } else {
@@ -7962,6 +7992,16 @@ Comida premium y de cumpleaños
                 // CAMBIAR STAGE A 'EGG' Y INICIAR TIEMPO
                 this.gameState.stage = 'egg';
                 this.gameState.eggStartTime = now;
+                
+                // 📊 OCULTAR BARRAS DE NECESIDADES CON HUEVO
+                const needsBar = document.getElementById('needsHeaderBar');
+                if (needsBar) {
+                    needsBar.style.display = 'none';
+                    console.log('📊 Barras ocultas con huevo');
+                }
+                
+                // 🎆 BURBUJITAS BLANCAS PARA EL HUEVO (EFECTO QUE QUERÍAS)
+                this.createEggBubbles();
                 this.egg.x = x || this.canvas.width / 2;
                 this.egg.y = y || this.canvas.height * 0.6;
                 
@@ -8138,7 +8178,7 @@ Comida premium y de cumpleaños
                     r: r
                 });
                 
-                console.log('🍎 Comida soltada:', x, r);
+                console.log('🍎 Comida soltada:', x, r, 'Total food:', this.food.length);
             }
             
             updateFood(deltaTime) {
