@@ -41,7 +41,7 @@
           --fish-baby-size: 46px;
           --fish-young-size: 52px;
           --fish-adult-size: 60px;
-          --egg-size: 130px; /* TAMAÑO PERFECTO MÓVIL (ni muy grande ni pequeño) */
+          --egg-size: 150px; /* UN POQUITO MÁS GRANDE (era 130px) */
           --pellet-size: 16px;
           --star-size: 32px;
           --transition-fast: 0.15s ease;
@@ -2852,8 +2852,12 @@
                 
                 // Verificar si es primera vez (sin huevo colocado)
                 const savedData = localStorage.getItem('miPececito_gameState');
-                const isFirstTime = !savedData || !localStorage.getItem('miPececito_hasPlayed');
-                console.log('🔍 Primera vez:', isFirstTime);
+                const hasPlayed = localStorage.getItem('miPececito_hasPlayed');
+                const isFirstTime = !savedData || !hasPlayed;
+                console.log('🔍 DEBUG PRIMERA VEZ:');
+                console.log('   savedData:', !!savedData);
+                console.log('   hasPlayed:', hasPlayed);
+                console.log('   isFirstTime:', isFirstTime);
                 
                 // IR DIRECTO (sin pantalla de carga)
                 loadingScreen.style.display = 'none';
@@ -2861,7 +2865,10 @@
                 // LÓGICA CORRECTA: Solo bienvenida si NO hay pez
                 if (isFirstTime) {
                     // Primera vez: mostrar bienvenida
+                    console.log('🪟 FORZANDO MODAL DE BIENVENIDA...');
                     welcomeScreen.style.display = 'flex';
+                    welcomeScreen.style.visibility = 'visible';
+                    welcomeScreen.style.opacity = '1';
                     setupWelcomeFlow();
                 } else {
                     // Ya tiene pez: mostrar pantalla de carga personalizada
@@ -4041,12 +4048,12 @@
                 
                 // Título más sutil SIN EMOJI
                 this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                this.ctx.font = 'bold 14px system-ui';
+                this.ctx.font = 'bold 18px system-ui'; // MÁS GRANDE (era 14px)
                 this.ctx.fillText('Nacerá en:', centerX, timerY - 20);
                 
                 // Countdown principal
                 this.ctx.fillStyle = '#fff';
-                this.ctx.font = 'bold 18px system-ui'; // MÁS PEQUEÑO PARA MÓVIL
+                this.ctx.font = 'bold 24px system-ui'; // MÁS GRANDE (era 18px)
                 
                 let timeText;
                 if (hours > 0) {
@@ -6007,7 +6014,7 @@
                 
                 // Verificar necesidades BASADAS EN LOS VALORES REALES
                 const needsFood = this.gameState.needs.hunger > 50; // Si hambre > 50%, activar botón
-                const needsCleaning = this.gameState.needs.dirt > 30; // Si suciedad > 30%, activar botón  
+                const needsCleaning = this.gameState.needs.dirt > 20; // Si suciedad > 20%, activar botón  
                 const needsMedicine = this.gameState.lastMedicine && (currentTime - this.gameState.lastMedicine) > medicineThreshold;
                 
                 // Actualizar botones (MEDICINA ELIMINADA)
@@ -8383,7 +8390,7 @@ Comida premium y de cumpleaños
                     if (this.fish && this.dist(this.fish.x, this.fish.y, f.x, f.y) < 22) {
                         this.food.splice(i, 1);
                         this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - 35, 0, 100);
-                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 8, 0, 100);
+                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 3, 0, 100); // MENOS SUCIEDAD AL COMER (era +8)
                         
                         this.labels.push({
                             x: this.fish.x,
