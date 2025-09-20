@@ -9947,7 +9947,6 @@ Comida premium y de cumpleaños
                             <span>Récord: <span id="bubble-best">0</span></span>
                             <span>⭐ <span id="bubble-stars">0</span></span>
                         </div>
-                        <button class="bubble-close-btn">×</button>
                     </div>
                     
                     <!-- 📖 LEYENDA -->
@@ -9964,8 +9963,8 @@ Comida premium y de cumpleaños
                     
                     <!-- 🎮 CONTROLES -->
                     <div class="bubble-controls">
-                        <button id="bubbleStartBtn" class="bubble-btn primary">▶️ JUGAR</button>
-                        <button class="bubble-btn secondary bubble-back-btn">🏠 Volver</button>
+                        <button id="bubbleStartBtn" class="bubble-btn primary">🎮 ¡EMPEZAR!</button>
+                        <button class="bubble-btn secondary bubble-back-btn">🌊 Salir al Acuario</button>
                     </div>
                 </div>
                 
@@ -9988,8 +9987,8 @@ Comida premium y de cumpleaños
                             </div>
                         </div>
                         <div class="results-buttons">
-                            <button id="bubble-again-btn" class="bubble-btn primary">🔄 Otra vez</button>
-                            <button id="bubble-finish-btn" class="bubble-btn secondary">🏠 Terminar</button>
+                            <button id="bubble-again-btn" class="bubble-btn primary">🎮 ¡Otra Partida!</button>
+                            <button id="bubble-finish-btn" class="bubble-btn secondary">🌊 Al Acuario</button>
                         </div>
                     </div>
                 </div>
@@ -10003,17 +10002,20 @@ Comida premium y de cumpleaños
             initBubbleGameLogic(gameModal);
         }
         
-        // 🎨 ESTILOS HERMOSOS PARA EL JUEGO DE BURBUJAS
+        // 🎨 ESTILOS COLORIDOS TIPO JUEGO PARA BURBUJAS
         function applyBubbleGameStyles(gameModal) {
-            // Modal principal
+            // Modal principal - Más colorido y menos oscuro
             gameModal.style.cssText = `
                 position: fixed;
                 top: 0;
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: rgba(0, 0, 0, 0.85);
-                backdrop-filter: blur(15px);
+                background: linear-gradient(135deg, 
+                    rgba(79, 195, 247, 0.2) 0%, 
+                    rgba(41, 182, 246, 0.15) 50%, 
+                    rgba(13, 71, 161, 0.3) 100%);
+                backdrop-filter: blur(20px) saturate(200%);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -10021,70 +10023,129 @@ Comida premium y de cumpleaños
                 animation: fadeIn 0.4s ease;
             `;
             
-            // Contenedor principal
+            // Contenedor principal - Diseño tipo acuario colorido
             const container = gameModal.querySelector('.bubble-game-container');
             container.style.cssText = `
-                background: rgba(13, 71, 161, 0.2);
-                backdrop-filter: blur(25px) saturate(180%);
-                border: 1px solid rgba(255, 255, 255, 0.25);
-                border-radius: 24px;
+                background: linear-gradient(180deg, 
+                    rgba(129, 212, 250, 0.25) 0%,
+                    rgba(79, 195, 247, 0.2) 30%,
+                    rgba(41, 182, 246, 0.15) 70%,
+                    rgba(13, 71, 161, 0.2) 100%);
+                backdrop-filter: blur(30px) saturate(200%);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-radius: 28px;
                 width: 95vw;
                 height: 90vh;
-                max-width: 400px;
-                max-height: 650px;
+                max-width: 420px;
+                max-height: 700px;
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
                 box-shadow: 
-                    0 25px 80px rgba(0, 0, 0, 0.4),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+                    0 30px 100px rgba(79, 195, 247, 0.3),
+                    0 0 60px rgba(129, 212, 250, 0.2),
+                    inset 0 2px 0 rgba(255, 255, 255, 0.4);
             `;
             
-            // Header del juego
+            // Header del juego - Más colorido
             const header = gameModal.querySelector('.bubble-game-header');
             header.style.cssText = `
-                background: rgba(255, 255, 255, 0.12);
-                padding: 15px 20px;
+                background: linear-gradient(135deg, 
+                    rgba(79, 195, 247, 0.3) 0%, 
+                    rgba(129, 212, 250, 0.2) 100%);
+                padding: 18px 25px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-                flex-wrap: wrap;
-                gap: 10px;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+                gap: 15px;
             `;
             
-            // Aplicar más estilos...
+            // Título más llamativo
             const title = gameModal.querySelector('.game-title');
             title.style.cssText = `
-                font-size: 18px;
-                font-weight: 700;
-                color: white;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+                font-size: 22px;
+                font-weight: 800;
+                color: #fff;
+                text-shadow: 
+                    0 2px 8px rgba(79, 195, 247, 0.8),
+                    0 0 20px rgba(129, 212, 250, 0.6);
+                letter-spacing: 0.5px;
             `;
             
+            // Stats más vistosas
             const stats = gameModal.querySelector('.game-stats');
             stats.style.cssText = `
                 display: flex;
-                gap: 15px;
-                font-size: 12px;
-                font-weight: 600;
+                gap: 20px;
+                font-size: 14px;
+                font-weight: 700;
                 color: #ffd700;
-                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+                text-shadow: 
+                    0 2px 4px rgba(0, 0, 0, 0.5),
+                    0 0 10px rgba(255, 215, 0, 0.6);
             `;
             
-            // Área de juego
+            
+            // Leyenda más colorida
+            const legend = gameModal.querySelector('.bubble-legend');
+            legend.style.cssText = `
+                background: linear-gradient(135deg, 
+                    rgba(76, 175, 80, 0.15) 0%, 
+                    rgba(244, 67, 54, 0.15) 100%);
+                padding: 15px 25px;
+                display: flex;
+                justify-content: space-around;
+                flex-wrap: wrap;
+                gap: 15px;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+                font-size: 13px;
+                font-weight: 600;
+            `;
+            
+            // Items de leyenda más vistosos
+            const goodLegend = gameModal.querySelector('.legend-item.good');
+            goodLegend.style.cssText = `
+                background: linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(139, 195, 74, 0.2));
+                border: 2px solid rgba(76, 175, 80, 0.6);
+                border-radius: 25px;
+                padding: 8px 16px;
+                color: #4caf50;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+                font-weight: 700;
+            `;
+            
+            const badLegend = gameModal.querySelector('.legend-item.bad');
+            badLegend.style.cssText = `
+                background: linear-gradient(135deg, rgba(244, 67, 54, 0.3), rgba(229, 57, 53, 0.2));
+                border: 2px solid rgba(244, 67, 54, 0.6);
+                border-radius: 25px;
+                padding: 8px 16px;
+                color: #f44336;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+                font-weight: 700;
+            `;
+            
+            // Área de juego - Fondo tipo acuario brillante
             const stageContainer = gameModal.querySelector('.bubble-stage-container');
             stageContainer.style.cssText = `
                 flex: 1;
                 position: relative;
-                margin: 10px;
-                border-radius: 16px;
+                margin: 15px;
+                border-radius: 20px;
                 overflow: hidden;
                 background: 
-                    radial-gradient(ellipse at 50% 0%, rgba(79, 195, 247, 0.15) 0%, transparent 50%),
-                    linear-gradient(180deg, #0a1929 0%, #1e3a5f 100%);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.3);
+                    radial-gradient(ellipse 80% 60% at 50% 20%, rgba(129, 212, 250, 0.4) 0%, transparent 60%),
+                    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(79, 195, 247, 0.3) 0%, transparent 50%),
+                    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(41, 182, 246, 0.3) 0%, transparent 50%),
+                    linear-gradient(180deg, #4fc3f7 0%, #29b6f6 30%, #0288d1 70%, #0277bd 100%);
+                border: 3px solid rgba(255, 255, 255, 0.4);
+                box-shadow: 
+                    inset 0 0 80px rgba(255, 255, 255, 0.1),
+                    0 10px 40px rgba(79, 195, 247, 0.3);
+                animation: aquarium-glow 4s ease-in-out infinite alternate;
             `;
             
             const stage = gameModal.querySelector('#bubbleStage');
@@ -10093,9 +10154,122 @@ Comida premium y de cumpleaños
                 top: 0;
                 left: 0;
                 right: 0;
-                bottom: 40px;
+                bottom: 50px;
                 overflow: hidden;
             `;
+            
+            // Instrucciones más llamativas
+            const instructions = gameModal.querySelector('.game-instructions');
+            instructions.style.cssText = `
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 50px;
+                background: linear-gradient(135deg, rgba(79, 195, 247, 0.4), rgba(129, 212, 250, 0.3));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                color: white;
+                font-weight: 700;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+                border-top: 2px solid rgba(255, 255, 255, 0.3);
+            `;
+            
+            // Controles más gaming
+            const controls = gameModal.querySelector('.bubble-controls');
+            controls.style.cssText = `
+                background: linear-gradient(135deg, 
+                    rgba(79, 195, 247, 0.2) 0%, 
+                    rgba(129, 212, 250, 0.15) 100%);
+                padding: 20px;
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+                border-top: 2px solid rgba(255, 255, 255, 0.25);
+            `;
+            
+            // Botón JUGAR - Más llamativo
+            const startBtn = gameModal.querySelector('.bubble-btn.primary');
+            startBtn.style.cssText = `
+                background: linear-gradient(135deg, #4caf50, #66bb6a);
+                border: 3px solid rgba(255, 255, 255, 0.4);
+                border-radius: 25px;
+                padding: 15px 30px;
+                font-size: 16px;
+                font-weight: 800;
+                color: white;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                box-shadow: 
+                    0 8px 25px rgba(76, 175, 80, 0.4),
+                    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                letter-spacing: 1px;
+            `;
+            
+            startBtn.addEventListener('mouseenter', () => {
+                startBtn.style.transform = 'translateY(-3px) scale(1.05)';
+                startBtn.style.boxShadow = '0 12px 35px rgba(76, 175, 80, 0.6)';
+                startBtn.style.background = 'linear-gradient(135deg, #66bb6a, #4caf50)';
+            });
+            
+            startBtn.addEventListener('mouseleave', () => {
+                startBtn.style.transform = 'translateY(0) scale(1)';
+                startBtn.style.boxShadow = '0 8px 25px rgba(76, 175, 80, 0.4)';
+                startBtn.style.background = 'linear-gradient(135deg, #4caf50, #66bb6a)';
+            });
+            
+            // Botón SALIR - Más sutil pero elegante
+            const backBtn = gameModal.querySelector('.bubble-btn.secondary');
+            backBtn.style.cssText = `
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-radius: 20px;
+                padding: 12px 25px;
+                font-size: 14px;
+                font-weight: 600;
+                color: white;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                box-shadow: 
+                    0 6px 20px rgba(255, 255, 255, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            `;
+            
+            backBtn.addEventListener('mouseenter', () => {
+                backBtn.style.transform = 'translateY(-2px)';
+                backBtn.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2))';
+                backBtn.style.boxShadow = '0 8px 25px rgba(255, 255, 255, 0.2)';
+            });
+            
+            backBtn.addEventListener('mouseleave', () => {
+                backBtn.style.transform = 'translateY(0)';
+                backBtn.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1))';
+                backBtn.style.boxShadow = '0 6px 20px rgba(255, 255, 255, 0.1)';
+            });
+            
+            // Añadir animación de acuario
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes aquarium-glow {
+                    from { 
+                        filter: brightness(1) saturate(100%);
+                        box-shadow: 
+                            inset 0 0 80px rgba(255, 255, 255, 0.1),
+                            0 10px 40px rgba(79, 195, 247, 0.3);
+                    }
+                    to { 
+                        filter: brightness(1.1) saturate(120%);
+                        box-shadow: 
+                            inset 0 0 100px rgba(255, 255, 255, 0.15),
+                            0 15px 50px rgba(129, 212, 250, 0.4);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
         }
         
         // 🎮 LÓGICA DEL JUEGO DE BURBUJAS
@@ -10119,7 +10293,6 @@ Comida premium y de cumpleaños
                 bestEl: gameModal.querySelector('#bubble-best'),
                 starsEl: gameModal.querySelector('#bubble-stars'),
                 startBtn: gameModal.querySelector('#bubbleStartBtn'),
-                closeBtn: gameModal.querySelector('.bubble-close-btn'),
                 backBtn: gameModal.querySelector('.bubble-back-btn'),
                 resultsModal: gameModal.querySelector('.bubble-results-modal')
             };
@@ -10298,12 +10471,96 @@ Comida premium y de cumpleaños
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    background: rgba(0, 0, 0, 0.8);
-                    backdrop-filter: blur(10px);
+                    background: linear-gradient(135deg, 
+                        rgba(79, 195, 247, 0.3) 0%, 
+                        rgba(129, 212, 250, 0.2) 50%, 
+                        rgba(41, 182, 246, 0.3) 100%);
+                    backdrop-filter: blur(20px) saturate(180%);
                     align-items: center;
                     justify-content: center;
-                    animation: fadeIn 0.3s ease;
+                    animation: fadeIn 0.5s ease;
                 `;
+                
+                // Estilo del contenido de resultados
+                const resultsContent = gameModal.querySelector('.results-content');
+                resultsContent.style.cssText = `
+                    background: linear-gradient(145deg, 
+                        rgba(79, 195, 247, 0.4) 0%, 
+                        rgba(129, 212, 250, 0.3) 50%, 
+                        rgba(255, 255, 255, 0.2) 100%);
+                    backdrop-filter: blur(25px);
+                    border: 3px solid rgba(255, 255, 255, 0.4);
+                    border-radius: 25px;
+                    padding: 35px;
+                    text-align: center;
+                    color: white;
+                    max-width: 320px;
+                    box-shadow: 
+                        0 25px 80px rgba(79, 195, 247, 0.4),
+                        0 0 60px rgba(129, 212, 250, 0.3),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.5);
+                    animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                `;
+                
+                // Título de resultados
+                const resultsTitle = gameModal.querySelector('#results-title');
+                resultsTitle.style.cssText = `
+                    font-size: 24px;
+                    font-weight: 800;
+                    margin-bottom: 20px;
+                    text-shadow: 
+                        0 3px 8px rgba(79, 195, 247, 0.8),
+                        0 0 25px rgba(129, 212, 250, 0.6);
+                    color: ${won ? '#4caf50' : '#ff9800'};
+                `;
+                
+                // Stats de resultados
+                const resultsStats = gameModal.querySelector('.results-stats');
+                resultsStats.style.cssText = `
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    margin-bottom: 25px;
+                `;
+                
+                gameModal.querySelectorAll('.result-item').forEach(item => {
+                    item.style.cssText = `
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        background: rgba(255, 255, 255, 0.15);
+                        border-radius: 15px;
+                        padding: 12px 18px;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        font-weight: 600;
+                    `;
+                });
+                
+                // Botones de resultados
+                const resultsButtons = gameModal.querySelector('.results-buttons');
+                resultsButtons.style.cssText = `
+                    display: flex;
+                    gap: 15px;
+                    justify-content: center;
+                `;
+                
+                gameModal.querySelectorAll('#bubble-again-btn, #bubble-finish-btn').forEach(btn => {
+                    const isAgain = btn.id === 'bubble-again-btn';
+                    btn.style.cssText = `
+                        background: linear-gradient(135deg, 
+                            ${isAgain ? '#4caf50, #66bb6a' : 'rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1)'});
+                        border: 2px solid ${isAgain ? 'rgba(76, 175, 80, 0.6)' : 'rgba(255, 255, 255, 0.3)'};
+                        border-radius: 20px;
+                        padding: 12px 25px;
+                        font-size: 14px;
+                        font-weight: 700;
+                        color: white;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                        box-shadow: 0 6px 20px ${isAgain ? 'rgba(76, 175, 80, 0.4)' : 'rgba(255, 255, 255, 0.2)'};
+                    `;
+                });
                 
                 console.log(`🏆 Juego terminado: ${finalScore} puntos, ${starsWon} estrellas`);
                 
@@ -10343,7 +10600,6 @@ Comida premium y de cumpleaños
                 console.log('🫧 Juego cerrado');
             };
             
-            elements.closeBtn.addEventListener('click', closeGame);
             elements.backBtn.addEventListener('click', closeGame);
             gameModal.querySelector('#bubble-finish-btn').addEventListener('click', closeGame);
             
