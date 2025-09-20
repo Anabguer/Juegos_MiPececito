@@ -2853,7 +2853,7 @@
                 const isFirstTime = !savedData || !localStorage.getItem('miPececito_hasPlayed');
                 console.log('🔍 Primera vez:', isFirstTime);
                 
-                // IR DIRECTO A BIENVENIDA (sin pantalla de carga)
+                // IR DIRECTO (sin pantalla de carga)
                 loadingScreen.style.display = 'none';
                 
                 // LÓGICA CORRECTA: Solo bienvenida si NO hay pez
@@ -6393,41 +6393,10 @@
                 });
             }
 
-            // 🎮 Pantalla de carga personalizada con nombre del pez
+            // 🎮 Pantalla de carga ELIMINADA (ya no se usa)
             showLoadingWithFishName() {
-                const savedData = localStorage.getItem('miPececito_gameState');
-                let fishName = 'tu pececito';
-                
-                if (savedData) {
-                    try {
-                        const gameData = JSON.parse(savedData);
-                        fishName = gameData.fishName || 'tu pececito';
-                    } catch (e) {
-                        console.log('Error leyendo nombre del pez');
-                    }
-                }
-
-                const loadingScreen = document.getElementById('loadingScreen');
-                loadingScreen.innerHTML = `
-                    <div class="loading-content">
-                        <div class="logo-container">
-                            <img src="./images/ui/logo.png" alt="Mi Pececito" class="loading-logo">
-                        </div>
-                        <div class="loading-text">
-                            <h2>🐠 Cargando a ${fishName}...</h2>
-                            <div class="loading-dots">
-                                <span>.</span><span>.</span><span>.</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                loadingScreen.style.display = 'flex';
-                
-                // Ocultar después de 1.5 segundos
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                }, 1500);
+                console.log('🎮 showLoadingWithFishName() ELIMINADO - Ya no hay pantalla de carga');
+                // Método eliminado - ir directo al juego
             }
 
             // 💀 Añadir botón reset al menú solo si ya tienes pez
