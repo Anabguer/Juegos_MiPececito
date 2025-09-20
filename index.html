@@ -8697,7 +8697,11 @@ Comida premium y de cumpleaños
                     this.gameState.needs.dirt = this.clamp((1 - progress) * this.dirtStart, 0, 100);
                     this.updateNeedBars();
 
-                    if (this.cleanEmitT <= 0) this.cleaningActive = false;
+                    if (this.cleanEmitT <= 0) {
+                        this.cleaningActive = false;
+                        this.cleaningJustFinished = true; // Marcar que acabamos de terminar
+                        console.log('🧹 Limpieza terminada - Esperando que se vayan las burbujas...');
+                    }
                 }
 
                 // Movimiento paramétrico: y = y0 - p*(H+24)
@@ -8715,10 +8719,12 @@ Comida premium y de cumpleaños
                     if (b.t >= (b.dur || 1) || b.y < -12) this.cleanBubbles.splice(i, 1);
                 }
 
-                // Garantía: si ya no emitimos y no quedan burbujas, suciedad 0
-                if (!this.cleaningActive && this.gameState.needs.dirt > 0 && this.cleanBubbles.length === 0) {
+                // Garantía: si acabamos de terminar una limpieza y no quedan burbujas, asegurar suciedad 0
+                if (this.cleaningJustFinished && this.cleanBubbles.length === 0) {
                     this.gameState.needs.dirt = 0;
                     this.updateNeedBars();
+                    this.cleaningJustFinished = false; // Reset flag
+                    console.log('🧹 Limpieza completada - Garantía: suciedad = 0');
                 }
             }
             
