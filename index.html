@@ -3552,6 +3552,7 @@
                     // 🚀 SISTEMA REALISTA COMPLETO
                     this.updateAutoNeeds(deltaTime);      // Necesidades automáticas
                     this.updateCrisisFlags();             // Flags de crisis
+                    this.updateFood(deltaTime);           // 🍎 COMIDA DEL DOCUMENTO
                     this.updateFishMovement(deltaTime);    // Movimiento realista
                     this.updateTinyBubbles(deltaTime);     // Burbujas de respiración
                     this.updateFlyers(deltaTime);          // Corazones voladores
@@ -3784,6 +3785,9 @@
                 
                 // 💖 DIBUJAR CORAZONES VOLADORES
                 this.drawFlyers();
+                
+                // 🍎 DIBUJAR COMIDA DEL DOCUMENTO
+                this.drawFood();
             }
             
             // 🖌️ MÉTODOS DE RENDERIZADO
@@ -4628,15 +4632,11 @@
                 this.gameState.bubbles += 5; // 5 burbujas de regalo por nacer
                 this.gameState.stars += 1;   // 1 estrella de regalo
                 
-                // 🎆 EFECTOS VISUALES DE NACIMIENTO - SOLO BURBUJAS CHULAS (SIN ICONOS)
-                setTimeout(() => {
-                    this.explosionHappened = false; // RESETEAR FLAG PARA QUE FUNCIONE
-                    this.createExplosionBubbles(); // ESTAS SON LAS BURBUJAS CHULAS
-                    // this.showRewardEffect('bubbles', 5); // ESTAS TIENEN ICONOS - DESACTIVADAS
-                    // setTimeout(() => {
-                    //     this.showRewardEffect('stars', 1); // ESTAS TIENEN ICONOS - DESACTIVADAS
-                    // }, 1000);
-                }, 2000);
+                // 🎆 BURBUJAS ANTES DEL PEZ (INMEDIATAS)
+                this.explosionHappened = false; // RESETEAR FLAG
+                this.createExplosionBubbles(); // BURBUJAS PRIMERO
+                
+                console.log('🎆 Burbujas de nacimiento creadas ANTES del pez');
                 
                 console.log('🐠 ¡PEZ LOTTIE NACIDO! +5 🫧 +1 ⭐ de regalo');
                 this.updateUI();
@@ -8122,10 +8122,10 @@ Comida premium y de cumpleaños
                 return this.clamp(v, min, max);
             }
             
-            // 🍎 SOLO LA FUNCIÓN DROPFOOD (PASO 1)
+            // 🍎 SISTEMA DE COMIDA EXACTO DEL DOCUMENTO
             dropFood() {
                 const x = Math.random() * this.canvas.width;
-                const r = 2.6 + Math.random() * 1.2; // TAMAÑO PEQUEÑO COMO EN ORIGINAL
+                const r = 2.6 + Math.random() * 1.2;
                 
                 this.food.push({
                     x: x,
@@ -8133,12 +8133,80 @@ Comida premium y de cumpleaños
                     vx: 0,
                     vy: 6 + Math.random() * 6,
                     bottomT: 0,
-                    colorFill: '#ffd166', // Color simple por ahora
+                    colorFill: '#ffd166',
                     colorStroke: '#cc8400',
                     r: r
                 });
                 
-                console.log('🍎 Comida soltada (pequeña):', r);
+                console.log('🍎 Comida soltada:', x, r);
+            }
+            
+            updateFood(deltaTime) {
+                const h = this.canvas.height;
+                const drag = 0.99;
+                
+                // EXACTO DEL DOCUMENTO - LÍNEAS 254-256
+                for (const f of this.food) {
+                    if (f.bottomT > 0) {
+                        f.bottomT += deltaTime;
+                    } else {
+                        f.vy = Math.min(f.vy + 80 * deltaTime, 90);
+                        f.y += f.vy * deltaTime;
+                        f.x += f.vx * deltaTime;
+                        f.vx *= drag;
+                        if (f.y > h - 12) {
+                            f.y = h - 12;
+                            f.vy = 0;
+                            f.vx = 0;
+                            f.bottomT = 0.001;
+                        }
+                    }
+                }
+                
+                // EXACTO DEL DOCUMENTO - LÍNEAS 258-269
+                for (let i = this.food.length - 1; i >= 0; i--) {
+                    const f = this.food[i];
+                    if (this.fish && this.dist(this.fish.x, this.fish.y, f.x, f.y) < 22) {
+                        this.food.splice(i, 1);
+                        this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - 35, 0, 100);
+                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 8, 0, 100);
+                        
+                        this.labels.push({
+                            x: this.fish.x,
+                            y: this.fish.y - 12,
+                            text: "Ñam",
+                            a: 1,
+                            vy: 40,
+                            life: 1.4
+                        });
+                        
+                        this.fish.happyBurst = Math.max(this.fish.happyBurst, 1.2);
+                        this.fish.spinKind = "eat";
+                        
+                        if (this.gameState.crisis.hunger) {
+                            this.gameState.needs.hunger = Math.min(this.gameState.needs.hunger, 60);
+                        }
+                        
+                        this.updateCrisisFlags();
+                        this.updateNeedBars();
+                    } else if (f.bottomT > 0 && f.bottomT > 8) {
+                        this.food.splice(i, 1);
+                    }
+                }
+            }
+            
+            drawFood() {
+                this.ctx.save();
+                for (const f of this.food) {
+                    this.ctx.beginPath();
+                    this.ctx.arc(f.x, f.y, f.r || 3, 0, Math.PI * 2);
+                    this.ctx.fillStyle = f.colorFill || '#ffd166';
+                    this.ctx.fill();
+                    this.ctx.lineWidth = 1;
+                    this.ctx.strokeStyle = f.colorStroke || '#cc8400';
+                    this.ctx.stroke();
+                }
+                this.ctx.restore();
             }
             
             // 🍎 FUNCIONES DE COMIDA
