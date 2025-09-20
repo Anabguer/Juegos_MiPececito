@@ -2295,6 +2295,45 @@
             to { opacity: 0.9; transform: translateX(0); }
         }
         
+        /* 🥚 MENSAJE SIMPLE DEL HUEVITO */
+        .welcome-info {
+            margin: 20px 0;
+        }
+        
+        .egg-message {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.4;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 12px;
+        }
+        
+        .games-tip {
+            font-size: 14px;
+            opacity: 0.85;
+            line-height: 1.4;
+            background: rgba(76, 175, 80, 0.15); /* Verde suave */
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            animation: tip-glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes tip-glow {
+            from { box-shadow: 0 0 5px rgba(76, 175, 80, 0.3); }
+            to { box-shadow: 0 0 15px rgba(76, 175, 80, 0.5); }
+        }
+        
+        /* 💖 EFECTO PULSE PARA BARRA DE DIVERSIÓN */
+        @keyframes ping {
+            0% { box-shadow: 0 0 0 0 rgba(155,231,255,.9) }
+            100% { box-shadow: 0 0 0 14px rgba(155,231,255,0) }
+        }
+        .pulse { animation: ping 1.1s ease-out; }
+        
         .start-button {
             padding: 16px 32px;
             border: 3px solid #01579b;
@@ -2625,11 +2664,7 @@
         <!-- ICONOS FLOTANTES ELIMINADOS - ERAN MOLESTOS -->
     </div>
     
-    <!-- 📱 Pantalla de carga -->
-    <div id="loadingScreen">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Cargando Mi Pececito...</div>
-    </div>
+    <!-- 📱 Pantalla de carga ELIMINADA -->
     
     <!-- 🎉 Pantalla de bienvenida (primera vez) -->
     <div id="welcomeScreen" style="display: none;">
@@ -2642,41 +2677,26 @@
             <h1>¡Bienvenido a<br>Mi Pececito!</h1>
             <p>Tu aventura de mascota virtual comienza aquí</p>
             
-            <!-- 🎓 TUTORIAL BÁSICO -->
-            <div class="welcome-tutorial">
-                <div class="tutorial-step">
-                    <span class="tutorial-icon">🥚</span>
-                    <span class="tutorial-text">Primero aparecerá tu huevo</span>
-                </div>
-                <div class="tutorial-step">
-                    <span class="tutorial-icon">⏰</span>
-                    <span class="tutorial-text">Espera a que nazca tu pez</span>
-                </div>
-                <div class="tutorial-step">
-                    <span class="tutorial-icon">🍎</span>
-                    <span class="tutorial-text">Dale comida cuando tenga hambre</span>
-                </div>
-                <div class="tutorial-step">
-                    <span class="tutorial-icon">🧹</span>
-                    <span class="tutorial-text">Limpia cuando esté sucio</span>
-                </div>
-                <div class="tutorial-step">
-                    <span class="tutorial-icon">👆</span>
-                    <span class="tutorial-text">Tócalo para que se divierta</span>
-                </div>
+            <!-- 🥚 MENSAJE SIMPLE DEL HUEVITO -->
+            <div class="welcome-info">
+                <p class="egg-message">
+                    Primero aparecerá tu huevito.<br>
+                    En <strong>5 minutos</strong> nacerá tu pececito.
+                </p>
+                <p class="games-tip">
+                    💡 <strong>¡Mientras esperas puedes jugar!</strong><br>
+                    Usa el botón de juegos para divertirte y ganar burbujas y estrellas.
+                </p>
             </div>
             
-            <!-- 🌊 BURBUJAS DECORATIVAS MEJORADAS -->
+            <!-- 🌊 BURBUJAS SUTILES (MENOS ICONOS) -->
             <div class="welcome-bubbles">
                 <div class="bubble bubble-1">🫧</div>
-                <div class="bubble bubble-2">💙</div>
+                <div class="bubble bubble-2">🫧</div>
                 <div class="bubble bubble-3">🫧</div>
-                <div class="bubble bubble-4">🐟</div>
-                <div class="bubble bubble-5">🫧</div>
-                <div class="bubble bubble-6">⭐</div>
             </div>
             
-            <button id="startGameBtn" class="start-button">🥚 ¡Cuidar mi huevo!</button>
+            <button id="startGameBtn" class="start-button">¡Cuidar mi huevo!</button>
             
             <!-- Botón de reset eliminado - Solo aparece en menú si ya tienes pez -->
         </div>
@@ -2907,7 +2927,6 @@
         
         // 🚀 Inicializar juego
         async function initializeGame() {
-            const loadingScreen = document.getElementById('loadingScreen');
             const welcomeScreen = document.getElementById('welcomeScreen');
             const errorScreen = document.getElementById('errorScreen');
             
@@ -2940,7 +2959,6 @@
                 console.log('   isFirstTime:', isFirstTime);
                 
                 // IR DIRECTO (sin pantalla de carga)
-                loadingScreen.style.display = 'none';
                 
                 // LÓGICA CORRECTA: Solo bienvenida si NO hay pez
                 if (isFirstTime) {
@@ -2961,7 +2979,6 @@
                 console.error('❌ Error inicializando juego:', error);
                 
                 // Mostrar pantalla de error
-                loadingScreen.style.display = 'none';
                 errorScreen.style.display = 'flex';
             }
         }
@@ -3537,10 +3554,9 @@
             
             setupCanvas() {
                 const resize = () => {
-                    // DPR CORRECTO
-                    const dpr = window.devicePixelRatio || 1;
-                    this.canvas.width = Math.floor(window.innerWidth * dpr);
-                    this.canvas.height = Math.floor((window.innerHeight - 130) * dpr);
+                    // VERSIÓN SIMPLE QUE FUNCIONABA
+                    this.canvas.width = window.innerWidth;
+                    this.canvas.height = window.innerHeight - 130; // 70px header + 60px botones
                     
                     // CANVAS SIEMPRE DESDE EL HEADER (SIN ESPACIO AZUL)
                     this.canvas.style.top = '70px'; // SIEMPRE PEGADO AL HEADER
@@ -3548,8 +3564,6 @@
                     this.canvas.style.left = '0';
                     this.canvas.style.right = '0';
                     this.canvas.style.bottom = '60px'; // Espacio para botones compactos
-                    
-                    this.resizeBubLayer(); // ACTUALIZAR CAPA OFFSCREEN
                 };
                 window.addEventListener('resize', resize);
                 resize();
@@ -3665,7 +3679,7 @@
                 // Lógica de eclosión (solo si hay huevo colocado)
                 if (this.gameState.stage === 'egg' && this.gameState.eggStartTime) {
                     const elapsed = Date.now() - this.gameState.eggStartTime;
-                    const total = 24 * 60 * 60 * 1000; // 24 horas
+                    const total = 5 * 60 * 1000; // 5 MINUTOS PARA TESTING
                     
                     if (elapsed >= total) {
                         this.startHatching();
@@ -3705,15 +3719,10 @@
             }
             
         render() {
-            // 1) Limpiar en device pixels
-            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+            // Limpiar canvas (VERSIÓN SIMPLE QUE FUNCIONABA)
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             
-            // 2) Fijar DPR para dibujar en "mundo" (CSS px)
-            const dpr = window.devicePixelRatio || 1;
-            this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            
-            // 3) Asegurar modo composición normal
+            // Composición normal
             this.ctx.globalCompositeOperation = 'source-over';
                 
                 // Fondo
@@ -3915,10 +3924,8 @@
                 // Burbujas de necesidades (DESACTIVADAS)  
                 // this.drawNeedBubbles();
                 
-                // 🧹 DIBUJAR BURBUJAS EN CAPA OFFSCREEN Y PEGARLA
-                this.drawBubblesLayer();
-                const w = this.viewW(), h = this.viewH();
-                this.ctx.drawImage(this.bubLayer, 0, 0, this.bubLayer.width, this.bubLayer.height, 0, 0, w, h);
+                // 🧹 DIBUJAR BURBUJAS SIMPLE (REVERTIR A VERSIÓN QUE FUNCIONABA)
+                this.drawCleanBubbles();
                 
                 // 💖 DIBUJAR CORAZONES VOLADORES
                 this.drawFlyers();
@@ -3938,15 +3945,25 @@
                 for (let i = this.bgBubbles.length - 1; i >= 0; i--) {
                     const bubble = this.bgBubbles[i];
                     
-                    // 🫧 BURBUJAS DEL TEST (NUEVO SISTEMA)
-                    if (bubble.isTestBubble) {
+                    // 🫧 TODAS LAS BURBUJAS (TEST + NUEVAS + EFECTOS)
+                    if (bubble.isTestBubble || bubble.type) {
                         // Actualizar posición
-                        bubble.x += bubble.vx;
-                        bubble.y += bubble.vy;
-                        bubble.life--;
+                        bubble.x += bubble.vx * 0.016; // deltaTime aproximado
+                        bubble.y += bubble.vy * 0.016;
                         
-                        // Eliminar si se acabó la vida
-                        if (bubble.life <= 0) {
+                        // Actualizar vida (compatible con ambos sistemas)
+                        if (bubble.maxLife) {
+                            bubble.life += 0.016; // Incrementar para nuevas burbujas
+                        } else {
+                            bubble.life--; // Decrementar para burbujas viejas
+                        }
+                        
+                        // Eliminar si se acabó la vida (compatible con ambos sistemas)
+                        const shouldRemove = bubble.maxLife ? 
+                            (bubble.life >= bubble.maxLife) : // Nuevas: life >= maxLife
+                            (bubble.life <= 0); // Viejas: life <= 0
+                            
+                        if (shouldRemove) {
                             this.bgBubbles.splice(i, 1);
                             continue;
                         }
@@ -3959,7 +3976,7 @@
                             this.ctx.shadowColor = bubble.color;
                         }
                         
-                        this.ctx.globalAlpha = bubble.alpha;
+                        this.ctx.globalAlpha = bubble.alpha || bubble.opacity || 0.8;
                         this.ctx.fillStyle = bubble.color;
                         this.ctx.beginPath();
                         this.ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
@@ -4019,32 +4036,34 @@
             
             drawEgg() {
                 const elapsed = Date.now() - this.gameState.eggStartTime;
-                const total = 24 * 60 * 60 * 1000; // 24 horas
+                const total = 5 * 60 * 1000; // 5 MINUTOS PARA TESTING // 24 horas
                 const progress = Math.min(elapsed / total, 1);
                 
-                // 🎆 ANIMACIÓN DE APARICIÓN GRADUAL
+                // 🎆 ANIMACIÓN SUAVE: SOLO FADE (SIN ESCALA BRUSCA)
                 if (this.egg.appearing) {
-                    // Crecimiento gradual
-                    if (this.egg.scale < this.egg.targetScale) {
-                        this.egg.scale += 0.03; // Aparición suave
-                    }
-                    
-                    // Fade in gradual
+                    // Solo fade in gradual (sin escala)
                     if (this.egg.alpha < this.egg.targetAlpha) {
-                        this.egg.alpha += 0.02; // Aparición suave
+                        this.egg.alpha += this.egg.fadeSpeed * 0.016; // Suave y controlado
                     }
                     
-                    // Terminar animación cuando esté completo
-                    if (this.egg.scale >= this.egg.targetScale && this.egg.alpha >= this.egg.targetAlpha) {
+                    // Terminar animación cuando esté opaco
+                    if (this.egg.alpha >= this.egg.targetAlpha) {
                         this.egg.appearing = false;
-                        this.egg.scale = 1;
                         this.egg.alpha = 1;
-                        console.log('✨ Animación de aparición completada');
+                        console.log('✨ Animación suave completada');
                     }
                 }
                 
-                // Obtener imagen correcta del huevo
+                // Obtener imagen correcta del huevo CON TRANSICIÓN
                 const currentImage = this.getCurrentEggImage(progress);
+                
+                // 🎭 DETECTAR CAMBIO DE HUEVO Y HACER TRANSICIÓN
+                if (!this.egg.lastImage) this.egg.lastImage = currentImage;
+                if (currentImage !== this.egg.lastImage) {
+                    console.log('🥚 ¡Huevo evolucionando! Transición suave...');
+                    this.egg.lastImage = currentImage;
+                    this.createEggTransitionEffect();
+                }
                 
                 if (currentImage) {
                     // Animación de flotación
@@ -4095,6 +4114,9 @@
                     // 🫧 BURBUJITAS SUTILES DE GESTACIÓN
                     this.drawEggGestationBubbles();
                     
+                    // 🎆 CHISPORROTEO ALREDEDOR (COMO HIRVIENDO)
+                    this.drawEggSizzleEffect();
+                    
                     this.ctx.restore();
                 } else {
                     // Fallback: huevo dibujado MÁS GRANDE
@@ -4106,11 +4128,153 @@
             }
             
             getCurrentEggImage(progress) {
-                if (progress < 0.2) return this.eggImages['00'];
-                if (progress < 0.4) return this.eggImages['01'];
-                if (progress < 0.6) return this.eggImages['02'];
-                if (progress < 0.8) return this.eggImages['03'];
-                return this.eggImages['04'];
+                // 🥚 CADA MINUTO CAMBIA DE HUEVO (5 huevos en 5 minutos)
+                if (progress < 0.2) return this.eggImages['00']; // Minuto 0-1
+                if (progress < 0.4) return this.eggImages['01']; // Minuto 1-2  
+                if (progress < 0.6) return this.eggImages['02']; // Minuto 2-3
+                if (progress < 0.8) return this.eggImages['03']; // Minuto 3-4
+                return this.eggImages['04']; // Minuto 4-5 (eclosión)
+            }
+            
+            // ✨ EFECTOS SUAVES PARA APARICIÓN DEL HUEVO
+            createSoftEggEffects() {
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                
+                // 🌈 PARTÍCULAS DE COLORES SUAVES (como nacimiento del pez pero diferentes)
+                for (let i = 0; i < 50; i++) {
+                    const angle = (i / 50) * Math.PI * 2;
+                    const distance = 80 + Math.random() * 40;
+                    const x = centerX + Math.cos(angle) * distance;
+                    const y = centerY + Math.sin(angle) * distance;
+                    
+                    this.bgBubbles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * (20 + Math.random() * 30),
+                        vy: Math.sin(angle) * (20 + Math.random() * 30),
+                        r: 3 + Math.random() * 4,
+                        life: 0,
+                        maxLife: 3 + Math.random() * 2,
+                        opacity: 0.7 + Math.random() * 0.3,
+                        color: i % 3 === 0 ? '#87ceeb' : i % 3 === 1 ? '#b0e0e6' : '#e0f6ff', // Azules suaves
+                        type: 'soft-magic'
+                    });
+                }
+                
+                console.log('✨ 50 partículas suaves creadas para el huevo');
+            }
+            
+            // 🎭 EFECTO DE TRANSICIÓN CUANDO CAMBIA EL HUEVO
+            createEggTransitionEffect() {
+                const centerX = this.egg.x;
+                const centerY = this.egg.y;
+                
+                // 🌟 PARTÍCULAS DORADAS DE EVOLUCIÓN (diferentes a las azules)
+                for (let i = 0; i < 20; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 30 + Math.random() * 20;
+                    const x = centerX + Math.cos(angle) * distance;
+                    const y = centerY + Math.sin(angle) * distance;
+                    
+                    this.bgBubbles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * (10 + Math.random() * 15),
+                        vy: Math.sin(angle) * (10 + Math.random() * 15) - 20, // Hacia arriba
+                        r: 2 + Math.random() * 3,
+                        life: 0,
+                        maxLife: 1.5 + Math.random() * 1,
+                        opacity: 0.8 + Math.random() * 0.2,
+                        color: i % 2 === 0 ? '#ffd700' : '#ffec8b', // Dorado suave
+                        type: 'egg-evolution'
+                    });
+                }
+                
+                console.log('🌟 Efecto de evolución del huevo creado');
+            }
+            
+            // 🎆 EXPLOSIÓN DE BURBUJAS PARA APARICIÓN DEL HUEVO (COMO NACIMIENTO)
+            createEggExplosionBubbles() {
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                
+                console.log('✨ Creando efecto de aparición del huevo (estilo nacimiento)');
+                
+                // LIMPIAR explosionBubbles para el huevo
+                this.explosionBubbles.length = 0;
+                
+                // EXPLOSIÓN DE BURBUJAS - VERSIÓN HUEVO (colores diferentes)
+                for (let i = 0; i < 100; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 30 + Math.random() * 80; // Velocidad variada
+                    const size = 3 + Math.random() * 8; // Tamaños variados
+                    const life = 3 + Math.random() * 2; // Duraderas
+                    
+                    // Colores DORADOS y BLANCOS (diferentes al nacimiento)
+                    const colors = ['#FFFFFF', '#FFF8DC', '#FFEBCD', '#F0E68C', '#FFD700', '#FFA500', '#FFEC8B'];
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    this.explosionBubbles.push({
+                        x: centerX + (Math.random() - 0.5) * 50,
+                        y: centerY + (Math.random() - 0.5) * 50,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        r: size,
+                        life: life, // VIDA INICIAL
+                        maxLife: life,
+                        opacity: 0.8 + Math.random() * 0.2,
+                        color: color,
+                        type: 'egg-birth'
+                    });
+                }
+                
+                console.log('🎆 100 burbujas doradas creadas para aparición del huevo');
+            }
+            
+            // 🎆 EFECTO CHISPORROTEO ALREDEDOR DEL HUEVO (COMO HIRVIENDO)
+            drawEggSizzleEffect() {
+                const time = Date.now() * 0.003; // Tiempo rápido para chispas
+                const eggSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--egg-size'));
+                const radius = eggSize * 0.6; // Alrededor del huevo
+                
+                // 🎇 8 CHISPAS ROTANDO ALREDEDOR
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2 + time; // Rotación
+                    const sparkRadius = radius + Math.sin(time * 3 + i) * 8; // Vibración
+                    const x = Math.cos(angle) * sparkRadius;
+                    const y = Math.sin(angle) * sparkRadius;
+                    
+                    // Chispa con transparencia variable
+                    const opacity = 0.3 + Math.sin(time * 4 + i * 0.5) * 0.3;
+                    const size = 2 + Math.sin(time * 5 + i) * 1;
+                    
+                    this.ctx.save();
+                    this.ctx.globalAlpha = opacity;
+                    this.ctx.fillStyle = i % 2 === 0 ? '#ffeb3b' : '#ff9800'; // Amarillo/naranja
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                }
+                
+                // 🔥 PARTÍCULAS ASCENDENTES (como vapor)
+                if (Math.random() < 0.3) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const startRadius = radius * 0.8;
+                    const x = Math.cos(angle) * startRadius;
+                    const y = Math.sin(angle) * startRadius;
+                    
+                    this.bgBubbles.push({
+                        x: x, y: y,
+                        vx: (Math.random() - 0.5) * 10,
+                        vy: -20 - Math.random() * 15, // Hacia arriba
+                        r: 1 + Math.random() * 2,
+                        life: 0,
+                        maxLife: 1 + Math.random() * 0.5,
+                        opacity: 0.4 + Math.random() * 0.3,
+                        color: '#fff8e1', // Vapor blanquecino
+                        type: 'egg-sizzle'
+                    });
+                }
             }
             
             drawEggTimer() {
@@ -4118,7 +4282,7 @@
                 
                 const currentTime = Date.now();
                 const elapsed = currentTime - this.gameState.eggStartTime;
-                const total = 24 * 60 * 60 * 1000; // 24 HORAS
+                const total = 5 * 60 * 1000; // 5 MINUTOS PARA TESTING // 24 HORAS
                 const remaining = Math.max(0, total - elapsed);
                 
                 // DEBUG: Verificar que el tiempo avanza
@@ -5058,27 +5222,27 @@
                 fish.y += fish.vy * deltaTime;
                 
                 // 🚧 LÍMITES MÓVIL - SEGUROS PARA TODOS LOS DISPOSITIVOS
-                const fishSize = 60; // Tamaño del pez
-                const fishHalfSize = fishSize / 2; // 30px - radio del pez
+                const fishSize = 80; // Tamaño REAL del pez Lottie (más grande)
+                const fishHalfSize = fishSize / 2; // 40px - radio del pez
                 const W = this.canvas.width;
                 const H = this.canvas.height;
                 
                 // ZONA SEGURA: Header = 70px, Botones = 60px (nuevo compacto)
                 const topLimit = 70 + 30; // Header + más espacio para necesidades
                 const bottomLimit = H - 60 - 30; // MÁS ESPACIO ABAJO para comida
-                const leftLimit = fishHalfSize + 5; // 35px - PEZ NUNCA SE SALE
-                const rightLimit = W - fishHalfSize - 5; // W-35px - PEZ NUNCA SE SALE
+                const leftLimit = fishHalfSize + 15; // 55px - MÁS MARGEN IZQUIERDO
+                const rightLimit = W - fishHalfSize - 15; // W-55px - MÁS MARGEN DERECHO
                 
                 // LÍMITES HORIZONTALES
                 if (fish.x < leftLimit) { 
                     fish.x = leftLimit; 
                     fish.vx = Math.abs(fish.vx) * 0.8; // Rebote suave hacia adentro
-                    console.log(`🚧 LÍMITE IZQUIERDO: Pez reposicionado a x=${leftLimit}`);
+                    console.log(`🚧 LÍMITE IZQUIERDO: Pez reposicionado a x=${leftLimit} (margen: ${leftLimit}px)`);
                 }
                 if (fish.x > rightLimit) { 
                     fish.x = rightLimit; 
                     fish.vx = -Math.abs(fish.vx) * 0.8; // Rebote suave hacia adentro
-                    console.log(`🚧 LÍMITE DERECHO: Pez reposicionado a x=${rightLimit}`);
+                    console.log(`🚧 LÍMITE DERECHO: Pez reposicionado a x=${rightLimit} (margen: ${W - rightLimit}px)`);
                 }
                 
                 // LÍMITES VERTICALES
@@ -7016,14 +7180,20 @@
                 this.gameState.stage = 'waiting';
                 this.gameState.eggStartTime = null;
                 
+                // 🏷️ RESETEAR NOMBRE PARA NUEVO PEZ
+                this.gameState.hasAskedForName = false;
+                this.gameState.fishName = null;
+                console.log('🏷️ Estado de nombre reseteado para nuevo pez');
+                
                     const centerX = this.canvas.width / 2;
                     const centerY = this.canvas.height / 2;
                     
-                // PASO 1: Activar efectos mágicos INMEDIATAMENTE
-                this.gameState.showMagicBubbles = true;
-                this.gameState.magicStartTime = Date.now() * 0.001;
+                // PASO 1: USAR EL MISMO EFECTO QUE EL NACIMIENTO DEL PEZ
+                console.log('🚀 LLAMANDO createEggExplosionBubbles()...');
+                this.createEggExplosionBubbles();
+                console.log('🚀 createEggExplosionBubbles() EJECUTADO');
                     
-                console.log('🫧 Tormenta de burbujas iniciada...');
+                console.log('✨ Burbujas de aparición del huevo (como nacimiento)...');
                 
                 // PASO 2: Colocar huevo y EMPEZAR CRONÓMETRO (2.2s)
                     setTimeout(() => {
@@ -7794,9 +7964,19 @@ Comida premium y de cumpleaños
             // 🐠 SISTEMA DE NOMBRE
             
             askForFishName() {
-                if (this.gameState.hasAskedForName || this.gameState.fishName) return;
+                console.log('🏷️ DEBUG NOMBRE:', {
+                    hasAskedForName: this.gameState.hasAskedForName,
+                    fishName: this.gameState.fishName,
+                    shouldAsk: !this.gameState.hasAskedForName && !this.gameState.fishName
+                });
+                
+                if (this.gameState.hasAskedForName || this.gameState.fishName) {
+                    console.log('❌ No preguntar nombre - Ya preguntado o ya tiene nombre');
+                    return;
+                }
                 
                 this.gameState.hasAskedForName = true;
+                console.log('🏷️ Preguntando nombre del pez...');
                 
                 // Mostrar burbuja de nombre
                 this.showNameBubble();
@@ -8157,14 +8337,15 @@ Comida premium y de cumpleaños
 
             // 🎆 ANIMACIÓN DE APARICIÓN DEL HUEVO (SOLO APARICIÓN)
             startEggAppearanceAnimation() {
-                // Inicializar propiedades de animación del huevo
+                // EFECTO SUAVE: Solo fade, sin escala brusca
                 this.egg.appearing = true;
-                this.egg.scale = 0;
+                this.egg.scale = 1; // TAMAÑO NORMAL DESDE EL INICIO
                 this.egg.targetScale = 1;
-                this.egg.alpha = 0;
-                this.egg.targetAlpha = 1;
+                this.egg.alpha = 0; // EMPEZAR TRANSPARENTE
+                this.egg.targetAlpha = 1; // IR A OPACO
+                this.egg.fadeSpeed = 0.8; // VELOCIDAD SUAVE
                 
-                console.log('🥚 Iniciando aparición gradual del huevo...');
+                console.log('🥚 Iniciando aparición SUAVE del huevo (fade)...');
             }
 
             // 🌫️ BURBUJAS DE APARICIÓN - TEST VISUAL DIRECTO
@@ -8243,7 +8424,7 @@ Comida premium y de cumpleaños
             }
             
             setEggTimeToFinalSeconds() {
-                const total = 24 * 60 * 60 * 1000;
+                const total = 5 * 60 * 1000; // 5 MINUTOS PARA TESTING
                 this.gameState.eggStartTime = Date.now() - (total - 5000);
                 console.log('🐣 Huevo a punto de eclosionar (5 segundos)');
             }
@@ -8580,22 +8761,29 @@ Comida premium y de cumpleaños
             
             // ❤️ CORAZÓN VOLADOR (cuando tocas el pez)
             launchHeartToFun() {
-                // Crear corazón que vuela hacia la barra de diversión
-                const sx = this.fish.x;
-                const sy = this.fish.y;
-                const ex = this.canvas.width * 0.8; // Hacia arriba-derecha
-                const ey = 50; // Cerca del header
+                // VERSIÓN CHATGPT: Convertir coords DOM de la barra a coords canvas
+                const barF = document.getElementById('funBarHeader'); // Barra de diversión del header
+                if (!barF) {
+                    console.log('❌ No se encontró barra de diversión');
+                    return;
+                }
+                
+                const crect = this.canvas.getBoundingClientRect();
+                const frect = barF.getBoundingClientRect();
+                
+                const sx = this.fish.x, sy = this.fish.y; // origen corazón (pez)
+                const ex = frect.left + frect.width * 0.9 - crect.left; // destino barra
+                const ey = frect.top + frect.height * 0.5 - crect.top;
+                
+                // control point para Bezier (curvita agradable)
                 const cx = (sx + ex) / 2;
                 const cy = Math.min(sy, ey) - 100;
                 
-                this.flyers.push({
-                    t: 0,
-                    dur: 1.8,
-                    sx, sy, cx, cy, ex, ey,
-                    given: false
+                this.flyers.push({ 
+                    t: 0, dur: 1.8, sx, sy, cx, cy, ex, ey, given: false 
                 });
                 
-                console.log('❤️ Corazón lanzado hacia diversión');
+                console.log('❤️ Corazón lanzado hacia barra de diversión (coords DOM)');
             }
             
             // 🫧 BURBUJAS DE RESPIRACIÓN (desde la boca)
@@ -8734,9 +8922,9 @@ Comida premium y de cumpleaños
             }
             
             // 🎯 VIEW HELPERS - COORDENADAS SIMPLES 
-        // 🌍 TAMAÑO "MUNDO" EN CSS PX (FIX DPR)
-        viewW() { return this.canvas.width / (window.devicePixelRatio || 1); }
-        viewH() { return this.canvas.height / (window.devicePixelRatio || 1); }
+        // 🌍 TAMAÑO CANVAS SIMPLE (VERSIÓN QUE FUNCIONABA)
+        viewW() { return this.canvas.width; }
+        viewH() { return this.canvas.height; }
         
         // 🫧 GESTIÓN CAPA OFFSCREEN
         ensureBubLayer() {
@@ -8791,8 +8979,8 @@ Comida premium y de cumpleaños
                 this.bubCtx.stroke();
             }
         }
-            
-            // 🔧 FUNCIONES QUE FALTAN PARA EL SISTEMA REALISTA
+        
+        // 🔧 FUNCIONES QUE FALTAN PARA EL SISTEMA REALISTA
             updateAutoNeeds(deltaTime) {
                 // Incremento automático de necesidades
                 const minutes = deltaTime / 60;
@@ -8862,22 +9050,31 @@ Comida premium y de cumpleaños
             updateFlyers(deltaTime) {
                 if (!this.flyers) this.flyers = [];
                 
-                // Actualizar corazones voladores
+                // VERSIÓN CHATGPT: Actualizar progreso de corazones
+                for (const f of this.flyers) {
+                    f.t += deltaTime / f.dur;
+                }
+                
+                // Purgar completados y dar diversión
                 for (let i = this.flyers.length - 1; i >= 0; i--) {
-                    const heart = this.flyers[i];
-                    
-                    // Actualizar posición
-                    heart.x += heart.vx * deltaTime;
-                    heart.y += heart.vy * deltaTime;
-                    
-                    // Gravedad suave
-                    heart.vy += 20 * deltaTime;
-                    
-                    // Reducir vida
-                    heart.life -= deltaTime;
-                    
-                    // Eliminar si se acabó la vida
-                    if (heart.life <= 0) {
+                    const f = this.flyers[i];
+                    if (f.t >= 1) {
+                        if (!f.given) {
+                            // SUMAR DIVERSIÓN +0.25
+                            this.gameState.needs.fun = this.clamp(this.gameState.needs.fun + 25, 0, 100); // +25 = +0.25 en escala 0-100
+                            this.updateNeedBars();
+                            
+                            // Efecto visual en la barra
+                            const barF = document.getElementById('funBarHeader');
+                            if (barF) {
+                                barF.classList.remove('pulse'); 
+                                void barF.offsetWidth; 
+                                barF.classList.add('pulse');
+                            }
+                            
+                            f.given = true;
+                            console.log('💖 +25 diversión por tocar al pez');
+                        }
                         this.flyers.splice(i, 1);
                     }
                 }
@@ -8887,27 +9084,20 @@ Comida premium y de cumpleaños
             drawFlyers() {
                 if (!this.flyers) return;
                 
-                this.ctx.save();
-                
-                for (const heart of this.flyers) {
-                    const alpha = heart.life / heart.maxLife; // Fade out
+                // VERSIÓN CHATGPT: Curva de Bezier
+                for (const f of this.flyers) {
+                    const t = Math.min(1, f.t), u = 1 - t;
+                    // curva de Bezier 2 puntos
+                    const x = u*u*f.sx + 2*u*t*f.cx + t*t*f.ex;
+                    const y = u*u*f.sy + 2*u*t*f.cy + t*t*f.ey;
                     
-                    this.ctx.globalAlpha = alpha;
-                    this.ctx.font = `${heart.size}px Arial`;
-                    this.ctx.textAlign = 'center';
-                    this.ctx.textBaseline = 'middle';
-                    
-                    // Sombra suave
-                    this.ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
-                    this.ctx.shadowBlur = 3;
-                    this.ctx.shadowOffsetX = 1;
-                    this.ctx.shadowOffsetY = 1;
-                    
-                    // Dibujar corazón emoji
-                    this.ctx.fillText(heart.color, heart.x, heart.y);
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 0.9;
+                    this.ctx.font = 'bold 18px system-ui, Segoe UI, Arial';
+                    this.ctx.fillStyle = 'rgba(255,120,160,1)';
+                    this.ctx.fillText('❤', x - 6, y);
+                    this.ctx.restore();
                 }
-                
-                this.ctx.restore();
             }
         }
         
