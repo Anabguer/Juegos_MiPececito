@@ -3574,6 +3574,7 @@
                     this.updateAutoNeeds(deltaTime);      // Necesidades automáticas
                     this.updateCrisisFlags();             // Flags de crisis
                     this.updateFood(deltaTime);           // 🍎 COMIDA DEL DOCUMENTO
+                    this.updateCleaning(deltaTime);       // 🧹 LIMPIEZA ESPECTACULAR
                     this.updateFishMovement(deltaTime);    // Movimiento realista
                     this.updateTinyBubbles(deltaTime);     // Burbujas de respiración
                     this.updateFlyers(deltaTime);          // Corazones voladores
@@ -3801,6 +3802,9 @@
                 
                 // Burbujas de necesidades (DESACTIVADAS)  
                 // this.drawNeedBubbles();
+                
+                // 🧹 DIBUJAR BURBUJAS DE LIMPIEZA ESPECTACULARES
+                this.drawCleanBubbles();
                 
                 // 💖 DIBUJAR CORAZONES VOLADORES
                 this.drawFlyers();
@@ -5139,7 +5143,11 @@
             
             // 👆 CLICK EN PANTALLA - PEZ VIENE AL DEDO (SISTEMA DEL DEMO)
             handleCanvasClick(event) {
-                if (!this.fish || this.gameState.stage === 'egg' || this.fish.isDepressed) return;
+                console.log('👆 CLICK DETECTADO - Pez:', !!this.fish, 'Stage:', this.gameState.stage);
+                if (!this.fish || this.gameState.stage === 'egg' || this.fish.isDepressed) {
+                    console.log('❌ Click ignorado - Sin pez o en huevo');
+                    return;
+                }
                 
                 const rect = this.canvas.getBoundingClientRect();
                 const clickX = event.clientX - rect.left;
@@ -8213,13 +8221,124 @@ Comida premium y de cumpleaños
                 console.log('🍎 Pellet añadido:', pellet, 'Total food:', this.food.length);
             }
             
+            // 🧹 LIMPIEZA ESPECTACULAR CON BURBUJAS (DEL DOCUMENTO)
             startCleaning() {
-                console.log('🧹 startCleaning() llamado');
-                // Método básico de limpieza
-                this.gameState.needs.dirt = Math.max(0, this.gameState.needs.dirt - 30);
-                this.updateCrisisFlags();
+                console.log('🧹 ¡LIMPIEZA ESPECTACULAR INICIADA!');
+                
+                // Sistema del documento original
+                this.cleaningActive = true;
+                this.cleanEmitT = 2.6; // 2.6 segundos emitiendo burbujas
+                this.dirtStart = this.gameState.needs.dirt; // Guardar suciedad inicial
+                
+                // Pez feliz con giros de limpieza
+                if (this.fish) {
+                    this.fish.happyBurst = 3.2;
+                    this.fish.spinKind = "clean";
+                }
+                
+                // Crear arrays si no existen
+                if (!this.cleanBubbles) this.cleanBubbles = [];
+                
+                // Lote inicial inmediato
+                this.emitCleanBubbles();
+                
+                console.log('🧹 Pecera limpiándose con burbujas espectaculares!');
+            }
+            
+            // 🫧 EMITIR BURBUJAS DE LIMPIEZA (DESDE EL SUELO)
+            emitCleanBubbles() {
+                const W = this.canvas.width;
+                const H = this.canvas.height;
+                const vents = Math.max(16, Math.floor(W/24)); // Respiraderos
+                const perVent = 2; // Burbujas por respiradero por frame
+                
+                for (let i = 0; i < vents; i++) {
+                    const baseX = (i + 0.5) * (W / vents) + (Math.random() - 0.5) * 8;
+                    
+                    for (let k = 0; k < perVent; k++) {
+                        const vy = 260 + Math.random() * 120; // Subida rápida
+                        const y0 = H - 1.5 + Math.random() * 0.5; // Nacen del suelo
+                        const dur = (H + 24) / vy; // Duración exacta
+                        const x0 = this.clamp(baseX + (Math.random() - 0.5) * 6, 2, W - 2);
+                        
+                        this.cleanBubbles.push({
+                            x: x0, y: y0, x0: x0, y0: y0,
+                            r: 1.5 + Math.random() * 2.8,
+                            vy: vy,
+                            t: 0, dur: dur,
+                            wob: Math.random() * Math.PI * 2,
+                            wobSpd: 1.5 + Math.random() * 1.2,
+                            wobAmp: 6 + Math.random() * 10,
+                            from: "clean"
+                        });
+                    }
+                }
+                
+                // Control de memoria (máximo 1400 burbujas)
+                if (this.cleanBubbles.length > 1400) {
+                    this.cleanBubbles.splice(0, this.cleanBubbles.length - 1400);
+                }
+            }
+            
+            // 🧹 ACTUALIZAR SISTEMA DE LIMPIEZA
+            updateCleaning(deltaTime) {
+                if (!this.cleaningActive) return;
+                
+                this.cleanEmitT -= deltaTime;
+                this.emitCleanBubbles(); // Emitir más burbujas cada frame
+                
+                // Progreso de limpieza (0-1)
+                const progress = this.clamp(1 - Math.max(this.cleanEmitT, 0) / 2.6, 0, 1);
+                
+                // Bajar suciedad gradualmente
+                this.gameState.needs.dirt = this.clamp((1 - progress) * this.dirtStart, 0, 100);
                 this.updateNeedBars();
-                console.log('🧹 Limpieza realizada, suciedad:', this.gameState.needs.dirt);
+                
+                // Terminar limpieza
+                if (this.cleanEmitT <= 0) {
+                    this.cleaningActive = false;
+                    console.log('🧹 ¡Limpieza completada! Suciedad:', this.gameState.needs.dirt);
+                }
+                
+                // Mover burbujas con cinemática paramétrica
+                for (let i = this.cleanBubbles.length - 1; i >= 0; i--) {
+                    const b = this.cleanBubbles[i];
+                    if (b.dur) {
+                        b.t += deltaTime;
+                        const t = b.t / b.dur;
+                        
+                        if (t >= 1) {
+                            this.cleanBubbles.splice(i, 1);
+                            continue;
+                        }
+                        
+                        // Movimiento paramétrico suave
+                        b.y = b.y0 - b.vy * b.t;
+                        b.x = b.x0 + Math.sin(b.wob + b.wobSpd * b.t) * b.wobAmp * t;
+                    }
+                }
+            }
+            
+            // 🫧 DIBUJAR BURBUJAS DE LIMPIEZA
+            drawCleanBubbles() {
+                if (!this.cleanBubbles || this.cleanBubbles.length === 0) return;
+                
+                this.ctx.save();
+                
+                for (const b of this.cleanBubbles) {
+                    const t = b.t / b.dur;
+                    const alpha = Math.sin(Math.PI * t) * 0.7; // Fade in/out
+                    
+                    this.ctx.globalAlpha = alpha;
+                    this.ctx.strokeStyle = 'rgba(200, 220, 255, 0.9)';
+                    this.ctx.lineWidth = 1.6;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
+                
+                this.ctx.restore();
             }
             
             updateFood(deltaTime) {
@@ -8481,9 +8600,19 @@ Comida premium y de cumpleaños
             updateAutoNeeds(deltaTime) {
                 // Incremento automático de necesidades
                 const minutes = deltaTime / 60;
+                const oldHunger = this.gameState.needs.hunger;
+                
                 this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger + 0.1 * minutes, 0, 100);
                 this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + (1/15) * minutes, 0, 100);
                 this.gameState.needs.fun = this.clamp(this.gameState.needs.fun - (1/8) * minutes, 0, 100);
+                
+                // Log cada 5 segundos para debug
+                if (Math.random() < 0.02) {
+                    console.log('📊 Necesidades:', 
+                        'Hambre:', this.gameState.needs.hunger.toFixed(1),
+                        'Suciedad:', this.gameState.needs.dirt.toFixed(1), 
+                        'Diversión:', this.gameState.needs.fun.toFixed(1));
+                }
                 
                 // Actualizar barras visuales
                 this.updateNeedBars();
