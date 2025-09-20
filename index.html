@@ -2375,8 +2375,14 @@
         }
 
         #volumeIcon {
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            width: 24px;
+            height: 24px;
+            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
             transition: all 0.3s ease;
+        }
+        
+        .volume-icon {
+            pointer-events: none;
         }
 
         /* Efecto de ondas cuando se activa */
@@ -2620,7 +2626,7 @@
             </div>
             <!-- 🔊 BOTÓN DE VOLUMEN BONITO -->
             <button id="volumeBtn" class="volume-button" title="Controlar sonido">
-                <span id="volumeIcon">🔊</span>
+                <img id="volumeIcon" src="./images/ui/sonidoon.png" alt="Sonido" class="volume-icon">
             </button>
         </div>
     </div>
@@ -6442,14 +6448,22 @@
                 
                 // Verificar necesidades BASADAS EN LOS VALORES REALES
                 const needsFood = this.gameState.needs.hunger > 20; // Si hambre > 20%, activar botón (AJUSTADO)
-                const needsCleaning = this.gameState.needs.dirt > 15; // Limpieza cuando suciedad > 15% (MÁS SENSIBLE)
+                const needsCleaning = this.gameState.needs.dirt > 10; // Limpieza cuando suciedad > 10% (MUY SENSIBLE)
                 const needsMedicine = this.gameState.lastMedicine && (currentTime - this.gameState.lastMedicine) > medicineThreshold;
                 
                 // Actualizar botones (MEDICINA ELIMINADA) - MÁS DEBUG
                 console.log('🔘 BOTONES DEBUG:', 
                     'Hambre:', this.gameState.needs.hunger.toFixed(1) + '% → needsFood:', needsFood,
                     'Suciedad:', this.gameState.needs.dirt.toFixed(1) + '% → needsCleaning:', needsCleaning,
-                    'Umbral limpieza: >15%');
+                    'Umbral limpieza: >10%');
+                    
+                // DEBUG EXTRA para limpieza
+                if (this.gameState.needs.dirt > 50) {
+                    console.log('🧹 LIMPIEZA DEBUG EXTRA:', 
+                        'dirt:', this.gameState.needs.dirt,
+                        'needsCleaning:', needsCleaning,
+                        'cleanBtn existe:', !!document.getElementById('cleanBtn'));
+                }
                 this.toggleButton('feedBtn', needsFood);
                 this.toggleButton('cleanBtn', needsCleaning);
                 // this.toggleButton('medicineBtn', needsMedicine); // ELIMINADO
@@ -9744,7 +9758,7 @@ Comida premium y de cumpleaños
                 const volumeIcon = document.getElementById('volumeIcon');
                 
                 if (volumeBtn && volumeIcon) {
-                    volumeIcon.textContent = this.isMuted ? '🔇' : '🔊';
+                    volumeIcon.src = this.isMuted ? './images/ui/sonidooff.png' : './images/ui/sonidoon.png';
                     volumeBtn.title = this.isMuted ? 'Activar sonido' : 'Silenciar sonido';
                     volumeBtn.classList.toggle('muted', this.isMuted);
                 }
