@@ -6417,7 +6417,7 @@
                 
                 // Verificar necesidades BASADAS EN LOS VALORES REALES
                 const needsFood = this.gameState.needs.hunger > 20; // Si hambre > 20%, activar botón (AJUSTADO)
-                const needsCleaning = this.gameState.needs.dirt > 10; // Limpieza cuando suciedad > 10% (MUY SENSIBLE)
+                const needsCleaning = true; // LIMPIEZA SIEMPRE DISPONIBLE
                 const needsMedicine = this.gameState.lastMedicine && (currentTime - this.gameState.lastMedicine) > medicineThreshold;
                 
                 // Actualizar botones (MEDICINA ELIMINADA) - MÁS DEBUG
