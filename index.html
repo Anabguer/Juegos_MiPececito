@@ -2341,6 +2341,7 @@
             padding: 0;
             cursor: pointer;
             margin-top: 8px;
+            margin-left: 12px; /* Separación de los contadores */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -2355,9 +2356,14 @@
         }
 
         #volumeIcon {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
+            opacity: 0.75; /* Translúcido para que pegue con el resto */
             transition: all 0.3s ease;
+        }
+        
+        .volume-button:hover #volumeIcon {
+            opacity: 1; /* Completamente opaco al hover */
         }
         
         .volume-icon {
