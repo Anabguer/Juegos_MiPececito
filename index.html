@@ -1095,7 +1095,14 @@
             top: 70px;
             left: 0;
             right: 0;
-            height: 35px; /* MÁS COMPACTA */
+            height: 0; /* ALTURA 0 CUANDO ESTÁ OCULTA */
+            overflow: hidden;
+            transition: height 0.3s ease;
+        }
+        
+        /* CUANDO SE MUESTRA, TIENE ALTURA */
+        .needs-header-bar[style*="flex"] {
+            height: 35px !important;
         }
         
         .need-compact {
@@ -3419,19 +3426,9 @@
                 const resize = () => {
                     this.canvas.width = window.innerWidth;
                     
-                    // AJUSTAR DINÁMICAMENTE SEGÚN SI HAY PEZ O HUEVO
-                    const needsBar = document.getElementById('needsHeaderBar');
-                    const hasNeedsBar = needsBar && needsBar.style.display !== 'none';
-                    
-                    if (hasNeedsBar) {
-                        // CON BARRAS: 70px header + 35px barras = 105px
-                        this.canvas.height = window.innerHeight - 105;
-                        this.canvas.style.top = '105px';
-                    } else {
-                        // SIN BARRAS: Solo 70px header
-                        this.canvas.height = window.innerHeight - 70;
-                        this.canvas.style.top = '70px';
-                    }
+                    // CANVAS SIEMPRE DESDE EL HEADER (SIN ESPACIO AZUL)
+                    this.canvas.height = window.innerHeight - 160; // 70px header + 90px botones
+                    this.canvas.style.top = '70px'; // SIEMPRE PEGADO AL HEADER
                     
                     this.canvas.style.position = 'fixed';
                     this.canvas.style.left = '0';
