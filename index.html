@@ -1081,9 +1081,9 @@
         
         /* 📊 BARRA DE NECESIDADES COMPACTA DEBAJO DE CABECERA */
         .needs-header-bar {
-            background: linear-gradient(135deg, rgba(0, 80, 120, 0.9), rgba(0, 120, 180, 0.9)) !important;
+            background: linear-gradient(135deg, rgba(100, 150, 200, 0.8), rgba(130, 180, 230, 0.8)) !important;
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             padding: 6px 15px;
             display: none; /* OCULTA POR DEFECTO - SOLO VISIBLE CON PEZ */
             justify-content: center;
@@ -2466,21 +2466,21 @@
     <!-- 📊 BARRA DE NECESIDADES (SIEMPRE VISIBLE) -->
     <div id="needsHeaderBar" class="needs-header-bar">
         <div class="need-compact" title="Hambre: MÁS ROJO = MÁS HAMBRE">
-            <img src="./images/ui/barra_comida.png" alt="Hambre" class="need-icon" style="width: 16px; height: 16px;">
+            <img src="./images/ui/barra_comida.png" alt="Hambre" class="need-icon" style="width: 22px; height: 22px;">
             <div class="need-bar-mini">
                 <div class="need-fill-mini hunger" id="hungerBarHeader" style="width: 80%"></div>
             </div>
         </div>
         
         <div class="need-compact" title="Suciedad: MÁS VERDE = MÁS SUCIO">
-            <img src="./images/ui/barra_limpieza.png" alt="Limpieza" class="need-icon" style="width: 16px; height: 16px;">
+            <img src="./images/ui/barra_limpieza.png" alt="Limpieza" class="need-icon" style="width: 22px; height: 22px;">
             <div class="need-bar-mini">
                 <div class="need-fill-mini dirt" id="dirtBarHeader" style="width: 65%"></div>
             </div>
         </div>
         
         <div class="need-compact" title="Diversión: MÁS AZUL = MÁS FELIZ">
-            <img src="./images/ui/barra_diversion.png" alt="Diversión" class="need-icon" style="width: 16px; height: 16px;">
+            <img src="./images/ui/barra_diversion.png" alt="Diversión" class="need-icon" style="width: 22px; height: 22px;">
             <div class="need-bar-mini">
                 <div class="need-fill-mini fun" id="funBarHeader" style="width: 70%"></div>
             </div>
@@ -2816,6 +2816,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     
     <!-- 🚀 Script principal -->
+    <!-- 🥚 MODAL PARA CUIDAR HUEVO -->
+    <div id="eggPlacementModal" class="mobile-modal-overlay" style="display: none;">
+        <div class="mobile-modal-content">
+            <div class="mobile-modal-header">
+                <h2>🥚 ¡Tu primer pececito!</h2>
+            </div>
+            <div class="mobile-modal-body">
+                <p style="text-align: center; font-size: 18px; margin: 20px 0;">
+                    🐠 ¡Bienvenido a Mi Pececito! <br>
+                    ¿Estás listo para cuidar tu primer huevito?
+                </p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <button id="startCareBtn" class="care-btn" style="
+                        background: linear-gradient(135deg, #4caf50, #66bb6a);
+                        color: white;
+                        border: none;
+                        padding: 15px 30px;
+                        border-radius: 25px;
+                        font-size: 18px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+                        transition: all 0.3s ease;
+                    ">
+                        🥚 ¡Cuidar mi huevo!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // VERSIÓN CON LOTTIE REAL
         // import { createGame } from './src/core/Game.js';
@@ -2901,6 +2932,20 @@
                     setTimeout(() => {
                         if (game) game.showTutorialModal();
                     }, 500);
+                }
+            });
+            
+            // 🥚 Botón "Cuidar mi huevo"
+            document.getElementById('startCareBtn').addEventListener('click', () => {
+                console.log('🥚 Botón cuidar huevo clickeado');
+                const modal = document.getElementById('eggPlacementModal');
+                modal.style.display = 'none';
+                
+                // Iniciar colocación del huevo
+                if (game && game.startEggPlacement) {
+                    game.startEggPlacement();
+                } else {
+                    console.error('❌ game.startEggPlacement no disponible');
                 }
             });
             
@@ -3569,6 +3614,7 @@
                     this.updateFishMovement(deltaTime);    // Movimiento realista
                     this.updateTinyBubbles(deltaTime);     // Burbujas de respiración
                     this.updateFlyers(deltaTime);          // Corazones voladores
+                    this.updateLabels(deltaTime);          // 🍎 LABELS ("Ñam")
                     
                     // Actualizar UI cada pocos segundos
                     if (Math.random() < 0.01) {
@@ -3756,22 +3802,8 @@
                     this.drawEgg();
                     this.drawEggTimer(); // Timer bonito en pantalla
                 } else if (this.gameState.stage === 'waiting') {
-                    // ESPERANDO: No dibujar nada hasta colocar huevo
-                    this.ctx.save();
-                    // MENSAJE BONITO Y CLARO
-                    this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                    this.ctx.strokeStyle = 'rgba(0,100,150,0.8)';
-                    this.ctx.lineWidth = 3;
-                    this.ctx.font = 'bold 24px system-ui';
-                    this.ctx.textAlign = 'center';
-                    
-                    const message = '🐠 ¡Toca para cuidar tu primer pececito! 🥚';
-                    const x = this.canvas.width / 2;
-                    const y = this.canvas.height / 2;
-                    
-                    this.ctx.strokeText(message, x, y);
-                    this.ctx.fillText(message, x, y);
-                    this.ctx.restore();
+                    // ESPERANDO: Mostrar modal automáticamente
+                    this.showEggPlacementModal();
                 }
                 
                 // Burbujas de explosión
@@ -3810,6 +3842,9 @@
                 
                 // 💖 DIBUJAR CORAZONES VOLADORES
                 this.drawFlyers();
+                
+                // 🍎 DIBUJAR LABELS ("Ñam") ENCIMA DE TODO
+                this.drawLabels();
                 
                 // 🍎 COMIDA YA SE DIBUJA ANTES DEL PEZ (LÍNEA 3743)
             }
@@ -3950,9 +3985,10 @@
                         }
                     }
                     
-                    // Dibujar huevo MÁS GRANDE Y ALTO CON ANIMACIÓN
-                    const eggWidth = 100; // Más ancho (vs 80)
-                    const eggHeight = 120; // Más alto para forma de huevo
+                    // Dibujar huevo MÁS GRANDE - USAR CSS VARIABLE
+                    const eggSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--egg-size'));
+                    const eggWidth = eggSize; // Usar variable CSS
+                    const eggHeight = eggSize; // Cuadrado perfecto
                     
                     this.ctx.save();
                     
@@ -4951,17 +4987,17 @@
                 fish.x += fish.vx * deltaTime;
                 fish.y += fish.vy * deltaTime;
                 
-                // 🚧 LÍMITES MÓVIL SÚPER SEGUROS
+                // 🚧 LÍMITES MÓVIL - ACCESO A BORDES PARA COMIDA
                 const fishSize = 60; // Tamaño del pez
-                const safePad = 50; // Padding extra seguro
+                const safePad = 20; // REDUCIDO para que llegue a bordes
                 const W = this.canvas.width;
                 const H = this.canvas.height;
                 
-                // ZONA SEGURA: Header = 70px, Botones = 90px
-                const topLimit = 70 + safePad; // Header + padding
-                const bottomLimit = H - 90 - safePad; // Sin botones - padding
-                const leftLimit = safePad;
-                const rightLimit = W - safePad;
+                // ZONA SEGURA: Header = 70px, Botones = 60px (nuevo compacto)
+                const topLimit = 70 + 10; // Header + mínimo padding
+                const bottomLimit = H - 60 - 10; // Botones compactos + mínimo
+                const leftLimit = 10; // CASI al borde para comida
+                const rightLimit = W - 10; // CASI al borde para comida
                 
                 // LÍMITES HORIZONTALES
                 if (fish.x < leftLimit) { 
@@ -8396,6 +8432,53 @@ Comida premium y de cumpleaños
                     this.ctx.beginPath();
                     this.ctx.arc(x, y, size, 0, Math.PI * 2);
                     this.ctx.fill();
+                }
+                
+                this.ctx.restore();
+            }
+            
+            // 🥚 MODAL PARA COLOCAR HUEVO
+            showEggPlacementModal() {
+                const modal = document.getElementById('eggPlacementModal');
+                if (!modal) {
+                    console.error('❌ Modal eggPlacementModal no encontrada');
+                    return;
+                }
+                
+                // Solo mostrar si no está ya visible
+                if (modal.style.display === 'flex') return;
+                
+                modal.style.display = 'flex';
+                console.log('🥚 Modal de colocación de huevo mostrada');
+            }
+            
+            // 🍎 ACTUALIZAR Y DIBUJAR LABELS ("Ñam", etc.)
+            updateLabels(deltaTime) {
+                for (let i = this.labels.length - 1; i >= 0; i--) {
+                    const label = this.labels[i];
+                    label.life -= deltaTime;
+                    label.y -= label.vy * deltaTime;
+                    label.a = Math.max(0, label.life / 1.4); // Fade out
+                    
+                    if (label.life <= 0) {
+                        this.labels.splice(i, 1);
+                    }
+                }
+            }
+            
+            drawLabels() {
+                this.ctx.save();
+                this.ctx.font = 'bold 18px system-ui';
+                this.ctx.textAlign = 'center';
+                
+                for (const label of this.labels) {
+                    this.ctx.globalAlpha = label.a;
+                    this.ctx.fillStyle = '#ff6b35';
+                    this.ctx.strokeStyle = '#fff';
+                    this.ctx.lineWidth = 2;
+                    
+                    this.ctx.strokeText(label.text, label.x, label.y);
+                    this.ctx.fillText(label.text, label.x, label.y);
                 }
                 
                 this.ctx.restore();
