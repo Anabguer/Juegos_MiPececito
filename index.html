@@ -6427,15 +6427,14 @@
                 
                 // Verificar necesidades BASADAS EN LOS VALORES REALES
                 const needsFood = this.gameState.needs.hunger > 20; // Si hambre > 20%, activar botón (AJUSTADO)
-                const needsCleaning = this.gameState.needs.dirt > 20; // Limpieza cuando suciedad > 20%  
+                const needsCleaning = this.gameState.needs.dirt > 15; // Limpieza cuando suciedad > 15% (MÁS SENSIBLE)
                 const needsMedicine = this.gameState.lastMedicine && (currentTime - this.gameState.lastMedicine) > medicineThreshold;
                 
-                // Actualizar botones (MEDICINA ELIMINADA)
+                // Actualizar botones (MEDICINA ELIMINADA) - MÁS DEBUG
                 console.log('🔘 BOTONES DEBUG:', 
-                    'Hambre:', this.gameState.needs.hunger.toFixed(1) + '% →', 
-                    'needsFood:', needsFood,
-                    'Suciedad:', this.gameState.needs.dirt.toFixed(1) + '% →',
-                    'needsCleaning:', needsCleaning);
+                    'Hambre:', this.gameState.needs.hunger.toFixed(1) + '% → needsFood:', needsFood,
+                    'Suciedad:', this.gameState.needs.dirt.toFixed(1) + '% → needsCleaning:', needsCleaning,
+                    'Umbral limpieza: >15%');
                 this.toggleButton('feedBtn', needsFood);
                 this.toggleButton('cleanBtn', needsCleaning);
                 // this.toggleButton('medicineBtn', needsMedicine); // ELIMINADO
@@ -8835,24 +8834,36 @@ Comida premium y de cumpleaños
                     const f = this.food[i];
                     if (this.fish && this.dist(this.fish.x, this.fish.y, f.x, f.y) < 22) {
                         this.food.splice(i, 1);
-                        this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - 35, 0, 100);
-                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 1.5, 0, 100); // MUCHO MENOS SUCIEDAD AL COMER
                         
-                        this.labels.push({
-                            x: this.fish.x,
-                            y: this.fish.y - 12,
-                            text: "Ñam",
-                            a: 1,
-                            vy: 40,
-                            life: 1.4
-                        });
+                        // Solo hacer efectos si realmente tiene hambre (>10)
+                        const hadHunger = this.gameState.needs.hunger > 10;
                         
-                        this.fish.happyBurst = Math.max(this.fish.happyBurst, 1.2);
-                        this.fish.spinKind = "eat";
-                        
-                        // 🔊 SONIDO DE COMER
-                        if (window.audioManager) {
-                            window.audioManager.playSound('eat');
+                        if (hadHunger) {
+                            this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - 35, 0, 100);
+                            this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 1.5, 0, 100); // MUCHO MENOS SUCIEDAD AL COMER
+                            
+                            // Efectos visuales y sonoros solo si tenía hambre
+                            this.labels.push({
+                                x: this.fish.x,
+                                y: this.fish.y - 12,
+                                text: "Ñam",
+                                a: 1,
+                                vy: 40,
+                                life: 1.4
+                            });
+                            
+                            this.fish.happyBurst = Math.max(this.fish.happyBurst, 1.2);
+                            this.fish.spinKind = "eat";
+                            
+                            // 🔊 SONIDO DE COMER
+                            if (window.audioManager) {
+                                window.audioManager.playSound('eat');
+                            }
+                            
+                            console.log('🍎 ¡Ñam! Pez comió con hambre');
+                        } else {
+                            // Sin hambre: solo desaparecer la comida sin efectos
+                            console.log('🍎 Pez tocó comida pero no tenía hambre - sin efectos');
                         }
                         
                         if (this.gameState.crisis.hunger) {
@@ -9510,7 +9521,7 @@ Comida premium y de cumpleaños
                 this.backgroundMusic = null;
                 this.isMuted = localStorage.getItem('miPececito_muted') === 'true';
                 this.volume = parseFloat(localStorage.getItem('miPececito_volume')) || 0.7;
-                this.musicVolume = 0.35; // Música de fondo más audible
+                this.musicVolume = 0.55; // Música de fondo bien audible
                 this.effectsVolume = 0.4; // Efectos a volumen medio
                 
                 this.initAudioContext();
