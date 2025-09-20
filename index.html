@@ -1969,12 +1969,16 @@
             color: #9c27b0;
         }
         
-        /* 🎮 BARRA DE HERRAMIENTAS INFERIOR BONITA */
+        /* 🎮 BARRA DE HERRAMIENTAS COMPACTA COMO CABECERA */
         .action-bar {
             position: fixed;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px; /* MÁS COMPACTA (era 90px) */
+            background: linear-gradient(135deg, #0d47a1, #1565c0, #1976d2); /* IGUAL QUE CABECERA */
+            box-shadow: 0 -4px 20px rgba(13, 71, 161, 0.4); /* SOMBRA HACIA ARRIBA */
+            border-top: 3px solid #0d47a1;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -3427,13 +3431,13 @@
                     this.canvas.width = window.innerWidth;
                     
                     // CANVAS SIEMPRE DESDE EL HEADER (SIN ESPACIO AZUL)
-                    this.canvas.height = window.innerHeight - 160; // 70px header + 90px botones
+                    this.canvas.height = window.innerHeight - 130; // 70px header + 60px botones
                     this.canvas.style.top = '70px'; // SIEMPRE PEGADO AL HEADER
                     
                     this.canvas.style.position = 'fixed';
                     this.canvas.style.left = '0';
                     this.canvas.style.right = '0';
-                    this.canvas.style.bottom = '90px'; // Espacio para botones
+                    this.canvas.style.bottom = '60px'; // Espacio para botones compactos
                 };
                 window.addEventListener('resize', resize);
                 resize();
