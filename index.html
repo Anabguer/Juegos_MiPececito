@@ -4628,13 +4628,14 @@
                 this.gameState.bubbles += 5; // 5 burbujas de regalo por nacer
                 this.gameState.stars += 1;   // 1 estrella de regalo
                 
-                // 🎆 EFECTOS VISUALES DE NACIMIENTO (DESACTIVADOS - ICONOS SOBRAN)
-                // setTimeout(() => {
-                //     this.showRewardEffect('bubbles', 5);
-                //     setTimeout(() => {
-                //         this.showRewardEffect('stars', 1);
-                //     }, 1000);
-                // }, 2000);
+                // 🎆 EFECTOS VISUALES DE NACIMIENTO - SOLO BURBUJAS CHULAS (SIN ICONOS)
+                setTimeout(() => {
+                    this.createExplosionBubbles(); // ESTAS SON LAS BURBUJAS CHULAS
+                    // this.showRewardEffect('bubbles', 5); // ESTAS TIENEN ICONOS - DESACTIVADAS
+                    // setTimeout(() => {
+                    //     this.showRewardEffect('stars', 1); // ESTAS TIENEN ICONOS - DESACTIVADAS
+                    // }, 1000);
+                }, 2000);
                 
                 console.log('🐠 ¡PEZ LOTTIE NACIDO! +5 🫧 +1 ⭐ de regalo');
                 this.updateUI();
