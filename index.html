@@ -2334,74 +2334,34 @@
         }
         .pulse { animation: ping 1.1s ease-out; }
 
-        /* 🔊 BOTÓN DE VOLUMEN BONITO */
+        /* 🔊 BOTÓN DE VOLUMEN SIMPLE */
         .volume-button {
-            background: linear-gradient(135deg, rgba(255, 193, 7, 0.9), rgba(255, 152, 0, 0.9));
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            margin-top: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 3px 8px rgba(255, 193, 7, 0.4);
-            backdrop-filter: blur(6px);
-            transition: all 0.3s ease;
-            margin-top: 8px;
-            font-size: 18px;
-            position: relative;
-            overflow: hidden;
         }
 
         .volume-button:hover {
             transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(255, 193, 7, 0.6);
-            background: linear-gradient(135deg, rgba(255, 193, 7, 1), rgba(255, 152, 0, 1));
         }
 
         .volume-button:active {
             transform: scale(0.95);
         }
 
-        .volume-button.muted {
-            background: linear-gradient(135deg, rgba(158, 158, 158, 0.9), rgba(117, 117, 117, 0.9));
-            box-shadow: 0 3px 8px rgba(158, 158, 158, 0.4);
-        }
-
-        .volume-button.muted:hover {
-            background: linear-gradient(135deg, rgba(158, 158, 158, 1), rgba(117, 117, 117, 1));
-            box-shadow: 0 6px 16px rgba(158, 158, 158, 0.6);
-        }
-
         #volumeIcon {
-            width: 24px;
-            height: 24px;
-            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+            width: 32px;
+            height: 32px;
             transition: all 0.3s ease;
         }
         
         .volume-icon {
             pointer-events: none;
-        }
-
-        /* Efecto de ondas cuando se activa */
-        .volume-button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
-            transform: translate(-50%, -50%);
-            transition: all 0.4s ease;
-        }
-
-        .volume-button:active::before {
-            width: 60px;
-            height: 60px;
         }
         
         .start-button {
