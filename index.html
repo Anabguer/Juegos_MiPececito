@@ -3723,8 +3723,8 @@
                 this.gameTime += deltaTime; // Actualizar tiempo del juego
                 
                 // Posición del huevo (centro de la pantalla)
-                this.egg.x = this.viewW() / 2;
-                this.egg.y = this.viewH() * 0.6;
+                this.egg.x = this.canvas.width / 2;
+                this.egg.y = this.canvas.height * 0.6;
                 this.egg.floatTime += deltaTime;
                 
                 // Burbujas de fondo
@@ -3802,28 +3802,28 @@
             }
             
         render() {
-            // 🎯 USAR NUEVO SISTEMA DE COORDENADAS CSS
-            this.beginFrame();
+            // 🎯 VOLVER AL SISTEMA SIMPLE QUE FUNCIONABA
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.globalCompositeOperation = 'source-over';
                 
-                // Fondo (usar coordenadas CSS para que se vea del tamaño correcto)
-                const W = this.viewW(), H = this.viewH();
+                // Fondo (coordenadas físicas normales)
                 if (this.bgImage && this.bgImage.complete) {
-                    this.ctx.drawImage(this.bgImage, 0, 0, W, H);
+                    this.ctx.drawImage(this.bgImage, 0, 0, this.canvas.width, this.canvas.height);
                 } else {
                     // Fondo degradado como fallback
-                    const gradient = this.ctx.createLinearGradient(0, 0, 0, H);
+                    const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
                     gradient.addColorStop(0, '#0b1b2b');
                     gradient.addColorStop(1, '#133754');
                     this.ctx.fillStyle = gradient;
-                    this.ctx.fillRect(0, 0, W, H);
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 }
                 
                 // ✨ EFECTOS MÁGICOS: MUCHAS BURBUJITAS QUE TAPAN EL HUEVO
                 if (this.gameState.stage === 'egg' && this.gameState.showMagicBubbles) {
                     this.ctx.save();
                     
-                    const centerX = this.viewW() / 2;
-                    const centerY = this.viewH() / 2;
+                    const centerX = this.canvas.width / 2;
+                    const centerY = this.canvas.height / 2;
                     const time = Date.now() * 0.001;
                     const effectTime = time - (this.gameState.magicStartTime || time);
                     
@@ -4382,7 +4382,7 @@
                 const timerProgress = elapsed / total;
                 
                 // CRONÓMETRO BONITO EN PANTALLA
-                const centerX = this.viewW() / 2;
+                const centerX = this.canvas.width / 2;
                 const timerY = 80; // Más arriba y visible
                 
                 this.ctx.save();
@@ -4422,8 +4422,8 @@
             
             drawLightRays() {
                 for (const ray of this.lightRays) {
-                    const centerX = this.viewW() / 2;
-                    const centerY = this.viewH() * 0.6;
+                    const centerX = this.canvas.width / 2;
+                    const centerY = this.canvas.height * 0.6;
                     
                     this.ctx.save();
                     this.ctx.globalAlpha = ray.opacity * (ray.life / ray.maxLife);
@@ -4543,8 +4543,8 @@
                     
                     // Gradiente de suciedad
                     const gradient = this.ctx.createRadialGradient(
-                        this.viewW() / 2, this.viewH() / 2, 0,
-                        this.viewW() / 2, this.viewH() / 2, this.viewW()
+                        this.canvas.width / 2, this.canvas.height / 2, 0,
+                        this.canvas.width / 2, this.canvas.height / 2, this.canvas.width
                     );
                     gradient.addColorStop(0, 'rgba(139, 115, 85, 0.2)'); // Marrón claro centro
                     gradient.addColorStop(0.7, 'rgba(101, 67, 33, 0.4)'); // Marrón medio
@@ -5004,8 +5004,8 @@
                 }
                 
                 this.fish = {
-                    x: this.viewW() / 2,
-                    y: this.viewH() * 0.6,
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height * 0.6,
                     size: 80, // Tamaño del contenedor Lottie (más pequeño)
                     birthTime: Date.now(),
                     isLottie: true,
@@ -5162,8 +5162,8 @@
             createCanvasFish() {
                 // Fallback al pez Canvas original
                 this.fish = {
-                    x: this.viewW() / 2,
-                    y: this.viewH() * 0.6,
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height * 0.6,
                     size: 45,
                     birthTime: Date.now(),
                     isLottie: false
@@ -7249,8 +7249,8 @@
                 this.gameState.fishName = null;
                 console.log('🏷️ Estado de nombre reseteado para nuevo pez');
                 
-                    const centerX = this.viewW() / 2;
-                    const centerY = this.viewH() / 2;
+                    const centerX = this.canvas.width / 2;
+                    const centerY = this.canvas.height / 2;
                     
                 // PASO 1: USAR EL MISMO EFECTO QUE EL NACIMIENTO DEL PEZ
                 console.log('🚀 LLAMANDO createEggExplosionBubbles()...');
@@ -8387,8 +8387,8 @@ Comida premium y de cumpleaños
                 
                 // ESPERAR 1 SEGUNDO PARA QUE SE VEAN LAS BURBUJAS PRIMERO
                 setTimeout(() => {
-                    this.egg.x = x || this.viewW() / 2;
-                    this.egg.y = y || this.viewH() * 0.6;
+                    this.egg.x = x || this.canvas.width / 2;
+                    this.egg.y = y || this.canvas.height * 0.6;
                     this.startEggAppearanceAnimation();
                     console.log('🥚 Huevo aparece DESPUÉS de las burbujas');
                 }, 1000);
