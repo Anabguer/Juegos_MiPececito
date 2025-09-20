@@ -5234,13 +5234,15 @@
                     }
                 }
                 // 🧹 CRISIS SUCIEDAD + comida (come pero lento) - SOLO SI TIENE HAMBRE
-                else if (inDirt && this.food.length && this.gameState.needs.hunger > 20) {
+                else if (inDirt && this.food.length && this.gameState.needs.hunger > 15) { // Bajado de 20 a 15 para consistencia
                     const best = this.nearestFood();
                     if (best) { // VERIFICAR QUE EXISTE
                         const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 0.6);
                         speedMul = 0.85;
                         targetV = {vx: s.vx, vy: s.vy};
-                        console.log('🧹 Crisis suciedad + comida disponible (con hambre)');
+                        if (Math.random() < 0.02) { // Log menos frecuente
+                            console.log('🧹 Crisis suciedad + comida disponible (con hambre)');
+                        }
                     }
                 }
                 // 🧹 CRISIS SUCIEDAD sin comida (esquina inferior)
@@ -5289,14 +5291,18 @@
                     }
                 }
                 // 🍎 HAY COMIDA (ir a comer) - SOLO SI TIENE HAMBRE
-                else if (this.food.length && this.gameState.needs.hunger > 20) {
+                else if (this.food.length && this.gameState.needs.hunger > 15) { // Bajado de 20 a 15 para más sensibilidad
                     const f = this.nearestFood();
                     if (f) { // VERIFICAR QUE EXISTE
                         const d = this.dist(fish.x, fish.y, f.x, f.y);
-                        const s = this.seek(fish.x, fish.y, f.x, f.y, fish.maxSpeed * 0.9);
+                        const s = this.seek(fish.x, fish.y, f.x, f.y, fish.maxSpeed * 1.1); // Aumentado de 0.9 a 1.1 para más velocidad
                         const t = this.clamp(d / 90, 0.35, 1);
                         targetV = {vx: s.vx * t, vy: s.vy * t};
-                        console.log('🍎 Pez va hacia comida:', f.x, f.y);
+                        
+                        // Log menos frecuente para evitar spam
+                        if (Math.random() < 0.05) { // Solo 5% de las veces
+                            console.log(`🍎 Pez persigue comida en (${f.x.toFixed(1)}, ${f.y.toFixed(1)}) - Distancia: ${d.toFixed(1)} - Hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
+                        }
                     }
                 }
                 // 🏊 MOVIMIENTO LIBRE (vagabundeo natural)
@@ -7230,6 +7236,12 @@
                     document.body.style.overflow = '';
                 }, 100);
                 
+                // 🎵 INICIAR MÚSICA DE FONDO AL APARECER EL HUEVO (si no está ya sonando)
+                if (window.audioManager && !window.audioManager.isMuted && !window.audioManager.backgroundMusic?.played?.length) {
+                    window.audioManager.startBackgroundMusic();
+                    console.log('🎵 Música de fondo iniciada con el huevo');
+                }
+                
                 // ASEGURAR que NO hay huevo todavía
                 this.gameState.stage = 'waiting';
                 this.gameState.eggStartTime = null;
@@ -8729,10 +8741,6 @@ Comida premium y de cumpleaños
                     return;
                 }
                 
-                if (this.food.length > 0) {
-                    console.log('🍎 updateFood: Actualizando', this.food.length, 'pellets');
-                }
-                
                 const h = this.canvas.height;
                 const drag = 0.99;
                 
@@ -8759,11 +8767,16 @@ Comida premium y de cumpleaños
                 // EXACTO DEL DOCUMENTO - LÍNEAS 258-269
                 for (let i = this.food.length - 1; i >= 0; i--) {
                     const f = this.food[i];
-                    if (this.fish && this.dist(this.fish.x, this.fish.y, f.x, f.y) < 22) {
+                    const distance = this.fish ? this.dist(this.fish.x, this.fish.y, f.x, f.y) : 999;
+                    
+                    // 🍎 COLISIÓN CON EL PEZ (radio de colisión más amplio)
+                    if (this.fish && distance < 28) { // Aumentado de 22 a 28 para mejor detección
+                        console.log(`🍎 COLISIÓN: Pez en (${this.fish.x.toFixed(1)}, ${this.fish.y.toFixed(1)}) come pellet en (${f.x.toFixed(1)}, ${f.y.toFixed(1)}) - Distancia: ${distance.toFixed(1)}`);
                         this.food.splice(i, 1);
                         
                         // Solo hacer efectos si realmente tiene hambre (>10)
                         const hadHunger = this.gameState.needs.hunger > 10;
+                        console.log(`🍎 Hambre actual: ${this.gameState.needs.hunger.toFixed(1)}% - ¿Tenía hambre? ${hadHunger}`);
                         
                         if (hadHunger) {
                             this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - 35, 0, 100);
@@ -8787,7 +8800,7 @@ Comida premium y de cumpleaños
                                 window.audioManager.playSound('eat');
                             }
                             
-                            console.log('🍎 ¡Ñam! Pez comió con hambre');
+                            console.log(`🍎 ¡Ñam! Pez comió - Nueva hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
                         } else {
                             // Sin hambre: solo desaparecer la comida sin efectos
                             console.log('🍎 Pez tocó comida pero no tenía hambre - sin efectos');
@@ -8799,9 +8812,19 @@ Comida premium y de cumpleaños
                         
                         this.updateCrisisFlags();
                         this.updateNeedBars();
-                    } else if (f.bottomT > 0 && f.bottomT > 8) {
+                        continue; // Importante: saltar al siguiente pellet
+                    } 
+                    
+                    // 🗑️ ELIMINAR COMIDA VIEJA (después de 8 segundos en el fondo)
+                    if (f.bottomT > 0 && f.bottomT > 8) {
+                        console.log(`🗑️ Eliminando pellet viejo (${f.bottomT.toFixed(1)}s en el fondo)`);
                         this.food.splice(i, 1);
                     }
+                }
+                
+                // 📊 LOG PERIÓDICO PARA DEBUG
+                if (this.food.length > 0 && Math.random() < 0.1) { // 10% de probabilidad cada frame
+                    console.log(`🍎 Estado comida: ${this.food.length} pellets - Hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
                 }
             }
             
