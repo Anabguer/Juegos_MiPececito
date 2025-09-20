@@ -3048,6 +3048,12 @@
                 console.log('🚀 Empezar aventura clickeado - OCULTANDO MODAL');
                 welcomeScreen.style.display = 'none';
                 
+                // 🎵 INICIAR MÚSICA DE FONDO INMEDIATAMENTE
+                if (audioManager && !audioManager.isMuted) {
+                    audioManager.startBackgroundMusic();
+                    console.log('🎵 Música de fondo iniciada al empezar el juego');
+                }
+                
                 // Marcar como jugado
                 localStorage.setItem('miPececito_hasPlayed', 'true');
                 
@@ -3167,25 +3173,8 @@
                 // Inicializar estado del botón
                 audioManager.updateVolumeButton();
                 
-                // 🎵 INICIAR MÚSICA AUTOMÁTICAMENTE TRAS PRIMERA INTERACCIÓN
-                let musicStarted = false;
-                const startMusicOnInteraction = () => {
-                    if (!musicStarted && audioManager && !audioManager.isMuted) {
-                        audioManager.startBackgroundMusic();
-                        musicStarted = true;
-                        console.log('🎵 Música iniciada tras interacción del usuario');
-                        
-                        // Remover listeners después de usar
-                        document.removeEventListener('click', startMusicOnInteraction);
-                        document.removeEventListener('touchstart', startMusicOnInteraction);
-                        document.removeEventListener('keydown', startMusicOnInteraction);
-                    }
-                };
-                
-                // Escuchar cualquier interacción del usuario
-                document.addEventListener('click', startMusicOnInteraction);
-                document.addEventListener('touchstart', startMusicOnInteraction);
-                document.addEventListener('keydown', startMusicOnInteraction);
+                // 🎵 MÚSICA SE INICIA AUTOMÁTICAMENTE AL HACER CLICK EN "¡Cuidar mi huevo!"
+                // (Ya no necesitamos listeners genéricos)
             }
             
         // Event listeners de la cabecera
