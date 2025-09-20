@@ -2946,6 +2946,7 @@
         <button class="debug-btn warning" id="timeAdvanceBtn" title="Avanzar tiempo">⏰</button>
         <button class="debug-btn success" id="maxFoodBtn" title="Máxima comida">🍎</button>
         <button class="debug-btn info" id="maxCleanBtn" title="Máxima limpieza">🧹</button>
+        <button class="debug-btn warning" id="maxDirtBtn" title="Máxima suciedad">🦠</button>
         <button class="debug-btn danger" id="minFunBtn" title="Mínima diversión">😢</button>
         <button class="debug-btn purple" id="simulatePlayBtn" title="Simular juego">🎮</button>
         <button class="debug-btn" id="addBubblesBtn" title="Añadir burbujas">🫧</button>
@@ -3477,6 +3478,16 @@
                     game.updateCrisisFlags();
                     game.updateNeedBars();
                     console.log('🧹 Pecera SÚPER LIMPIA (suciedad = 0)');
+                }
+            });
+            
+            // 🦠 MÁXIMA SUCIEDAD
+            document.getElementById('maxDirtBtn').addEventListener('click', () => {
+                if (game && game.gameState.needs) {
+                    game.gameState.needs.dirt = 100; // Súper sucio
+                    game.updateCrisisFlags();
+                    game.updateNeedBars();
+                    console.log('🦠 Pecera SÚPER SUCIA (suciedad = 100) - Debería verse efecto visual');
                 }
             });
             
@@ -4532,9 +4543,9 @@
                 // USAR EL MISMO SISTEMA QUE LAS BARRAS
                 const dirtValue = this.gameState.needs.dirt; // 0-100
                 
-                if (dirtValue > 30) { // Efecto visual más tarde que el botón
+                if (dirtValue > 15) { // Efecto visual más temprano (era 30)
                     // Calcular nivel de suciedad (0 a 1)
-                    const dirtLevel = Math.min((dirtValue - 30) / 70, 1); // Escala desde 30-100
+                    const dirtLevel = Math.min((dirtValue - 15) / 85, 1); // Escala desde 15-100
                     
                     // Crear overlay de suciedad MÁS SUTIL
                     this.ctx.save();
@@ -8782,7 +8793,7 @@ Comida premium y de cumpleaños
                         
                         if (hadHunger) {
                             this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - 35, 0, 100);
-                            this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 1.5, 0, 100); // MUCHO MENOS SUCIEDAD AL COMER
+                            this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 8, 0, 100); // MÁS SUCIEDAD AL COMER (para testing)
                             
                             // Efectos visuales y sonoros solo si tenía hambre
                             this.labels.push({
@@ -9091,20 +9102,21 @@ Comida premium y de cumpleaños
         
         // 🔧 FUNCIONES QUE FALTAN PARA EL SISTEMA REALISTA
             updateAutoNeeds(deltaTime) {
-                // Incremento automático de necesidades (MÁS RÁPIDO PARA TESTING)
+                // Incremento automático de necesidades (ACELERADO PARA TESTING)
                 const minutes = deltaTime / 60;
                 const oldHunger = this.gameState.needs.hunger;
+                const oldDirt = this.gameState.needs.dirt;
                 
-                this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger + 0.3 * minutes, 0, 100); // Más hambre
-                this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + (1/10) * minutes, 0, 100); // Más suciedad
-                this.gameState.needs.fun = this.clamp(this.gameState.needs.fun - (1/5) * minutes, 0, 100); // Menos diversión
+                this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger + 0.5 * minutes, 0, 100); // Más hambre (acelerado)
+                this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 0.3 * minutes, 0, 100); // MÁS SUCIEDAD (era 0.1)
+                this.gameState.needs.fun = this.clamp(this.gameState.needs.fun - 0.2 * minutes, 0, 100); // Menos diversión
                 
-                // Log cada 5 segundos para debug
-                if (Math.random() < 0.02) {
-                    console.log('📊 Necesidades:', 
-                        'Hambre:', this.gameState.needs.hunger.toFixed(1),
-                        'Suciedad:', this.gameState.needs.dirt.toFixed(1), 
-                        'Diversión:', this.gameState.needs.fun.toFixed(1));
+                // Log cada 3 segundos para debug
+                if (Math.random() < 0.03) {
+                    console.log('🔄 Necesidades AUTO:', 
+                        `Hambre: ${this.gameState.needs.hunger.toFixed(1)}% (+${(this.gameState.needs.hunger - oldHunger).toFixed(2)})`,
+                        `Suciedad: ${this.gameState.needs.dirt.toFixed(1)}% (+${(this.gameState.needs.dirt - oldDirt).toFixed(2)})`,
+                        `Diversión: ${this.gameState.needs.fun.toFixed(1)}%`);
                 }
                 
                 // Actualizar barras visuales
