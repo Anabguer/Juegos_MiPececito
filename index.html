@@ -5372,8 +5372,8 @@
                 const W = this.canvas.width;
                 const H = this.canvas.height;
                 
-                // ZONA SEGURA: Header = 70px, Botones = 60px (nuevo compacto)
-                const topLimit = 70 + 30; // Header + más espacio para necesidades
+                // ZONA SEGURA: Header = 70px + Necesidades = 35px, Botones = 60px
+                const topLimit = 70 + 35 + 20; // Header + barra necesidades + margen = 125px
                 const bottomLimit = H - 60 - 50; // Más espacio para alcanzar comida en el fondo
                 const leftLimit = fishHalfSize + 15; // 55px - MÁS MARGEN IZQUIERDO
                 const rightLimit = W - fishHalfSize - 15; // W-55px - MÁS MARGEN DERECHO
@@ -5390,11 +5390,14 @@
                     console.log(`🚧 LÍMITE DERECHO: Pez reposicionado a x=${rightLimit} (margen: ${W - rightLimit}px)`);
                 }
                 
-                // LÍMITES VERTICALES
+                // LÍMITES VERTICALES - CON MARGEN DE SEGURIDAD
                 if (fish.y < topLimit) { 
-                    fish.y = topLimit; 
+                    fish.y = topLimit + 5; // +5px de margen para evitar bucles
                     fish.vy = Math.abs(fish.vy) * 0.8; // Rebote suave hacia abajo
-                    console.log(`🚧 LÍMITE SUPERIOR: Pez reposicionado a y=${topLimit}`);
+                    // Reducir logs para evitar spam
+                    if (Math.random() < 0.01) {
+                        console.log(`🚧 LÍMITE SUPERIOR: Pez reposicionado a y=${topLimit + 5}`);
+                    }
                 }
                 if (fish.y > bottomLimit) { 
                     fish.y = bottomLimit; 
