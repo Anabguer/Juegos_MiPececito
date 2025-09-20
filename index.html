@@ -3970,6 +3970,9 @@
                         eggHeight
                     );
                     
+                    // 🫧 BURBUJITAS SUTILES DE GESTACIÓN
+                    this.drawEggGestationBubbles();
+                    
                     this.ctx.restore();
                 } else {
                     // Fallback: huevo dibujado MÁS GRANDE
@@ -4956,8 +4959,8 @@
                 const H = this.canvas.height;
                 
                 // ZONA SEGURA: Header = 70px, Botones = 60px (nuevo compacto)
-                const topLimit = 70 + 10; // Header + mínimo padding
-                const bottomLimit = H - 60 - 10; // Botones compactos + mínimo
+                const topLimit = 70 + 30; // Header + más espacio para necesidades
+                const bottomLimit = H - 60 - 30; // MÁS ESPACIO ABAJO para comida
                 const leftLimit = 10; // CASI al borde para comida
                 const rightLimit = W - 10; // CASI al borde para comida
                 
@@ -8197,9 +8200,9 @@ Comida premium y de cumpleaños
                 
                 const pellet = {
                     x: x,
-                    y: 10,
+                    y: 120, // MÁS ABAJO para que esté cerca del pez
                     vx: 0,
-                    vy: 6 + Math.random() * 6, // CAÍDA LENTA COMO EN ORIGINAL
+                    vy: 4 + Math.random() * 4, // CAÍDA MÁS LENTA
                     bottomT: 0,
                     colorFill: col.fill,
                     colorStroke: col.stroke,
@@ -8399,7 +8402,48 @@ Comida premium y de cumpleaños
                 this.ctx.restore();
             }
             
-            // 🥚 FUNCIÓN ELIMINADA - YA NO SE NECESITA
+            // 🫧 BURBUJITAS SUTILES DURANTE GESTACIÓN DEL HUEVO
+            drawEggGestationBubbles() {
+                const time = (Date.now() * 0.001) % 1000; // Tiempo lento
+                const eggX = 0; // Relativo al huevo (ya transformado)
+                const eggY = 0;
+                const eggSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--egg-size'));
+                
+                // 6 burbujitas muy sutiles alrededor del huevo
+                for (let i = 0; i < 6; i++) {
+                    const angle = (time * 0.3 + i * Math.PI / 3) % (Math.PI * 2);
+                    const radius = eggSize * 0.35 + Math.sin(time * 2 + i) * 10;
+                    
+                    const x = eggX + Math.cos(angle) * radius;
+                    const y = eggY + Math.sin(angle) * radius * 0.6; // Más ovalado
+                    
+                    // Tamaño muy pequeño (2-4px)
+                    const size = 2 + Math.sin(time * 3 + i) * 1;
+                    
+                    // MUY transparente y suave
+                    this.ctx.globalAlpha = 0.1 + Math.sin(time * 1.5 + i) * 0.05;
+                    this.ctx.fillStyle = '#e8fbff'; // Azul muy claro
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+                
+                // 3 burbujitas más grandes que suben lentamente
+                for (let i = 0; i < 3; i++) {
+                    const yOffset = ((time * 20 + i * 40) % 120) - 60; // Suben lentamente
+                    const x = eggX + (i - 1) * 25 + Math.sin(time * 2 + i) * 8;
+                    const y = eggY - eggSize * 0.4 - yOffset;
+                    
+                    const size = 3 + i * 0.5;
+                    this.ctx.globalAlpha = 0.15 - (yOffset / 120) * 0.1; // Se desvanecen al subir
+                    this.ctx.fillStyle = '#b3e5fc'; // Azul claro
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
             
             // 🍎 ACTUALIZAR Y DIBUJAR LABELS ("Ñam", etc.)
             updateLabels(deltaTime) {
