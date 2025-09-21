@@ -9073,44 +9073,36 @@ Comida premium y de cumpleaños
                         console.log(`🍎 COLISIÓN: Pez en (${this.fish.x.toFixed(1)}, ${this.fish.y.toFixed(1)}) come pellet en (${f.x.toFixed(1)}, ${f.y.toFixed(1)}) - Distancia: ${distance.toFixed(1)}`);
                         this.food.splice(i, 1);
                         
-                        // Solo hacer efectos si tiene mucha hambre (>70%)
-                        const hadHunger = this.gameState.needs.hunger > 70;
-                        console.log(`🍎 Hambre actual: ${this.gameState.needs.hunger.toFixed(1)}% - ¿Tenía hambre? ${hadHunger}`);
+                        // 🍎 SIEMPRE COME - SIN CONDICIONES
+                        console.log(`🍎 ¡PEZ COME SIEMPRE! Hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
                         
-                        if (hadHunger) {
-                            this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - 35, 0, 100);
-                            this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 8, 0, 100); // MÁS SUCIEDAD AL COMER (para testing)
-                            
-                            // Efectos visuales y sonoros solo si tenía hambre
-                            this.labels.push({
-                                x: this.fish.x,
-                                y: this.fish.y - 12,
-                                text: "Ñam",
-                                a: 1,
-                                vy: 40,
-                                life: 1.4
-                            });
-                            
-                            this.fish.happyBurst = Math.max(this.fish.happyBurst, 1.2);
-                            this.fish.spinKind = "eat";
-                            
-                            // 🍎 REDUCIR HAMBRE AL COMER
-                            this.gameState.needs.hunger = Math.max(0, this.gameState.needs.hunger - 30);
-                            
-                            // 🔊 SONIDO DE COMER
-                            if (window.audioManager) {
-                                window.audioManager.playSound('eat');
-                            }
-                            
-                            console.log(`🍎 ¡Ñam! Pez comió - Nueva hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
-                            
-                            // 📊 ACTUALIZAR BARRAS Y CRISIS
-                            this.updateCrisisFlags();
-                            this.updateNeedBars();
-                        } else {
-                            // Sin hambre: solo desaparecer la comida sin efectos
-                            console.log('🍎 Pez tocó comida pero no tenía hambre - sin efectos');
+                        // SIEMPRE hace efectos:
+                        this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - 35, 0, 100);
+                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 8, 0, 100); // MÁS SUCIEDAD AL COMER (para testing)
+                        
+                        // 🔊 SONIDO SIEMPRE
+                        if (window.audioManager) {
+                            window.audioManager.playSound('eat');
                         }
+                        
+                        // 🎬 ÑAM SIEMPRE
+                        this.labels.push({
+                            x: this.fish.x,
+                            y: this.fish.y - 12,
+                            text: "Ñam",
+                            a: 1,
+                            vy: 40,
+                            life: 1.4
+                        });
+                        
+                        this.fish.happyBurst = Math.max(this.fish.happyBurst, 1.2);
+                        this.fish.spinKind = "eat";
+                        
+                        // 📊 ACTUALIZAR BARRAS SIEMPRE
+                        this.updateCrisisFlags();
+                        this.updateNeedBars();
+                        
+                        console.log(`🍎 ¡Ñam completo! Nueva hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
                         
                         // ⚠️ ELIMINADO: No limitar hambre en crisis para que siga persiguiendo
                         // if (this.gameState.crisis.hunger) {
