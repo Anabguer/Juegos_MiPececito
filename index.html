@@ -7963,14 +7963,38 @@ Comida premium y de cumpleaños
                 this.gameState.stage = newStage;
                 this.evolutionInProgress = false;
                 
-                // 📏 ACTUALIZAR TAMAÑO DEL PEZ
+                // 📏 ACTUALIZAR TAMAÑO DEL PEZ (LOTTIE Y CANVAS)
                 if (this.fish) {
                     this.fish.size = this.getFishSizeForStage(newStage);
-                    console.log(`📏 Tamaño actualizado para ${newStage}: ${this.fish.size}px`);
+                    
+                    // ESCALAR LOTTIE SEGÚN ETAPA
+                    const scaleByStage = {
+                        'baby': 1.0,
+                        'young': 1.2, // 20% más grande
+                        'adult': 1.4  // 40% más grande
+                    };
+                    
+                    this.fish.targetScale = scaleByStage[newStage] || 1.0;
+                    this.fish.scale = this.fish.targetScale; // Cambio inmediato
+                    
+                    console.log(`📏 Tamaño actualizado para ${newStage}: size=${this.fish.size}px, scale=${this.fish.scale}`);
                 }
                 
-                // 🎨 RECARGAR LOTTIE CON NUEVA ETAPA
-                this.reloadLottieForStage(newStage);
+                // 🎨 CAMBIAR A CANVAS PARA VER NUESTROS CAMBIOS VISUALES
+                if (this.lottieAnimation) {
+                    this.lottieAnimation.destroy();
+                    this.lottieAnimation = null;
+                }
+                
+                // Ocultar contenedor Lottie
+                const container = document.getElementById('lottieContainer');
+                if (container) {
+                    container.style.display = 'none';
+                }
+                
+                // Cambiar a Canvas para ver ojo grande y raya amarilla
+                this.fish.isLottie = false;
+                console.log(`🎨 Cambiado a Canvas para ver mejoras visuales de ${newStage}`);
                 
                 // Añadir al álbum
                 const messages = {
