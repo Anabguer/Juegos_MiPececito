@@ -2818,18 +2818,14 @@
                 <img src="./images/ui/logo.png" alt="Mi Pececito" class="logo-bounce">
             </div>
             
-            <h1>¡Bienvenido a<br>Mi Pececito!</h1>
-            <p>Tu aventura de mascota virtual comienza aquí</p>
+            <h1>🐟 Mi Pececito</h1>
+            <p>Tu mascota virtual</p>
             
             <!-- 🥚 MENSAJE SIMPLE DEL HUEVITO -->
             <div class="welcome-info">
                 <p class="egg-message">
-                    Primero aparecerá tu huevito.<br>
-                    En <strong>5 minutos</strong> nacerá tu pececito.
-                </p>
-                <p class="games-tip">
-                    💡 <strong>¡Mientras esperas puedes jugar!</strong><br>
-                    Usa el botón de juegos para divertirte y ganar burbujas y estrellas.
+                    🥚 Tu huevo nacerá en <strong>5 minutos</strong><br>
+                    🎮 ¡Juega mientras esperas!
                 </p>
             </div>
             
@@ -2840,7 +2836,7 @@
                 <div class="bubble bubble-3">🫧</div>
             </div>
             
-            <button id="startGameBtn" class="start-button">¡Cuidar mi huevo!</button>
+            <button id="startGameBtn" class="start-button">¡Empezar!</button>
             
             <!-- Botón de reset eliminado - Solo aparece en menú si ya tienes pez -->
         </div>
@@ -3827,9 +3823,9 @@
                     
                     // 📊 SISTEMA DE NECESIDADES REALISTA (0-100)
                     needs: {
-                        hunger: 80,  // NACE CON HAMBRE (crisis)
-                        dirt: 65,    // 0=limpio, 100=súper sucio  
-                        fun: 70      // 0=deprimido, 100=súper feliz
+                        hunger: 15,  // EMPIEZA CON POCA HAMBRE
+                        dirt: 0,     // PANTALLA LIMPIA AL INICIAR 
+                        fun: 95      // EMPIEZA FELIZ
                     },
                     
                     // 🚨 FLAGS DE CRISIS (75+ es crisis)
@@ -8896,8 +8892,10 @@ Comida premium y de cumpleaños
             // 🧹 LIMPIEZA ESPECTACULAR CON BURBUJAS (DEL DOCUMENTO)
             startCleaning() {
                 console.log('🧹 ¡LIMPIEZA ESPECTACULAR INICIADA!');
+                
+                // SINCRONIZAR: Sonido Y burbujas AL MISMO TIEMPO
                 if (window.audioManager) window.audioManager.playSound('clean');
-
+                
                 this.cleaningActive = true;
                 this.cleanEmitT = 2.6;
                 this.dirtStart = this.gameState.needs.dirt;
@@ -8907,8 +8905,9 @@ Comida premium y de cumpleaños
 
                 if (this.fish) { this.fish.happyBurst = 3.2; this.fish.spinKind = "clean"; }
 
-                // Lote inicial (nacen DENTRO del canvas, pegadas al borde)
+                // INMEDIATO: Burbujas aparecen CON el sonido
                 this.emitCleanBubbles();
+                this.emitCleanBubbles(); // DOBLE RÁFAGA para efecto inmediato
                 
                 // 🧪 MINI TEST PARA VERIFICAR MOVIMIENTO
                 setTimeout(() => {
@@ -9394,9 +9393,9 @@ Comida premium y de cumpleaños
                 const oldFun = this.gameState.needs.fun;
                 
                 // FORZAR incrementos mínimos para evitar +0.00
-                const hungerInc = Math.max(0.5 * minutes, 0.01); // Mínimo 0.01 por frame
-                const dirtInc = Math.max(0.3 * minutes, 0.01);   // Mínimo 0.01 por frame
-                const funDec = Math.max(0.2 * minutes, 0.01);    // Mínimo 0.01 por frame
+                const hungerInc = Math.max(0.15 * minutes, 0.003); // MUCHO MÁS LENTO
+                const dirtInc = Math.max(0.08 * minutes, 0.002);   // MUCHO MÁS LENTO  
+                const funDec = Math.max(0.05 * minutes, 0.001);    // MUCHO MÁS LENTO
                 
                 this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger + hungerInc, 0, 100);
                 this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + dirtInc, 0, 100);
