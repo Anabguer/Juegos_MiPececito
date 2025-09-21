@@ -8912,12 +8912,12 @@ Comida premium y de cumpleaños
                     ctx.restore();
                 }
                 
-                // 🔊 SONIDO DESPUÉS DE DIBUJAR
+                // 🔊 SONIDO CASI INMEDIATO DESPUÉS DE DIBUJAR
                 setTimeout(() => {
                     if (window.audioManager) {
                         window.audioManager.playSound('clean');
                     }
-                }, 100); // 100ms para que las burbujas se vean PRIMERO
+                }, 30); // Solo 30ms para que las burbujas salgan un poco antes
                 
                 // 🧪 MINI TEST PARA VERIFICAR MOVIMIENTO
                 setTimeout(() => {
