@@ -9266,11 +9266,17 @@ Comida premium y de cumpleaños
                     speedMul = 1.5;
                     
                     if (s.dist < 40) {
-                        // 💖 PEZ LLEGÓ AL DEDO - LANZAR CORAZÓN
+                        // 💖 PEZ LLEGÓ AL DEDO - LANZAR CORAZÓN CON SONIDO
                         fish.desire = null;
                         targetV = {vx: 0, vy: 0};
                         this.launchHeartToFun(fish.x, fish.y);
-                        console.log('💖 ¡Pez llegó al dedo! Corazón lanzado');
+                        
+                        // 🔊 SONIDO DE CORAZÓN/BURBUJA
+                        if (window.audioManager) {
+                            window.audioManager.playSound('heart');
+                        }
+                        
+                        console.log('💖 ¡Pez llegó al dedo! Corazón lanzado con sonido');
                     }
                 }
                 // 🍎 PERSEGUIR COMIDA (cuando hay hambre)
