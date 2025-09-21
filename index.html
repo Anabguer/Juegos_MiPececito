@@ -9279,8 +9279,8 @@ Comida premium y de cumpleaños
                         console.log('💖 ¡Pez llegó al dedo! Corazón lanzado con sonido');
                     }
                 }
-                // 🍎 PERSEGUIR COMIDA (cuando hay hambre)
-                else if (this.food.length > 0 && this.gameState.needs.hunger > 1) {
+                // 🍎 PERSEGUIR COMIDA SIEMPRE (los peces SIEMPRE comen)
+                else if (this.food.length > 0) {
                     const closest = this.nearestFood();
                     if (closest) {
                         const d = this.dist(fish.x, fish.y, closest.x, closest.y);
