@@ -11382,49 +11382,361 @@ Comida premium y de cumpleaños
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
-            // Por ahora usar iframe hasta implementar completamente
-            const gameModal = document.createElement('div');
-            gameModal.className = 'game-iframe-modal';
-            gameModal.innerHTML = `
-                <div class="game-iframe-container">
-                    <div class="game-iframe-header">
+            // Crear overlay del juego integrado
+            const gameOverlay = document.createElement('div');
+            gameOverlay.id = 'memoriaGameOverlay';
+            gameOverlay.innerHTML = `
+                <div class="memoria-game-container">
+                    <div class="memoria-header">
                         <h2>🧠 Memoflip</h2>
-                        <button class="game-close-btn">✕</button>
+                        <div class="memoria-stats">
+                            <span>⏱ <span id="memoria-time">00:00</span></span>
+                            <span>🌀 <span id="memoria-moves">0</span></span>
+                        </div>
+                        <button class="memoria-close-btn">✕</button>
                     </div>
-                    <iframe src="./ejemplos/juegos/Juego memoria.html" class="game-iframe"></iframe>
+                    <div class="memoria-board-wrap">
+                        <div class="memoria-board" id="memoria-board"></div>
+                    </div>
+                    <div class="memoria-footer">
+                        <select id="memoria-grid-sel">
+                            <option value="3x4">3×4</option>
+                            <option value="4x4" selected>4×4</option>
+                        </select>
+                        <button class="memoria-btn" id="memoria-start">▶️ Empezar</button>
+                        <button class="memoria-btn" id="memoria-reset">↺ Reset</button>
+                    </div>
                 </div>
             `;
             
-            // Reutilizar estilos de bloques
-            applyGameIframeStyles(gameModal);
+            // Aplicar estilos básicos
+            gameOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: linear-gradient(135deg, #072334 0%, #1d4b6b 100%);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 9999; animation: fadeIn 0.3s ease;
+            `;
             
-            document.body.appendChild(gameModal);
+            const container = gameOverlay.querySelector('.memoria-game-container');
+            container.style.cssText = `
+                background: rgba(7, 35, 52, 0.95); border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px; width: 90vw; height: 90vh; max-width: 500px; max-height: 700px;
+                display: flex; flex-direction: column; color: #e9f6ff; font-family: system-ui, Arial, sans-serif;
+            `;
+            
+            // Configurar juego básico de memoria
+            const EMOJIS = ["🐟","🐠","🐚","🦀","🐙","⭐","🪸","🌊"];
+            let cards = [], moves = 0, timeStart = 0, timeInterval = null;
+            
+            function initMemoriaGame() {
+                const board = gameOverlay.querySelector('#memoria-board');
+                board.innerHTML = '';
+                board.style.cssText = `
+                    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+                    width: 100%; max-width: 350px; aspect-ratio: 1;
+                `;
+                
+                // Crear 8 pares (16 cartas)
+                const cardData = [...EMOJIS, ...EMOJIS];
+                for(let i = cardData.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [cardData[i], cardData[j]] = [cardData[j], cardData[i]];
+                }
+                
+                cardData.forEach((emoji, i) => {
+                    const card = document.createElement('div');
+                    card.innerHTML = `<div class="front"></div><div class="back">${emoji}</div>`;
+                    card.style.cssText = `
+                        position: relative; aspect-ratio: 1; border-radius: 12px; cursor: pointer;
+                        transform-style: preserve-3d; transition: transform 0.3s;
+                    `;
+                    card.querySelector('.front').style.cssText = `
+                        position: absolute; inset: 0; border-radius: 12px; 
+                        background: linear-gradient(145deg, #0e3855, #144a6d);
+                        backface-visibility: hidden;
+                    `;
+                    card.querySelector('.back').style.cssText = `
+                        position: absolute; inset: 0; border-radius: 12px; display: flex;
+                        align-items: center; justify-content: center; font-size: 24px;
+                        background: linear-gradient(165deg, #113e5d, #0a2c45);
+                        transform: rotateY(180deg); backface-visibility: hidden;
+                    `;
+                    card.addEventListener('click', () => {
+                        if(card.style.transform.includes('180deg')) return;
+                        card.style.transform = 'rotateY(180deg)';
+                        moves++;
+                        document.getElementById('memoria-moves').textContent = moves;
+                    });
+                    board.appendChild(card);
+                });
+            }
+            
+            // Event listeners
+            gameOverlay.querySelector('.memoria-close-btn').addEventListener('click', () => {
+                if(timeInterval) clearInterval(timeInterval);
+                gameOverlay.remove();
+            });
+            
+            gameOverlay.querySelector('#memoria-start').addEventListener('click', () => {
+                initMemoriaGame();
+                timeStart = Date.now();
+                if(timeInterval) clearInterval(timeInterval);
+                timeInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - timeStart) / 1000);
+                    const min = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                    const sec = (elapsed % 60).toString().padStart(2, '0');
+                    document.getElementById('memoria-time').textContent = `${min}:${sec}`;
+                }, 1000);
+            });
+            
+            document.body.appendChild(gameOverlay);
+            initMemoriaGame();
             console.log('🧠 Juego Memoflip iniciado');
         }
         
-        // 🎵 JUEGO DE SIMÓN MARINO
+        // 🎵 JUEGO DE SIMÓN MARINO - INTEGRADO COMPLETO
         function startSimonGame() {
-            console.log('🎵 Iniciando juego Simón Marino...');
+            console.log('🎵 Iniciando juego Simón Marino integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
-            // Crear iframe con el juego completo
-            const gameModal = document.createElement('div');
-            gameModal.className = 'game-iframe-modal';
-            gameModal.innerHTML = `
-                <div class="game-iframe-container">
-                    <div class="game-iframe-header">
+            // Crear overlay del juego
+            const gameOverlay = document.createElement('div');
+            gameOverlay.id = 'simonGameOverlay';
+            gameOverlay.innerHTML = `
+                <div class="simon-game-container">
+                    <div class="simon-header">
                         <h2>🎵 Simón Marino</h2>
-                        <button class="game-close-btn">✕</button>
+                        <div class="simon-stats">
+                            <span>Ronda: <span id="simon-round">0</span></span>
+                            <span>Récord: <span id="simon-best">0</span></span>
+                        </div>
+                        <button class="simon-close-btn">✕</button>
                     </div>
-                    <iframe src="./ejemplos/juegos/Juego Simon.html" class="game-iframe"></iframe>
+                    <div class="simon-board-wrap">
+                        <div class="simon-board" id="simon-board">
+                            <button class="simon-pad" id="simon-p1">🐟</button>
+                            <button class="simon-pad" id="simon-p2">🐚</button>
+                            <button class="simon-pad" id="simon-p3">⭐</button>
+                            <button class="simon-pad" id="simon-p4">🌊</button>
+                        </div>
+                    </div>
+                    <div class="simon-footer">
+                        <button class="simon-btn" id="simon-start">▶️ Empezar</button>
+                        <div class="simon-message">Un fallo = fin de partida</div>
+                    </div>
                 </div>
             `;
             
-            applyGameIframeStyles(gameModal);
+            // Aplicar estilos
+            gameOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: radial-gradient(120% 90% at 50% 100%, #0a3552, #062130);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 9999; animation: fadeIn 0.3s ease;
+            `;
             
-            document.body.appendChild(gameModal);
+            const container = gameOverlay.querySelector('.simon-game-container');
+            container.style.cssText = `
+                background: rgba(6, 33, 48, 0.95); border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px; width: 90vw; height: 90vh; max-width: 500px; max-height: 600px;
+                display: flex; flex-direction: column; color: #e9f6ff; font-family: system-ui, Arial, sans-serif;
+            `;
+            
+            const header = gameOverlay.querySelector('.simon-header');
+            header.style.cssText = `
+                background: rgba(29, 75, 107, 0.8); padding: 15px 20px;
+                display: flex; justify-content: space-between; align-items: center;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.1); border-radius: 18px 18px 0 0;
+            `;
+            
+            const boardWrap = gameOverlay.querySelector('.simon-board-wrap');
+            boardWrap.style.cssText = `
+                flex: 1; display: flex; align-items: center; justify-content: center; padding: 30px;
+            `;
+            
+            const board = gameOverlay.querySelector('.simon-board');
+            board.style.cssText = `
+                display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);
+                gap: 15px; width: 100%; max-width: 300px; aspect-ratio: 1;
+            `;
+            
+            const pads = gameOverlay.querySelectorAll('.simon-pad');
+            const padColors = ['#1e88e5', '#43a047', '#f4511e', '#fdd835'];
+            pads.forEach((pad, i) => {
+                pad.style.cssText = `
+                    border: none; border-radius: 18px; font-size: 32px; font-weight: 900;
+                    background: linear-gradient(145deg, ${padColors[i]}, ${padColors[i]}dd);
+                    color: #062130; cursor: pointer; user-select: none;
+                    box-shadow: 0 8px 16px rgba(0,0,0,0.3); transition: all 0.15s ease;
+                    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+                `;
+            });
+            
+            // Variables del juego
+            let sequence = [], playerSequence = [], round = 0, best = 0;
+            let isShowing = false, isPlayerTurn = false, gameActive = false;
+            
+            // Funciones del juego
+            function initSimonGame() {
+                sequence = [];
+                playerSequence = [];
+                round = 0;
+                isShowing = false;
+                isPlayerTurn = false;
+                gameActive = true;
+                updateUI();
+                addToSequence();
+            }
+            
+            function addToSequence() {
+                const nextPad = Math.floor(Math.random() * 4);
+                sequence.push(nextPad);
+                round++;
+                updateUI();
+                showSequence();
+            }
+            
+            function showSequence() {
+                isShowing = true;
+                isPlayerTurn = false;
+                let i = 0;
+                
+                const showNext = () => {
+                    if (i < sequence.length) {
+                        lightUpPad(sequence[i]);
+                        setTimeout(() => {
+                            i++;
+                            setTimeout(showNext, 200);
+                        }, 600);
+                    } else {
+                        isShowing = false;
+                        isPlayerTurn = true;
+                        playerSequence = [];
+                    }
+                };
+                
+                setTimeout(showNext, 800);
+            }
+            
+            function lightUpPad(padIndex) {
+                const pad = pads[padIndex];
+                const originalStyle = pad.style.cssText;
+                pad.style.filter = 'brightness(1.4) contrast(1.1)';
+                pad.style.transform = 'scale(1.05)';
+                
+                // Sonido simple
+                playSimonSound(padIndex);
+                
+                setTimeout(() => {
+                    pad.style.cssText = originalStyle;
+                }, 400);
+            }
+            
+            function playSimonSound(padIndex) {
+                // Sonidos simples con AudioContext
+                if (!window.audioContext) return;
+                try {
+                    const oscillator = window.audioContext.createOscillator();
+                    const gainNode = window.audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(window.audioContext.destination);
+                    
+                    const frequencies = [330, 415, 523, 659]; // Notas musicales
+                    oscillator.frequency.setValueAtTime(frequencies[padIndex], window.audioContext.currentTime);
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, window.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, window.audioContext.currentTime + 0.3);
+                    
+                    oscillator.start();
+                    oscillator.stop(window.audioContext.currentTime + 0.3);
+                } catch(e) {
+                    console.log('Audio no disponible');
+                }
+            }
+            
+            function handlePadClick(padIndex) {
+                if (!isPlayerTurn || isShowing || !gameActive) return;
+                
+                lightUpPad(padIndex);
+                playerSequence.push(padIndex);
+                
+                // Verificar si es correcto
+                const currentIndex = playerSequence.length - 1;
+                if (playerSequence[currentIndex] !== sequence[currentIndex]) {
+                    // Error - fin del juego
+                    gameOver();
+                    return;
+                }
+                
+                // Si completó la secuencia
+                if (playerSequence.length === sequence.length) {
+                    isPlayerTurn = false;
+                    setTimeout(() => {
+                        addToSequence();
+                    }, 1000);
+                }
+            }
+            
+            function gameOver() {
+                gameActive = false;
+                isPlayerTurn = false;
+                
+                if (round - 1 > best) {
+                    best = round - 1;
+                    localStorage.setItem('simon-best', best.toString());
+                }
+                
+                // Dar recompensas
+                const bubbles = (round - 1) * 2;
+                const stars = Math.floor((round - 1) / 5);
+                
+                if (window.game && bubbles > 0) {
+                    window.game.gameState.bubbles += bubbles;
+                    window.game.gameState.stars += stars;
+                    window.game.saveGame();
+                }
+                
+                setTimeout(() => {
+                    alert(`🎵 ¡Juego terminado!\\n🌊 Ronda alcanzada: ${round - 1}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
+                }, 500);
+                
+                updateUI();
+            }
+            
+            function updateUI() {
+                document.getElementById('simon-round').textContent = round;
+                document.getElementById('simon-best').textContent = best;
+            }
+            
+            // Cargar récord
+            const savedBest = localStorage.getItem('simon-best');
+            if (savedBest) best = parseInt(savedBest);
+            
+            // Event listeners
+            gameOverlay.querySelector('.simon-close-btn').addEventListener('click', () => {
+                gameOverlay.remove();
+                console.log('🎵 Juego Simón Marino cerrado');
+            });
+            
+            gameOverlay.querySelector('#simon-start').addEventListener('click', () => {
+                initSimonGame();
+            });
+            
+            pads.forEach((pad, index) => {
+                pad.addEventListener('click', () => handlePadClick(index));
+            });
+            
+            gameOverlay.addEventListener('click', (e) => {
+                if (e.target === gameOverlay) {
+                    gameOverlay.remove();
+                }
+            });
+            
+            document.body.appendChild(gameOverlay);
+            updateUI();
             console.log('🎵 Juego Simón Marino iniciado');
         }
         
