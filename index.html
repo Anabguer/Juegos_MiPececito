@@ -9094,12 +9094,19 @@ Comida premium y de cumpleaños
                             this.fish.happyBurst = Math.max(this.fish.happyBurst, 1.2);
                             this.fish.spinKind = "eat";
                             
+                            // 🍎 REDUCIR HAMBRE AL COMER
+                            this.gameState.needs.hunger = Math.max(0, this.gameState.needs.hunger - 30);
+                            
                             // 🔊 SONIDO DE COMER
                             if (window.audioManager) {
                                 window.audioManager.playSound('eat');
                             }
                             
                             console.log(`🍎 ¡Ñam! Pez comió - Nueva hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
+                            
+                            // 📊 ACTUALIZAR BARRAS Y CRISIS
+                            this.updateCrisisFlags();
+                            this.updateNeedBars();
                         } else {
                             // Sin hambre: solo desaparecer la comida sin efectos
                             console.log('🍎 Pez tocó comida pero no tenía hambre - sin efectos');
