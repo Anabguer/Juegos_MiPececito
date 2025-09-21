@@ -9490,15 +9490,16 @@ Comida premium y de cumpleaños
                 fish.x += fish.vx * deltaTime;
                 fish.y += fish.vy * deltaTime;
 
-                // 🧱 LÍMITES DE PANTALLA CON REBOTE SUAVE (MARGEN AMPLIADO)
-                const pad = 60; // Margen más grande para pez joven/adulto
+                // 🧱 LÍMITES DE PANTALLA CON REBOTE SUAVE (OPTIMIZADOS)
+                const padSides = 60; // Margen lateral para no salir de pantalla
+                const padBottom = 20; // Margen inferior PEQUEÑO para alcanzar comida
                 const W = this.canvas.width;
                 const H = this.getFloorY();
                 
-                if (fish.x < pad) { fish.x = pad; if (fish.vx < 0) fish.vx *= -0.5; }
-                if (fish.x > W - pad) { fish.x = W - pad; if (fish.vx > 0) fish.vx *= -0.5; }
+                if (fish.x < padSides) { fish.x = padSides; if (fish.vx < 0) fish.vx *= -0.5; }
+                if (fish.x > W - padSides) { fish.x = W - padSides; if (fish.vx > 0) fish.vx *= -0.5; }
                 if (fish.y < 125) { fish.y = 125; if (fish.vy < 0) fish.vy *= -0.5; }
-                if (fish.y > H - pad) { fish.y = H - pad; if (fish.vy > 0) fish.vy *= -0.5; }
+                if (fish.y > H - padBottom) { fish.y = H - padBottom; if (fish.vy > 0) fish.vy *= -0.5; } // MARGEN PEQUEÑO ABAJO
 
                 // 🐟 ORIENTACIÓN FLUIDA (mirar hacia donde nada)
                 if (Math.abs(fish.vx) > 2) {
