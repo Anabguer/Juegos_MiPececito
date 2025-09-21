@@ -3775,9 +3775,9 @@
                     game.gameState.needs.fun = Math.min(100, game.gameState.needs.fun + 30); // +30 diversión
                     game.updateCrisisFlags();
                     game.updateNeedBars();
-                    // Añadir recompensas como si hubiera jugado
-                    game.addCurrency('bubbles', 5);
-                    game.addCurrency('stars', 1);
+                    // Sin recompensas automáticas - solo por jugar realmente
+                    // game.addCurrency('bubbles', 5);
+                    // game.addCurrency('stars', 1);
                     console.log('🎮 SIMULADO: Pez ha jugado (+30 diversión, +5 burbujas, +1 estrella)');
                 }
             });
@@ -5330,9 +5330,9 @@
                     console.log('📊 Barras de necesidades activadas + Canvas reajustado');
                 }
                 
-                // Bonus de bienvenida
-                this.gameState.bubbles += 5; // 5 burbujas de regalo por nacer
-                this.gameState.stars += 1;   // 1 estrella de regalo
+                // Sin bonus de bienvenida - empezar desde cero
+                // this.gameState.bubbles += 0; // Empezar sin burbujas
+                // this.gameState.stars += 0;   // Empezar sin estrellas
                 
                 // 🎆 BURBUJAS ANTES DEL PEZ (INMEDIATAS)
                 this.explosionHappened = false; // RESETEAR FLAG
@@ -5519,8 +5519,8 @@
                         console.log(`👆 DEDO TURBO: ${(fish.maxSpeed * (isDirty ? 0.80 : 1.30)).toFixed(0)}px/s ${isDirty ? '(sucio)' : '(rápido)'}`);
                     }
                 }
-                // 🏎️ 2) COMIDA: solo perseguir si tiene hambre (>1%)
-                else if (foodExists && this.gameState.needs.hunger > 1) {
+                // 🏎️ 2) COMIDA: solo perseguir si tiene mucha hambre (>70%)
+                else if (foodExists && this.gameState.needs.hunger > 70) {
                     const target = this.nearestFood(); // helper existente
                     if (target) {
                         // velocidad máxima: rápido normal o capado por suciedad
@@ -9073,8 +9073,8 @@ Comida premium y de cumpleaños
                         console.log(`🍎 COLISIÓN: Pez en (${this.fish.x.toFixed(1)}, ${this.fish.y.toFixed(1)}) come pellet en (${f.x.toFixed(1)}, ${f.y.toFixed(1)}) - Distancia: ${distance.toFixed(1)}`);
                         this.food.splice(i, 1);
                         
-                        // Solo hacer efectos si tiene CUALQUIER hambre (>1%)
-                        const hadHunger = this.gameState.needs.hunger > 1;
+                        // Solo hacer efectos si tiene mucha hambre (>70%)
+                        const hadHunger = this.gameState.needs.hunger > 70;
                         console.log(`🍎 Hambre actual: ${this.gameState.needs.hunger.toFixed(1)}% - ¿Tenía hambre? ${hadHunger}`);
                         
                         if (hadHunger) {
