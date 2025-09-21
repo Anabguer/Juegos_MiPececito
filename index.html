@@ -5519,8 +5519,8 @@
                         console.log(`👆 DEDO TURBO: ${(fish.maxSpeed * (isDirty ? 0.80 : 1.30)).toFixed(0)}px/s ${isDirty ? '(sucio)' : '(rápido)'}`);
                     }
                 }
-                // 🏎️ 2) COMIDA: solo perseguir si tiene mucha hambre (>70%)
-                else if (foodExists && this.gameState.needs.hunger > 70) {
+                // 🏎️ 2) COMIDA: perseguir si tiene CUALQUIER hambre (>1%)
+                else if (foodExists && this.gameState.needs.hunger > 1) {
                     const target = this.nearestFood(); // helper existente
                     if (target) {
                         // velocidad máxima: rápido normal o capado por suciedad
