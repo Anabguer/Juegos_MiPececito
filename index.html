@@ -9002,7 +9002,14 @@ Comida premium y de cumpleaños
             }
             
             drawCleanBubbles() {
-                if (!this.cleanBubbles || this.cleanBubbles.length === 0) return;
+                if (!this.cleanBubbles || this.cleanBubbles.length === 0) {
+                    console.log('🚨 drawCleanBubbles: NO HAY BURBUJAS', {
+                        exists: !!this.cleanBubbles,
+                        length: this.cleanBubbles?.length || 0
+                    });
+                    return;
+                }
+                console.log(`🫧 drawCleanBubbles: Dibujando ${this.cleanBubbles.length} burbujas`);
                 const ctx = this.ctx;
                 
                 // 🎯 ESCALAR CONTEXTO SOLO PARA BURBUJAS (sistema híbrido)
