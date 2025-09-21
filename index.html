@@ -2818,14 +2818,14 @@
                 <img src="./images/ui/logo.png" alt="Mi Pececito" class="logo-bounce">
             </div>
             
-            <h1>🐟 Mi Pececito</h1>
+            <h1>Mi Pececito</h1>
             <p>Tu mascota virtual</p>
             
-            <!-- 🥚 MENSAJE SIMPLE DEL HUEVITO -->
+            <!-- MENSAJE SIMPLE DEL HUEVITO -->
             <div class="welcome-info">
                 <p class="egg-message">
-                    🥚 Tu huevo nacerá en <strong>5 minutos</strong><br>
-                    🎮 ¡Juega mientras esperas!
+                    Tu huevo nacerá en <strong>5 minutos</strong><br>
+                    Juega mientras esperas
                 </p>
             </div>
             
@@ -2836,7 +2836,7 @@
                 <div class="bubble bubble-3">🫧</div>
             </div>
             
-            <button id="startGameBtn" class="start-button">¡Empezar!</button>
+            <button id="startGameBtn" class="start-button">Empezar</button>
             
             <!-- Botón de reset eliminado - Solo aparece en menú si ya tienes pez -->
         </div>
@@ -3816,7 +3816,7 @@
                 this.gameState = {
                     stage: 'waiting', // NUEVO: Esperando a colocar huevo
                     eggStartTime: null, // NO hay tiempo hasta colocar huevo
-                    bubbles: 10,  // Empezar con pocas burbujas
+                    bubbles: 0,   // EMPEZAR SIN BURBUJAS
                     stars: 0,     // Sin estrellas al inicio
                     currentBackground: 'basic',
                     bubblesCreated: false,
@@ -5275,11 +5275,11 @@
                 // Crear pez Lottie REAL
                 await this.createLottieFish();
                 
-                // 🔊 SONIDO DE NACIMIENTO (fanfarria)
+                // 🔊 SONIDO DE NACIMIENTO BONITO (solo eclosión)
                 if (window.audioManager) {
                     setTimeout(() => {
-                        window.audioManager.playSound('birth');
-                    }, 500); // Pequeño retraso para que suene después de la eclosión
+                        window.audioManager.playSound('hatch'); // SOLO eclosión, sin bipbip
+                    }, 200); // Más rápido para sincronizar mejor
                 }
                 
                 this.fish = {
@@ -7517,6 +7517,12 @@
                 this.gameState.fishName = null;
                 console.log('🏷️ Estado de nombre reseteado para nuevo pez');
                 
+                // 🧼 RESETEAR PANTALLA LIMPIA AL INICIAR HUEVO
+                this.gameState.needs.dirt = 0;
+                this.gameState.needs.hunger = 15;
+                this.gameState.needs.fun = 95;
+                console.log('🧼 Pantalla reseteada: limpia, poca hambre, feliz');
+                
                     const centerX = this.canvas.width / 2;
                     const centerY = this.canvas.height / 2;
                     
@@ -8319,31 +8325,19 @@ Comida premium y de cumpleaños
                 
                 // Crear modal bonito para el nombre
                 this.showCustomModal({
-                    title: '🐠 ¡Hola! Soy tu nuevo pececito bebé',
-                    message: '🏷️ ¿Cómo quieres que me llame?\n\n💡 Elige un nombre bonito para mí:',
+                    title: 'Hola! Soy tu nuevo pececito',
+                    message: 'Como quieres que me llame?\n\nSi no escribes nada, yo elegiré un nombre bonito para ti',
                     input: true,
-                    inputPlaceholder: 'Escribe mi nombre...',
-                    confirmText: '✨ ¡Ese nombre me gusta!',
-                    cancelText: '🎲 Sorpréndeme',
+                    inputPlaceholder: 'Mi nombre...',
+                    confirmText: 'Confirmar',
                     onConfirm: (name) => {
                         if (name && name.trim()) {
                             this.gameState.fishName = name.trim();
                             console.log(`🏷️ Pez nombrado: ${this.gameState.fishName}`);
-                            
-                            this.showCustomModal({
-                                title: '🎉 ¡Perfecto!',
-                                message: `🐠💭 "¡Me encanta mi nombre: ${this.gameState.fishName}!"\n\n¡Ahora somos mejores amigos! 💕`,
-                                confirmText: '🥰 ¡Me alegra!',
-                                onConfirm: () => {}
-                            });
                         } else {
                             this.setRandomName();
+                            console.log(`🏷️ Nombre aleatorio elegido: ${this.gameState.fishName}`);
                         }
-                        this.updateUI();
-                        this.saveGame();
-                    },
-                    onCancel: () => {
-                        this.setRandomName();
                         this.updateUI();
                         this.saveGame();
                     }
@@ -8908,6 +8902,20 @@ Comida premium y de cumpleaños
                 // INMEDIATO: Burbujas aparecen CON el sonido
                 this.emitCleanBubbles();
                 this.emitCleanBubbles(); // DOBLE RÁFAGA para efecto inmediato
+                this.emitCleanBubbles(); // TRIPLE RÁFAGA para efecto MÁS visible
+                
+                // FORZAR burbujas grandes y visibles INMEDIATAMENTE
+                for (let i = 0; i < 20; i++) {
+                    this.cleanBubbles.push({
+                        x: Math.random() * this.viewW(),
+                        y: this.viewH() - 20, // Empezar desde abajo
+                        vx: (Math.random() - 0.5) * 40,
+                        vy: -150 - Math.random() * 100,
+                        r: 8 + Math.random() * 6,
+                        alpha: 0.8,
+                        life: 3 + Math.random() * 2
+                    });
+                }
                 
                 // 🧪 MINI TEST PARA VERIFICAR MOVIMIENTO
                 setTimeout(() => {
@@ -9430,14 +9438,24 @@ Comida premium y de cumpleaños
                 
                 if (hungerBarHeader) hungerBarHeader.style.width = this.gameState.needs.hunger + '%';
                 if (dirtBarHeader) dirtBarHeader.style.width = this.gameState.needs.dirt + '%';
-                if (funBarHeader) funBarHeader.style.width = this.gameState.needs.fun + '%';
+                if (funBarHeader) {
+                    funBarHeader.style.width = this.gameState.needs.fun + '%';
+                    // BORDE ROJO cuando diversión está baja (aburrido)
+                    if (this.gameState.needs.fun <= 25) {
+                        funBarHeader.style.border = '2px solid #ff4444';
+                        funBarHeader.style.boxShadow = '0 0 8px rgba(255, 68, 68, 0.6)';
+                    } else {
+                        funBarHeader.style.border = 'none';
+                        funBarHeader.style.boxShadow = 'none';
+                    }
+                }
             }
             
             updateCrisisFlags() {
                 const CRISIS_LVL = 75;
                 this.gameState.crisis.hunger = this.gameState.needs.hunger >= CRISIS_LVL;
                 this.gameState.crisis.dirt = this.gameState.needs.dirt >= CRISIS_LVL;
-                this.gameState.crisis.bored = this.gameState.needs.fun <= (100 - CRISIS_LVL);
+                this.gameState.crisis.bored = this.gameState.needs.fun <= 25; // Aburrido cuando diversión < 25%
             }
             
             updateTinyBubbles(deltaTime) {
