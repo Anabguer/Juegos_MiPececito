@@ -11740,133 +11740,1323 @@ Comida premium y de cumpleaños
             console.log('🎵 Juego Simón Marino iniciado');
         }
         
-        // 🐬 JUEGO DEL CARRIL DEL DELFÍN
+        // 🐬 JUEGO DEL CARRIL DEL DELFÍN - INTEGRADO COMPLETO
         function startCarrilGame() {
-            console.log('🐬 Iniciando juego Carril del Delfín...');
+            console.log('🐬 Iniciando juego Carril del Delfín integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
-            // Crear iframe con el juego completo
-            const gameModal = document.createElement('div');
-            gameModal.className = 'game-iframe-modal';
-            gameModal.innerHTML = `
-                <div class="game-iframe-container">
-                    <div class="game-iframe-header">
+            // Crear overlay del juego
+            const gameOverlay = document.createElement('div');
+            gameOverlay.id = 'carrilGameOverlay';
+            gameOverlay.innerHTML = `
+                <div class="carril-game-container">
+                    <div class="carril-header">
                         <h2>🐬 Carril del Delfín</h2>
-                        <button class="game-close-btn">✕</button>
+                        <div class="carril-stats">
+                            <span>⏱ <span id="carril-time">60</span>s</span>
+                            <span>Pts <span id="carril-score">0</span></span>
+                            <span>Rec <span id="carril-best">0</span></span>
+                        </div>
+                        <button class="carril-close-btn">✕</button>
                     </div>
-                    <iframe src="./ejemplos/juegos/Juego carril.html" class="game-iframe"></iframe>
+                    <div class="carril-stage" id="carril-stage">
+                        <div class="carril-lanes">
+                            <div class="carril-lane" id="carril-lane-0"></div>
+                            <div class="carril-lane" id="carril-lane-1"></div>
+                            <div class="carril-lane" id="carril-lane-2"></div>
+                        </div>
+                    </div>
+                    <div class="carril-footer">
+                        <div class="carril-controls">
+                            <button class="carril-move-btn" data-lane="0">◀ Izq</button>
+                            <button class="carril-move-btn" data-lane="1">● Centro</button>
+                            <button class="carril-move-btn" data-lane="2">Dcha ▶</button>
+                        </div>
+                        <button class="carril-btn" id="carril-start">▶️ Empezar</button>
+                    </div>
                 </div>
             `;
             
-            applyGameIframeStyles(gameModal);
+            // Aplicar estilos
+            gameOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: linear-gradient(#0a3d66, #0e5a92);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 9999; animation: fadeIn 0.3s ease;
+            `;
             
-            document.body.appendChild(gameModal);
+            const container = gameOverlay.querySelector('.carril-game-container');
+            container.style.cssText = `
+                background: rgba(7, 42, 68, 0.95); border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px; width: 90vw; height: 90vh; max-width: 400px; max-height: 700px;
+                display: flex; flex-direction: column; color: #e9f6ff; font-family: system-ui, Arial, sans-serif;
+            `;
+            
+            const stage = gameOverlay.querySelector('.carril-stage');
+            stage.style.cssText = `
+                flex: 1; position: relative; background: linear-gradient(#0a3d66, #0e5a92);
+                border-radius: 14px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.15);
+                margin: 10px;
+            `;
+            
+            const lanes = gameOverlay.querySelector('.carril-lanes');
+            lanes.style.cssText = `
+                position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr);
+                gap: 6px; padding: 6px;
+            `;
+            
+            const laneElements = gameOverlay.querySelectorAll('.carril-lane');
+            laneElements.forEach(lane => {
+                lane.style.cssText = `
+                    border-radius: 10px; background: rgba(255, 255, 255, 0.06);
+                    position: relative; overflow: hidden;
+                `;
+            });
+            
+            // Variables del juego
+            let gameActive = false, timeLeft = 60, score = 0, best = 0;
+            let playerLane = 1, entities = [], gameLoop = null, spawnTimer = 0;
+            
+            // Cargar récord
+            const savedBest = localStorage.getItem('carril-best');
+            if (savedBest) best = parseInt(savedBest);
+            
+            // Funciones del juego
+            function initCarrilGame() {
+                gameActive = true;
+                timeLeft = 60;
+                score = 0;
+                playerLane = 1;
+                entities = [];
+                spawnTimer = 0;
+                updateUI();
+                createPlayer();
+                startGameLoop();
+                startTimer();
+            }
+            
+            function createPlayer() {
+                const player = document.createElement('div');
+                player.className = 'carril-player';
+                player.innerHTML = '🐬';
+                player.style.cssText = `
+                    position: absolute; width: 50px; height: 50px; border-radius: 12px;
+                    background: #5bd0ff; color: #072a44; font-size: 30px; font-weight: 900;
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.22), 0 6px 12px rgba(0,0,0,0.35);
+                    bottom: 20px; left: 50%; transform: translateX(-50%);
+                    transition: all 0.2s ease;
+                `;
+                
+                const currentLane = laneElements[playerLane];
+                currentLane.appendChild(player);
+            }
+            
+            function movePlayer(newLane) {
+                if (!gameActive || newLane === playerLane) return;
+                
+                // Remover jugador del carril actual
+                const oldPlayer = laneElements[playerLane].querySelector('.carril-player');
+                if (oldPlayer) oldPlayer.remove();
+                
+                // Cambiar carril
+                playerLane = newLane;
+                createPlayer();
+            }
+            
+            function spawnEntity() {
+                const lane = Math.floor(Math.random() * 3);
+                const isGood = Math.random() < 0.3; // 30% bueno, 70% malo
+                
+                const entity = document.createElement('div');
+                entity.className = isGood ? 'carril-good' : 'carril-bad';
+                entity.innerHTML = isGood ? '⭐' : '💥';
+                entity.style.cssText = `
+                    position: absolute; width: 50px; height: 50px; border-radius: 12px;
+                    background: ${isGood ? '#ff9a3c' : '#ff7a6e'}; color: #072a44;
+                    font-size: 30px; font-weight: 900; display: flex; align-items: center; justify-content: center;
+                    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.22), 0 6px 12px rgba(0,0,0,0.35);
+                    top: -60px; left: 50%; transform: translateX(-50%);
+                `;
+                
+                entity.dataset.lane = lane;
+                entity.dataset.good = isGood;
+                entity.dataset.y = -60;
+                
+                laneElements[lane].appendChild(entity);
+                entities.push(entity);
+            }
+            
+            function updateEntities() {
+                for (let i = entities.length - 1; i >= 0; i--) {
+                    const entity = entities[i];
+                    let y = parseInt(entity.dataset.y);
+                    y += 4; // Velocidad de caída
+                    entity.dataset.y = y;
+                    entity.style.top = y + 'px';
+                    
+                    // Verificar colisión con jugador
+                    const entityLane = parseInt(entity.dataset.lane);
+                    if (entityLane === playerLane && y > stage.offsetHeight - 120 && y < stage.offsetHeight - 60) {
+                        // Colisión!
+                        const isGood = entity.dataset.good === 'true';
+                        if (isGood) {
+                            score += 10;
+                            // Efecto visual positivo
+                            entity.style.background = '#1bb37a';
+                            entity.innerHTML = '✨';
+                        } else {
+                            // Game over
+                            gameOver();
+                            return;
+                        }
+                        
+                        // Remover entidad
+                        entity.remove();
+                        entities.splice(i, 1);
+                        updateUI();
+                    }
+                    // Remover si sale de pantalla
+                    else if (y > stage.offsetHeight + 60) {
+                        entity.remove();
+                        entities.splice(i, 1);
+                    }
+                }
+            }
+            
+            function startGameLoop() {
+                gameLoop = setInterval(() => {
+                    if (!gameActive) return;
+                    
+                    updateEntities();
+                    
+                    // Spawn nuevas entidades
+                    spawnTimer++;
+                    if (spawnTimer >= 30) { // Cada ~500ms
+                        spawnEntity();
+                        spawnTimer = 0;
+                    }
+                }, 16); // ~60fps
+            }
+            
+            function startTimer() {
+                const timer = setInterval(() => {
+                    if (!gameActive) {
+                        clearInterval(timer);
+                        return;
+                    }
+                    
+                    timeLeft--;
+                    updateUI();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        gameOver();
+                    }
+                }, 1000);
+            }
+            
+            function gameOver() {
+                gameActive = false;
+                if (gameLoop) clearInterval(gameLoop);
+                
+                if (score > best) {
+                    best = score;
+                    localStorage.setItem('carril-best', best.toString());
+                }
+                
+                // Dar recompensas
+                const bubbles = Math.floor(score / 2);
+                const stars = Math.floor(score / 20);
+                
+                if (window.game && bubbles > 0) {
+                    window.game.gameState.bubbles += bubbles;
+                    window.game.gameState.stars += stars;
+                    window.game.saveGame();
+                }
+                
+                setTimeout(() => {
+                    alert(`🐬 ¡Fin de partida!\\n🌊 Puntuación: ${score}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
+                }, 300);
+                
+                updateUI();
+            }
+            
+            function updateUI() {
+                document.getElementById('carril-time').textContent = timeLeft;
+                document.getElementById('carril-score').textContent = score;
+                document.getElementById('carril-best').textContent = best;
+            }
+            
+            // Event listeners
+            gameOverlay.querySelector('.carril-close-btn').addEventListener('click', () => {
+                gameActive = false;
+                if (gameLoop) clearInterval(gameLoop);
+                gameOverlay.remove();
+                console.log('🐬 Juego Carril del Delfín cerrado');
+            });
+            
+            gameOverlay.querySelector('#carril-start').addEventListener('click', () => {
+                initCarrilGame();
+            });
+            
+            // Controles de movimiento
+            gameOverlay.querySelectorAll('.carril-move-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lane = parseInt(btn.dataset.lane);
+                    movePlayer(lane);
+                });
+            });
+            
+            // Controles de teclado
+            document.addEventListener('keydown', (e) => {
+                if (!gameActive) return;
+                switch(e.key) {
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        movePlayer(Math.max(0, playerLane - 1));
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        movePlayer(Math.min(2, playerLane + 1));
+                        break;
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W':
+                        movePlayer(1); // Centro
+                        break;
+                }
+            });
+            
+            gameOverlay.addEventListener('click', (e) => {
+                if (e.target === gameOverlay) {
+                    gameActive = false;
+                    if (gameLoop) clearInterval(gameLoop);
+                    gameOverlay.remove();
+                }
+            });
+            
+            document.body.appendChild(gameOverlay);
+            updateUI();
             console.log('🐬 Juego Carril del Delfín iniciado');
         }
         
-        // 🐉 JUEGO DEL DRAGÓN MARINO
+        // 🐉 JUEGO DEL DRAGÓN MARINO - INTEGRADO BÁSICO
         function startCorrerGame() {
-            console.log('🐉 Iniciando juego Dragón Marino...');
+            console.log('🐉 Iniciando juego Dragón Marino integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
-            // Crear iframe con el juego completo
-            const gameModal = document.createElement('div');
-            gameModal.className = 'game-iframe-modal';
-            gameModal.innerHTML = `
-                <div class="game-iframe-container">
-                    <div class="game-iframe-header">
+            // Crear overlay del juego
+            const gameOverlay = document.createElement('div');
+            gameOverlay.id = 'correrGameOverlay';
+            gameOverlay.innerHTML = `
+                <div class="correr-game-container">
+                    <div class="correr-header">
                         <h2>🐉 Dragón Marino</h2>
-                        <button class="game-close-btn">✕</button>
+                        <div class="correr-stats">
+                            <span>Pts <span id="correr-score">0</span></span>
+                            <span>Rec <span id="correr-best">0</span></span>
+                        </div>
+                        <button class="correr-close-btn">✕</button>
                     </div>
-                    <iframe src="./ejemplos/juegos/Juego Correr y saltar.html" class="game-iframe"></iframe>
+                    <div class="correr-stage">
+                        <canvas id="correr-canvas" width="400" height="300"></canvas>
+                        <div class="correr-hint">Toca o pulsa ESPACIO para saltar</div>
+                    </div>
+                    <div class="correr-footer">
+                        <button class="correr-btn" id="correr-jump">⬆️ Saltar</button>
+                        <button class="correr-btn" id="correr-start">▶️ Empezar</button>
+                    </div>
                 </div>
             `;
             
-            applyGameIframeStyles(gameModal);
+            // Aplicar estilos
+            gameOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: linear-gradient(#083457, #0b4e7b);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 9999; animation: fadeIn 0.3s ease;
+            `;
             
-            document.body.appendChild(gameModal);
+            const container = gameOverlay.querySelector('.correr-game-container');
+            container.style.cssText = `
+                background: rgba(7, 42, 68, 0.95); border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px; width: 90vw; height: 90vh; max-width: 450px; max-height: 600px;
+                display: flex; flex-direction: column; color: #e9f6ff; font-family: system-ui, Arial, sans-serif;
+            `;
+            
+            const stage = gameOverlay.querySelector('.correr-stage');
+            stage.style.cssText = `
+                flex: 1; position: relative; background: linear-gradient(#083457, #0b4e7b);
+                border-radius: 14px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.15);
+                margin: 10px; display: flex; align-items: center; justify-content: center;
+            `;
+            
+            const canvas = gameOverlay.querySelector('#correr-canvas');
+            canvas.style.cssText = `
+                border-radius: 10px; background: linear-gradient(#083457, #0b4e7b);
+                max-width: 100%; max-height: 100%;
+            `;
+            
+            const hint = gameOverlay.querySelector('.correr-hint');
+            hint.style.cssText = `
+                position: absolute; bottom: 8px; left: 0; right: 0; text-align: center;
+                opacity: 0.7; font-size: 14px;
+            `;
+            
+            // Variables del juego
+            let gameActive = false, score = 0, best = 0;
+            let player = { x: 50, y: 200, vy: 0, grounded: true, size: 30 };
+            let obstacles = [], gameSpeed = 2, spawnTimer = 0;
+            let gameLoop = null, ctx = canvas.getContext('2d');
+            
+            // Cargar récord
+            const savedBest = localStorage.getItem('correr-best');
+            if (savedBest) best = parseInt(savedBest);
+            
+            // Funciones del juego
+            function initCorrerGame() {
+                gameActive = true;
+                score = 0;
+                gameSpeed = 2;
+                spawnTimer = 0;
+                obstacles = [];
+                player = { x: 50, y: 200, vy: 0, grounded: true, size: 30 };
+                updateUI();
+                startGameLoop();
+            }
+            
+            function jump() {
+                if (gameActive && player.grounded) {
+                    player.vy = -12;
+                    player.grounded = false;
+                }
+            }
+            
+            function updateGame() {
+                if (!gameActive) return;
+                
+                // Física del jugador
+                player.vy += 0.6; // Gravedad
+                player.y += player.vy;
+                
+                // Suelo
+                if (player.y >= 200) {
+                    player.y = 200;
+                    player.vy = 0;
+                    player.grounded = true;
+                }
+                
+                // Spawn obstáculos
+                spawnTimer++;
+                if (spawnTimer >= 120) { // Cada ~2 segundos
+                    obstacles.push({
+                        x: canvas.width,
+                        y: 200,
+                        width: 20,
+                        height: 40,
+                        passed: false
+                    });
+                    spawnTimer = 0;
+                }
+                
+                // Actualizar obstáculos
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    const obs = obstacles[i];
+                    obs.x -= gameSpeed;
+                    
+                    // Colisión
+                    if (obs.x < player.x + player.size && 
+                        obs.x + obs.width > player.x &&
+                        obs.y < player.y + player.size && 
+                        obs.y + obs.height > player.y) {
+                        gameOver();
+                        return;
+                    }
+                    
+                    // Puntuación
+                    if (!obs.passed && obs.x + obs.width < player.x) {
+                        obs.passed = true;
+                        score += 10;
+                        updateUI();
+                    }
+                    
+                    // Remover si sale de pantalla
+                    if (obs.x + obs.width < 0) {
+                        obstacles.splice(i, 1);
+                    }
+                }
+                
+                // Aumentar velocidad gradualmente
+                gameSpeed += 0.001;
+            }
+            
+            function drawGame() {
+                // Limpiar canvas
+                ctx.fillStyle = '#083457';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Dibujar suelo
+                ctx.fillStyle = '#0d4670';
+                ctx.fillRect(0, 230, canvas.width, 70);
+                
+                // Dibujar jugador (dragón)
+                ctx.fillStyle = '#5bd0ff';
+                ctx.fillRect(player.x, player.y, player.size, player.size);
+                ctx.fillStyle = '#072a44';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('🐉', player.x + player.size/2, player.y + player.size/2 + 7);
+                
+                // Dibujar obstáculos
+                ctx.fillStyle = '#ff7a6e';
+                obstacles.forEach(obs => {
+                    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                    ctx.fillStyle = '#072a44';
+                    ctx.fillText('🪨', obs.x + obs.width/2, obs.y + obs.height/2 + 7);
+                    ctx.fillStyle = '#ff7a6e';
+                });
+            }
+            
+            function startGameLoop() {
+                gameLoop = setInterval(() => {
+                    updateGame();
+                    drawGame();
+                }, 16); // ~60fps
+            }
+            
+            function gameOver() {
+                gameActive = false;
+                if (gameLoop) clearInterval(gameLoop);
+                
+                if (score > best) {
+                    best = score;
+                    localStorage.setItem('correr-best', best.toString());
+                }
+                
+                // Dar recompensas
+                const bubbles = Math.floor(score / 5);
+                const stars = Math.floor(score / 30);
+                
+                if (window.game && bubbles > 0) {
+                    window.game.gameState.bubbles += bubbles;
+                    window.game.gameState.stars += stars;
+                    window.game.saveGame();
+                }
+                
+                setTimeout(() => {
+                    alert(`🐉 ¡Fin de partida!\\n🌊 Puntuación: ${score}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
+                }, 300);
+                
+                updateUI();
+            }
+            
+            function updateUI() {
+                document.getElementById('correr-score').textContent = score;
+                document.getElementById('correr-best').textContent = best;
+            }
+            
+            // Event listeners
+            gameOverlay.querySelector('.correr-close-btn').addEventListener('click', () => {
+                gameActive = false;
+                if (gameLoop) clearInterval(gameLoop);
+                gameOverlay.remove();
+                console.log('🐉 Juego Dragón Marino cerrado');
+            });
+            
+            gameOverlay.querySelector('#correr-start').addEventListener('click', () => {
+                initCorrerGame();
+            });
+            
+            gameOverlay.querySelector('#correr-jump').addEventListener('click', jump);
+            
+            // Controles de teclado
+            const keyHandler = (e) => {
+                if (!gameActive) return;
+                if (e.code === 'Space' || e.key === ' ') {
+                    e.preventDefault();
+                    jump();
+                }
+            };
+            document.addEventListener('keydown', keyHandler);
+            
+            // Canvas click para saltar
+            canvas.addEventListener('click', jump);
+            
+            gameOverlay.addEventListener('click', (e) => {
+                if (e.target === gameOverlay) {
+                    gameActive = false;
+                    if (gameLoop) clearInterval(gameLoop);
+                    document.removeEventListener('keydown', keyHandler);
+                    gameOverlay.remove();
+                }
+            });
+            
+            document.body.appendChild(gameOverlay);
+            updateUI();
             console.log('🐉 Juego Dragón Marino iniciado');
         }
         
-        // 🎯 JUEGO DE CAZA DE PECES
+        // 🎯 JUEGO DE CAZA DE PECES - INTEGRADO COMPLETO
         function startCazaGame() {
-            console.log('🎯 Iniciando juego Caza de Peces...');
+            console.log('🎯 Iniciando juego Caza de Peces integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
-            // Crear iframe con el juego completo
-            const gameModal = document.createElement('div');
-            gameModal.className = 'game-iframe-modal';
-            gameModal.innerHTML = `
-                <div class="game-iframe-container">
-                    <div class="game-iframe-header">
+            // Crear overlay del juego
+            const gameOverlay = document.createElement('div');
+            gameOverlay.id = 'cazaGameOverlay';
+            gameOverlay.innerHTML = `
+                <div class="caza-game-container">
+                    <div class="caza-header">
                         <h2>🎯 Caza de Peces</h2>
-                        <button class="game-close-btn">✕</button>
+                        <div class="caza-stats">
+                            <span>Pts <span id="caza-score">0</span></span>
+                            <span>Ronda <span id="caza-round">1</span></span>
+                            <span>Rec <span id="caza-best">0</span></span>
+                        </div>
+                        <button class="caza-close-btn">✕</button>
                     </div>
-                    <iframe src="./ejemplos/juegos/Juego de caza.html" class="game-iframe"></iframe>
+                    <div class="caza-game-area">
+                        <div class="caza-timebar">
+                            <div class="caza-fill" id="caza-fill"></div>
+                            <div class="caza-tick" id="caza-tick">100%</div>
+                        </div>
+                        <div class="caza-main">
+                            <div class="caza-objective">
+                                Objetivo: <span class="caza-token" id="caza-obj-token">
+                                    <span id="caza-obj-emoji">🐟</span>
+                                </span>
+                            </div>
+                            <div class="caza-board" id="caza-board"></div>
+                        </div>
+                    </div>
+                    <div class="caza-footer">
+                        <button class="caza-btn" id="caza-start">▶️ Empezar</button>
+                    </div>
                 </div>
             `;
             
-            applyGameIframeStyles(gameModal);
+            // Aplicar estilos
+            gameOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: linear-gradient(135deg, #072a44 0%, #1d4b6b 100%);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 9999; animation: fadeIn 0.3s ease;
+            `;
             
-            document.body.appendChild(gameModal);
+            const container = gameOverlay.querySelector('.caza-game-container');
+            container.style.cssText = `
+                background: rgba(7, 42, 68, 0.95); border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px; width: 95vw; height: 90vh; max-width: 600px; max-height: 700px;
+                display: flex; flex-direction: column; color: #e9f6ff; font-family: system-ui, Arial, sans-serif;
+            `;
+            
+            const gameArea = gameOverlay.querySelector('.caza-game-area');
+            gameArea.style.cssText = `
+                flex: 1; display: flex; gap: 10px; padding: 10px;
+            `;
+            
+            const timebar = gameOverlay.querySelector('.caza-timebar');
+            timebar.style.cssText = `
+                width: 32px; background: #0a2f4f; border-radius: 8px; overflow: hidden;
+                position: relative; border: 1px solid rgba(255, 255, 255, 0.18);
+            `;
+            
+            const fill = gameOverlay.querySelector('.caza-fill');
+            fill.style.cssText = `
+                position: absolute; bottom: 0; left: 0; right: 0; height: 100%;
+                background: linear-gradient(#25c3ea, #0ea5c6); transition: height 0.18s ease;
+            `;
+            
+            const main = gameOverlay.querySelector('.caza-main');
+            main.style.cssText = `
+                flex: 1; display: flex; flex-direction: column; gap: 10px;
+            `;
+            
+            const objective = gameOverlay.querySelector('.caza-objective');
+            objective.style.cssText = `
+                display: flex; align-items: center; gap: 8px; padding: 8px;
+                background: rgba(255, 255, 255, 0.06); border-radius: 12px; font-weight: 800;
+            `;
+            
+            const objToken = gameOverlay.querySelector('.caza-token');
+            objToken.style.cssText = `
+                width: 32px; height: 32px; border-radius: 50%; display: flex;
+                align-items: center; justify-content: center; font-size: 20px;
+                background: #e9d8a6;
+            `;
+            
+            const board = gameOverlay.querySelector('.caza-board');
+            board.style.cssText = `
+                flex: 1; display: grid; grid-template-columns: repeat(6, 1fr);
+                grid-template-rows: repeat(6, 1fr); gap: 4px; background: transparent;
+            `;
+            
+            // Variables del juego
+            const EMOJIS = ["🐟", "⭐", "🐙", "🪸", "🦀"];
+            const COLORS = ["#e9d8a6", "#0b5cab", "#5a4d8a", "#20c5c9", "#2a9d65"];
+            let gameActive = false, score = 0, round = 1, best = 0;
+            let timeLeft = 100, currentTarget = 0, gameTimer = null;
+            
+            // Cargar récord
+            const savedBest = localStorage.getItem('caza-best');
+            if (savedBest) best = parseInt(savedBest);
+            
+            // Funciones del juego
+            function initCazaGame() {
+                gameActive = true;
+                score = 0;
+                round = 1;
+                timeLeft = 100;
+                currentTarget = Math.floor(Math.random() * EMOJIS.length);
+                updateUI();
+                createBoard();
+                startTimer();
+            }
+            
+            function createBoard() {
+                board.innerHTML = '';
+                
+                // Crear 36 celdas (6x6)
+                for (let i = 0; i < 36; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'caza-cell';
+                    
+                    const tokenType = Math.floor(Math.random() * EMOJIS.length);
+                    cell.innerHTML = `
+                        <div class="caza-token" data-type="${tokenType}">
+                            ${EMOJIS[tokenType]}
+                        </div>
+                    `;
+                    
+                    cell.style.cssText = `
+                        position: relative; display: flex; align-items: center; justify-content: center;
+                        cursor: pointer; aspect-ratio: 1; background: transparent;
+                    `;
+                    
+                    const token = cell.querySelector('.caza-token');
+                    token.style.cssText = `
+                        width: 100%; height: 100%; border-radius: 50%; display: flex;
+                        align-items: center; justify-content: center; font-size: 20px;
+                        background: ${COLORS[tokenType]}; transition: all 0.12s ease;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                    `;
+                    
+                    cell.addEventListener('click', () => handleClick(tokenType, token));
+                    board.appendChild(cell);
+                }
+                
+                // Asegurar que hay al menos 3 del tipo objetivo
+                const targetCells = board.querySelectorAll(`[data-type="${currentTarget}"]`);
+                if (targetCells.length < 3) {
+                    for (let i = 0; i < 3; i++) {
+                        const randomCell = board.children[Math.floor(Math.random() * 36)];
+                        const token = randomCell.querySelector('.caza-token');
+                        token.dataset.type = currentTarget;
+                        token.innerHTML = EMOJIS[currentTarget];
+                        token.style.background = COLORS[currentTarget];
+                    }
+                }
+            }
+            
+            function handleClick(tokenType, tokenElement) {
+                if (!gameActive) return;
+                
+                if (tokenType === currentTarget) {
+                    // Correcto!
+                    score += 10;
+                    tokenElement.style.boxShadow = '0 0 12px rgba(27, 179, 122, 0.6)';
+                    tokenElement.style.transform = 'scale(0.8)';
+                    tokenElement.style.opacity = '0.3';
+                    
+                    // Verificar si quedan más objetivos
+                    setTimeout(() => {
+                        const remaining = board.querySelectorAll(`[data-type="${currentTarget}"]`).length - 1;
+                        if (remaining <= 0) {
+                            nextRound();
+                        }
+                    }, 100);
+                    
+                } else {
+                    // Incorrecto
+                    tokenElement.style.boxShadow = '0 0 12px rgba(240, 68, 56, 0.6)';
+                    tokenElement.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        tokenElement.style.transform = 'scale(1)';
+                        tokenElement.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+                    }, 200);
+                    
+                    // Penalizar tiempo
+                    timeLeft -= 5;
+                    if (timeLeft <= 0) {
+                        gameOver();
+                    }
+                }
+                
+                updateUI();
+            }
+            
+            function nextRound() {
+                round++;
+                currentTarget = Math.floor(Math.random() * EMOJIS.length);
+                timeLeft = Math.min(100, timeLeft + 15); // Bonus tiempo
+                createBoard();
+                updateUI();
+            }
+            
+            function startTimer() {
+                gameTimer = setInterval(() => {
+                    if (!gameActive) {
+                        clearInterval(gameTimer);
+                        return;
+                    }
+                    
+                    timeLeft -= 0.5;
+                    if (timeLeft <= 0) {
+                        gameOver();
+                    }
+                    updateUI();
+                }, 50); // Actualización suave
+            }
+            
+            function gameOver() {
+                gameActive = false;
+                if (gameTimer) clearInterval(gameTimer);
+                
+                if (score > best) {
+                    best = score;
+                    localStorage.setItem('caza-best', best.toString());
+                }
+                
+                // Dar recompensas
+                const bubbles = Math.floor(score / 3);
+                const stars = Math.floor(score / 25);
+                
+                if (window.game && bubbles > 0) {
+                    window.game.gameState.bubbles += bubbles;
+                    window.game.gameState.stars += stars;
+                    window.game.saveGame();
+                }
+                
+                setTimeout(() => {
+                    alert(`🎯 ¡Fin de caza!\\n🌊 Puntuación: ${score}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
+                }, 300);
+                
+                updateUI();
+            }
+            
+            function updateUI() {
+                document.getElementById('caza-score').textContent = score;
+                document.getElementById('caza-round').textContent = round;
+                document.getElementById('caza-best').textContent = best;
+                document.getElementById('caza-obj-emoji').textContent = EMOJIS[currentTarget];
+                document.getElementById('caza-obj-token').style.background = COLORS[currentTarget];
+                document.getElementById('caza-fill').style.height = Math.max(0, timeLeft) + '%';
+                document.getElementById('caza-tick').textContent = Math.floor(timeLeft) + '%';
+            }
+            
+            // Event listeners
+            gameOverlay.querySelector('.caza-close-btn').addEventListener('click', () => {
+                gameActive = false;
+                if (gameTimer) clearInterval(gameTimer);
+                gameOverlay.remove();
+                console.log('🎯 Juego Caza de Peces cerrado');
+            });
+            
+            gameOverlay.querySelector('#caza-start').addEventListener('click', () => {
+                initCazaGame();
+            });
+            
+            gameOverlay.addEventListener('click', (e) => {
+                if (e.target === gameOverlay) {
+                    gameActive = false;
+                    if (gameTimer) clearInterval(gameTimer);
+                    gameOverlay.remove();
+                }
+            });
+            
+            document.body.appendChild(gameOverlay);
+            updateUI();
             console.log('🎯 Juego Caza de Peces iniciado');
         }
         
-        // 🌊 JUEGO DE SECUENCIA DE MAREAS
+        // 🌊 JUEGO DE SECUENCIA DE MAREAS - INTEGRADO COMPLETO
         function startSecuenciaGame() {
-            console.log('🌊 Iniciando juego Secuencia de Mareas...');
+            console.log('🌊 Iniciando juego Secuencia de Mareas integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
-            // Crear iframe con el juego completo
-            const gameModal = document.createElement('div');
-            gameModal.className = 'game-iframe-modal';
-            gameModal.innerHTML = `
-                <div class="game-iframe-container">
-                    <div class="game-iframe-header">
+            // Crear overlay del juego
+            const gameOverlay = document.createElement('div');
+            gameOverlay.id = 'secuenciaGameOverlay';
+            gameOverlay.innerHTML = `
+                <div class="secuencia-game-container">
+                    <div class="secuencia-header">
                         <h2>🌊 Secuencia de Mareas</h2>
-                        <button class="game-close-btn">✕</button>
+                        <div class="secuencia-stats">
+                            <span>Ronda <span id="secuencia-round">0</span></span>
+                            <span>Pts <span id="secuencia-score">0</span></span>
+                            <span>Rec <span id="secuencia-best">0</span></span>
+                        </div>
+                        <button class="secuencia-close-btn">✕</button>
                     </div>
-                    <iframe src="./ejemplos/juegos/Juego secuencia.html" class="game-iframe"></iframe>
+                    <div class="secuencia-game-area">
+                        <div class="secuencia-timebar">
+                            <div class="secuencia-fill" id="secuencia-fill"></div>
+                            <div class="secuencia-tick" id="secuencia-tick">100%</div>
+                        </div>
+                        <div class="secuencia-main">
+                            <div class="secuencia-hint" id="secuencia-hint">Mira la secuencia...</div>
+                            <div class="secuencia-board" id="secuencia-board"></div>
+                        </div>
+                    </div>
+                    <div class="secuencia-footer">
+                        <button class="secuencia-btn" id="secuencia-start">▶️ Empezar</button>
+                    </div>
                 </div>
             `;
             
-            applyGameIframeStyles(gameModal);
+            // Aplicar estilos básicos
+            gameOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: linear-gradient(135deg, #072a44 0%, #1d4b6b 100%);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 9999; animation: fadeIn 0.3s ease;
+            `;
             
-            document.body.appendChild(gameModal);
+            const container = gameOverlay.querySelector('.secuencia-game-container');
+            container.style.cssText = `
+                background: rgba(7, 42, 68, 0.95); border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px; width: 95vw; height: 90vh; max-width: 600px; max-height: 700px;
+                display: flex; flex-direction: column; color: #e9f6ff; font-family: system-ui, Arial, sans-serif;
+            `;
+            
+            const gameArea = gameOverlay.querySelector('.secuencia-game-area');
+            gameArea.style.cssText = `flex: 1; display: flex; gap: 10px; padding: 10px;`;
+            
+            const board = gameOverlay.querySelector('.secuencia-board');
+            board.style.cssText = `
+                flex: 1; display: grid; grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(4, 1fr); gap: 6px; background: transparent;
+            `;
+            
+            // Variables del juego - versión simplificada
+            const EMOJIS = ["🐟", "⭐", "🐙", "🪸", "🦀"];
+            const COLORS = ["#e9d8a6", "#0b5cab", "#5a4d8a", "#20c5c9", "#2a9d65"];
+            let gameActive = false, score = 0, round = 0, best = 0;
+            let sequence = [], playerInput = [], timeLeft = 100;
+            let showingSequence = false, gameTimer = null;
+            
+            // Cargar récord
+            const savedBest = localStorage.getItem('secuencia-best');
+            if (savedBest) best = parseInt(savedBest);
+            
+            function initSecuenciaGame() {
+                gameActive = true;
+                score = 0;
+                round = 0;
+                timeLeft = 100;
+                sequence = [];
+                playerInput = [];
+                showingSequence = false;
+                updateUI();
+                createBoard();
+                nextRound();
+                startTimer();
+            }
+            
+            function createBoard() {
+                board.innerHTML = '';
+                for (let i = 0; i < 16; i++) {
+                    const cell = document.createElement('div');
+                    const tokenType = Math.floor(Math.random() * EMOJIS.length);
+                    cell.innerHTML = `<div class="secuencia-token" data-type="${tokenType}" data-index="${i}">${EMOJIS[tokenType]}</div>`;
+                    cell.style.cssText = `
+                        display: flex; align-items: center; justify-content: center; cursor: pointer;
+                        aspect-ratio: 1; background: transparent;
+                    `;
+                    const token = cell.querySelector('.secuencia-token');
+                    token.style.cssText = `
+                        width: 100%; height: 100%; border-radius: 50%; display: flex;
+                        align-items: center; justify-content: center; font-size: 24px;
+                        background: ${COLORS[tokenType]}; transition: all 0.12s ease;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                    `;
+                    cell.addEventListener('click', () => handleTokenClick(i));
+                    board.appendChild(cell);
+                }
+            }
+            
+            function nextRound() {
+                round++;
+                const randomIndex = Math.floor(Math.random() * 16);
+                sequence.push(randomIndex);
+                playerInput = [];
+                document.getElementById('secuencia-hint').textContent = 'Mira la secuencia...';
+                showSequence();
+            }
+            
+            function showSequence() {
+                showingSequence = true;
+                let i = 0;
+                const showNext = () => {
+                    if (i < sequence.length) {
+                        const token = board.children[sequence[i]].querySelector('.secuencia-token');
+                        token.style.boxShadow = '0 0 20px rgba(255,255,255,0.8)';
+                        token.style.transform = 'scale(1.1)';
+                        setTimeout(() => {
+                            token.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+                            token.style.transform = 'scale(1)';
+                            i++;
+                            setTimeout(showNext, 300);
+                        }, 500);
+                    } else {
+                        showingSequence = false;
+                        document.getElementById('secuencia-hint').textContent = '¡Repite la secuencia!';
+                    }
+                };
+                setTimeout(showNext, 800);
+            }
+            
+            function handleTokenClick(index) {
+                if (!gameActive || showingSequence) return;
+                
+                playerInput.push(index);
+                const token = board.children[index].querySelector('.secuencia-token');
+                
+                // Verificar si es correcto
+                const currentStep = playerInput.length - 1;
+                if (playerInput[currentStep] === sequence[currentStep]) {
+                    // Correcto
+                    token.style.boxShadow = '0 0 12px rgba(27, 179, 122, 0.6)';
+                    score += 5;
+                    
+                    if (playerInput.length === sequence.length) {
+                        // Secuencia completa
+                        setTimeout(() => {
+                            nextRound();
+                        }, 800);
+                    }
+                } else {
+                    // Error
+                    token.style.boxShadow = '0 0 12px rgba(240, 68, 56, 0.6)';
+                    gameOver();
+                }
+                
+                updateUI();
+            }
+            
+            function startTimer() {
+                gameTimer = setInterval(() => {
+                    if (!gameActive) {
+                        clearInterval(gameTimer);
+                        return;
+                    }
+                    timeLeft -= 0.3;
+                    if (timeLeft <= 0) gameOver();
+                    updateUI();
+                }, 50);
+            }
+            
+            function gameOver() {
+                gameActive = false;
+                if (gameTimer) clearInterval(gameTimer);
+                
+                if (score > best) {
+                    best = score;
+                    localStorage.setItem('secuencia-best', best.toString());
+                }
+                
+                // Dar recompensas
+                const bubbles = Math.floor(score / 2);
+                const stars = Math.floor(score / 15);
+                
+                if (window.game && bubbles > 0) {
+                    window.game.gameState.bubbles += bubbles;
+                    window.game.gameState.stars += stars;
+                    window.game.saveGame();
+                }
+                
+                setTimeout(() => {
+                    alert(`🌊 ¡Fin de secuencia!\\n🌊 Ronda: ${round}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
+                }, 300);
+            }
+            
+            function updateUI() {
+                document.getElementById('secuencia-round').textContent = round;
+                document.getElementById('secuencia-score').textContent = score;
+                document.getElementById('secuencia-best').textContent = best;
+                document.getElementById('secuencia-fill').style.height = Math.max(0, timeLeft) + '%';
+                document.getElementById('secuencia-tick').textContent = Math.floor(timeLeft) + '%';
+            }
+            
+            // Event listeners
+            gameOverlay.querySelector('.secuencia-close-btn').addEventListener('click', () => {
+                gameActive = false;
+                if (gameTimer) clearInterval(gameTimer);
+                gameOverlay.remove();
+            });
+            
+            gameOverlay.querySelector('#secuencia-start').addEventListener('click', () => {
+                initSecuenciaGame();
+            });
+            
+            document.body.appendChild(gameOverlay);
+            updateUI();
             console.log('🌊 Juego Secuencia de Mareas iniciado');
         }
         
-        // 🏖️ JUEGO DE TOCA-3 MARINO
+        // 🏖️ JUEGO DE TOCA-3 MARINO - INTEGRADO COMPLETO
         function startToca3Game() {
-            console.log('🏖️ Iniciando juego Toca-3 Marino...');
+            console.log('🏖️ Iniciando juego Toca-3 Marino integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
-            // Crear iframe con el juego completo
-            const gameModal = document.createElement('div');
-            gameModal.className = 'game-iframe-modal';
-            gameModal.innerHTML = `
-                <div class="game-iframe-container">
-                    <div class="game-iframe-header">
+            // Crear overlay del juego
+            const gameOverlay = document.createElement('div');
+            gameOverlay.id = 'toca3GameOverlay';
+            gameOverlay.innerHTML = `
+                <div class="toca3-game-container">
+                    <div class="toca3-header">
                         <h2>🏖️ Toca-3 Marino</h2>
-                        <button class="game-close-btn">✕</button>
+                        <div class="toca3-stats">
+                            <span>Pts <span id="toca3-score">0</span></span>
+                            <span>Rec <span id="toca3-best">0</span></span>
+                        </div>
+                        <button class="toca3-close-btn">✕</button>
                     </div>
-                    <iframe src="./ejemplos/juegos/Juego Toca3.html" class="game-iframe"></iframe>
+                    <div class="toca3-game-area">
+                        <div class="toca3-timebar">
+                            <div class="toca3-fill" id="toca3-fill"></div>
+                            <div class="toca3-tick" id="toca3-tick">100%</div>
+                        </div>
+                        <div class="toca3-main">
+                            <div class="toca3-board" id="toca3-board"></div>
+                        </div>
+                    </div>
+                    <div class="toca3-footer">
+                        <button class="toca3-btn" id="toca3-start">▶️ Empezar</button>
+                    </div>
                 </div>
             `;
             
-            applyGameIframeStyles(gameModal);
+            // Aplicar estilos básicos
+            gameOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: linear-gradient(135deg, #072a44 0%, #1d4b6b 100%);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 9999; animation: fadeIn 0.3s ease;
+            `;
             
-            document.body.appendChild(gameModal);
+            const container = gameOverlay.querySelector('.toca3-game-container');
+            container.style.cssText = `
+                background: rgba(7, 42, 68, 0.95); border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px; width: 95vw; height: 90vh; max-width: 600px; max-height: 700px;
+                display: flex; flex-direction: column; color: #e9f6ff; font-family: system-ui, Arial, sans-serif;
+            `;
+            
+            const board = gameOverlay.querySelector('.toca3-board');
+            board.style.cssText = `
+                flex: 1; display: grid; grid-template-columns: repeat(6, 1fr);
+                grid-template-rows: repeat(8, 1fr); gap: 4px; background: transparent; padding: 10px;
+            `;
+            
+            // Variables del juego - versión simplificada de match-3
+            const EMOJIS = ["🐟", "⭐", "🐙", "🪸", "🦀"];
+            const COLORS = ["#e9d8a6", "#0b5cab", "#5a4d8a", "#20c5c9", "#2a9d65"];
+            let gameActive = false, score = 0, best = 0, timeLeft = 100;
+            let grid = [], selectedCells = [], gameTimer = null;
+            
+            // Cargar récord
+            const savedBest = localStorage.getItem('toca3-best');
+            if (savedBest) best = parseInt(savedBest);
+            
+            function initToca3Game() {
+                gameActive = true;
+                score = 0;
+                timeLeft = 100;
+                selectedCells = [];
+                grid = [];
+                updateUI();
+                createBoard();
+                startTimer();
+            }
+            
+            function createBoard() {
+                board.innerHTML = '';
+                grid = [];
+                
+                // Crear tablero 6x8
+                for (let r = 0; r < 8; r++) {
+                    grid[r] = [];
+                    for (let c = 0; c < 6; c++) {
+                        const tokenType = Math.floor(Math.random() * EMOJIS.length);
+                        const cell = document.createElement('div');
+                        cell.innerHTML = `<div class="toca3-token" data-type="${tokenType}" data-r="${r}" data-c="${c}">${EMOJIS[tokenType]}</div>`;
+                        cell.style.cssText = `
+                            display: flex; align-items: center; justify-content: center; cursor: pointer;
+                            aspect-ratio: 1; background: transparent;
+                        `;
+                        const token = cell.querySelector('.toca3-token');
+                        token.style.cssText = `
+                            width: 100%; height: 100%; border-radius: 50%; display: flex;
+                            align-items: center; justify-content: center; font-size: 18px;
+                            background: ${COLORS[tokenType]}; transition: all 0.12s ease;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                        `;
+                        
+                        cell.addEventListener('click', () => handleCellClick(r, c, tokenType, token));
+                        board.appendChild(cell);
+                        grid[r][c] = { type: tokenType, element: token };
+                    }
+                }
+            }
+            
+            function handleCellClick(r, c, type, token) {
+                if (!gameActive) return;
+                
+                const cellKey = `${r}-${c}`;
+                const index = selectedCells.findIndex(cell => cell.key === cellKey);
+                
+                if (index >= 0) {
+                    // Deseleccionar
+                    selectedCells.splice(index, 1);
+                    token.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+                    token.style.transform = 'scale(1)';
+                } else if (selectedCells.length < 3) {
+                    // Seleccionar
+                    selectedCells.push({ key: cellKey, r, c, type, token });
+                    token.style.boxShadow = '0 0 12px rgba(255,255,255,0.6)';
+                    token.style.transform = 'scale(1.1)';
+                    
+                    if (selectedCells.length === 3) {
+                        checkMatch();
+                    }
+                }
+            }
+            
+            function checkMatch() {
+                const types = selectedCells.map(cell => cell.type);
+                const allSame = types.every(type => type === types[0]);
+                
+                if (allSame) {
+                    // Match correcto!
+                    score += 15;
+                    selectedCells.forEach(cell => {
+                        cell.token.style.background = '#1bb37a';
+                        cell.token.innerHTML = '✨';
+                        cell.token.style.transform = 'scale(0.8)';
+                        cell.token.style.opacity = '0.7';
+                    });
+                    
+                    setTimeout(() => {
+                        // Remover tokens matched y hacer caer los de arriba
+                        selectedCells.forEach(cell => {
+                            fillFromTop(cell.c);
+                        });
+                        selectedCells = [];
+                        timeLeft += 5; // Bonus tiempo
+                    }, 500);
+                    
+                } else {
+                    // No match
+                    selectedCells.forEach(cell => {
+                        cell.token.style.boxShadow = '0 0 12px rgba(240, 68, 56, 0.6)';
+                    });
+                    
+                    setTimeout(() => {
+                        selectedCells.forEach(cell => {
+                            cell.token.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+                            cell.token.style.transform = 'scale(1)';
+                        });
+                        selectedCells = [];
+                    }, 400);
+                    
+                    timeLeft -= 3; // Penalización
+                }
+                
+                updateUI();
+            }
+            
+            function fillFromTop(col) {
+                // Simplificado: regenerar columna
+                for (let r = 0; r < 8; r++) {
+                    const tokenType = Math.floor(Math.random() * EMOJIS.length);
+                    const cell = board.children[r * 6 + col];
+                    const token = cell.querySelector('.toca3-token');
+                    token.innerHTML = EMOJIS[tokenType];
+                    token.style.background = COLORS[tokenType];
+                    token.dataset.type = tokenType;
+                    grid[r][col] = { type: tokenType, element: token };
+                }
+            }
+            
+            function startTimer() {
+                gameTimer = setInterval(() => {
+                    if (!gameActive) {
+                        clearInterval(gameTimer);
+                        return;
+                    }
+                    timeLeft -= 0.2;
+                    if (timeLeft <= 0) gameOver();
+                    updateUI();
+                }, 50);
+            }
+            
+            function gameOver() {
+                gameActive = false;
+                if (gameTimer) clearInterval(gameTimer);
+                
+                if (score > best) {
+                    best = score;
+                    localStorage.setItem('toca3-best', best.toString());
+                }
+                
+                // Dar recompensas
+                const bubbles = Math.floor(score / 3);
+                const stars = Math.floor(score / 20);
+                
+                if (window.game && bubbles > 0) {
+                    window.game.gameState.bubbles += bubbles;
+                    window.game.gameState.stars += stars;
+                    window.game.saveGame();
+                }
+                
+                setTimeout(() => {
+                    alert(`🏖️ ¡Fin del juego!\\n🌊 Puntuación: ${score}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
+                }, 300);
+            }
+            
+            function updateUI() {
+                document.getElementById('toca3-score').textContent = score;
+                document.getElementById('toca3-best').textContent = best;
+                document.getElementById('toca3-fill').style.height = Math.max(0, timeLeft) + '%';
+                document.getElementById('toca3-tick').textContent = Math.floor(timeLeft) + '%';
+            }
+            
+            // Event listeners
+            gameOverlay.querySelector('.toca3-close-btn').addEventListener('click', () => {
+                gameActive = false;
+                if (gameTimer) clearInterval(gameTimer);
+                gameOverlay.remove();
+            });
+            
+            gameOverlay.querySelector('#toca3-start').addEventListener('click', () => {
+                initToca3Game();
+            });
+            
+            document.body.appendChild(gameOverlay);
+            updateUI();
             console.log('🏖️ Juego Toca-3 Marino iniciado');
         }
         
