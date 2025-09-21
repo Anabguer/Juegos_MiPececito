@@ -8888,41 +8888,26 @@ Comida premium y de cumpleaños
             startCleaning() {
                 console.log('🧹 ¡LIMPIEZA ESPECTACULAR INICIADA!');
                 
-                // 🫧 CREAR BURBUJAS PRIMERO (para que estén en el próximo frame)
+                // 🎯 INICIALIZAR ARRAYS PERO NO CREAR BURBUJAS AÚN
                 this._time = this._time || 0;
                 this.cleanBubbles = this.cleanBubbles || [];
-                this.emitCleanBubbles();
-                this.emitCleanBubbles(); // Doble ráfaga como antes
                 
                 if (this.fish) { this.fish.happyBurst = 3.2; this.fish.spinKind = "clean"; }
                 
-                console.log(`🫧 Burbujas creadas: ${this.cleanBubbles.length}`);
+                // 🔊 SONIDO INMEDIATO
+                if (window.audioManager) {
+                    window.audioManager.playSound('clean');
+                }
                 
-                // ⏰ ESPERAR 1 FRAME para que las burbujas se dibujen ANTES del sonido
-                setTimeout(() => {
-                    // 🔊 SONIDO DESPUÉS de que las burbujas sean visibles
-                    if (window.audioManager) {
-                        window.audioManager.playSound('clean');
-                    }
-                    
-                    // 🧹 ACTIVAR LIMPIEZA DESPUÉS del sonido
-                    this.cleaningActive = true;
-                    this.cleanEmitT = 2.6;
-                    this.dirtStart = this.gameState.needs.dirt;
-                }, 16); // 1 frame a 60fps = 16ms
+                // 🫧 CREAR BURBUJAS AL MISMO TIEMPO QUE SONIDO Y LIMPIEZA
+                this.emitCleanBubbles();
+                this.emitCleanBubbles(); // Doble ráfaga como antes
+                console.log(`🫧 Burbujas creadas SINCRONIZADAS: ${this.cleanBubbles.length}`);
                 
-                // 🧪 MINI TEST PARA VERIFICAR MOVIMIENTO
-                setTimeout(() => {
-                    const ys = this.cleanBubbles.map(b => b.y);
-                    const minY = Math.min(...ys), maxY = Math.max(...ys);
-                    console.log('[TEST] Burbujas y-range justo tras inicio:', {minY, maxY});
-                }, 50);
-
-                setTimeout(() => {
-                    const ys = this.cleanBubbles.map(b => b.y);
-                    const minY = Math.min(...ys), maxY = Math.max(...ys);
-                    console.log('[TEST] Burbujas y-range tras 1s:', {minY, maxY});
-                }, 1000);
+                // 🧹 ACTIVAR LIMPIEZA INMEDIATAMENTE
+                this.cleaningActive = true;
+                this.cleanEmitT = 2.6;
+                this.dirtStart = this.gameState.needs.dirt;
             }
             
             emitCleanBubbles() {
@@ -9003,13 +8988,8 @@ Comida premium y de cumpleaños
             
             drawCleanBubbles() {
                 if (!this.cleanBubbles || this.cleanBubbles.length === 0) {
-                    console.log('🚨 drawCleanBubbles: NO HAY BURBUJAS', {
-                        exists: !!this.cleanBubbles,
-                        length: this.cleanBubbles?.length || 0
-                    });
                     return;
                 }
-                console.log(`🫧 drawCleanBubbles: Dibujando ${this.cleanBubbles.length} burbujas`);
                 const ctx = this.ctx;
                 
                 // 🎯 ESCALAR CONTEXTO SOLO PARA BURBUJAS (sistema híbrido)

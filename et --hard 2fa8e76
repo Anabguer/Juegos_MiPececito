@@ -1,0 +1,3 @@
+[33m33cea0f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m  FIX: Eliminar pez anterior al colocar nuevo huevo
+[33m64c9b58[m  FIX: Cargar diseño original del pez (archivos JSON)
+[33m8ae8c8c[m  FIX FINAL: Pez invisible al cargar datos guardados

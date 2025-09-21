@@ -1,0 +1,10 @@
+[33m33cea0f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m  FIX: Eliminar pez anterior al colocar nuevo huevo
+[33m64c9b58[m  FIX: Cargar diseño original del pez (archivos JSON)
+[33m8ae8c8c[m  FIX FINAL: Pez invisible al cargar datos guardados
+[33m8a30095[m  ARREGLOS CRÍTICOS: Pantalla sucia y pez invisible
+[33me59e87e[m  FIX: Velocidades realistas de necesidades y diversión
+[33ma270a46[m  DEBUG: Logs detallados para pantalla sucia y pez invisible
+[33mdcaea0e[m  SISTEMA DE PECES POR ETAPAS COMPLETO
+[33me3a8352[m  CLEANUP: Eliminar sistema modular no utilizado
+[33mffd0446[m  FIX: Huevos no se ensucian al iniciar
+[33m22dfaac[m Optimizar barra de debug: reducir ancho y tamaños para mejor visibilidad del juego
