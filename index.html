@@ -9213,16 +9213,35 @@ Comida premium y de cumpleaños
             }
         }
             
-            // 🐟 MOVIMIENTO DEL PEZ
+            // 🐟 MOVIMIENTO DEL PEZ COMPLETO (DESDE DOCUMENTO)
             updateFishMovement(deltaTime) {
                 if (!this.fish) return;
                 const fish = this.fish;
 
-                // 🍎 PERSEGUIR COMIDA (prioridad alta si hay comida)
+                // Animaciones básicas
+                fish.blinkT = (fish.blinkT || 0) - deltaTime;
+                if (fish.blinkT <= 0) {
+                    fish.blinkT = 0.12;
+                    fish.nextBlink = 2 + Math.random() * 4;
+                }
+
+                // Burbujas de respiración
+                fish.breathT = (fish.breathT || 0) - deltaTime;
+                if (fish.breathT <= 0 && !this.cleaningState) {
+                    this.emitMouthBubbles(3 + Math.floor(Math.random() * 3));
+                    fish.breathT = 2 + Math.random() * 3;
+                }
+
+                fish.swimPhase = (fish.swimPhase || 0) + deltaTime * 3.2;
                 let targetV = {vx: 0, vy: 0};
                 let speedMul = 1.0;
-                
-                if (this.food.length > 0) {
+
+                // 🔥 TURBO DE DEDO (decaimiento)
+                fish.fingerBoostT = Math.max(0, (fish.fingerBoostT || 0) - deltaTime);
+
+                // 🍎 PERSEGUIR COMIDA (LÓGICA SIMPLIFICADA)
+                fish.isChasing = false;
+                if (this.food.length > 0 && this.gameState.needs.hunger > 1) { // SIMPLIFICADO: >1% hambre
                     let closest = null;
                     let closestDist = Infinity;
                     
@@ -9239,23 +9258,34 @@ Comida premium y de cumpleaños
                         const dy = closest.y - fish.y;
                         const len = Math.hypot(dx, dy);
                         if (len > 0) {
-                            targetV.vx = (dx / len) * 120;
-                            targetV.vy = (dy / len) * 120;
-                            speedMul = 1.8;
+                            targetV.vx = (dx / len) * 80; // Velocidad hacia comida
+                            targetV.vy = (dy / len) * 80;
+                            speedMul = 1.8; // Más rápido cuando persigue comida
                             fish.isChasing = true;
                         }
                     }
                 }
 
-                // 👆 SEGUIR DEDO (prioridad máxima)
-                if (this.fingerTarget && this.dist(fish.x, fish.y, this.fingerTarget.x, this.fingerTarget.y) > 30) {
-                    const dx = this.fingerTarget.x - fish.x;
-                    const dy = this.fingerTarget.y - fish.y;
-                    const len = Math.hypot(dx, dy);
-                    if (len > 0) {
-                        targetV.vx = (dx / len) * 150;
-                        targetV.vy = (dy / len) * 150;
-                        speedMul = 2.5;
+                // 👆 SEGUIR DEDO (prioridad alta)
+                if (this.fingerTarget) {
+                    const distanceToFinger = this.dist(fish.x, fish.y, this.fingerTarget.x, this.fingerTarget.y);
+                    
+                    if (distanceToFinger > 30) {
+                        const dx = this.fingerTarget.x - fish.x;
+                        const dy = this.fingerTarget.y - fish.y;
+                        const len = Math.hypot(dx, dy);
+                        if (len > 0) {
+                            targetV.vx = (dx / len) * 120; // MÁS RÁPIDO hacia dedo
+                            targetV.vy = (dy / len) * 120;
+                            speedMul = 2.5; // TURBO hacia dedo
+                            fish.fingerBoostT = 1.0; // Activar turbo visual
+                        }
+                    } else if (fish.shouldLaunchHeart) {
+                        // 💖 PEZ LLEGÓ AL DEDO - LANZAR CORAZÓN
+                        this.launchHeartToFun(fish.x, fish.y);
+                        fish.shouldLaunchHeart = false;
+                        this.fingerTarget = null; // Limpiar target
+                        console.log('💖 ¡Pez llegó al dedo! Corazón lanzado');
                     }
                 }
 
@@ -9265,13 +9295,13 @@ Comida premium y de cumpleaños
                     if (fish.wanderT <= 0) {
                         const angle = Math.random() * Math.PI * 2;
                         fish.wanderDir = {
-                            vx: Math.cos(angle) * 40,
-                            vy: Math.sin(angle) * 40
+                            vx: Math.cos(angle) * (20 + Math.random() * 30),
+                            vy: Math.sin(angle) * (20 + Math.random() * 30)
                         };
                         fish.wanderT = 1 + Math.random() * 3;
                     }
                     targetV = fish.wanderDir || {vx: 0, vy: 0};
-                    speedMul = 0.6;
+                    speedMul = 0.6; // Más lento en movimiento aleatorio
                 }
 
                 // 🏊 APLICAR VELOCIDAD CON SUAVIZADO
@@ -9281,12 +9311,12 @@ Comida premium y de cumpleaños
                 fish.vx += (targetV.vx * speedMul - fish.vx) * smoothing;
                 fish.vy += (targetV.vy * speedMul - fish.vy) * smoothing;
 
-                // 🧱 LÍMITES DE PANTALLA (USANDO SUELO UNIFICADO)
+                // 🧱 LÍMITES DE PANTALLA (con rebote suave)
                 const margin = 55;
                 const leftLimit = margin;
                 const rightLimit = this.canvas.width - margin;
                 const topLimit = 125;
-                const bottomLimit = this.getFloorY(); // ¡USAR SUELO UNIFICADO!
+                const bottomLimit = this.getFloorY(); // USAR SUELO UNIFICADO
 
                 if (fish.x <= leftLimit && fish.vx < 0) fish.vx = Math.abs(fish.vx) * 0.8;
                 if (fish.x >= rightLimit && fish.vx > 0) fish.vx = -Math.abs(fish.vx) * 0.8;
