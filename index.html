@@ -8897,30 +8897,35 @@ Comida premium y de cumpleaños
 
                 if (this.fish) { this.fish.happyBurst = 3.2; this.fish.spinKind = "clean"; }
 
-                // 🚀 CREAR BURBUJAS INSTANTÁNEAS PRIMERO
-                console.log('🫧 Creando burbujas instantáneas...');
-                for (let i = 0; i < 30; i++) {
+                // 🚀 CREAR BURBUJAS MASIVAS ANTES DE TODO
+                console.log('🫧 Creando EXPLOSIÓN de burbujas...');
+                for (let i = 0; i < 50; i++) {
                     this.cleanBubbles.push({
                         x: Math.random() * this.viewW(),
-                        y: this.viewH() - Math.random() * 100, // Distribuir por toda la altura
-                        vx: (Math.random() - 0.5) * 60,
-                        vy: -200 - Math.random() * 150,
-                        r: 6 + Math.random() * 8,
-                        alpha: 0.9,
-                        life: 2 + Math.random() * 3,
-                        color: `hsl(${180 + Math.random() * 60}, 70%, 80%)` // Colores azul-cyan
+                        y: Math.random() * this.viewH(), // TODA LA PANTALLA
+                        vx: (Math.random() - 0.5) * 100,
+                        vy: -300 - Math.random() * 200, // MÁS RÁPIDAS
+                        r: 8 + Math.random() * 12, // MÁS GRANDES
+                        alpha: 1.0, // COMPLETAMENTE OPACAS
+                        life: 4 + Math.random() * 3, // MÁS DURADERAS
+                        color: `hsl(${180 + Math.random() * 60}, 80%, 90%)` // MÁS BRILLANTES
                     });
                 }
                 
-                // 🔊 SONIDO DESPUÉS de crear burbujas
-                if (window.audioManager) {
-                    window.audioManager.playSound('clean');
-                }
+                // EMISIÓN CONTINUA INMEDIATA
+                this.emitCleanBubbles();
+                this.emitCleanBubbles();
+                this.emitCleanBubbles();
+                this.emitCleanBubbles(); // CUÁDRUPLE RÁFAGA
                 
-                // EMISIÓN CONTINUA
-                this.emitCleanBubbles();
-                this.emitCleanBubbles();
-                this.emitCleanBubbles();
+                console.log(`🫧 TOTAL BURBUJAS: ${this.cleanBubbles.length}`);
+                
+                // 🔊 SONIDO AL FINAL
+                setTimeout(() => {
+                    if (window.audioManager) {
+                        window.audioManager.playSound('clean');
+                    }
+                }, 50); // 50ms después para que las burbujas se vean PRIMERO
                 
                 // 🧪 MINI TEST PARA VERIFICAR MOVIMIENTO
                 setTimeout(() => {
