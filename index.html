@@ -8808,6 +8808,17 @@ Comida premium y de cumpleaños
                 return this.canvas.height / this.getDPR(); // alto en CSS px
             }
             
+            // ——— SUELO ÚNICO COHERENTE CON LA BARRA INFERIOR ———
+            getFloorY() {
+                // Si quieres medir la barra real:
+                // const bar = document.querySelector('.bottom-bar');
+                // const uiBottom = bar ? bar.getBoundingClientRect().height : 100;
+
+                const uiBottom = 100;  // ← ajusta si tu barra real es otra
+                const safeGap  = 12;   // margen para no pisar la UI
+                return this.viewH() - (uiBottom + safeGap);
+            }
+            
             // Llamar al principio de cada render()
             beginFrame() {
                 const ctx = this.ctx;
@@ -9032,13 +9043,13 @@ Comida premium y de cumpleaños
                         f.y += f.vy * deltaTime;
                         f.x += f.vx * deltaTime;
                         f.vx *= drag;
-                // LÍMITE MÁS ALTO para que el pez pueda alcanzar la comida
-                const bottomLimit = h - 200; // 200px desde abajo - MUCHO más alto para alcanzar comida
-                        if (f.y > bottomLimit) {
-                            f.y = bottomLimit;
+                // USAR SUELO UNIFICADO
+                const floorY = this.getFloorY();
+                        if (f.y > floorY) {
+                            f.y = floorY;
                             f.vy = 0;
                             f.vx = 0;
-                            f.bottomT = 0.001;
+                            f.bottomT = Math.max(0.001, f.bottomT || 0.001);
                         }
                     }
                 }
@@ -9053,12 +9064,12 @@ Comida premium y de cumpleaños
                         console.log(`🍎 COLISIÓN: Pez en (${this.fish.x.toFixed(1)}, ${this.fish.y.toFixed(1)}) come pellet en (${f.x.toFixed(1)}, ${f.y.toFixed(1)}) - Distancia: ${distance.toFixed(1)}`);
                         this.food.splice(i, 1);
                         
-                        // 🍎 SIEMPRE COME - SIN CONDICIONES
-                        console.log(`🍎 ¡PEZ COME SIEMPRE! Hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
+                        // 🍎 COMER CON CONFIG POR ETAPA
+                        const cfg = getStageCfg(this.gameState);
+                        this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - cfg.eatReduce, 0, 100);
+                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerPellet, 0, 100);
                         
-                        // SIEMPRE hace efectos:
-                        this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - 35, 0, 100);
-                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + 8, 0, 100); // MÁS SUCIEDAD AL COMER (para testing)
+                        console.log(`🍎 ¡PEZ COME! Etapa: ${this.gameState.stage} - Reduce hambre: ${cfg.eatReduce} - Añade suciedad: ${cfg.dirtPerPellet}`);
                         
                         // 🔊 SONIDO SIEMPRE
                         if (window.audioManager) {
@@ -9094,9 +9105,13 @@ Comida premium y de cumpleaños
                         continue; // Importante: saltar al siguiente pellet
                     } 
                     
-                    // 🗑️ ELIMINAR COMIDA VIEJA (después de 8 segundos en el fondo)
+                    // 🗑️ PUDRIR COMIDA VIEJA (después de 8 segundos en el fondo)
                     if (f.bottomT > 0 && f.bottomT > 8) {
-                        console.log(`🗑️ Eliminando pellet viejo (${f.bottomT.toFixed(1)}s en el fondo)`);
+                        console.log(`🗑️ Pellet podrido después de ${f.bottomT.toFixed(1)}s en el fondo`);
+                        const cfg = getStageCfg(this.gameState);
+                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerRotten, 0, 100);
+                        console.log(`🦠 Suciedad por pudrición: +${cfg.dirtPerRotten} (total: ${this.gameState.needs.dirt.toFixed(1)}%)`);
+                        this.updateNeedBars();
                         this.food.splice(i, 1);
                     }
                 }
@@ -9366,42 +9381,52 @@ Comida premium y de cumpleaños
         }
         
         
+        // ——— CONFIG POR ETAPA ———
+        const STAGE_RATES = {
+            baby:  { hungerHours: 2, dirtHours: 4, funHours: 3, eatReduce: 30, dirtPerPellet: 3, dirtPerRotten: 6 },
+            young: { hungerHours: 6, dirtHours: 8, funHours: 4, eatReduce: 25, dirtPerPellet: 2, dirtPerRotten: 5 },
+            adult: { hungerHours: 8, dirtHours:10, funHours: 5, eatReduce: 20, dirtPerPellet: 1, dirtPerRotten: 4 },
+        };
+
+        function getStageCfg(state) {
+            const st = state?.stage || 'baby';
+            return STAGE_RATES[st] || STAGE_RATES.baby;
+        }
+        
         // 🔧 FUNCIONES QUE FALTAN PARA EL SISTEMA REALISTA
             updateAutoNeeds(deltaTime) {
-                // DEBUG: Verificar que deltaTime no sea 0
-                if (deltaTime <= 0) {
-                    console.warn('⚠️ deltaTime es 0 o negativo:', deltaTime);
-                    return;
-                }
-                
-                // Incremento automático de necesidades (ACELERADO PARA TESTING)
-                const minutes = deltaTime / 60;
-                const oldHunger = this.gameState.needs.hunger;
-                const oldDirt = this.gameState.needs.dirt;
-                const oldFun = this.gameState.needs.fun;
-                
-                // CÁLCULOS MATEMÁTICOS EXACTOS:
-                // Suciedad: 4 horas = 14,400 segundos para 100%
-                // Hambre bebé: 2 horas = 7,200 segundos para 100% 
-                // Diversión: 3 horas = 10,800 segundos para 100%
-                const dirtInc = (100 / (4 * 60 * 60)) * deltaTime;  // 4 horas para ensuciarse
-                const hungerInc = (100 / (2 * 60 * 60)) * deltaTime; // 2 horas para hambre total
-                const funDec = (100 / (3 * 60 * 60)) * deltaTime;    // 3 horas para aburrirse
-                
+                if (!this.fish || this.gameState.stage === 'egg') return;
+
+                const cfg = getStageCfg(this.gameState);
+                const hungerInc = (100 / (cfg.hungerHours * 3600)) * deltaTime;
+                const dirtInc   = (100 / (cfg.dirtHours   * 3600)) * deltaTime;
+                const funDec    = (100 / (cfg.funHours    * 3600)) * deltaTime;
+
                 this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger + hungerInc, 0, 100);
-                this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + dirtInc, 0, 100);
-                this.gameState.needs.fun = this.clamp(this.gameState.needs.fun - funDec, 0, 100);
-                
-                // Log cada 3 segundos para debug
-                if (Math.random() < 0.03) {
-                    console.log('🔄 Necesidades AUTO (deltaTime=' + deltaTime.toFixed(4) + 's):', 
-                        `Hambre: ${this.gameState.needs.hunger.toFixed(1)}% (+${(this.gameState.needs.hunger - oldHunger).toFixed(2)})`,
-                        `Suciedad: ${this.gameState.needs.dirt.toFixed(1)}% (+${(this.gameState.needs.dirt - oldDirt).toFixed(2)})`,
-                        `Diversión: ${this.gameState.needs.fun.toFixed(1)}% (${(this.gameState.needs.fun - oldFun).toFixed(2)})`);
-                }
+                this.gameState.needs.dirt   = this.clamp(this.gameState.needs.dirt   + dirtInc,   0, 100);
+                this.gameState.needs.fun    = this.clamp(this.gameState.needs.fun    - funDec,    0, 100);
                 
                 // Actualizar barras visuales
                 this.updateNeedBars();
+            }
+            
+            resetForEgg() {
+                this.food = [];
+                this.cleanBubbles = [];
+                this.labels = [];
+                this.flyers = [];
+                this.fingerTarget = null;
+                this.cleaning = null;
+
+                this.gameState.needs = { hunger: 15, dirt: 0, fun: 95 };
+                this.updateNeedBars?.();
+                this.gameState.stage = 'egg';
+
+                // Si tienes contadores de monedas/estrellas, pon sus valores de inicio acordados
+                // this.gameState.coins = 0;
+                // this.gameState.stars = 0;
+                
+                console.log('🥚 Reset completo para huevo - Todo limpio');
             }
             
             updateNeedBars() {
