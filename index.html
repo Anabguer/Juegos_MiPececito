@@ -5043,15 +5043,16 @@
                 
                 // 👁️ OJO EXACTO DEL LOTTIE
                 if (fish.eyeOpen > 0) {
-                    // Ojo blanco (forma orgánica del Lottie)
+                    // Ojo blanco (forma orgánica del Lottie) - MÁS GRANDE PARA JOVEN
+                    const whiteEyeScale = this.gameState.stage === 'baby' ? 1.0 : 1.6;
                     this.ctx.fillStyle = '#ffffff';
                     this.ctx.beginPath();
-                    this.ctx.ellipse(size * 0.3, -size * 0.05, size * 0.2, size * 0.15 * fish.eyeOpen, 0, 0, Math.PI * 2);
+                    this.ctx.ellipse(size * 0.3, -size * 0.05, size * 0.2 * whiteEyeScale, size * 0.15 * fish.eyeOpen * whiteEyeScale, 0, 0, Math.PI * 2);
                     this.ctx.fill();
                     
                     // Pupila negra
-                    // 👁️ OJO MÁS GRANDE (especialmente para joven/adulto)
-                    const eyeScale = this.gameState.stage === 'baby' ? 1.0 : 1.4; // Más grande para joven/adulto
+                    // 👁️ OJO SÚPER GRANDE (especialmente para joven/adulto)
+                    const eyeScale = this.gameState.stage === 'baby' ? 1.0 : 1.8; // MUCHO más grande para joven/adulto
                     this.ctx.fillStyle = '#323232'; // Color exacto [0.1961,0.1961,0.1961]
                     this.ctx.beginPath();
                     this.ctx.ellipse(size * 0.32, -size * 0.05, size * 0.08 * eyeScale, size * 0.1 * fish.eyeOpen * eyeScale, 0, 0, Math.PI * 2);
@@ -5093,6 +5094,16 @@
                 this.ctx.restore();
             }
             
+            // 📏 TAMAÑO DEL PEZ SEGÚN ETAPA
+            getFishSizeForStage(stage) {
+                const sizes = {
+                    'baby': 80,   // Tamaño normal
+                    'young': 95,  // 15% más grande
+                    'adult': 110  // 30% más grande
+                };
+                return sizes[stage] || sizes['baby'];
+            }
+            
             // 🎨 COLORES EXACTOS DEL LOTTIE
             getFishColors() {
                 const stage = this.gameState.stage;
@@ -5113,7 +5124,7 @@
                 if (stage === 'young' || ageInDays < 8) {
                     return {
                         body: '#8a7bd8',      // Morado más intenso
-                        stripes: '#ffd166',   // RAYA AMARILLA BRILLANTE
+                        stripes: '#f4d03f',   // RAYA AMARILLENTA SUAVE
                         tail: '#c13434',      // Cola más intensa
                         fins: '#c77373',      // Aletas más fuertes
                         pacifier: null        // Sin chupete
@@ -5309,7 +5320,7 @@
                 this.fish = {
                     x: this.canvas.width / 2,
                     y: this.canvas.height * 0.6,
-                    size: 80, // Tamaño del contenedor Lottie (más pequeño)
+                    size: this.getFishSizeForStage('baby'), // Tamaño según etapa
                     birthTime: Date.now(),
                     isLottie: true,
                     scale: 0.1, // Empezar muy pequeño
@@ -7938,6 +7949,12 @@ Comida premium y de cumpleaños
                 // Cambiar etapa
                 this.gameState.stage = newStage;
                 this.evolutionInProgress = false;
+                
+                // 📏 ACTUALIZAR TAMAÑO DEL PEZ
+                if (this.fish) {
+                    this.fish.size = this.getFishSizeForStage(newStage);
+                    console.log(`📏 Tamaño actualizado para ${newStage}: ${this.fish.size}px`);
+                }
                 
                 // 🎨 RECARGAR LOTTIE CON NUEVA ETAPA
                 this.reloadLottieForStage(newStage);
