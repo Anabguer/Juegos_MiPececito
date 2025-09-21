@@ -3823,7 +3823,7 @@
                     
                     // 📊 SISTEMA DE NECESIDADES REALISTA (0-100)
                     needs: {
-                        hunger: 15,  // EMPIEZA CON POCA HAMBRE
+                        hunger: 80,  // Bebé nace con hambre (normal)
                         dirt: 0,     // PANTALLA LIMPIA AL INICIAR 
                         fun: 95      // EMPIEZA FELIZ
                     },
@@ -5313,14 +5313,14 @@
                 this.gameState.birthDate = Date.now();
                 this.gameState.ageInDays = 0;
                 
-                // 🍎 NACER CON POCA HAMBRE (FELIZ)
-                this.gameState.needs.hunger = 15; // Poca hambre al nacer
+                // 🍎 NACER CON HAMBRE (ES UN BEBÉ)
+                this.gameState.needs.hunger = 80; // Bebé nace con hambre
                 this.gameState.needs.dirt = 0;    // Limpio al nacer
                 this.gameState.needs.fun = 95;    // Feliz al nacer
-                this.updateCrisisFlags(); // Actualizar flags
+                this.updateCrisisFlags(); // Activar flags
                 this.updateNeedBars(); // Actualizar barras
                 
-                console.log('🍎 Pez nació feliz - Sin crisis');
+                console.log('🍎 Bebé nació con hambre - Crisis activada');
                 
                 // 📊 MOSTRAR BARRAS DE NECESIDADES CUANDO NACE EL PEZ
                 const needsBar = document.getElementById('needsHeaderBar');
@@ -7519,12 +7519,10 @@
                 this.gameState.fishName = null;
                 console.log('🏷️ Estado de nombre reseteado para nuevo pez');
                 
-                // 🧼 RESETEAR PANTALLA LIMPIA AL INICIAR HUEVO
-                this.gameState.needs.dirt = 0;
-                this.gameState.needs.hunger = 15;
-                this.gameState.needs.fun = 95;
-                this.gameState.bubbles = 0; // RESETEAR BURBUJAS A 0
-                console.log('🧼 Pantalla reseteada: limpia, poca hambre, feliz, sin burbujas');
+                // 🧼 RESETEAR SOLO PANTALLA Y BURBUJAS AL INICIAR HUEVO
+                this.gameState.needs.dirt = 0;     // Pantalla limpia
+                this.gameState.bubbles = 0;        // Sin burbujas
+                console.log('🧼 Pantalla reseteada: limpia, sin burbujas');
                 
                     const centerX = this.canvas.width / 2;
                     const centerY = this.canvas.height / 2;
@@ -9403,10 +9401,13 @@ Comida premium y de cumpleaños
                 const oldDirt = this.gameState.needs.dirt;
                 const oldFun = this.gameState.needs.fun;
                 
-                // FORZAR incrementos mínimos para evitar +0.00
-                const hungerInc = Math.max(0.15 * minutes, 0.003); // MUCHO MÁS LENTO
-                const dirtInc = Math.max(0.08 * minutes, 0.002);   // MUCHO MÁS LENTO  
-                const funDec = Math.max(0.05 * minutes, 0.001);    // MUCHO MÁS LENTO
+                // CÁLCULOS MATEMÁTICOS EXACTOS:
+                // Suciedad: 4 horas = 14,400 segundos para 100%
+                // Hambre bebé: 2 horas = 7,200 segundos para 100% 
+                // Diversión: 3 horas = 10,800 segundos para 100%
+                const dirtInc = (100 / (4 * 60 * 60)) * deltaTime;  // 4 horas para ensuciarse
+                const hungerInc = (100 / (2 * 60 * 60)) * deltaTime; // 2 horas para hambre total
+                const funDec = (100 / (3 * 60 * 60)) * deltaTime;    // 3 horas para aburrirse
                 
                 this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger + hungerInc, 0, 100);
                 this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + dirtInc, 0, 100);
