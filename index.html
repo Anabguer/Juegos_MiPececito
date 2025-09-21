@@ -5758,6 +5758,19 @@
                 this.updateNeedBars();
                 
                 console.log(`💖 Corazón lanzado! Diversión: ${this.gameState.needs.fun}`);
+                
+                // 📸 EVENTO DE JUEGO OCASIONAL
+                if (Math.random() < 0.08) { // 8% chance
+                    const playMessages = [
+                        '¡Me encanta jugar contigo! Eres el mejor cuidador.',
+                        'Cuando vienes a jugar conmigo me siento súper feliz.',
+                        '¡Qué divertido! Me gusta mucho cuando interactúas conmigo.',
+                        'Estos momentos de juego son mis favoritos del día.',
+                        'Gracias por dedicarme tiempo para jugar. ¡Eres genial!'
+                    ];
+                    const msg = playMessages[Math.floor(Math.random() * playMessages.length)];
+                    this.addAlbumEvent('playing', '🎮 Momento de juego', msg);
+                }
             }
             
             // YA NO NECESITAMOS CAMBIOS DE COMPORTAMIENTO
@@ -7947,7 +7960,7 @@ Comida premium y de cumpleaños
                 
                 // 🔊 SONIDO DE EVOLUCIÓN
                 if (window.audioManager) {
-                    window.audioManager.playSound('hatch'); // Reutilizar sonido de nacimiento
+                    window.audioManager.playSound('evolution'); // Sonido mágico específico
                 }
                 
                 // 🎉 EFECTO EN EL PEZ
@@ -8266,7 +8279,10 @@ Comida premium y de cumpleaños
                 }
                 
                 // Añadir evento al álbum
-                this.addAlbumEvent('background', `🎨 Nuevo hogar: ${bg.name}`, `He cambiado mi acuario por uno ${bg.name}. ¡Me encanta mi nuevo hogar!`);
+                const purchaseMsg = bg.cost > 0 ? 
+                    `He comprado un nuevo fondo ${bg.name} por ${bg.cost} burbujas. ¡Me encanta mi nuevo hogar!` :
+                    `He cambiado mi acuario por uno ${bg.name}. ¡Me encanta mi nuevo hogar!`;
+                this.addAlbumEvent('background', `🎨 Nuevo hogar: ${bg.name}`, purchaseMsg);
                 
                 console.log(`🎨 Fondo cambiado a: ${bg.name}`);
                 this.populateBackgroundsGrid(); // Actualizar selección
@@ -8782,7 +8798,7 @@ Comida premium y de cumpleaños
                 
                 // Sonido de logro
                 if (window.audioManager) {
-                    window.audioManager.playSound('hatch');
+                    window.audioManager.playSound('achievement');
                 }
             }
             
@@ -9009,16 +9025,68 @@ Comida premium y de cumpleaños
                 const now = Date.now();
                 const hoursSinceLastEvent = (now - this.gameState.lastEventTime) / (1000 * 60 * 60);
                 
-                // Solo generar eventos cada 2+ horas para no spam
-                if (hoursSinceLastEvent < 2) return;
+                // Solo generar eventos cada 1+ horas para más actividad
+                if (hoursSinceLastEvent < 1) return;
                 
                 // Eventos aleatorios basados en el estado del pez
-                if (this.fish && Math.random() < 0.1) { // 10% chance cada check
+                if (this.fish && Math.random() < 0.15) { // 15% chance cada check
+                    const stage = this.gameState.stage;
+                    const age = this.gameState.ageInDays || 0;
+                    const bubbles = this.gameState.bubbles || 0;
+                    const stars = this.gameState.stars || 0;
+                    
                     const randomEvents = [
+                        // Eventos básicos
                         { type: 'swimming', title: '🏊 Nadando feliz', desc: 'Hoy he nadado mucho y me siento muy activo.' },
                         { type: 'exploring', title: '🔍 Explorando', desc: 'He descubierto un rincón nuevo de mi acuario.' },
                         { type: 'playing', title: '🎈 Jugando', desc: 'He estado jugando con las burbujas. ¡Qué divertido!' },
-                        { type: 'resting', title: '😴 Descansando', desc: 'He encontrado un lugar cómodo para relajarme.' }
+                        { type: 'resting', title: '😴 Descansando', desc: 'He encontrado un lugar cómodo para relajarme.' },
+                        
+                        // Eventos por etapa
+                        ...(stage === 'baby' ? [
+                            { type: 'curious', title: '👀 Curiosidad', desc: 'Todo me parece nuevo y emocionante. ¡Quiero explorarlo todo!' },
+                            { type: 'learning', title: '🧠 Aprendiendo', desc: 'Estoy aprendiendo a nadar mejor cada día.' },
+                            { type: 'growing', title: '📏 Creciendo', desc: 'Siento que cada día soy un poquito más grande.' }
+                        ] : []),
+                        
+                        ...(stage === 'young' ? [
+                            { type: 'energetic', title: '⚡ Lleno de energía', desc: 'Me siento súper activo y lleno de vida.' },
+                            { type: 'social', title: '👋 Sociable', desc: 'Me encanta cuando vienes a visitarme.' },
+                            { type: 'adventurous', title: '🗺️ Aventurero', desc: 'Tengo ganas de explorar más allá de mi pecera.' }
+                        ] : []),
+                        
+                        ...(stage === 'adult' ? [
+                            { type: 'wise', title: '🧙 Sabiduría', desc: 'Con la experiencia he aprendido muchas cosas.' },
+                            { type: 'peaceful', title: '☮️ Tranquilo', desc: 'Disfruto de la paz y tranquilidad de mi hogar.' },
+                            { type: 'mentor', title: '👨‍🏫 Mentor', desc: 'Me gustaría enseñar a otros peces jóvenes.' }
+                        ] : []),
+                        
+                        // Eventos por logros
+                        ...(bubbles >= 50 ? [
+                            { type: 'wealthy', title: '💰 Próspero', desc: 'He acumulado muchas burbujas. ¡Soy rico!' }
+                        ] : []),
+                        
+                        ...(stars >= 20 ? [
+                            { type: 'skilled', title: '🌟 Habilidoso', desc: 'Mis habilidades en los juegos han mejorado mucho.' }
+                        ] : []),
+                        
+                        // Eventos por edad
+                        ...(age >= 3 ? [
+                            { type: 'memories', title: '💭 Recuerdos', desc: 'Recuerdo cuando era solo un huevito. ¡Qué tiempos!' }
+                        ] : []),
+                        
+                        ...(age >= 7 ? [
+                            { type: 'milestone', title: '🎂 Una semana especial', desc: 'Ya llevo una semana contigo. ¡Qué feliz soy!' }
+                        ] : []),
+                        
+                        // Eventos especiales por hora del día
+                        ...(new Date().getHours() < 12 ? [
+                            { type: 'morning', title: '🌅 Buenos días', desc: 'La mañana es perfecta para nadar y jugar.' }
+                        ] : new Date().getHours() < 18 ? [
+                            { type: 'afternoon', title: '☀️ Tarde soleada', desc: 'Los rayos de sol hacen brillar el agua.' }
+                        ] : [
+                            { type: 'evening', title: '🌙 Noche tranquila', desc: 'La noche es perfecta para relajarse.' }
+                        ])
                     ];
                     
                     const event = randomEvents[Math.floor(Math.random() * randomEvents.length)];
@@ -9510,6 +9578,19 @@ Comida premium y de cumpleaños
                                 this.updateNeedBars();
                                 this.cleaningState = null;
                                 console.log('🧹 LIMPIEZA COMPLETADA');
+                                
+                                // 📸 EVENTO DE LIMPIEZA OCASIONAL
+                                if (Math.random() < 0.15) { // 15% chance
+                                    const cleaningMessages = [
+                                        '¡Ahh! ¡Qué limpia está mi pecera! Me siento renovado.',
+                                        'Gracias por limpiar mi hogar. Ahora puedo nadar mejor.',
+                                        '¡Qué bien! El agua cristalina me hace muy feliz.',
+                                        'Una pecera limpia es un pez feliz. ¡Gracias!',
+                                        'Me encanta cuando mi hogar está así de limpio y brillante.'
+                                    ];
+                                    const msg = cleaningMessages[Math.floor(Math.random() * cleaningMessages.length)];
+                                    this.addAlbumEvent('cleaning', '🧹 Pecera limpia', msg);
+                                }
                             }
                             break;
                     }
@@ -9635,6 +9716,19 @@ Comida premium y de cumpleaños
                         
                         // ✨ EFECTOS DE PARTÍCULAS AL COMER
                         this.createEatingParticles(f.x, f.y);
+                        
+                        // 📸 EVENTO DE ALIMENTACIÓN OCASIONAL
+                        if (Math.random() < 0.1) { // 10% chance
+                            const feedingMessages = [
+                                'Mmm, ¡qué rico! Esta comida está deliciosa.',
+                                '¡Ñam ñam! Me encanta cuando me das de comer.',
+                                'Gracias por cuidarme tan bien. Esta comida me da mucha energía.',
+                                '¡Qué sabroso! Ahora me siento mucho mejor.',
+                                'Esta comida me recuerda a cuando era pequeño.'
+                            ];
+                            const msg = feedingMessages[Math.floor(Math.random() * feedingMessages.length)];
+                            this.addAlbumEvent('feeding', '🍽️ Hora de comer', msg);
+                        }
                         
                         // ⚠️ ELIMINADO: No limitar hambre en crisis para que siga persiguiendo
                         // if (this.gameState.crisis.hunger) {
@@ -10551,6 +10645,9 @@ Comida premium y de cumpleaños
                 this.createHeartSound();
                 this.createBirthSound();
                 this.createClickSound();
+                this.createAchievementSound();
+                this.createEvolutionSound();
+                this.createGameWinSound();
             }
             
             createHeartSound() {
@@ -10626,6 +10723,88 @@ Comida premium y de cumpleaños
                     oscillator.type = 'sine';
                     oscillator.start(this.audioContext.currentTime);
                     oscillator.stop(this.audioContext.currentTime + 0.1);
+                };
+            }
+            
+            // 🔊 SONIDOS ADICIONALES PARA NUEVAS FUNCIONALIDADES
+            createAchievementSound() {
+                // Sonido épico para logros
+                this.sounds.achievement = () => {
+                    if (!this.audioContext || this.isMuted) return;
+                    
+                    // Acorde triunfal
+                    const frequencies = [523, 659, 784]; // Do, Mi, Sol
+                    frequencies.forEach((freq, i) => {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+                        oscillator.type = 'triangle';
+                        
+                        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                        gainNode.gain.linearRampToValueAtTime(this.effectsVolume * this.volume * 0.2, this.audioContext.currentTime + 0.1);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 1.0);
+                        
+                        oscillator.start(this.audioContext.currentTime + i * 0.1);
+                        oscillator.stop(this.audioContext.currentTime + 1.0);
+                    });
+                };
+            }
+            
+            createEvolutionSound() {
+                // Sonido mágico para evolución
+                this.sounds.evolution = () => {
+                    if (!this.audioContext || this.isMuted) return;
+                    
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    // Subida mágica de frecuencia
+                    oscillator.frequency.setValueAtTime(200, this.audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(800, this.audioContext.currentTime + 0.5);
+                    oscillator.frequency.exponentialRampToValueAtTime(1200, this.audioContext.currentTime + 1.0);
+                    
+                    oscillator.type = 'sawtooth';
+                    
+                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(this.effectsVolume * this.volume * 0.4, this.audioContext.currentTime + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 1.2);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 1.2);
+                };
+            }
+            
+            createGameWinSound() {
+                // Sonido de victoria para juegos
+                this.sounds.gamewin = () => {
+                    if (!this.audioContext || this.isMuted) return;
+                    
+                    // Melodía ascendente alegre
+                    const notes = [523, 587, 659, 784]; // Do, Re, Mi, Sol
+                    notes.forEach((freq, i) => {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+                        oscillator.type = 'square';
+                        
+                        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                        gainNode.gain.linearRampToValueAtTime(this.effectsVolume * this.volume * 0.15, this.audioContext.currentTime + i * 0.1 + 0.01);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + i * 0.1 + 0.3);
+                        
+                        oscillator.start(this.audioContext.currentTime + i * 0.1);
+                        oscillator.stop(this.audioContext.currentTime + i * 0.1 + 0.3);
+                    });
                 };
             }
             
