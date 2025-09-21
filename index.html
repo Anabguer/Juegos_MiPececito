@@ -5313,12 +5313,14 @@
                 this.gameState.birthDate = Date.now();
                 this.gameState.ageInDays = 0;
                 
-                // 🍎 NACER CON HAMBRE (CRISIS)
-                this.gameState.needs.hunger = 80; // Crisis de hambre
-                this.updateCrisisFlags(); // Activar flags
+                // 🍎 NACER CON POCA HAMBRE (FELIZ)
+                this.gameState.needs.hunger = 15; // Poca hambre al nacer
+                this.gameState.needs.dirt = 0;    // Limpio al nacer
+                this.gameState.needs.fun = 95;    // Feliz al nacer
+                this.updateCrisisFlags(); // Actualizar flags
                 this.updateNeedBars(); // Actualizar barras
                 
-                console.log('🍎 Pez nació con hambre - Crisis activada');
+                console.log('🍎 Pez nació feliz - Sin crisis');
                 
                 // 📊 MOSTRAR BARRAS DE NECESIDADES CUANDO NACE EL PEZ
                 const needsBar = document.getElementById('needsHeaderBar');
@@ -5487,8 +5489,8 @@
                 const isDirty = inDirt;
                 const foodExists = this.food.length > 0;
                 
-                // 👆 1) DEDO: prioridad máxima (si no hay hambre grave/aburrido)
-                if (fish.desire && !inHunger && !inBored) {
+                // 👆 1) DEDO: prioridad máxima (solo si no está muy aburrido)
+                if (fish.desire && !inBored) {
                     const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y,
                                       fish.maxSpeed * (isDirty ? 0.80 : 1.30));
                     // ⚡ SIN factor 't' por distancia; velocidad completa
@@ -5517,8 +5519,8 @@
                         console.log(`👆 DEDO TURBO: ${(fish.maxSpeed * (isDirty ? 0.80 : 1.30)).toFixed(0)}px/s ${isDirty ? '(sucio)' : '(rápido)'}`);
                     }
                 }
-                // 🏎️ 2) COMIDA: si hay pellets, perseguir (siempre), más lento si está sucio
-                else if (foodExists) {
+                // 🏎️ 2) COMIDA: solo perseguir si tiene hambre (>1%)
+                else if (foodExists && this.gameState.needs.hunger > 1) {
                     const target = this.nearestFood(); // helper existente
                     if (target) {
                         // velocidad máxima: rápido normal o capado por suciedad
@@ -5817,9 +5819,9 @@
                 const x = event.clientX - rect.left;
                 const y = event.clientY - rect.top;
                 
-                // 🚨 GUARDACOSTAS: Ignorar dedo en hambre grave/aburrido
-                if (this.gameState.crisis.hunger || this.gameState.crisis.bored) {
-                    console.log('😔 Click ignorado - Pez demasiado triste (hambre grave/aburrido)');
+                // 🚨 GUARDACOSTAS: Solo ignorar si está MUY aburrido (no por hambre)
+                if (this.gameState.crisis.bored) {
+                    console.log('😔 Click ignorado - Pez muy aburrido (necesita jugar)');
                     return;
                 }
                 
@@ -7521,7 +7523,8 @@
                 this.gameState.needs.dirt = 0;
                 this.gameState.needs.hunger = 15;
                 this.gameState.needs.fun = 95;
-                console.log('🧼 Pantalla reseteada: limpia, poca hambre, feliz');
+                this.gameState.bubbles = 0; // RESETEAR BURBUJAS A 0
+                console.log('🧼 Pantalla reseteada: limpia, poca hambre, feliz, sin burbujas');
                 
                     const centerX = this.canvas.width / 2;
                     const centerY = this.canvas.height / 2;
@@ -9072,8 +9075,8 @@ Comida premium y de cumpleaños
                         console.log(`🍎 COLISIÓN: Pez en (${this.fish.x.toFixed(1)}, ${this.fish.y.toFixed(1)}) come pellet en (${f.x.toFixed(1)}, ${f.y.toFixed(1)}) - Distancia: ${distance.toFixed(1)}`);
                         this.food.splice(i, 1);
                         
-                        // Solo hacer efectos si realmente tiene hambre (>10)
-                        const hadHunger = this.gameState.needs.hunger > 10;
+                        // Solo hacer efectos si tiene CUALQUIER hambre (>1%)
+                        const hadHunger = this.gameState.needs.hunger > 1;
                         console.log(`🍎 Hambre actual: ${this.gameState.needs.hunger.toFixed(1)}% - ¿Tenía hambre? ${hadHunger}`);
                         
                         if (hadHunger) {
