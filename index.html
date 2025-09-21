@@ -8888,35 +8888,39 @@ Comida premium y de cumpleaños
             startCleaning() {
                 console.log('🧹 ¡LIMPIEZA ESPECTACULAR INICIADA!');
                 
-                // SINCRONIZAR: Sonido Y burbujas AL MISMO TIEMPO
-                if (window.audioManager) window.audioManager.playSound('clean');
-                
                 this.cleaningActive = true;
                 this.cleanEmitT = 2.6;
                 this.dirtStart = this.gameState.needs.dirt;
 
-                this._time = this._time || 0;       // reloj del juego (segundos)
+                this._time = this._time || 0;
                 this.cleanBubbles = this.cleanBubbles || [];
 
                 if (this.fish) { this.fish.happyBurst = 3.2; this.fish.spinKind = "clean"; }
 
-                // INMEDIATO: Burbujas aparecen CON el sonido
-                this.emitCleanBubbles();
-                this.emitCleanBubbles(); // DOBLE RÁFAGA para efecto inmediato
-                this.emitCleanBubbles(); // TRIPLE RÁFAGA para efecto MÁS visible
-                
-                // FORZAR burbujas grandes y visibles INMEDIATAMENTE
-                for (let i = 0; i < 20; i++) {
+                // 🚀 CREAR BURBUJAS INSTANTÁNEAS PRIMERO
+                console.log('🫧 Creando burbujas instantáneas...');
+                for (let i = 0; i < 30; i++) {
                     this.cleanBubbles.push({
                         x: Math.random() * this.viewW(),
-                        y: this.viewH() - 20, // Empezar desde abajo
-                        vx: (Math.random() - 0.5) * 40,
-                        vy: -150 - Math.random() * 100,
-                        r: 8 + Math.random() * 6,
-                        alpha: 0.8,
-                        life: 3 + Math.random() * 2
+                        y: this.viewH() - Math.random() * 100, // Distribuir por toda la altura
+                        vx: (Math.random() - 0.5) * 60,
+                        vy: -200 - Math.random() * 150,
+                        r: 6 + Math.random() * 8,
+                        alpha: 0.9,
+                        life: 2 + Math.random() * 3,
+                        color: `hsl(${180 + Math.random() * 60}, 70%, 80%)` // Colores azul-cyan
                     });
                 }
+                
+                // 🔊 SONIDO DESPUÉS de crear burbujas
+                if (window.audioManager) {
+                    window.audioManager.playSound('clean');
+                }
+                
+                // EMISIÓN CONTINUA
+                this.emitCleanBubbles();
+                this.emitCleanBubbles();
+                this.emitCleanBubbles();
                 
                 // 🧪 MINI TEST PARA VERIFICAR MOVIMIENTO
                 setTimeout(() => {
