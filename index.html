@@ -8897,14 +8897,27 @@ Comida premium y de cumpleaños
 
                 if (this.fish) { this.fish.happyBurst = 3.2; this.fish.spinKind = "clean"; }
 
-                // 🫧 BURBUJAS ORIGINALES QUE FUNCIONABAN BIEN
+                // 🫧 CREAR BURBUJAS Y FORZAR RENDER INMEDIATO
                 this.emitCleanBubbles();
                 this.emitCleanBubbles(); // Doble ráfaga como antes
                 
-                // 🔊 SONIDO INMEDIATAMENTE DESPUÉS (SIN DELAY)
-                if (window.audioManager) {
-                    window.audioManager.playSound('clean');
+                // 🎨 FORZAR DIBUJO INMEDIATO DE BURBUJAS
+                if (this.cleanBubbles && this.cleanBubbles.length > 0) {
+                    console.log(`🫧 FORZANDO RENDER de ${this.cleanBubbles.length} burbujas`);
+                    this.drawCleanBubbles(); // DIBUJAR AHORA MISMO
+                    
+                    // FORZAR ACTUALIZACIÓN DEL CANVAS
+                    const ctx = this.ctx;
+                    ctx.save();
+                    ctx.restore();
                 }
+                
+                // 🔊 SONIDO DESPUÉS DE DIBUJAR
+                setTimeout(() => {
+                    if (window.audioManager) {
+                        window.audioManager.playSound('clean');
+                    }
+                }, 100); // 100ms para que las burbujas se vean PRIMERO
                 
                 // 🧪 MINI TEST PARA VERIFICAR MOVIMIENTO
                 setTimeout(() => {
