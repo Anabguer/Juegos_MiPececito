@@ -2747,6 +2747,11 @@
                 <img src="./images/ui/badge_inventario.png" alt="Inventario" class="menu-icon">
             </div>
         </button>
+        <button class="menu-btn" id="shareButton" title="Compartir mi pez">
+            <div class="btn-icon">
+                📱
+            </div>
+        </button>
         <button class="menu-btn" id="albumButton">
             <div class="btn-icon">
                 <img src="./images/ui/badge_fotos.png" alt="Álbum" class="menu-icon">
@@ -3461,6 +3466,16 @@
                 }
             });
             
+            // Botón de compartir
+            document.getElementById('shareButton').addEventListener('click', () => {
+                if (window.game) {
+                    window.game.shareMyFish();
+                } else {
+                    console.warn('🚨 Game no disponible para compartir');
+                }
+                console.log('📱 Botón de compartir clickeado');
+            });
+            
             // Cerrar inventario con animación
             document.getElementById('closeInventory').addEventListener('click', () => {
                 const modal = document.getElementById('inventoryModal');
@@ -4114,6 +4129,7 @@
                     this.updateTinyBubbles(deltaTime);     // Burbujas de respiración
                     this.updateFlyers(deltaTime);          // Corazones voladores
                     this.updateLabels(deltaTime);          // 🍎 LABELS ("Ñam")
+                    this.updateEatingParticles(deltaTime); // ✨ PARTÍCULAS DE COMIDA
                     
                     // Actualizar UI cada pocos segundos
                     if (Math.random() < 0.05) { // MÁS FRECUENTE PARA DEBUG (era 0.01)
@@ -4344,6 +4360,9 @@
                 
                 // 💖 DIBUJAR CORAZONES VOLADORES
                 this.drawFlyers();
+                
+                // ✨ DIBUJAR PARTÍCULAS DE COMIDA
+                this.drawEatingParticles();
                 
                 // 🍎 DIBUJAR LABELS ("Ñam") ENCIMA DE TODO
                 this.drawLabels();
@@ -8584,6 +8603,406 @@ Comida premium y de cumpleaños
                 
                 console.log(`📸 Evento añadido al álbum: ${title}`);
                 this.saveGame();
+                
+                // Verificar logros después de añadir evento
+                this.checkAchievements();
+            }
+            
+            // 🏆 SISTEMA DE LOGROS INTEGRADO
+            checkAchievements() {
+                if (!this.gameState.achievements) {
+                    this.gameState.achievements = [];
+                }
+                
+                const achievements = [
+                    {
+                        id: 'first_birth',
+                        title: '🐣 Primera Vida',
+                        desc: 'Tu primer pececito ha nacido',
+                        condition: () => this.gameState.stage !== 'egg',
+                        reward: { bubbles: 5, stars: 1 }
+                    },
+                    {
+                        id: 'first_evolution',
+                        title: '🌱 Crecimiento',
+                        desc: 'Tu pez ha evolucionado por primera vez',
+                        condition: () => this.gameState.hasEvolvedToYoung,
+                        reward: { bubbles: 10, stars: 2 }
+                    },
+                    {
+                        id: 'adult_fish',
+                        title: '👑 Madurez',
+                        desc: 'Tu pez ha alcanzado la edad adulta',
+                        condition: () => this.gameState.hasEvolvedToAdult,
+                        reward: { bubbles: 20, stars: 3 }
+                    },
+                    {
+                        id: 'bubble_collector',
+                        title: '🫧 Coleccionista',
+                        desc: 'Has reunido 100 burbujas',
+                        condition: () => this.gameState.bubbles >= 100,
+                        reward: { bubbles: 25, stars: 2 }
+                    },
+                    {
+                        id: 'star_hunter',
+                        title: '⭐ Cazador de Estrellas',
+                        desc: 'Has reunido 50 estrellas',
+                        condition: () => this.gameState.stars >= 50,
+                        reward: { bubbles: 30, stars: 5 }
+                    },
+                    {
+                        id: 'caring_owner',
+                        title: '💖 Cuidador Ejemplar',
+                        desc: 'Has alimentado a tu pez 20 veces',
+                        condition: () => {
+                            const feedEvents = this.gameState.album.filter(e => 
+                                e.type === 'feeding' || e.description.includes('comido')
+                            ).length;
+                            return feedEvents >= 20;
+                        },
+                        reward: { bubbles: 15, stars: 3 }
+                    },
+                    {
+                        id: 'week_survivor',
+                        title: '📅 Una Semana Juntos',
+                        desc: 'Tu pez ha vivido 7 días',
+                        condition: () => (this.gameState.ageInDays || 0) >= 7,
+                        reward: { bubbles: 35, stars: 5 }
+                    }
+                ];
+                
+                achievements.forEach(achievement => {
+                    // Verificar si ya se obtuvo este logro
+                    const alreadyEarned = this.gameState.achievements.includes(achievement.id);
+                    
+                    if (!alreadyEarned && achievement.condition()) {
+                        // ¡Logro desbloqueado!
+                        this.gameState.achievements.push(achievement.id);
+                        
+                        // Dar recompensas
+                        this.gameState.bubbles += achievement.reward.bubbles;
+                        this.gameState.stars += achievement.reward.stars;
+                        
+                        // Añadir al álbum como evento especial
+                        this.addAlbumEventDirect('achievement', achievement.title, achievement.desc);
+                        
+                        // Mostrar notificación
+                        this.showAchievementNotification(achievement);
+                        
+                        console.log(`🏆 ¡LOGRO DESBLOQUEADO! ${achievement.title}`);
+                        this.updateUI(); // Actualizar burbujas/estrellas
+                    }
+                });
+            }
+            
+            // 📸 AÑADIR EVENTO SIN RECURSIÓN
+            addAlbumEventDirect(type, title, description) {
+                const event = {
+                    id: Date.now() + Math.random(),
+                    type: type,
+                    title: title,
+                    description: description,
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleDateString('es-ES'),
+                    time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+                    fishAge: this.gameState.ageInDays || 0,
+                    fishName: this.gameState.fishName || 'Mi Pececito'
+                };
+                
+                this.gameState.album.push(event);
+                if (this.gameState.album.length > 50) {
+                    this.gameState.album = this.gameState.album.slice(-50);
+                }
+                this.saveGame();
+            }
+            
+            // 🎉 NOTIFICACIÓN DE LOGRO
+            showAchievementNotification(achievement) {
+                const notification = document.createElement('div');
+                notification.className = 'achievement-notification';
+                notification.innerHTML = `
+                    <div class="achievement-content">
+                        <div class="achievement-icon">🏆</div>
+                        <div class="achievement-text">
+                            <div class="achievement-title">${achievement.title}</div>
+                            <div class="achievement-desc">${achievement.desc}</div>
+                            <div class="achievement-reward">+${achievement.reward.bubbles}🫧 +${achievement.reward.stars}⭐</div>
+                        </div>
+                    </div>
+                `;
+                
+                notification.style.cssText = `
+                    position: fixed; top: 80px; right: 20px;
+                    background: linear-gradient(135deg, #1bb37a, #2e7d32);
+                    color: white; border: 2px solid #4caf50; border-radius: 15px; padding: 15px;
+                    box-shadow: 0 8px 25px rgba(27, 179, 122, 0.4); z-index: 10000;
+                    animation: slideInRight 0.5s ease; max-width: 300px;
+                `;
+                
+                // Añadir animaciones CSS si no existen
+                if (!document.querySelector('#achievement-animations')) {
+                    const style = document.createElement('style');
+                    style.id = 'achievement-animations';
+                    style.textContent = `
+                        @keyframes slideInRight {
+                            from { transform: translateX(100%); opacity: 0; }
+                            to { transform: translateX(0); opacity: 1; }
+                        }
+                        @keyframes bounce {
+                            0%, 20%, 53%, 80%, 100% { transform: scale(1); }
+                            40%, 43% { transform: scale(1.1); }
+                            70% { transform: scale(1.05); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                const content = notification.querySelector('.achievement-content');
+                content.style.cssText = `display: flex; align-items: center; gap: 12px;`;
+                
+                const icon = notification.querySelector('.achievement-icon');
+                icon.style.cssText = `font-size: 32px; animation: bounce 0.6s ease;`;
+                
+                const title = notification.querySelector('.achievement-title');
+                title.style.cssText = `font-weight: bold; font-size: 16px; margin-bottom: 4px;`;
+                
+                const desc = notification.querySelector('.achievement-desc');
+                desc.style.cssText = `font-size: 12px; opacity: 0.9; margin-bottom: 4px;`;
+                
+                const reward = notification.querySelector('.achievement-reward');
+                reward.style.cssText = `font-size: 12px; font-weight: bold; color: #ffeb3b;`;
+                
+                document.body.appendChild(notification);
+                
+                // Remover después de 4 segundos
+                setTimeout(() => {
+                    notification.style.animation = 'slideInRight 0.5s ease reverse';
+                    setTimeout(() => notification.remove(), 500);
+                }, 4000);
+                
+                // Sonido de logro
+                if (window.audioManager) {
+                    window.audioManager.playSound('hatch');
+                }
+            }
+            
+            // 📱 SISTEMA DE COMPARTIR PEZ
+            shareMyFish() {
+                console.log('📱 Iniciando sistema de compartir...');
+                
+                // Crear imagen bonita para compartir
+                this.generateShareImage().then(shareData => {
+                    // Mostrar modal de compartir
+                    this.showShareModal(shareData);
+                }).catch(error => {
+                    console.error('Error generando imagen:', error);
+                    this.showSimpleShare();
+                });
+            }
+            
+            async generateShareImage() {
+                // Crear canvas temporal para captura
+                const shareCanvas = document.createElement('canvas');
+                shareCanvas.width = 400;
+                shareCanvas.height = 300;
+                const ctx = shareCanvas.getContext('2d');
+                
+                // Fondo bonito
+                const gradient = ctx.createLinearGradient(0, 0, 400, 300);
+                gradient.addColorStop(0, '#4fc3f7');
+                gradient.addColorStop(0.5, '#29b6f6');
+                gradient.addColorStop(1, '#0288d1');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 400, 300);
+                
+                // Título
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('🐠 Mi Pececito', 200, 40);
+                
+                // Info del pez
+                const fishName = this.gameState.fishName || 'Sin nombre';
+                const stage = this.gameState.stage;
+                const age = this.gameState.ageInDays || 0;
+                const bubbles = this.gameState.bubbles || 0;
+                const stars = this.gameState.stars || 0;
+                
+                ctx.font = '18px Arial';
+                ctx.fillText(`Nombre: ${fishName}`, 200, 80);
+                ctx.fillText(`Etapa: ${stage === 'baby' ? 'Bebé' : stage === 'young' ? 'Joven' : 'Adulto'}`, 200, 110);
+                ctx.fillText(`Edad: ${age} días`, 200, 140);
+                ctx.fillText(`🫧 ${bubbles} burbujas  ⭐ ${stars} estrellas`, 200, 170);
+                
+                // Mensaje
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#e3f2fd';
+                ctx.fillText('¡Ven a cuidar tu propio pececito!', 200, 220);
+                ctx.fillText('🌊 Mi Pececito - Mascota Virtual 🌊', 200, 250);
+                
+                // Convertir a blob
+                return new Promise(resolve => {
+                    shareCanvas.toBlob(blob => {
+                        const url = URL.createObjectURL(blob);
+                        resolve({
+                            image: url,
+                            text: `🐠 ¡Mira mi pececito ${fishName}! Es un ${stage === 'baby' ? 'bebé' : stage === 'young' ? 'joven' : 'adulto'} de ${age} días. ¡Únete a Mi Pececito! 🌊`,
+                            url: window.location.href
+                        });
+                    }, 'image/png');
+                });
+            }
+            
+            showShareModal(shareData) {
+                this.showCustomModal({
+                    title: '📱 Compartir mi pez',
+                    message: `¿Cómo quieres compartir a ${this.gameState.fishName || 'tu pececito'}?`,
+                    confirmText: '📋 Copiar texto',
+                    cancelText: '❌ Cancelar',
+                    onConfirm: () => {
+                        // Copiar al portapapeles
+                        navigator.clipboard.writeText(shareData.text).then(() => {
+                            alert('📋 ¡Texto copiado! Pégalo en WhatsApp, Telegram, etc.');
+                        }).catch(() => {
+                            // Fallback para navegadores sin clipboard API
+                            this.showTextToCopy(shareData.text);
+                        });
+                    },
+                    extraButtons: [
+                        {
+                            text: '📸 Descargar imagen',
+                            onclick: () => {
+                                const link = document.createElement('a');
+                                link.download = `mi-pececito-${this.gameState.fishName || 'mascota'}.png`;
+                                link.href = shareData.image;
+                                link.click();
+                                URL.revokeObjectURL(shareData.image);
+                            }
+                        },
+                        {
+                            text: '🌐 Compartir web',
+                            onclick: () => {
+                                if (navigator.share) {
+                                    navigator.share({
+                                        title: 'Mi Pececito',
+                                        text: shareData.text,
+                                        url: shareData.url
+                                    });
+                                } else {
+                                    this.showTextToCopy(shareData.url);
+                                }
+                            }
+                        }
+                    ]
+                });
+            }
+            
+            showSimpleShare() {
+                const fishName = this.gameState.fishName || 'mi pececito';
+                const stage = this.gameState.stage;
+                const age = this.gameState.ageInDays || 0;
+                const text = `🐠 ¡Mira mi pececito ${fishName}! Es un ${stage === 'baby' ? 'bebé' : stage === 'young' ? 'joven' : 'adulto'} de ${age} días. ¡Únete a Mi Pececito! 🌊`;
+                
+                this.showTextToCopy(text);
+            }
+            
+            showTextToCopy(text) {
+                this.showCustomModal({
+                    title: '📋 Copiar para compartir',
+                    message: 'Copia este texto y compártelo:',
+                    confirmText: '✅ Entendido',
+                    input: true,
+                    inputValue: text,
+                    inputReadonly: true,
+                    onConfirm: () => {
+                        console.log('📱 Texto para compartir mostrado');
+                    }
+                });
+            }
+            
+            // ✨ EFECTOS DE PARTÍCULAS AL COMER
+            createEatingParticles(x, y) {
+                if (!this.eatingParticles) this.eatingParticles = [];
+                
+                // Crear 8-12 partículas brillantes
+                const particleCount = 8 + Math.floor(Math.random() * 5);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.5;
+                    const speed = 60 + Math.random() * 40;
+                    const size = 3 + Math.random() * 4;
+                    const life = 1.2 + Math.random() * 0.8;
+                    
+                    const particle = {
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - 20, // Hacia arriba
+                        size: size,
+                        life: life,
+                        maxLife: life,
+                        color: ['#ffeb3b', '#ffc107', '#ff9800', '#4caf50', '#2196f3'][Math.floor(Math.random() * 5)],
+                        sparkle: Math.random() < 0.5
+                    };
+                    
+                    this.eatingParticles.push(particle);
+                }
+                
+                console.log(`✨ ${particleCount} partículas de comida creadas en (${x.toFixed(1)}, ${y.toFixed(1)})`);
+            }
+            
+            // ✨ ACTUALIZAR PARTÍCULAS DE COMIDA
+            updateEatingParticles(deltaTime) {
+                if (!this.eatingParticles) return;
+                
+                for (let i = this.eatingParticles.length - 1; i >= 0; i--) {
+                    const p = this.eatingParticles[i];
+                    
+                    // Física
+                    p.x += p.vx * deltaTime;
+                    p.y += p.vy * deltaTime;
+                    p.vy += 80 * deltaTime; // Gravedad suave
+                    p.vx *= 0.98; // Fricción
+                    
+                    // Vida
+                    p.life -= deltaTime;
+                    
+                    // Remover si murió
+                    if (p.life <= 0) {
+                        this.eatingParticles.splice(i, 1);
+                    }
+                }
+            }
+            
+            // ✨ DIBUJAR PARTÍCULAS DE COMIDA
+            drawEatingParticles() {
+                if (!this.eatingParticles || this.eatingParticles.length === 0) return;
+                
+                this.ctx.save();
+                
+                for (const p of this.eatingParticles) {
+                    const alpha = p.life / p.maxLife;
+                    const size = p.size * (0.5 + alpha * 0.5);
+                    
+                    this.ctx.globalAlpha = alpha;
+                    this.ctx.fillStyle = p.color;
+                    
+                    // Partícula brillante
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Brillo extra para algunas partículas
+                    if (p.sparkle) {
+                        this.ctx.globalAlpha = alpha * 0.6;
+                        this.ctx.fillStyle = 'white';
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, size * 0.5, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                }
+                
+                this.ctx.restore();
             }
             
             checkForAlbumEvents() {
@@ -9213,6 +9632,9 @@ Comida premium y de cumpleaños
                         this.updateNeedBars();
                         
                         console.log(`🍎 ¡Ñam completo! Nueva hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
+                        
+                        // ✨ EFECTOS DE PARTÍCULAS AL COMER
+                        this.createEatingParticles(f.x, f.y);
                         
                         // ⚠️ ELIMINADO: No limitar hambre en crisis para que siga persiguiendo
                         // if (this.gameState.crisis.hunger) {
