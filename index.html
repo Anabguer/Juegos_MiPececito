@@ -3400,6 +3400,19 @@
         function setupHeaderEvents() {
             console.log('🔧 Configurando eventos de cabecera...');
             
+            // 🏷️ CLICK EN NOMBRE DEL PEZ PARA CAMBIARLO
+            const fishNameElement = document.getElementById('fishName');
+            if (fishNameElement) {
+                fishNameElement.style.cursor = 'pointer';
+                fishNameElement.title = 'Click para cambiar nombre';
+                fishNameElement.addEventListener('click', () => {
+                    if (game && game.gameState.stage !== 'egg' && game.gameState.stage !== 'waiting') {
+                        game.showChangeNameModal();
+                    }
+                });
+                console.log('🏷️ Evento de cambio de nombre configurado');
+            }
+            
             // Verificar que el botón existe
             const playBtn = document.getElementById('playButton');
             const gamesModal = document.getElementById('gamesModal');
@@ -8267,6 +8280,36 @@ Comida premium y de cumpleaños
                 }
             }
             
+            // 🏷️ MODAL PARA CAMBIAR NOMBRE DEL PEZ
+            showChangeNameModal() {
+                const currentName = this.gameState.fishName || 'Sin nombre';
+                
+                this.showCustomModal({
+                    title: '🏷️ Cambiar nombre',
+                    message: `Nombre actual: "${currentName}"\n\n¿Cómo quieres llamar a tu pez?`,
+                    confirmText: '✅ Cambiar',
+                    cancelText: '❌ Cancelar',
+                    hasInput: true,
+                    inputPlaceholder: 'Nuevo nombre...',
+                    inputValue: currentName === 'Sin nombre' ? '' : currentName,
+                    onConfirm: (newName) => {
+                        if (newName && newName.trim()) {
+                            const oldName = this.gameState.fishName;
+                            this.gameState.fishName = newName.trim();
+                            this.updateUI();
+                            this.saveGame();
+                            
+                            // Añadir evento al álbum
+                            this.addAlbumEvent('rename', '🏷️ Nuevo nombre', 
+                                oldName ? `Cambié mi nombre de "${oldName}" a "${newName.trim()}"` : 
+                                `¡Ahora me llamo "${newName.trim()}"!`);
+                            
+                            console.log(`🏷️ Nombre cambiado a: ${newName.trim()}`);
+                        }
+                    }
+                });
+            }
+            
             // 🐠 SISTEMA DE NOMBRE
             
             askForFishName() {
@@ -9406,16 +9449,19 @@ Comida premium y de cumpleaños
                 if (!fish.wanderDir) fish.wanderDir = {x: 1, y: 0};
                 if (fish.desire === undefined) fish.desire = null;
 
-                // Animaciones básicas - PARPADEO UNIFICADO
-                fish.blinkT = Math.max(0, (fish.blinkT || 0) - deltaTime);
-                fish.nextBlink = (fish.nextBlink || 2) - deltaTime;
-                if (fish.nextBlink <= 0 && fish.blinkT <= 0) {
-                    fish.blinkT = 0.12;
-                    fish.eyeOpen = 0; // CERRAR OJO
-                    fish.nextBlink = 2 + Math.random() * 4;
-                } else if (fish.blinkT <= 0) {
-                    fish.eyeOpen = 1; // ABRIR OJO
-                }
+                // 👁️ PARPADEO SIMPLIFICADO (OJO SIEMPRE VISIBLE)
+                fish.eyeOpen = 1; // OJO SIEMPRE ABIERTO (sin parpadeo por ahora)
+                
+                // Sistema de parpadeo deshabilitado temporalmente para debug
+                // fish.blinkT = Math.max(0, (fish.blinkT || 0) - deltaTime);
+                // fish.nextBlink = (fish.nextBlink || 2) - deltaTime;
+                // if (fish.nextBlink <= 0 && fish.blinkT <= 0) {
+                //     fish.blinkT = 0.12;
+                //     fish.eyeOpen = 0;
+                //     fish.nextBlink = 2 + Math.random() * 4;
+                // } else if (fish.blinkT <= 0) {
+                //     fish.eyeOpen = 1;
+                // }
 
                 // Burbujas de respiración
                 fish.breathT = (fish.breathT || 2) - deltaTime;
