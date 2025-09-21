@@ -7980,21 +7980,8 @@ Comida premium y de cumpleaños
                     console.log(`📏 Tamaño actualizado para ${newStage}: size=${this.fish.size}px, scale=${this.fish.scale}`);
                 }
                 
-                // 🎨 CAMBIAR A CANVAS PARA VER NUESTROS CAMBIOS VISUALES
-                if (this.lottieAnimation) {
-                    this.lottieAnimation.destroy();
-                    this.lottieAnimation = null;
-                }
-                
-                // Ocultar contenedor Lottie
-                const container = document.getElementById('lottieContainer');
-                if (container) {
-                    container.style.display = 'none';
-                }
-                
-                // Cambiar a Canvas para ver ojo grande y raya amarilla
-                this.fish.isLottie = false;
-                console.log(`🎨 Cambiado a Canvas para ver mejoras visuales de ${newStage}`);
+                // 🎨 RECARGAR LOTTIE CON NUEVA ETAPA (MANTENER DISEÑOS BONITOS)
+                this.reloadLottieForStage(newStage);
                 
                 // Añadir al álbum
                 const messages = {
@@ -8027,9 +8014,13 @@ Comida premium y de cumpleaños
                 console.log(`🎭 EVOLUCIÓN COMPLETADA: ${newStage}`);
             }
             
-            // 🎨 RECARGAR LOTTIE PARA NUEVA ETAPA
+            // 🎨 RECARGAR LOTTIE PARA NUEVA ETAPA (PRESERVANDO ESCALA)
             async reloadLottieForStage(newStage) {
                 try {
+                    // Guardar escala antes de destruir
+                    const savedScale = this.fish ? this.fish.scale : 1.0;
+                    const savedPosition = this.fish ? {x: this.fish.x, y: this.fish.y} : null;
+                    
                     // Destruir animación actual
                     if (this.lottieAnimation) {
                         this.lottieAnimation.destroy();
@@ -8038,7 +8029,20 @@ Comida premium y de cumpleaños
                     
                     // Cargar nueva animación
                     await this.createLottieFish();
-                    console.log(`🎨 Lottie recargado para etapa: ${newStage}`);
+                    
+                    // RESTAURAR ESCALA Y POSICIÓN
+                    if (this.fish) {
+                        this.fish.scale = savedScale;
+                        this.fish.targetScale = savedScale;
+                        this.fish.growing = false; // No volver a crecer
+                        
+                        if (savedPosition) {
+                            this.fish.x = savedPosition.x;
+                            this.fish.y = savedPosition.y;
+                        }
+                    }
+                    
+                    console.log(`🎨 Lottie recargado para etapa: ${newStage} con escala: ${savedScale}`);
                     
                 } catch (error) {
                     console.error('❌ Error recargando Lottie:', error);
