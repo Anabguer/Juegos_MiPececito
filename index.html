@@ -3630,6 +3630,26 @@
                 startToca3Game();
             });
             
+            // 🔗 CONECTORES ADICIONALES PARA NOMBRES ALTERNATIVOS
+            const alternativeConnectors = [
+                { selector: '[data-game="memory"]', handler: startMemoriaGame },
+                { selector: '[data-game="snake"]', handler: startCarrilGame }, // Snake -> Carril
+                { selector: '[data-game="puzzle"]', handler: startBloquesGame }, // Puzzle -> Bloques
+                { selector: '[data-game="race"]', handler: startCorrerGame }, // Race -> Correr
+                { selector: '[data-game="target"]', handler: startCazaGame }, // Target -> Caza
+                { selector: '[data-game="adventure"]', handler: startSecuenciaGame }, // Adventure -> Secuencia
+                { selector: '[data-game="tower"]', handler: startToca3Game }, // Tower -> Toca3
+                { selector: '[data-game="boss"]', handler: startSimonGame } // Boss -> Simon
+            ];
+            
+            alternativeConnectors.forEach(({selector, handler}) => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    element.addEventListener('click', handler);
+                    console.log(`🔗 Conector alternativo añadido: ${selector}`);
+                }
+            });
+            
             // Tabs del inventario y juegos (sistema unificado)
             document.querySelectorAll('.game-tab-btn, .tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
