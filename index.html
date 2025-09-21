@@ -9382,14 +9382,14 @@ Comida premium y de cumpleaños
         
         
         // ——— CONFIG POR ETAPA ———
-        const STAGE_RATES = {
+        var STAGE_RATES = {
             baby:  { hungerHours: 2, dirtHours: 4, funHours: 3, eatReduce: 30, dirtPerPellet: 3, dirtPerRotten: 6 },
             young: { hungerHours: 6, dirtHours: 8, funHours: 4, eatReduce: 25, dirtPerPellet: 2, dirtPerRotten: 5 },
             adult: { hungerHours: 8, dirtHours:10, funHours: 5, eatReduce: 20, dirtPerPellet: 1, dirtPerRotten: 4 },
         };
 
         function getStageCfg(state) {
-            const st = state?.stage || 'baby';
+            var st = (state && state.stage) || 'baby';
             return STAGE_RATES[st] || STAGE_RATES.baby;
         }
         
