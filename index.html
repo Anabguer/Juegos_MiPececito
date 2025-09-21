@@ -2674,8 +2674,8 @@
         <!-- 🎨 LOGO DE LA WEB -->
         <div class="logo-container">
             <img src="./images/ui/logo.png" alt="Mi Pececito" class="game-logo">
-        </div>
-        
+    </div>
+    
         <!-- 📝 INFO EN DOS LÍNEAS -->
         <div class="fish-info-stacked">
             <div id="fishAge">Huevo</div>
@@ -3155,6 +3155,8 @@
         </div>
         <button class="debug-btn danger" id="debugResetBtn" title="Reset juego">🔄</button>
         <button class="debug-btn primary" id="forceHatchBtn" title="Forzar eclosión">🐣</button>
+        <button class="debug-btn success" id="evolveToYoungBtn" title="Evolucionar a Joven">🌱</button>
+        <button class="debug-btn info" id="evolveToAdultBtn" title="Evolucionar a Adulto">👑</button>
         <button class="debug-btn warning" id="timeAdvanceBtn" title="Avanzar tiempo">⏰</button>
         <button class="debug-btn success" id="maxFoodBtn" title="Máxima comida">🍎</button>
         <button class="debug-btn info" id="maxCleanBtn" title="Máxima limpieza">🧹</button>
@@ -3696,6 +3698,26 @@
                 if (game) {
                     game.setEggTimeToFinalSeconds(); // Ir a los últimos 5 segundos
                     console.log('🐣 Huevo a punto de eclosionar (5 segundos)');
+                }
+            });
+            
+            // 🌱 BOTÓN EVOLUCIONAR A JOVEN
+            document.getElementById('evolveToYoungBtn').addEventListener('click', () => {
+                if (game && game.gameState.stage === 'baby') {
+                    console.log('🌱 DEBUG: Forzando evolución a joven...');
+                    game.startEvolution('young');
+                } else {
+                    console.log('❌ Solo se puede evolucionar desde bebé a joven');
+                }
+            });
+            
+            // 👑 BOTÓN EVOLUCIONAR A ADULTO  
+            document.getElementById('evolveToAdultBtn').addEventListener('click', () => {
+                if (game && game.gameState.stage === 'young') {
+                    console.log('👑 DEBUG: Forzando evolución a adulto...');
+                    game.startEvolution('adult');
+                } else {
+                    console.log('❌ Solo se puede evolucionar desde joven a adulto');
                 }
             });
             
@@ -5361,8 +5383,20 @@
             
             async createLottieFish() {
                 try {
-                    // Cargar JSON del pez
-                    const response = await fetch('./ejemplos/bebe.json');
+                    // 🎯 SELECCIONAR ARCHIVO SEGÚN ETAPA
+                    const lottieFiles = {
+                        'baby': './ejemplos/bebe.json',
+                        'young': './ejemplos/joven.json', 
+                        'adult': './ejemplos/adulto.json'
+                    };
+                    
+                    const currentStage = this.gameState.stage;
+                    const filePath = lottieFiles[currentStage] || lottieFiles['baby'];
+                    
+                    console.log(`🎨 Cargando Lottie para etapa: ${currentStage} → ${filePath}`);
+                    
+                    // Cargar JSON del pez según etapa
+                    const response = await fetch(filePath);
                     const animationData = await response.json();
                     
                     const container = document.getElementById('lottieContainer');
@@ -7890,6 +7924,9 @@ Comida premium y de cumpleaños
                 this.gameState.stage = newStage;
                 this.evolutionInProgress = false;
                 
+                // 🎨 RECARGAR LOTTIE CON NUEVA ETAPA
+                this.reloadLottieForStage(newStage);
+                
                 // Añadir al álbum
                 const messages = {
                     'young': {
@@ -7919,6 +7956,24 @@ Comida premium y de cumpleaños
                 }
                 
                 console.log(`🎭 EVOLUCIÓN COMPLETADA: ${newStage}`);
+            }
+            
+            // 🎨 RECARGAR LOTTIE PARA NUEVA ETAPA
+            async reloadLottieForStage(newStage) {
+                try {
+                    // Destruir animación actual
+                    if (this.lottieAnimation) {
+                        this.lottieAnimation.destroy();
+                        this.lottieAnimation = null;
+                    }
+                    
+                    // Cargar nueva animación
+                    await this.createLottieFish();
+                    console.log(`🎨 Lottie recargado para etapa: ${newStage}`);
+                    
+                } catch (error) {
+                    console.error('❌ Error recargando Lottie:', error);
+                }
             }
             
             // 🍎 SISTEMA DE NECESIDADES
@@ -8784,7 +8839,7 @@ Comida premium y de cumpleaños
                 this.cleaningTimer = 0;
                 this._time = this._time || 0;
                 this.cleanBubbles = this.cleanBubbles || [];
-                
+
                 // 🐟 EFECTO EN EL PEZ
                 if (this.fish) { 
                     this.fish.happyBurst = 3.2; 
@@ -8885,9 +8940,9 @@ Comida premium y de cumpleaños
                         case 'fade':
                             // FASE 2: Reducir suciedad gradualmente (2s)
                             const progress = Math.min(this.cleaningTimer / 2.0, 1.0);
-                            this.gameState.needs.dirt = this.clamp((1 - progress) * this.dirtStart, 0, 100);
-                            this.updateNeedBars();
-                            
+                    this.gameState.needs.dirt = this.clamp((1 - progress) * this.dirtStart, 0, 100);
+                    this.updateNeedBars();
+
                             if (this.cleaningTimer >= 2.0) {
                                 this.cleaningState = 'settle';
                                 this.cleaningTimer = 0;
@@ -9007,18 +9062,18 @@ Comida premium y de cumpleaños
                         }
                         
                         // 🎬 ÑAM SIEMPRE
-                        this.labels.push({
-                            x: this.fish.x,
-                            y: this.fish.y - 12,
-                            text: "Ñam",
-                            a: 1,
-                            vy: 40,
-                            life: 1.4
-                        });
-                        
-                        this.fish.happyBurst = Math.max(this.fish.happyBurst, 1.2);
-                        this.fish.spinKind = "eat";
-                        
+                            this.labels.push({
+                                x: this.fish.x,
+                                y: this.fish.y - 12,
+                                text: "Ñam",
+                                a: 1,
+                                vy: 40,
+                                life: 1.4
+                            });
+                            
+                            this.fish.happyBurst = Math.max(this.fish.happyBurst, 1.2);
+                            this.fish.spinKind = "eat";
+                            
                         // 📊 ACTUALIZAR BARRAS SIEMPRE
                         this.updateCrisisFlags();
                         this.updateNeedBars();
@@ -10600,7 +10655,7 @@ Comida premium y de cumpleaños
                         if (bubble.isGood) {
                             endGame(false, "¡Dejaste escapar una buena!");
                             return;
-                        } else {
+            } else {
                             removeBubble(bubble, true);
                         }
                     }
