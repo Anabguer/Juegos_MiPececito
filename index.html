@@ -10954,37 +10954,41 @@ Comida premium y de cumpleaños
             console.log('🎮 Juego de burbujas inicializado completamente');
         }
         
-        // 💎 JUEGO DE BLOQUES (MAR MATCH-3)
+        // 💎 JUEGO DE BLOQUES (MAR MATCH-3) - INTEGRADO COMPLETO
         function startBloquesGame() {
-            console.log('💎 Iniciando juego Mar Match-3...');
+            console.log('💎 Iniciando juego Mar Match-3 integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
-            // Crear iframe con el juego completo
-            const gameModal = document.createElement('div');
-            gameModal.className = 'game-iframe-modal';
-            gameModal.innerHTML = `
-                <div class="game-iframe-container">
-                    <div class="game-iframe-header">
+            // Crear overlay del juego
+            const gameOverlay = document.createElement('div');
+            gameOverlay.id = 'bloquesGameOverlay';
+            gameOverlay.innerHTML = `
+                <div class="bloques-game-container">
+                    <div class="bloques-header">
                         <h2>💎 Mar Match-3</h2>
-                        <button class="game-close-btn">✕</button>
+                        <div class="bloques-stats">
+                            <span>⭐ <span id="bloques-score">0</span></span>
+                            <span>⏰ <span id="bloques-time">60</span>s</span>
+                        </div>
+                        <button class="bloques-close-btn">✕</button>
                     </div>
-                    <iframe src="./ejemplos/juegos/Juego bloques.html" class="game-iframe"></iframe>
+                    <div class="bloques-board" id="bloques-board"></div>
+                    <div class="bloques-footer">
+                        <button class="bloques-btn" id="bloques-restart">🔄 Reiniciar</button>
+                    </div>
                 </div>
             `;
             
             // Aplicar estilos
-            gameModal.style.cssText = `
+            gameOverlay.style.cssText = `
                 position: fixed;
                 top: 0;
                 left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(135deg, 
-                    rgba(25, 30, 40, 0.9) 0%, 
-                    rgba(15, 20, 30, 0.95) 100%);
-                backdrop-filter: blur(15px);
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(135deg, #083150 0%, #1d4b6b 50%, #2a6287 100%);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -10992,28 +10996,30 @@ Comida premium y de cumpleaños
                 animation: fadeIn 0.3s ease;
             `;
             
-            const container = gameModal.querySelector('.game-iframe-container');
+            const container = gameOverlay.querySelector('.bloques-game-container');
             container.style.cssText = `
-                background: rgba(35, 40, 50, 0.95);
+                background: rgba(8, 49, 80, 0.95);
                 border: 2px solid rgba(255, 255, 255, 0.2);
                 border-radius: 20px;
-                width: 95vw;
-                height: 95vh;
-                max-width: 800px;
+                width: 90vw;
+                height: 90vh;
+                max-width: 600px;
                 max-height: 700px;
                 display: flex;
                 flex-direction: column;
-                overflow: hidden;
+                color: #e9f6ff;
+                font-family: system-ui, Arial, sans-serif;
             `;
             
-            const header = gameModal.querySelector('.game-iframe-header');
+            const header = gameOverlay.querySelector('.bloques-header');
             header.style.cssText = `
-                background: rgba(79, 195, 247, 0.2);
+                background: rgba(29, 75, 107, 0.8);
                 padding: 15px 20px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+                border-radius: 18px 18px 0 0;
             `;
             
             const title = header.querySelector('h2');
@@ -11024,7 +11030,15 @@ Comida premium y de cumpleaños
                 font-weight: 800;
             `;
             
-            const closeBtn = gameModal.querySelector('.game-close-btn');
+            const stats = header.querySelector('.bloques-stats');
+            stats.style.cssText = `
+                display: flex;
+                gap: 15px;
+                font-weight: bold;
+                color: #e9f6ff;
+            `;
+            
+            const closeBtn = gameOverlay.querySelector('.bloques-close-btn');
             closeBtn.style.cssText = `
                 background: rgba(255, 255, 255, 0.2);
                 border: none;
@@ -11041,38 +11055,334 @@ Comida premium y de cumpleaños
                 transition: all 0.2s ease;
             `;
             
-            const iframe = gameModal.querySelector('.game-iframe');
-            iframe.style.cssText = `
+            const board = gameOverlay.querySelector('.bloques-board');
+            board.style.cssText = `
                 flex: 1;
-                border: none;
-                width: 100%;
-                background: white;
+                display: grid;
+                grid-template-columns: repeat(8, 1fr);
+                grid-template-rows: repeat(8, 1fr);
+                gap: 3px;
+                padding: 20px;
+                background: rgba(255, 255, 255, 0.06);
+                margin: 10px;
+                border-radius: 14px;
+                border: 1px solid rgba(255, 255, 255, 0.15);
             `;
+            
+            const footer = gameOverlay.querySelector('.bloques-footer');
+            footer.style.cssText = `
+                padding: 15px 20px;
+                display: flex;
+                justify-content: center;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            `;
+            
+            const restartBtn = gameOverlay.querySelector('.bloques-btn');
+            restartBtn.style.cssText = `
+                background: #1bb37a;
+                color: white;
+                border: none;
+                border-radius: 999px;
+                padding: 8px 16px;
+                font-weight: 800;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            `;
+            
+            // Variables del juego
+            const ICONS = ["🐟","⭐","🐚","🦀","🐙","🪸"];
+            const TYPES = [0,1,2,3,4,5];
+            let grid = [], score = 0, selected = null, busy = false;
+            let timerId = null, timeLeft = 60;
+            
+            // Inicializar juego
+            function initBloquesGame() {
+                grid = new Array(8);
+                board.innerHTML = "";
+                score = 0;
+                timeLeft = 60;
+                updateUI();
+                
+                for(let r = 0; r < 8; r++) {
+                    grid[r] = new Array(8);
+                    for(let c = 0; c < 8; c++) {
+                        let t;
+                        do {
+                            t = Math.floor(Math.random() * TYPES.length);
+                        } while(
+                            (c >= 2 && getT(r,c-1) === t && getT(r,c-2) === t) ||
+                            (r >= 2 && getT(r-1,c) === t && getT(r-2,c) === t)
+                        );
+                        
+                        const cell = makeCell(r, c, t);
+                        grid[r][c] = {t: t, el: cell};
+                        board.appendChild(cell);
+                    }
+                }
+                
+                startTimer();
+            }
+            
+            function getT(r, c) {
+                return (grid[r] && grid[r][c]) ? grid[r][c].t : null;
+            }
+            
+            function makeCell(r, c, t) {
+                const cell = document.createElement('div');
+                cell.className = 'bloques-cell';
+                cell.dataset.r = r;
+                cell.dataset.c = c;
+                cell.innerHTML = ICONS[t];
+                cell.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 14px;
+                    aspect-ratio: 1/1;
+                    cursor: pointer;
+                    user-select: none;
+                    font-size: 24px;
+                    background: linear-gradient(160deg, #0e4e76, #0a3757);
+                    border: 1px solid rgba(255, 255, 255, 0.18);
+                    box-shadow: 0 4px 8px rgba(0,0,0,.35);
+                    transition: all 0.2s ease;
+                `;
+                
+                cell.addEventListener('click', () => onCellClick(r, c));
+                return cell;
+            }
+            
+            function onCellClick(r, c) {
+                if (busy || timeLeft <= 0) return;
+                
+                const cell = grid[r][c];
+                if (!selected) {
+                    selected = {r, c};
+                    cell.el.style.transform = 'scale(1.1)';
+                    cell.el.style.boxShadow = '0 0 20px rgba(255,255,255,0.6)';
+                } else if (selected.r === r && selected.c === c) {
+                    // Deseleccionar
+                    cell.el.style.transform = 'scale(1)';
+                    cell.el.style.boxShadow = '0 4px 8px rgba(0,0,0,.35)';
+                    selected = null;
+                } else if (isAdjacent(selected, {r, c})) {
+                    // Intercambiar
+                    swapCells(selected, {r, c});
+                    selected = null;
+                } else {
+                    // Seleccionar nueva celda
+                    grid[selected.r][selected.c].el.style.transform = 'scale(1)';
+                    grid[selected.r][selected.c].el.style.boxShadow = '0 4px 8px rgba(0,0,0,.35)';
+                    selected = {r, c};
+                    cell.el.style.transform = 'scale(1.1)';
+                    cell.el.style.boxShadow = '0 0 20px rgba(255,255,255,0.6)';
+                }
+            }
+            
+            function isAdjacent(a, b) {
+                return Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1;
+            }
+            
+            function swapCells(a, b) {
+                const ta = grid[a.r][a.c].t;
+                const tb = grid[b.r][b.c].t;
+                
+                grid[a.r][a.c].t = tb;
+                grid[b.r][b.c].t = ta;
+                grid[a.r][a.c].el.innerHTML = ICONS[tb];
+                grid[b.r][b.c].el.innerHTML = ICONS[ta];
+                
+                // Reset styles
+                grid[a.r][a.c].el.style.transform = 'scale(1)';
+                grid[a.r][a.c].el.style.boxShadow = '0 4px 8px rgba(0,0,0,.35)';
+                grid[b.r][b.c].el.style.transform = 'scale(1)';
+                grid[b.r][b.c].el.style.boxShadow = '0 4px 8px rgba(0,0,0,.35)';
+                
+                // Verificar matches
+                setTimeout(() => {
+                    const matches = findMatches();
+                    if (matches.length > 0) {
+                        removeMatches(matches);
+                    } else {
+                        // Revertir si no hay matches
+                        grid[a.r][a.c].t = ta;
+                        grid[b.r][b.c].t = tb;
+                        grid[a.r][a.c].el.innerHTML = ICONS[ta];
+                        grid[b.r][b.c].el.innerHTML = ICONS[tb];
+                    }
+                }, 100);
+            }
+            
+            function findMatches() {
+                const matches = [];
+                
+                // Buscar matches horizontales
+                for(let r = 0; r < 8; r++) {
+                    let count = 1;
+                    for(let c = 1; c < 8; c++) {
+                        if(getT(r, c) === getT(r, c-1)) {
+                            count++;
+                        } else {
+                            if(count >= 3) {
+                                for(let i = 0; i < count; i++) {
+                                    matches.push({r, c: c-1-i});
+                                }
+                            }
+                            count = 1;
+                        }
+                    }
+                    if(count >= 3) {
+                        for(let i = 0; i < count; i++) {
+                            matches.push({r, c: 7-i});
+                        }
+                    }
+                }
+                
+                // Buscar matches verticales
+                for(let c = 0; c < 8; c++) {
+                    let count = 1;
+                    for(let r = 1; r < 8; r++) {
+                        if(getT(r, c) === getT(r-1, c)) {
+                            count++;
+                        } else {
+                            if(count >= 3) {
+                                for(let i = 0; i < count; i++) {
+                                    matches.push({r: r-1-i, c});
+                                }
+                            }
+                            count = 1;
+                        }
+                    }
+                    if(count >= 3) {
+                        for(let i = 0; i < count; i++) {
+                            matches.push({r: 7-i, c});
+                        }
+                    }
+                }
+                
+                return matches;
+            }
+            
+            function removeMatches(matches) {
+                score += matches.length * 10;
+                updateUI();
+                
+                matches.forEach(({r, c}) => {
+                    grid[r][c].el.style.opacity = '0.3';
+                    grid[r][c].el.style.transform = 'scale(0.8)';
+                });
+                
+                setTimeout(() => {
+                    // Rellenar desde arriba
+                    for(let c = 0; c < 8; c++) {
+                        let writePos = 7;
+                        for(let r = 7; r >= 0; r--) {
+                            const isMatch = matches.some(m => m.r === r && m.c === c);
+                            if(!isMatch) {
+                                if(writePos !== r) {
+                                    grid[writePos][c] = grid[r][c];
+                                    grid[writePos][c].el.dataset.r = writePos;
+                                }
+                                writePos--;
+                            }
+                        }
+                        
+                        // Llenar espacios vacíos
+                        for(let r = writePos; r >= 0; r--) {
+                            const t = Math.floor(Math.random() * TYPES.length);
+                            const cell = makeCell(r, c, t);
+                            grid[r][c] = {t: t, el: cell};
+                            board.appendChild(cell);
+                            cell.style.opacity = '0';
+                            cell.style.transform = 'translateY(-50px)';
+                            setTimeout(() => {
+                                cell.style.opacity = '1';
+                                cell.style.transform = 'translateY(0)';
+                            }, 50);
+                        }
+                    }
+                    
+                    // Limpiar matches del DOM
+                    matches.forEach(({r, c}) => {
+                        const oldCell = board.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+                        if(oldCell && oldCell !== grid[r][c].el) {
+                            oldCell.remove();
+                        }
+                    });
+                    
+                    // Verificar nuevos matches
+                    setTimeout(() => {
+                        const newMatches = findMatches();
+                        if(newMatches.length > 0) {
+                            removeMatches(newMatches);
+                        }
+                    }, 300);
+                }, 300);
+            }
+            
+            function startTimer() {
+                timerId = setInterval(() => {
+                    timeLeft--;
+                    updateUI();
+                    if(timeLeft <= 0) {
+                        endGame();
+                    }
+                }, 1000);
+            }
+            
+            function updateUI() {
+                document.getElementById('bloques-score').textContent = score;
+                document.getElementById('bloques-time').textContent = timeLeft;
+            }
+            
+            function endGame() {
+                clearInterval(timerId);
+                busy = true;
+                
+                // Dar recompensas
+                if (window.game) {
+                    const bubbles = Math.floor(score / 10);
+                    const stars = Math.floor(score / 50);
+                    window.game.gameState.bubbles += bubbles;
+                    window.game.gameState.stars += stars;
+                    window.game.saveGame();
+                    
+                    alert(`🎉 ¡Juego terminado!\\n⭐ Puntuación: ${score}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
+                }
+            }
             
             // Event listeners
             closeBtn.addEventListener('click', () => {
-                gameModal.remove();
+                if(timerId) clearInterval(timerId);
+                gameOverlay.remove();
                 console.log('💎 Juego Mar Match-3 cerrado');
             });
             
-            gameModal.addEventListener('click', (e) => {
-                if (e.target === gameModal) {
-                    gameModal.remove();
+            restartBtn.addEventListener('click', () => {
+                if(timerId) clearInterval(timerId);
+                initBloquesGame();
+            });
+            
+            gameOverlay.addEventListener('click', (e) => {
+                if (e.target === gameOverlay) {
+                    if(timerId) clearInterval(timerId);
+                    gameOverlay.remove();
                 }
             });
             
-            document.body.appendChild(gameModal);
+            document.body.appendChild(gameOverlay);
+            initBloquesGame();
             console.log('💎 Juego Mar Match-3 iniciado');
         }
         
-        // 🧠 JUEGO DE MEMORIA
+        // 🧠 JUEGO DE MEMORIA - INTEGRADO BÁSICO
         function startMemoriaGame() {
-            console.log('🧠 Iniciando juego Memoflip...');
+            console.log('🧠 Iniciando juego Memoflip integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
-            // Crear iframe con el juego completo
+            // Por ahora usar iframe hasta implementar completamente
             const gameModal = document.createElement('div');
             gameModal.className = 'game-iframe-modal';
             gameModal.innerHTML = `
