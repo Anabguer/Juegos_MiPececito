@@ -8289,7 +8289,7 @@ Comida premium y de cumpleaños
                     message: `Nombre actual: "${currentName}"\n\n¿Cómo quieres llamar a tu pez?`,
                     confirmText: '✅ Cambiar',
                     cancelText: '❌ Cancelar',
-                    hasInput: true,
+                    input: true, // ACTIVAR CAMPO DE INPUT
                     inputPlaceholder: 'Nuevo nombre...',
                     inputValue: currentName === 'Sin nombre' ? '' : currentName,
                     onConfirm: (newName) => {
@@ -8433,7 +8433,12 @@ Comida premium y de cumpleaños
                 // Focus en input si existe
                 document.body.appendChild(modal);
                 if (input) {
+                    // Asignar valor inicial si se proporcionó
+                    if (options.inputValue) {
+                        input.value = options.inputValue;
+                    }
                     input.focus();
+                    input.select(); // Seleccionar todo el texto
                     input.addEventListener('keypress', (e) => {
                         if (e.key === 'Enter') {
                             confirmBtn.click();
