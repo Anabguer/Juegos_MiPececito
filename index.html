@@ -5050,15 +5050,17 @@
                     this.ctx.fill();
                     
                     // Pupila negra
+                    // 👁️ OJO MÁS GRANDE (especialmente para joven/adulto)
+                    const eyeScale = this.gameState.stage === 'baby' ? 1.0 : 1.4; // Más grande para joven/adulto
                     this.ctx.fillStyle = '#323232'; // Color exacto [0.1961,0.1961,0.1961]
                     this.ctx.beginPath();
-                    this.ctx.ellipse(size * 0.32, -size * 0.05, size * 0.08, size * 0.1 * fish.eyeOpen, 0, 0, Math.PI * 2);
+                    this.ctx.ellipse(size * 0.32, -size * 0.05, size * 0.08 * eyeScale, size * 0.1 * fish.eyeOpen * eyeScale, 0, 0, Math.PI * 2);
                     this.ctx.fill();
                     
-                    // Brillo en el ojo (pequeño punto blanco)
+                    // Brillo en el ojo (más grande también)
                     this.ctx.fillStyle = '#ffffff';
                     this.ctx.beginPath();
-                    this.ctx.arc(size * 0.34, -size * 0.08, size * 0.03, 0, Math.PI * 2);
+                    this.ctx.arc(size * 0.34, -size * 0.08, size * 0.03 * eyeScale, 0, Math.PI * 2);
                     this.ctx.fill();
                 }
                 
@@ -5111,7 +5113,7 @@
                 if (stage === 'young' || ageInDays < 8) {
                     return {
                         body: '#8a7bd8',      // Morado más intenso
-                        stripes: '#8f7cb9',   // Franjas más marcadas
+                        stripes: '#ffd166',   // RAYA AMARILLA BRILLANTE
                         tail: '#c13434',      // Cola más intensa
                         fins: '#c77373',      // Aletas más fuertes
                         pacifier: null        // Sin chupete
@@ -7889,33 +7891,40 @@ Comida premium y de cumpleaños
                 }, 2000);
             }
             
-            // 🎆 CREAR BURBUJAS DE EVOLUCIÓN
+            // 🎆 CREAR BURBUJAS DE EVOLUCIÓN (USANDO SISTEMA DE LIMPIEZA)
             createEvolutionBubbles() {
                 console.log('🎆 Creando explosión de evolución...');
                 
-                // Crear muchas burbujas doradas desde el pez
-                const fishX = this.fish ? this.fish.x : this.canvas.width / 2;
-                const fishY = this.fish ? this.fish.y : this.canvas.height / 2;
+                // Limpiar burbujas anteriores
+                this.cleanBubbles = this.cleanBubbles || [];
                 
-                for (let i = 0; i < 80; i++) {
-                    const angle = (i / 80) * Math.PI * 2;
-                    const speed = 60 + Math.random() * 80;
-                    const life = 2.5 + Math.random() * 1.5;
-                    
-                    this.bgBubbles.push({
-                        x: fishX + (Math.random() - 0.5) * 40,
-                        y: fishY + (Math.random() - 0.5) * 40,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        r: 4 + Math.random() * 8,
-                        life: life,
-                        maxLife: life,
-                        color: `hsl(${45 + Math.random() * 30}, 80%, 70%)`, // Dorado
-                        opacity: 0.9
-                    });
+                // Crear explosión desde el pez usando el sistema que SÍ funciona
+                const fishX = this.fish ? this.fish.x : this.viewW() / 2;
+                const fishY = this.fish ? this.fish.y : this.viewH() / 2;
+                
+                // 🎆 TRIPLE RÁFAGA DE EVOLUCIÓN (más espectacular)
+                for (let wave = 0; wave < 4; wave++) {
+                    for (let i = 0; i < 30; i++) {
+                        const angle = (i / 30) * Math.PI * 2;
+                        const distance = 20 + wave * 15; // Ondas concéntricas
+                        
+                        const b = {
+                            x0: fishX + Math.cos(angle) * distance,
+                            y0: fishY + Math.sin(angle) * distance,
+                            t: wave * 0.2, // Escalonar ondas
+                            dur: 3.0 + Math.random() * 1.0,
+                            wobble: Math.random() * Math.PI * 2,
+                            wobSpd: 2.0 + Math.random() * 3,
+                            wobAmp: 15 + Math.random() * 20,
+                            r: 5 + Math.random() * 8
+                        };
+                        b.x = b.x0;
+                        b.y = b.y0;
+                        this.cleanBubbles.push(b);
+                    }
                 }
                 
-                console.log('🎆 Burbujas de evolución creadas');
+                console.log(`🎆 Burbujas de evolución creadas: ${this.cleanBubbles.length} burbujas doradas`);
             }
             
             // ✅ COMPLETAR EVOLUCIÓN CON MODAL BONITO
@@ -9472,8 +9481,8 @@ Comida premium y de cumpleaños
                 fish.x += fish.vx * deltaTime;
                 fish.y += fish.vy * deltaTime;
 
-                // 🧱 LÍMITES DE PANTALLA CON REBOTE SUAVE
-                const pad = 16;
+                // 🧱 LÍMITES DE PANTALLA CON REBOTE SUAVE (MARGEN AMPLIADO)
+                const pad = 60; // Margen más grande para pez joven/adulto
                 const W = this.canvas.width;
                 const H = this.getFloorY();
                 
