@@ -5452,218 +5452,6 @@
                 console.log('🐠 Pez Canvas creado (fallback)');
             }
             
-            // 🏊 MOVIMIENTO DEL PEZ
-            // 🏊 MOVIMIENTO DEL PEZ REALISTA (COPIADO DEL CÓDIGO PERFECTO)
-            updateFishMovement(deltaTime) {
-                if (!this.fish) return;
-                
-                const fish = this.fish;
-                
-                // 👁️ Parpadeo y respiración
-                fish.blinkT = Math.max(0, fish.blinkT - deltaTime);
-                fish.nextBlink -= deltaTime;
-                if (fish.nextBlink <= 0 && fish.blinkT <= 0) {
-                    fish.blinkT = 0.12;
-                    fish.nextBlink = 2 + Math.random() * 4;
-                }
-                
-                fish.breathT -= deltaTime;
-                if (fish.breathT <= 0 && !this.cleaningActive) {
-                    this.emitMouthBubbles(3 + Math.floor(Math.random() * 3));
-                    fish.breathT = 2 + Math.random() * 3;
-                }
-                
-                fish.swimPhase += deltaTime * 3.2;
-                let targetV = {vx: 0, vy: 0};
-                let speedMul = 1.0;
-                
-                // 🔥 TURBO DE DEDO (decaimiento)
-                fish.fingerBoostT = Math.max(0, (fish.fingerBoostT || 0) - deltaTime);
-                
-                // 🚨 ESTADOS DE CRISIS
-                const inHunger = this.gameState.crisis.hunger;
-                const inDirt = this.gameState.crisis.dirt;
-                const inBored = this.gameState.crisis.bored;
-                
-                // === DECISIÓN DE MOVIMIENTO (prioridad DEDO PRIMERO) ===
-                const isDirty = inDirt;
-                const foodExists = this.food.length > 0;
-                
-                // 👆 1) DEDO: prioridad máxima (solo si no está muy aburrido)
-                if (fish.desire && !inBored) {
-                    const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y,
-                                      fish.maxSpeed * (isDirty ? 0.80 : 1.30));
-                    // ⚡ SIN factor 't' por distancia; velocidad completa
-                    targetV = { vx: s.vx, vy: s.vy };
-                    speedMul = 1.0;
-                    // que no "robe" prioridad una celebración previa
-                    fish.happyBurst = 0;
-                    
-                    if (s.dist < 22) {
-                        fish.desire = null;
-                        // 💖 LANZAR CORAZÓN SOLO SI SE SOLICITÓ
-                        if (fish.shouldLaunchHeart) {
-                            this.launchHeartToFun(); // Sin coordenadas - usar posición del pez
-                            fish.shouldLaunchHeart = false;
-                            
-                            // 🔊 SONIDO DE CORAZÓN
-                            if (window.audioManager) {
-                                window.audioManager.playSound('heart');
-                            }
-                            
-                            console.log('💖 ¡Pez llegó al dedo! Lanzando corazón...');
-                        }
-                    }
-                    
-                    if (Math.random() < 0.02) { // Log ocasional
-                        console.log(`👆 DEDO TURBO: ${(fish.maxSpeed * (isDirty ? 0.80 : 1.30)).toFixed(0)}px/s ${isDirty ? '(sucio)' : '(rápido)'}`);
-                    }
-                }
-                // 🏎️ 2) COMIDA: perseguir si tiene CUALQUIER hambre (>1%)
-                else if (foodExists && this.gameState.needs.hunger > 1) {
-                    const target = this.nearestFood(); // helper existente
-                    if (target) {
-                        // velocidad máxima: rápido normal o capado por suciedad
-                        const chaseMax = fish.maxSpeed * (isDirty ? 0.60 : 1.30);
-                        const s = this.seek(fish.x, fish.y, target.x, target.y, chaseMax);
-                        
-                        // Nada de "t = clamp(d/90, …)" que frena al acercarte:
-                        targetV = { vx: s.vx, vy: s.vy };
-                        speedMul = 1.0;
-                        
-                        if (Math.random() < 0.02) { // Log ocasional
-                            console.log(`🏎️ PEZ F1: Persiguiendo comida a ${chaseMax.toFixed(0)}px/s ${isDirty ? '(sucio-lento)' : '(turbo)'}`);
-                        }
-                    }
-                }
-                // 🎉 3) CELEBRACIÓN: solo si no hay dedo ni comida
-                else if (fish.happyBurst > 0) {
-                    const w = (fish.spinKind === "clean") ? 13.0 : 6.0;
-                    const R = (fish.spinKind === "clean") ? 140 : 55;
-                    const a = this.gameTime * w;
-                    targetV = { vx: Math.cos(a) * R * 0.65, vy: Math.sin(a) * R * 0.65 };
-                    speedMul = (fish.spinKind === "clean") ? 1.8 : 1.25;
-                    fish.happyBurst = Math.max(0, fish.happyBurst - (fish.spinKind === "clean" ? 0.6 : 1.6) * deltaTime);
-                }
-                // 🍎 4) CRISIS sin comida/ni dedo → esquinas
-                else if (inHunger) {
-                    // Crisis hambre sin comida (esquina superior)
-                    const home = {x: 70, y: 70}; // Esquina superior
-                    const s = this.seek(fish.x, fish.y, home.x, home.y, 60);
-                    speedMul = 0.5;
-                    if (s.dist > 20) {
-                        targetV = {vx: s.vx * 0.5, vy: s.vy * 0.5};
-                    } else {
-                        targetV = {vx: Math.sin(fish.swimPhase) * 6, vy: Math.cos(fish.swimPhase * 1.2) * 3};
-                    }
-                }
-                else if (inDirt) {
-                    // Crisis suciedad sin comida (esquina inferior)
-                    const home = {x: this.canvas.width - 70, y: this.canvas.height - 70}; // Esquina inferior
-                    const s = this.seek(fish.x, fish.y, home.x, home.y, 70);
-                    speedMul = 0.7;
-                    if (s.dist > 20) {
-                        targetV = {vx: s.vx * 0.5, vy: s.vy * 0.5};
-                    } else {
-                        targetV = {vx: Math.sin(fish.swimPhase) * 5, vy: Math.cos(fish.swimPhase * 1.2) * 2};
-                    }
-                }
-                else if (inBored) {
-                    // Crisis aburrimiento (centro, pasa de clicks)
-                    const home = {x: this.canvas.width * 0.5, y: this.canvas.height - 70};
-                    const s = this.seek(fish.x, fish.y, home.x, home.y, 80);
-                    speedMul = 0.9;
-                    if (s.dist > 18) {
-                        targetV = {vx: s.vx * 0.6, vy: s.vy * 0.6};
-                    } else {
-                        targetV = {vx: Math.sin(fish.swimPhase) * 7, vy: Math.cos(fish.swimPhase * 1.5) * 3};
-                    }
-                }
-                // 🏊 MOVIMIENTO LIBRE (vagabundeo natural)
-                else {
-                    fish.wanderTimer -= deltaTime;
-                    if (fish.wanderTimer <= 0) {
-                        const angle = Math.random() * Math.PI * 2;
-                        fish.wanderDir.x = Math.cos(angle);
-                        fish.wanderDir.y = Math.sin(angle) * 0.33; // Menos vertical
-                        fish.wanderTimer = 0.8 + Math.random() * 1.1;
-                    }
-                    const cruise = fish.baseSpeed * 1.1;
-                    targetV = {
-                        vx: fish.wanderDir.x * cruise + Math.cos(fish.swimPhase) * 16,
-                        vy: fish.wanderDir.y * cruise + Math.sin(fish.swimPhase * 1.8) * 16
-                    };
-                }
-                
-                // 🚀 APLICAR FÍSICA REALISTA (aceleración/desaceleración)
-                const maxSpeed = fish.maxSpeed * speedMul;
-                const maxAccel = fish.maxAccel * speedMul;
-                const ax = this.clamp(targetV.vx - fish.vx, -maxAccel, maxAccel);
-                const ay = this.clamp(targetV.vy - fish.vy, -maxAccel, maxAccel);
-                fish.vx += ax * deltaTime;
-                fish.vy += ay * deltaTime;
-                
-                // 📍 ACTUALIZAR POSICIÓN
-                fish.x += fish.vx * deltaTime;
-                fish.y += fish.vy * deltaTime;
-                
-                // 🚧 LÍMITES MÓVIL - SEGUROS PARA TODOS LOS DISPOSITIVOS
-                const fishSize = 80; // Tamaño REAL del pez Lottie (más grande)
-                const fishHalfSize = fishSize / 2; // 40px - radio del pez
-                const W = this.canvas.width;
-                const H = this.canvas.height;
-                
-                // ZONA SEGURA: Header = 70px + Necesidades = 35px, Botones = 60px
-                const topLimit = 70 + 35 + 20; // Header + barra necesidades + margen = 125px
-                const bottomLimit = H - 60 - 100; // MUCHO más espacio - pez puede bajar hasta 160px del fondo
-                const leftLimit = fishHalfSize + 15; // 55px - MÁS MARGEN IZQUIERDO
-                const rightLimit = W - fishHalfSize - 15; // W-55px - MÁS MARGEN DERECHO
-                
-                // LÍMITES HORIZONTALES
-                if (fish.x < leftLimit) { 
-                    fish.x = leftLimit; 
-                    fish.vx = Math.abs(fish.vx) * 0.8; // Rebote suave hacia adentro
-                    console.log(`🚧 LÍMITE IZQUIERDO: Pez reposicionado a x=${leftLimit} (margen: ${leftLimit}px)`);
-                }
-                if (fish.x > rightLimit) { 
-                    fish.x = rightLimit; 
-                    fish.vx = -Math.abs(fish.vx) * 0.8; // Rebote suave hacia adentro
-                    console.log(`🚧 LÍMITE DERECHO: Pez reposicionado a x=${rightLimit} (margen: ${W - rightLimit}px)`);
-                }
-                
-                // LÍMITES VERTICALES - CON MARGEN DE SEGURIDAD
-                if (fish.y < topLimit) { 
-                    fish.y = topLimit + 5; // +5px de margen para evitar bucles
-                    fish.vy = Math.abs(fish.vy) * 0.8; // Rebote suave hacia abajo
-                    // Reducir logs para evitar spam
-                    if (Math.random() < 0.01) {
-                        console.log(`🚧 LÍMITE SUPERIOR: Pez reposicionado a y=${topLimit + 5}`);
-                    }
-                }
-                if (fish.y > bottomLimit) { 
-                    fish.y = bottomLimit - 5; // -5px de margen para evitar bucles
-                    fish.vy = -Math.abs(fish.vy) * 0.8; // Rebote suave hacia arriba
-                    // Reducir logs para evitar spam
-                    if (Math.random() < 0.005) {
-                        console.log(`🚧 LÍMITE INFERIOR: Pez reposicionado a y=${bottomLimit - 5}`);
-                    }
-                }
-                
-                // 🔄 ORIENTACIÓN (cambiar facing solo con movimiento significativo)
-                if (Math.abs(fish.vx) > 2) {
-                    fish.facing = fish.vx > 0 ? 1 : -1;
-                }
-                
-                // 📊 DEBUG POSICIÓN (cada 3 segundos aprox)
-                if (Math.random() < 0.005) {
-                    console.log(`🐟 POSICIÓN: x=${fish.x.toFixed(1)}, y=${fish.y.toFixed(1)} | Límites: L=${leftLimit}, R=${rightLimit}, T=${topLimit}, B=${bottomLimit} | Canvas: ${W}x${H}`);
-                }
-                
-                // Actualizar posición Lottie
-                if (fish.isLottie) {
-                    this.updateLottiePosition();
-                }
-            }
             
             // 🐠 LÓGICA SIMPLE DE PEZ REAL
             updateNaturalFishMovement(deltaTime) {
@@ -8895,30 +8683,60 @@ Comida premium y de cumpleaños
                     'Total food:', this.food.length);
             }
             
-            // 🧹 LIMPIEZA ESPECTACULAR CON BURBUJAS (DEL DOCUMENTO)
+            // 🧹 LIMPIEZA CON MÁQUINA DE ESTADOS SINCRONIZADA
             startCleaning() {
-                console.log('🧹 ¡LIMPIEZA ESPECTACULAR INICIADA!');
+                console.log('🧹 ¡INICIANDO LIMPIEZA SINCRONIZADA!');
                 
-                // 🎯 INICIALIZAR ARRAYS PERO NO CREAR BURBUJAS AÚN
+                // 🎯 INICIALIZAR ESTADO DE LIMPIEZA
+                this.cleaningState = 'burst'; // burst -> fade -> settle
+                this.cleaningTimer = 0;
                 this._time = this._time || 0;
                 this.cleanBubbles = this.cleanBubbles || [];
                 
-                if (this.fish) { this.fish.happyBurst = 3.2; this.fish.spinKind = "clean"; }
+                // 🐟 EFECTO EN EL PEZ
+                if (this.fish) { 
+                    this.fish.happyBurst = 3.2; 
+                    this.fish.spinKind = "clean"; 
+                }
                 
-                // 🔊 SONIDO INMEDIATO
+                // 🫧 CREAR BURBUJAS INMEDIATAMENTE (RÁFAGA INICIAL)
+                this.emitCleanBubblesBurst();
+                console.log(`🫧 RÁFAGA INICIAL: ${this.cleanBubbles.length} burbujas creadas`);
+                
+                // 🔊 SONIDO SINCRONIZADO
                 if (window.audioManager) {
                     window.audioManager.playSound('clean');
                 }
                 
-                // 🫧 CREAR BURBUJAS AL MISMO TIEMPO QUE SONIDO Y LIMPIEZA
-                this.emitCleanBubbles();
-                this.emitCleanBubbles(); // Doble ráfaga como antes
-                console.log(`🫧 Burbujas creadas SINCRONIZADAS: ${this.cleanBubbles.length}`);
-                
-                // 🧹 ACTIVAR LIMPIEZA INMEDIATAMENTE
-                this.cleaningActive = true;
-                this.cleanEmitT = 2.6;
+                // 🧹 CONFIGURAR LIMPIEZA
                 this.dirtStart = this.gameState.needs.dirt;
+            }
+            
+            // 🫧 RÁFAGA INTENSA DE BURBUJAS PARA SINCRONIZACIÓN
+            emitCleanBubblesBurst() {
+                const W = this.viewW();
+                const H = this.viewH();
+                
+                // 🎯 CREAR MUCHAS BURBUJAS DE UNA VEZ (RÁFAGA)
+                for (let wave = 0; wave < 3; wave++) {
+                    for (let i = 0; i < 25; i++) {
+                        const b = {
+                            x0: 30 + Math.random() * (W - 60),
+                            y0: H * 0.8 + Math.random() * (H * 0.15),
+                            t: wave * 0.1, // Escalonar ligeramente las ondas
+                            dur: 2.0 + Math.random() * 0.8,
+                            wobble: Math.random() * Math.PI * 2,
+                            wobSpd: 1.5 + Math.random() * 2,
+                            wobAmp: 8 + Math.random() * 12,
+                            r: 4 + Math.random() * 6
+                        };
+                        b.x = b.x0;
+                        b.y = b.y0;
+                        this.cleanBubbles.push(b);
+                    }
+                }
+                
+                console.log(`🫧 Ráfaga creada: ${this.cleanBubbles.length} burbujas totales`);
             }
             
             emitCleanBubbles() {
@@ -8958,42 +8776,60 @@ Comida premium y de cumpleaños
             updateCleaning(deltaTime) {
                 this._time = (this._time || 0) + deltaTime;
 
-                if (this.cleaningActive) {
-                    this.cleanEmitT -= deltaTime;
-                    this.emitCleanBubbles();
-
-                    const progress = this.clamp(1 - Math.max(this.cleanEmitT, 0) / 2.6, 0, 1);
-                    this.gameState.needs.dirt = this.clamp((1 - progress) * this.dirtStart, 0, 100);
-                    this.updateNeedBars();
-
-                    if (this.cleanEmitT <= 0) {
-                        this.cleaningActive = false;
-                        this.cleaningJustFinished = true; // Marcar que acabamos de terminar
-                        console.log('🧹 Limpieza terminada - Esperando que se vayan las burbujas...');
+                // 🎯 MÁQUINA DE ESTADOS DE LIMPIEZA
+                if (this.cleaningState) {
+                    this.cleaningTimer += deltaTime;
+                    
+                    switch (this.cleaningState) {
+                        case 'burst':
+                            // FASE 1: Ráfaga inicial (0.5s)
+                            if (this.cleaningTimer >= 0.5) {
+                                this.cleaningState = 'fade';
+                                this.cleaningTimer = 0;
+                                console.log('🧹 FASE: burst → fade');
+                            }
+                            break;
+                            
+                        case 'fade':
+                            // FASE 2: Reducir suciedad gradualmente (2s)
+                            const progress = Math.min(this.cleaningTimer / 2.0, 1.0);
+                            this.gameState.needs.dirt = this.clamp((1 - progress) * this.dirtStart, 0, 100);
+                            this.updateNeedBars();
+                            
+                            if (this.cleaningTimer >= 2.0) {
+                                this.cleaningState = 'settle';
+                                this.cleaningTimer = 0;
+                                console.log('🧹 FASE: fade → settle');
+                            }
+                            break;
+                            
+                        case 'settle':
+                            // FASE 3: Finalizar cuando no queden burbujas
+                            if (this.cleanBubbles.length === 0 || this.cleaningTimer >= 3.0) {
+                                this.gameState.needs.dirt = 0;
+                                this.updateNeedBars();
+                                this.cleaningState = null;
+                                console.log('🧹 LIMPIEZA COMPLETADA');
+                            }
+                            break;
                     }
                 }
 
-                // Movimiento paramétrico: y = y0 - p*(H+24)
+                // 🫧 ACTUALIZAR MOVIMIENTO DE BURBUJAS
                 const H = this.viewH();
                 for (const b of this.cleanBubbles) {
                     b.t += deltaTime;
-                    const p = Math.min(1, b.t / (b.dur || 1));       // 0→1
+                    const p = Math.min(1, b.t / (b.dur || 1));
                     b.y = b.y0 - p * (H + 24);
                     b.x = b.x0 + Math.sin(this._time * b.wobSpd + b.wobble) * b.wobAmp;
                 }
 
-                // Purga: cuando terminen la trayectoria o por seguridad (edad larga)
+                // 🗑️ ELIMINAR BURBUJAS QUE SALIERON DE PANTALLA
                 for (let i = this.cleanBubbles.length - 1; i >= 0; i--) {
                     const b = this.cleanBubbles[i];
-                    if (b.t >= (b.dur || 1) || b.y < -12) this.cleanBubbles.splice(i, 1);
-                }
-
-                // Garantía: si acabamos de terminar una limpieza y no quedan burbujas, asegurar suciedad 0
-                if (this.cleaningJustFinished && this.cleanBubbles.length === 0) {
-                    this.gameState.needs.dirt = 0;
-                    this.updateNeedBars();
-                    this.cleaningJustFinished = false; // Reset flag
-                    console.log('🧹 Limpieza completada - Garantía: suciedad = 0');
+                    if (b.t >= (b.dur || 1) || b.y < -12) {
+                        this.cleanBubbles.splice(i, 1);
+                    }
                 }
             }
             
@@ -9031,6 +8867,8 @@ Comida premium y de cumpleaños
                     return;
                 }
                 
+                // 🐟 PERSECUCIÓN DE COMIDA MANEJADA EN updateFishMovement()
+                
                 const h = this.canvas.height;
                 const drag = 0.99;
                 
@@ -9065,7 +8903,7 @@ Comida premium y de cumpleaños
                         this.food.splice(i, 1);
                         
                         // 🍎 COMER CON CONFIG POR ETAPA
-                        const cfg = getStageCfg(this.gameState);
+                        const cfg = this.getStageCfg(this.gameState);
                         this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - cfg.eatReduce, 0, 100);
                         this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerPellet, 0, 100);
                         
@@ -9108,7 +8946,7 @@ Comida premium y de cumpleaños
                     // 🗑️ PUDRIR COMIDA VIEJA (después de 8 segundos en el fondo)
                     if (f.bottomT > 0 && f.bottomT > 8) {
                         console.log(`🗑️ Pellet podrido después de ${f.bottomT.toFixed(1)}s en el fondo`);
-                        const cfg = getStageCfg(this.gameState);
+                        const cfg = this.getStageCfg(this.gameState);
                         this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerRotten, 0, 100);
                         console.log(`🦠 Suciedad por pudrición: +${cfg.dirtPerRotten} (total: ${this.gameState.needs.dirt.toFixed(1)}%)`);
                         this.updateNeedBars();
@@ -9117,8 +8955,11 @@ Comida premium y de cumpleaños
                 }
                 
                 // 📊 LOG PERIÓDICO PARA DEBUG
-                if (this.food.length > 0 && Math.random() < 0.1) { // 10% de probabilidad cada frame
-                    console.log(`🍎 Estado comida: ${this.food.length} pellets - Hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
+                // Log reducido: solo cada 5 segundos o cuando cambia significativamente
+                this.lastFoodLogTime = this.lastFoodLogTime || 0;
+                if (Date.now() - this.lastFoodLogTime > 5000) {
+                    console.log(`🍎 Estado: ${this.food.length} pellets - Hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
+                    this.lastFoodLogTime = Date.now();
                 }
             }
             
@@ -9128,12 +8969,16 @@ Comida premium y de cumpleaños
                     return;
                 }
                 
-                console.log('🍎 drawFood: Dibujando', this.food.length, 'pellets');
+                // Solo log cuando hay cambios importantes
+                if (this.food.length > (this.lastFoodCount || 0)) {
+                    console.log('🍎 Comida añadida:', this.food.length, 'pellets');
+                    this.lastFoodCount = this.food.length;
+                }
                 
                 this.ctx.save();
                 for (let i = 0; i < this.food.length; i++) {
                     const f = this.food[i];
-                    console.log(`🍎 Dibujando pellet ${i}:`, f.x, f.y, f.r);
+                    // console.log(`🍎 Dibujando pellet ${i}:`, f.x, f.y, f.r); // Log deshabilitado para performance
                     
                     this.ctx.beginPath();
                     this.ctx.arc(f.x, f.y, f.r || 3, 0, Math.PI * 2);
@@ -9366,38 +9211,118 @@ Comida premium y de cumpleaños
                 this.bubCtx.strokeStyle = 'rgba(255,255,255,0.8)'; 
                 this.bubCtx.stroke();
             }
-            
-            // Limpieza
-            for (const b of this.cleanBubbles) {
-                this.bubCtx.globalAlpha = 0.95;
-                this.bubCtx.beginPath(); 
-                this.bubCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-                this.bubCtx.fillStyle = '#dff7ff'; 
-                this.bubCtx.fill();
-                this.bubCtx.lineWidth = 0.9; 
-                this.bubCtx.strokeStyle = 'rgba(255,255,255,0.75)'; 
-                this.bubCtx.stroke();
-            }
         }
-        
-        
-        // ——— CONFIG POR ETAPA ———
-        var STAGE_RATES = {
-            baby:  { hungerHours: 2, dirtHours: 4, funHours: 3, eatReduce: 30, dirtPerPellet: 3, dirtPerRotten: 6 },
-            young: { hungerHours: 6, dirtHours: 8, funHours: 4, eatReduce: 25, dirtPerPellet: 2, dirtPerRotten: 5 },
-            adult: { hungerHours: 8, dirtHours:10, funHours: 5, eatReduce: 20, dirtPerPellet: 1, dirtPerRotten: 4 },
-        };
+            
+            // 🐟 MOVIMIENTO DEL PEZ
+            updateFishMovement(deltaTime) {
+                if (!this.fish) return;
+                const fish = this.fish;
 
-        function getStageCfg(state) {
+                // 🍎 PERSEGUIR COMIDA (prioridad alta si hay comida)
+                let targetV = {vx: 0, vy: 0};
+                let speedMul = 1.0;
+                
+                if (this.food.length > 0) {
+                    let closest = null;
+                    let closestDist = Infinity;
+                    
+                    for (const f of this.food) {
+                        const d = this.dist(fish.x, fish.y, f.x, f.y);
+                        if (d < closestDist) {
+                            closest = f;
+                            closestDist = d;
+                        }
+                    }
+                    
+                    if (closest && closestDist < 200) {
+                        const dx = closest.x - fish.x;
+                        const dy = closest.y - fish.y;
+                        const len = Math.hypot(dx, dy);
+                        if (len > 0) {
+                            targetV.vx = (dx / len) * 120;
+                            targetV.vy = (dy / len) * 120;
+                            speedMul = 1.8;
+                            fish.isChasing = true;
+                        }
+                    }
+                }
+
+                // 👆 SEGUIR DEDO (prioridad máxima)
+                if (this.fingerTarget && this.dist(fish.x, fish.y, this.fingerTarget.x, this.fingerTarget.y) > 30) {
+                    const dx = this.fingerTarget.x - fish.x;
+                    const dy = this.fingerTarget.y - fish.y;
+                    const len = Math.hypot(dx, dy);
+                    if (len > 0) {
+                        targetV.vx = (dx / len) * 150;
+                        targetV.vy = (dy / len) * 150;
+                        speedMul = 2.5;
+                    }
+                }
+
+                // 🎯 MOVIMIENTO ALEATORIO (cuando no hay objetivos)
+                if (targetV.vx === 0 && targetV.vy === 0) {
+                    fish.wanderT = (fish.wanderT || 0) - deltaTime;
+                    if (fish.wanderT <= 0) {
+                        const angle = Math.random() * Math.PI * 2;
+                        fish.wanderDir = {
+                            vx: Math.cos(angle) * 40,
+                            vy: Math.sin(angle) * 40
+                        };
+                        fish.wanderT = 1 + Math.random() * 3;
+                    }
+                    targetV = fish.wanderDir || {vx: 0, vy: 0};
+                    speedMul = 0.6;
+                }
+
+                // 🏊 APLICAR VELOCIDAD CON SUAVIZADO
+                const smoothing = 1 - Math.exp(-3 * deltaTime);
+                fish.vx = fish.vx || 0;
+                fish.vy = fish.vy || 0;
+                fish.vx += (targetV.vx * speedMul - fish.vx) * smoothing;
+                fish.vy += (targetV.vy * speedMul - fish.vy) * smoothing;
+
+                // 🧱 LÍMITES DE PANTALLA (USANDO SUELO UNIFICADO)
+                const margin = 55;
+                const leftLimit = margin;
+                const rightLimit = this.canvas.width - margin;
+                const topLimit = 125;
+                const bottomLimit = this.getFloorY(); // ¡USAR SUELO UNIFICADO!
+
+                if (fish.x <= leftLimit && fish.vx < 0) fish.vx = Math.abs(fish.vx) * 0.8;
+                if (fish.x >= rightLimit && fish.vx > 0) fish.vx = -Math.abs(fish.vx) * 0.8;
+                if (fish.y <= topLimit && fish.vy < 0) fish.vy = Math.abs(fish.vy) * 0.8;
+                if (fish.y >= bottomLimit && fish.vy > 0) fish.vy = -Math.abs(fish.vy) * 0.8;
+
+                // 🚀 MOVER PEZ
+                fish.x += fish.vx * deltaTime;
+                fish.y += fish.vy * deltaTime;
+
+                // 🔒 CLAMP FINAL (garantía)
+                fish.x = this.clamp(fish.x, leftLimit, rightLimit);
+                fish.y = this.clamp(fish.y, topLimit, bottomLimit);
+
+                // 🐟 ORIENTACIÓN (mirar hacia donde nada)
+                if (Math.abs(fish.vx) > 5) {
+                    fish.facingRight = fish.vx > 0;
+                }
+            }
+            
+            // ——— CONFIG POR ETAPA ———
+        getStageCfg(state) {
+            var STAGE_RATES = {
+                baby:  { hungerHours: 2, dirtHours: 4, funHours: 3, eatReduce: 30, dirtPerPellet: 3, dirtPerRotten: 6 },
+                young: { hungerHours: 6, dirtHours: 8, funHours: 4, eatReduce: 25, dirtPerPellet: 2, dirtPerRotten: 5 },
+                adult: { hungerHours: 8, dirtHours:10, funHours: 5, eatReduce: 20, dirtPerPellet: 1, dirtPerRotten: 4 },
+            };
             var st = (state && state.stage) || 'baby';
             return STAGE_RATES[st] || STAGE_RATES.baby;
         }
         
         // 🔧 FUNCIONES QUE FALTAN PARA EL SISTEMA REALISTA
-            updateAutoNeeds(deltaTime) {
+        updateAutoNeeds(deltaTime) {
                 if (!this.fish || this.gameState.stage === 'egg') return;
 
-                const cfg = getStageCfg(this.gameState);
+                const cfg = this.getStageCfg(this.gameState);
                 const hungerInc = (100 / (cfg.hungerHours * 3600)) * deltaTime;
                 const dirtInc   = (100 / (cfg.dirtHours   * 3600)) * deltaTime;
                 const funDec    = (100 / (cfg.funHours    * 3600)) * deltaTime;
