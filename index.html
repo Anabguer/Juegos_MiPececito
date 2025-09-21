@@ -9239,9 +9239,9 @@ Comida premium y de cumpleaños
                 // 🔥 TURBO DE DEDO (decaimiento)
                 fish.fingerBoostT = Math.max(0, (fish.fingerBoostT || 0) - deltaTime);
 
-                // 🍎 PERSEGUIR COMIDA (LÓGICA SIMPLIFICADA)
+                // 🍎 PERSEGUIR COMIDA (RANGO AMPLIADO)
                 fish.isChasing = false;
-                if (this.food.length > 0 && this.gameState.needs.hunger > 1) { // SIMPLIFICADO: >1% hambre
+                if (this.food.length > 0 && this.gameState.needs.hunger > 1) {
                     let closest = null;
                     let closestDist = Infinity;
                     
@@ -9253,32 +9253,35 @@ Comida premium y de cumpleaños
                         }
                     }
                     
-                    if (closest && closestDist < 200) {
+                    // RANGO AMPLIADO: 400px en lugar de 200px
+                    if (closest && closestDist < 400) {
                         const dx = closest.x - fish.x;
                         const dy = closest.y - fish.y;
                         const len = Math.hypot(dx, dy);
                         if (len > 0) {
-                            targetV.vx = (dx / len) * 80; // Velocidad hacia comida
-                            targetV.vy = (dy / len) * 80;
-                            speedMul = 1.8; // Más rápido cuando persigue comida
+                            targetV.vx = (dx / len) * 100; // Más rápido hacia comida
+                            targetV.vy = (dy / len) * 100;
+                            speedMul = 2.2; // Más velocidad
                             fish.isChasing = true;
                         }
                     }
                 }
 
-                // 👆 SEGUIR DEDO (prioridad alta)
+                // 👆 SEGUIR DEDO (PRIORIDAD MÁXIMA - ANULA COMIDA)
                 if (this.fingerTarget) {
                     const distanceToFinger = this.dist(fish.x, fish.y, this.fingerTarget.x, this.fingerTarget.y);
                     
-                    if (distanceToFinger > 30) {
+                    if (distanceToFinger > 50) { // Rango más amplio para llegar
                         const dx = this.fingerTarget.x - fish.x;
                         const dy = this.fingerTarget.y - fish.y;
                         const len = Math.hypot(dx, dy);
                         if (len > 0) {
-                            targetV.vx = (dx / len) * 120; // MÁS RÁPIDO hacia dedo
-                            targetV.vy = (dy / len) * 120;
-                            speedMul = 2.5; // TURBO hacia dedo
-                            fish.fingerBoostT = 1.0; // Activar turbo visual
+                            // ANULAR COMIDA - PRIORIDAD TOTAL AL DEDO
+                            targetV.vx = (dx / len) * 150; // MUY RÁPIDO hacia dedo
+                            targetV.vy = (dy / len) * 150;
+                            speedMul = 3.0; // TURBO MÁXIMO hacia dedo
+                            fish.fingerBoostT = 1.5; // Activar turbo visual más largo
+                            fish.isChasing = false; // No perseguir comida
                         }
                     } else if (fish.shouldLaunchHeart) {
                         // 💖 PEZ LLEGÓ AL DEDO - LANZAR CORAZÓN
@@ -9289,19 +9292,20 @@ Comida premium y de cumpleaños
                     }
                 }
 
-                // 🎯 MOVIMIENTO ALEATORIO (cuando no hay objetivos)
+                // 🎯 MOVIMIENTO ALEATORIO MEJORADO (cuando no hay objetivos)
                 if (targetV.vx === 0 && targetV.vy === 0) {
                     fish.wanderT = (fish.wanderT || 0) - deltaTime;
                     if (fish.wanderT <= 0) {
                         const angle = Math.random() * Math.PI * 2;
+                        const speed = 30 + Math.random() * 40; // Velocidad más variable
                         fish.wanderDir = {
-                            vx: Math.cos(angle) * (20 + Math.random() * 30),
-                            vy: Math.sin(angle) * (20 + Math.random() * 30)
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed
                         };
-                        fish.wanderT = 1 + Math.random() * 3;
+                        fish.wanderT = 2 + Math.random() * 4; // Tiempo más largo entre cambios
                     }
                     targetV = fish.wanderDir || {vx: 0, vy: 0};
-                    speedMul = 0.6; // Más lento en movimiento aleatorio
+                    speedMul = 0.8; // Velocidad normal de nado libre
                 }
 
                 // 🏊 APLICAR VELOCIDAD CON SUAVIZADO
