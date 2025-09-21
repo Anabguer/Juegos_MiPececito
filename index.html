@@ -9225,6 +9225,7 @@ Comida premium y de cumpleaños
                 if (!fish.facing) fish.facing = 1;
                 if (!fish.wanderTimer) fish.wanderTimer = 0;
                 if (!fish.wanderDir) fish.wanderDir = {x: 1, y: 0};
+                if (fish.desire === undefined) fish.desire = null;
 
                 // Animaciones básicas
                 fish.blinkT = Math.max(0, (fish.blinkT || 0) - deltaTime);
@@ -9257,18 +9258,18 @@ Comida premium y de cumpleaños
                     speedMul = (fish.spinKind === "clean") ? 1.8 : 1.25;
                     fish.happyBurst = Math.max(0, fish.happyBurst - (fish.spinKind === "clean" ? 0.6 : 1.6) * deltaTime);
                 }
-                // 👆 SEGUIR DEDO (PRIORIDAD MÁXIMA)
-                else if (this.fingerTarget) {
-                    const s = this.seek(fish.x, fish.y, this.fingerTarget.x, this.fingerTarget.y, fish.maxSpeed * 0.9);
+                // 👆 SEGUIR DEDO (PRIORIDAD MÁXIMA) - USANDO fish.desire COMO EL EJEMPLO
+                else if (fish.desire) {
+                    const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y, fish.maxSpeed * 0.9);
                     const t = this.clamp(s.dist / 120, 0.25, 1);
                     targetV = {vx: s.vx * t, vy: s.vy * t};
                     speedMul = 1.5;
                     
-                    if (s.dist < 40 && fish.shouldLaunchHeart) {
+                    if (s.dist < 40) {
                         // 💖 PEZ LLEGÓ AL DEDO - LANZAR CORAZÓN
+                        fish.desire = null;
+                        targetV = {vx: 0, vy: 0};
                         this.launchHeartToFun(fish.x, fish.y);
-                        fish.shouldLaunchHeart = false;
-                        this.fingerTarget = null;
                         console.log('💖 ¡Pez llegó al dedo! Corazón lanzado');
                     }
                 }
@@ -9398,7 +9399,7 @@ Comida premium y de cumpleaños
                 this.cleanBubbles = [];
                 this.labels = [];
                 this.flyers = [];
-                this.fingerTarget = null;
+                if (this.fish) this.fish.desire = null; // Limpiar desire del pez
                 this.cleaning = null;
 
                 this.gameState.needs = { hunger: 15, dirt: 0, fun: 95 };
