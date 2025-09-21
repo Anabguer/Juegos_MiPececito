@@ -7807,26 +7807,118 @@ Comida premium y de cumpleaños
                 }
             }
             
-            // 🔄 EVOLUCIÓN AUTOMÁTICA
+            // 🔄 EVOLUCIÓN AUTOMÁTICA CON EFECTOS ESPECTACULARES
             checkEvolution() {
-                if (!this.fish) return;
+                if (!this.fish || this.evolutionInProgress) return;
                 
                 const ageInDays = this.gameState.ageInDays || 0;
                 const currentStage = this.gameState.stage;
                 
                 // Bebé → Joven (3 días)
-                if (currentStage === 'baby' && ageInDays >= 3) {
-                    this.gameState.stage = 'young';
-                    this.addAlbumEvent('evolution', '🌱 ¡He crecido!', 'Ya no soy un bebé. ¡Ahora soy un pez joven!');
-                    console.log('🌱 Evolución: Bebé → Joven');
+                if (currentStage === 'baby' && ageInDays >= 3 && !this.gameState.hasEvolvedToYoung) {
+                    this.startEvolution('young');
+                    this.gameState.hasEvolvedToYoung = true;
                 }
                 
                 // Joven → Adulto (8 días)
-                if (currentStage === 'young' && ageInDays >= 8) {
-                    this.gameState.stage = 'adult';
-                    this.addAlbumEvent('evolution', '👑 ¡Soy adulto!', 'He crecido completamente. ¡Ahora soy un pez adulto!');
-                    console.log('👑 Evolución: Joven → Adulto');
+                if (currentStage === 'young' && ageInDays >= 8 && !this.gameState.hasEvolvedToAdult) {
+                    this.startEvolution('adult');
+                    this.gameState.hasEvolvedToAdult = true;
                 }
+            }
+            
+            // 🎭 INICIAR EVOLUCIÓN ESPECTACULAR
+            startEvolution(newStage) {
+                console.log(`🎭 ¡EVOLUCIÓN INICIADA! ${this.gameState.stage} → ${newStage}`);
+                
+                this.evolutionInProgress = true;
+                this.evolutionStartTime = Date.now();
+                this.evolutionTargetStage = newStage;
+                
+                // 🫧 CREAR EXPLOSIÓN DE BURBUJAS (como el huevo)
+                this.createEvolutionBubbles();
+                
+                // 🔊 SONIDO DE EVOLUCIÓN
+                if (window.audioManager) {
+                    window.audioManager.playSound('hatch'); // Reutilizar sonido de nacimiento
+                }
+                
+                // 🎉 EFECTO EN EL PEZ
+                if (this.fish) {
+                    this.fish.happyBurst = 4.0; // Giro más largo
+                    this.fish.spinKind = "evolution";
+                }
+                
+                // ⏰ PROGRAMAR CAMBIO DE ETAPA DESPUÉS DE 2 SEGUNDOS
+                setTimeout(() => {
+                    this.completeEvolution(newStage);
+                }, 2000);
+            }
+            
+            // 🎆 CREAR BURBUJAS DE EVOLUCIÓN
+            createEvolutionBubbles() {
+                console.log('🎆 Creando explosión de evolución...');
+                
+                // Crear muchas burbujas doradas desde el pez
+                const fishX = this.fish ? this.fish.x : this.canvas.width / 2;
+                const fishY = this.fish ? this.fish.y : this.canvas.height / 2;
+                
+                for (let i = 0; i < 80; i++) {
+                    const angle = (i / 80) * Math.PI * 2;
+                    const speed = 60 + Math.random() * 80;
+                    const life = 2.5 + Math.random() * 1.5;
+                    
+                    this.bgBubbles.push({
+                        x: fishX + (Math.random() - 0.5) * 40,
+                        y: fishY + (Math.random() - 0.5) * 40,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        r: 4 + Math.random() * 8,
+                        life: life,
+                        maxLife: life,
+                        color: `hsl(${45 + Math.random() * 30}, 80%, 70%)`, // Dorado
+                        opacity: 0.9
+                    });
+                }
+                
+                console.log('🎆 Burbujas de evolución creadas');
+            }
+            
+            // ✅ COMPLETAR EVOLUCIÓN CON MODAL BONITO
+            completeEvolution(newStage) {
+                // Cambiar etapa
+                this.gameState.stage = newStage;
+                this.evolutionInProgress = false;
+                
+                // Añadir al álbum
+                const messages = {
+                    'young': {
+                        title: '🌱 ¡He crecido!',
+                        desc: 'Ya no soy un bebé. ¡Ahora soy un pez joven y más fuerte!'
+                    },
+                    'adult': {
+                        title: '👑 ¡Soy adulto!',
+                        desc: 'He crecido completamente. ¡Ahora soy un pez adulto y sabio!'
+                    }
+                };
+                
+                const msg = messages[newStage];
+                if (msg) {
+                    this.addAlbumEvent('evolution', msg.title, msg.desc);
+                    
+                    // 🎉 MOSTRAR MODAL BONITO
+                    this.showCustomModal({
+                        title: msg.title,
+                        message: `${msg.desc}\n\n✨ ¡Mis necesidades han cambiado!\n🍎 Tendré hambre más lentamente\n🧹 Me ensuciaré menos\n🎮 Me aburriré menos`,
+                        confirmText: '🎉 ¡Qué emocionante!',
+                        onConfirm: () => {
+                            console.log(`✅ Evolución a ${newStage} completada`);
+                            this.saveGameData(); // Guardar inmediatamente
+                        }
+                    });
+                }
+                
+                console.log(`🎭 EVOLUCIÓN COMPLETADA: ${newStage}`);
             }
             
             // 🍎 SISTEMA DE NECESIDADES
