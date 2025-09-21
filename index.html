@@ -5485,11 +5485,17 @@
                 const tilt = this.fish.tilt || 0;
                 const tiltDegrees = tilt * (180 / Math.PI); // Convertir a grados
                 
-                // 🎨 COLOR FIJO - NO MÁS CAMBIOS RAROS
-                const fixedFilter = 'brightness(1.2) contrast(1.1) saturate(1.2)'; // Color fijo y bonito
+                // 🎨 FILTROS POR ETAPA - JOVEN LILA CLARITO
+                const stageFilters = {
+                    'baby': 'brightness(1.2) contrast(1.1) saturate(1.2)', // Color original bebé
+                    'young': 'brightness(1.4) contrast(0.8) saturate(0.9) hue-rotate(280deg)', // Lila clarito suave
+                    'adult': 'brightness(1.2) contrast(1.1) saturate(1.2)' // Color original adulto
+                };
+                
+                const currentFilter = stageFilters[this.gameState.stage] || stageFilters['baby'];
                 
                 container.style.transform = `translate(-50%, -50%) scaleX(${scaleX}) scale(${currentScale}) rotate(${tiltDegrees}deg)`;
-                container.style.filter = fixedFilter; // SIEMPRE EL MISMO
+                container.style.filter = currentFilter; // FILTRO SEGÚN ETAPA
                 container.style.opacity = 1; // Siempre visible
                 
                 // Reducir felicidad gradualmente
