@@ -8897,35 +8897,14 @@ Comida premium y de cumpleaños
 
                 if (this.fish) { this.fish.happyBurst = 3.2; this.fish.spinKind = "clean"; }
 
-                // 🚀 CREAR BURBUJAS MASIVAS ANTES DE TODO
-                console.log('🫧 Creando EXPLOSIÓN de burbujas...');
-                for (let i = 0; i < 50; i++) {
-                    this.cleanBubbles.push({
-                        x: Math.random() * this.viewW(),
-                        y: Math.random() * this.viewH(), // TODA LA PANTALLA
-                        vx: (Math.random() - 0.5) * 100,
-                        vy: -300 - Math.random() * 200, // MÁS RÁPIDAS
-                        r: 8 + Math.random() * 12, // MÁS GRANDES
-                        alpha: 1.0, // COMPLETAMENTE OPACAS
-                        life: 4 + Math.random() * 3, // MÁS DURADERAS
-                        color: `hsl(${180 + Math.random() * 60}, 80%, 90%)` // MÁS BRILLANTES
-                    });
+                // 🫧 BURBUJAS ORIGINALES QUE FUNCIONABAN BIEN
+                this.emitCleanBubbles();
+                this.emitCleanBubbles(); // Doble ráfaga como antes
+                
+                // 🔊 SONIDO INMEDIATAMENTE DESPUÉS (SIN DELAY)
+                if (window.audioManager) {
+                    window.audioManager.playSound('clean');
                 }
-                
-                // EMISIÓN CONTINUA INMEDIATA
-                this.emitCleanBubbles();
-                this.emitCleanBubbles();
-                this.emitCleanBubbles();
-                this.emitCleanBubbles(); // CUÁDRUPLE RÁFAGA
-                
-                console.log(`🫧 TOTAL BURBUJAS: ${this.cleanBubbles.length}`);
-                
-                // 🔊 SONIDO AL FINAL
-                setTimeout(() => {
-                    if (window.audioManager) {
-                        window.audioManager.playSound('clean');
-                    }
-                }, 50); // 50ms después para que las burbujas se vean PRIMERO
                 
                 // 🧪 MINI TEST PARA VERIFICAR MOVIMIENTO
                 setTimeout(() => {
