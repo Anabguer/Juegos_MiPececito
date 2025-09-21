@@ -8888,25 +8888,28 @@ Comida premium y de cumpleaños
             startCleaning() {
                 console.log('🧹 ¡LIMPIEZA ESPECTACULAR INICIADA!');
                 
-                this.cleaningActive = true;
-                this.cleanEmitT = 2.6;
-                this.dirtStart = this.gameState.needs.dirt;
-
+                // 🫧 CREAR BURBUJAS PRIMERO (para que estén en el próximo frame)
                 this._time = this._time || 0;
                 this.cleanBubbles = this.cleanBubbles || [];
-
-                if (this.fish) { this.fish.happyBurst = 3.2; this.fish.spinKind = "clean"; }
-
-                // 🫧 CREAR BURBUJAS (se renderizan automáticamente en el próximo frame)
                 this.emitCleanBubbles();
                 this.emitCleanBubbles(); // Doble ráfaga como antes
                 
-                // 🔊 SONIDO INMEDIATO (sin delay, confiando en el loop de renderizado)
-                if (window.audioManager) {
-                    window.audioManager.playSound('clean');
-                }
+                if (this.fish) { this.fish.happyBurst = 3.2; this.fish.spinKind = "clean"; }
                 
                 console.log(`🫧 Burbujas creadas: ${this.cleanBubbles.length}`);
+                
+                // ⏰ ESPERAR 1 FRAME para que las burbujas se dibujen ANTES del sonido
+                setTimeout(() => {
+                    // 🔊 SONIDO DESPUÉS de que las burbujas sean visibles
+                    if (window.audioManager) {
+                        window.audioManager.playSound('clean');
+                    }
+                    
+                    // 🧹 ACTIVAR LIMPIEZA DESPUÉS del sonido
+                    this.cleaningActive = true;
+                    this.cleanEmitT = 2.6;
+                    this.dirtStart = this.gameState.needs.dirt;
+                }, 16); // 1 frame a 60fps = 16ms
                 
                 // 🧪 MINI TEST PARA VERIFICAR MOVIMIENTO
                 setTimeout(() => {
