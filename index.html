@@ -5330,7 +5330,8 @@
                     spinKind: "eat", // Tipo de giro (eat/clean)
                     blinkT: 0, // Tiempo de parpadeo
                     nextBlink: 2 + Math.random() * 4, // Próximo parpadeo
-                    breathT: 2 + Math.random() * 3 // Próxima respiración
+                    breathT: 2 + Math.random() * 3, // Próxima respiración
+                    eyeOpen: 1 // OJO ABIERTO AL NACER
                 };
                 
                 // Establecer fecha de nacimiento
@@ -7820,13 +7821,14 @@ Comida premium y de cumpleaños
                 const breatheCycle = fish.breatheTime % (2.5 * Math.PI);
                 fish.breatheScale = 1 + Math.sin(breatheCycle) * 0.06;
                 
-                if (fish.blinkTime > 4 + Math.random() * 3) {
-                    fish.eyeOpen = 0;
-                    setTimeout(() => {
-                        if (this.fish) this.fish.eyeOpen = 1;
-                    }, 200);
-                    fish.blinkTime = 0;
-                }
+                // PARPADEO DESHABILITADO - Se maneja en updateFishMovement()
+                // if (fish.blinkTime > 4 + Math.random() * 3) {
+                //     fish.eyeOpen = 0;
+                //     setTimeout(() => {
+                //         if (this.fish) this.fish.eyeOpen = 1;
+                //     }, 200);
+                //     fish.blinkTime = 0;
+                // }
                 
                 const finCycle = (fish.finTime % (2.5 * Math.PI)) / (2.5 * Math.PI);
                 const minRotation = -36 * Math.PI / 180;
@@ -7963,7 +7965,7 @@ Comida premium y de cumpleaños
                         confirmText: '🎉 ¡Qué emocionante!',
                         onConfirm: () => {
                             console.log(`✅ Evolución a ${newStage} completada`);
-                            this.saveGameData(); // Guardar inmediatamente
+                            this.saveGame(); // Guardar inmediatamente
                         }
                     });
                 }
@@ -9387,12 +9389,15 @@ Comida premium y de cumpleaños
                 if (!fish.wanderDir) fish.wanderDir = {x: 1, y: 0};
                 if (fish.desire === undefined) fish.desire = null;
 
-                // Animaciones básicas
+                // Animaciones básicas - PARPADEO UNIFICADO
                 fish.blinkT = Math.max(0, (fish.blinkT || 0) - deltaTime);
                 fish.nextBlink = (fish.nextBlink || 2) - deltaTime;
                 if (fish.nextBlink <= 0 && fish.blinkT <= 0) {
                     fish.blinkT = 0.12;
+                    fish.eyeOpen = 0; // CERRAR OJO
                     fish.nextBlink = 2 + Math.random() * 4;
+                } else if (fish.blinkT <= 0) {
+                    fish.eyeOpen = 1; // ABRIR OJO
                 }
 
                 // Burbujas de respiración
