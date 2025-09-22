@@ -11402,37 +11402,7 @@ Comida premium y de cumpleaños
             
             // Items de leyenda ya configurados arriba con bordes de colores
             
-            // Área de juego - Fondo tipo acuario brillante
-            const stageContainer = gameModal.querySelector('.bubble-stage-container');
-            stageContainer.style.cssText = `
-                flex: 1;
-                position: relative;
-                margin: 15px;
-                border-radius: 20px;
-                overflow: hidden;
-                background: 
-                    radial-gradient(ellipse 80% 60% at 50% 20%, rgba(129, 212, 250, 0.4) 0%, transparent 60%),
-                    radial-gradient(ellipse 60% 40% at 20% 80%, rgba(79, 195, 247, 0.3) 0%, transparent 50%),
-                    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(41, 182, 246, 0.3) 0%, transparent 50%),
-                    linear-gradient(180deg, #4fc3f7 0%, #29b6f6 30%, #0288d1 70%, #0277bd 100%);
-                border: 3px solid rgba(255, 255, 255, 0.4);
-                box-shadow: 
-                    inset 0 0 80px rgba(255, 255, 255, 0.1),
-                    0 10px 40px rgba(79, 195, 247, 0.3);
-                animation: aquarium-glow 4s ease-in-out infinite alternate;
-            `;
-            
-            const stage = gameModal.querySelector('#bubbleStage');
-            stage.style.cssText = `
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 35px;
-                overflow: hidden;
-            `;
-            
-            // Instrucciones más llamativas
+            // Área de juego ya configurada arriba
             const instructions = gameModal.querySelector('.game-instructions');
             instructions.style.cssText = `
                 position: absolute;
