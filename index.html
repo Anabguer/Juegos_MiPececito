@@ -11185,15 +11185,15 @@ Comida premium y de cumpleaños
                     <div class="bubble-game-header">
                         <div class="game-title">🫧 Atrapa Burbujas</div>
                         <div class="game-stats-simple">
-                            <span id="bubble-score">0</span> puntos
+                            <span id="bubble-score">0</span> perlas
                         </div>
                         <button class="game-close-btn">✕</button>
                     </div>
                     
                     <!-- 📖 LEYENDA -->
                     <div class="bubble-legend">
-                        <div class="legend-item good">✅ 🐟 🐠 🐚 🪸 ⭐</div>
-                        <div class="legend-item bad">❌ 💀 🦈 ⚠️ 🧨 🪝</div>
+                        <div class="legend-item good">🐟 🐠 🐚 🪸 ⭐</div>
+                        <div class="legend-item bad">💀 🦈 ⚠️ 🧨 🪝</div>
                     </div>
                     
                     <!-- 🎯 ÁREA DE JUEGO -->
@@ -11203,7 +11203,7 @@ Comida premium y de cumpleaños
                     
                     <!-- 🎮 CONTROLES SIMPLES -->
                     <div class="bubble-controls">
-                        <button id="bubbleStartBtn" class="bubble-btn primary">JUGAR</button>
+                        <button id="bubbleStartBtn" class="bubble-btn primary big-yellow">JUGAR</button>
                     </div>
                 </div>
                 
@@ -11350,10 +11350,11 @@ Comida premium y de cumpleaños
             legend.style.cssText = `
                 display: flex;
                 justify-content: space-around;
-                padding: 15px;
-                background: rgba(0, 0, 0, 0.1);
-                border-radius: 15px;
+                padding: 10px;
+                background: rgba(0, 0, 0, 0.05);
+                border-radius: 10px;
                 margin: 10px 20px;
+                font-size: 18px;
             `;
             
             // Burbujas buenas (verde)
@@ -11437,64 +11438,39 @@ Comida premium y de cumpleaños
             // Botón JUGAR estilo gamer
             const playBtn = gameModal.querySelector('#bubbleStartBtn');
             playBtn.style.cssText = `
-                background: linear-gradient(135deg, #4CAF50, #66BB6A);
-                border: 3px solid #2E7D32;
-                border-radius: 25px;
-                padding: 15px 40px;
-                font-size: 20px;
+                background: linear-gradient(135deg, #FFD700, #FFA500);
+                border: 4px solid #FF8C00;
+                border-radius: 30px;
+                padding: 20px 60px;
+                font-size: 28px;
                 font-weight: bold;
-                color: white;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+                color: #8B4513;
+                text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
                 box-shadow: 
-                    0 6px 15px rgba(76, 175, 80, 0.4),
-                    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                    0 8px 20px rgba(255, 215, 0, 0.5),
+                    inset 0 3px 0 rgba(255, 255, 255, 0.6);
                 cursor: pointer;
                 transition: all 0.3s ease;
                 text-transform: uppercase;
-                letter-spacing: 1px;
+                letter-spacing: 2px;
+                width: 80%;
+                max-width: 300px;
+                margin: 0 auto;
+                display: block;
             `;
             
             // Efecto hover para el botón
             playBtn.addEventListener('mouseenter', () => {
-                playBtn.style.transform = 'translateY(-2px) scale(1.05)';
-                playBtn.style.boxShadow = '0 8px 20px rgba(76, 175, 80, 0.6)';
+                playBtn.style.transform = 'translateY(-3px) scale(1.08)';
+                playBtn.style.boxShadow = '0 12px 25px rgba(255, 215, 0, 0.7)';
             });
             
             playBtn.addEventListener('mouseleave', () => {
                 playBtn.style.transform = 'translateY(0) scale(1)';
-                playBtn.style.boxShadow = '0 6px 15px rgba(76, 175, 80, 0.4)';
+                playBtn.style.boxShadow = '0 8px 20px rgba(255, 215, 0, 0.5)';
             });
             
-            // Botón JUGAR - Más llamativo
-            const startBtn = gameModal.querySelector('.bubble-btn.primary');
-            startBtn.style.cssText = `
-                background: linear-gradient(135deg, #4caf50, #66bb6a);
-                border: 3px solid rgba(255, 255, 255, 0.4);
-                border-radius: 25px;
-                padding: 10px 20px;
-                font-size: 14px;
-                font-weight: 800;
-                color: white;
-                cursor: pointer;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                box-shadow: 
-                    0 8px 25px rgba(76, 175, 80, 0.4),
-                    inset 0 2px 0 rgba(255, 255, 255, 0.3);
-                letter-spacing: 1px;
-            `;
-            
-            startBtn.addEventListener('mouseenter', () => {
-                startBtn.style.transform = 'translateY(-3px) scale(1.05)';
-                startBtn.style.boxShadow = '0 12px 35px rgba(76, 175, 80, 0.6)';
-                startBtn.style.background = 'linear-gradient(135deg, #66bb6a, #4caf50)';
-            });
-            
-            startBtn.addEventListener('mouseleave', () => {
-                startBtn.style.transform = 'translateY(0) scale(1)';
-                startBtn.style.boxShadow = '0 8px 25px rgba(76, 175, 80, 0.4)';
-                startBtn.style.background = 'linear-gradient(135deg, #4caf50, #66bb6a)';
-            });
+            // Botón JUGAR ya configurado arriba con estilo amarillo
             
             // Botón SALIR - Más sutil pero elegante
             const backBtn = gameModal.querySelector('.bubble-btn.secondary');
