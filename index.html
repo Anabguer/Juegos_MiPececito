@@ -692,13 +692,13 @@
         
         /* 🎯 ÁREA DE JUEGO MÁS GRANDE */
         #bubbleStage {
-            width: 90% !important;
+            width: 95% !important;
             height: 500px !important;
             position: relative !important;
             overflow: hidden !important;
             background: linear-gradient(180deg, #4fc3f7 0%, #29b6f6 30%, #0288d1 70%, #0277bd 100%) !important;
-            border-radius: 15px !important;
-            border: 2px solid rgba(255, 255, 255, 0.3) !important;
+            border-radius: 20px !important;
+            border: 3px solid rgba(255, 255, 255, 0.4) !important;
             margin: 0 auto !important;
             display: block !important;
         }
@@ -11222,11 +11222,11 @@ Comida premium y de cumpleaños
                 <div class="bubble-game-container">
                     <!-- 🏆 HEADER SIMPLE Y BONITO -->
                     <div class="bubble-game-header">
-                        <div class="game-title">🫧 Atrapa Burbujas</div>
+                        <div class="game-title">🫧 Burbujas</div>
                         <div class="game-stats-simple">
                             <div style="display: flex; align-items: center; background: rgba(255, 215, 0, 0.1); border: 2px solid #FFD700; border-radius: 20px; padding: 4px 8px;">
+                                <img src="images/perlas.png" style="width: 20px; height: 20px; margin-right: 4px;">
                                 <span id="bubble-score">0</span>
-                                <img src="images/perlas.png" style="width: 16px; height: 16px; margin-left: 4px;">
                             </div>
                         </div>
                         <button class="game-close-btn">✕</button>
@@ -11521,35 +11521,35 @@ Comida premium y de cumpleaños
             
             // Botón JUGAR ya configurado arriba con estilo amarillo
             
-            // Botón SALIR - Más sutil pero elegante
-            const backBtn = gameModal.querySelector('.bubble-btn.secondary');
-            backBtn.style.cssText = `
-                background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
-                border: 2px solid rgba(255, 255, 255, 0.3);
-                border-radius: 20px;
-                padding: 8px 16px;
-                font-size: 12px;
-                font-weight: 600;
-                color: white;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-                box-shadow: 
-                    0 6px 20px rgba(255, 255, 255, 0.1),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            `;
-            
-            backBtn.addEventListener('mouseenter', () => {
-                backBtn.style.transform = 'translateY(-2px)';
-                backBtn.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2))';
-                backBtn.style.boxShadow = '0 8px 25px rgba(255, 255, 255, 0.2)';
-            });
-            
-            backBtn.addEventListener('mouseleave', () => {
-                backBtn.style.transform = 'translateY(0)';
-                backBtn.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1))';
-                backBtn.style.boxShadow = '0 6px 20px rgba(255, 255, 255, 0.1)';
-            });
+            // Botón SALIR eliminado - solo queda REINTENTAR
+            // const backBtn = gameModal.querySelector('.bubble-btn.secondary');
+            // backBtn.style.cssText = `
+            //     background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            //     border: 2px solid rgba(255, 255, 255, 0.3);
+            //     border-radius: 20px;
+            //     padding: 8px 16px;
+            //     font-size: 12px;
+            //     font-weight: 600;
+            //     color: white;
+            //     cursor: pointer;
+            //     transition: all 0.3s ease;
+            //     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            //     box-shadow: 
+            //         0 6px 20px rgba(255, 255, 255, 0.1),
+            //         inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            // `;
+            // 
+            // backBtn.addEventListener('mouseenter', () => {
+            //     backBtn.style.transform = 'translateY(-2px)';
+            //     backBtn.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2))';
+            //     backBtn.style.boxShadow = '0 8px 25px rgba(255, 255, 255, 0.2)';
+            // });
+            // 
+            // backBtn.addEventListener('mouseleave', () => {
+            //     backBtn.style.transform = 'translateY(0)';
+            //     backBtn.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1))';
+            //     backBtn.style.boxShadow = '0 6px 20px rgba(255, 255, 255, 0.1)';
+            // });
             
             // Añadir animación de acuario
             const style = document.createElement('style');
