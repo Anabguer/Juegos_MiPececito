@@ -1492,6 +1492,34 @@
             max-height: 85%;
         }
         
+        .album-header-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .album-action-btn {
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            border: 2px solid white;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(79, 195, 247, 0.3);
+        }
+        
+        .album-action-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 12px rgba(79, 195, 247, 0.4);
+        }
+        
         .album-content {
             padding: 20px;
             max-height: 500px;
@@ -2747,11 +2775,6 @@
                 <img src="./images/ui/badge_inventario.png" alt="Inventario" class="menu-icon">
             </div>
         </button>
-        <button class="menu-btn" id="shareButton" title="Compartir mi pez">
-            <div class="btn-icon">
-                📱
-            </div>
-        </button>
         <button class="menu-btn" id="albumButton">
             <div class="btn-icon">
                 <img src="./images/ui/badge_fotos.png" alt="Álbum" class="menu-icon">
@@ -3128,7 +3151,10 @@
         <div class="modal-content album-modal">
             <div class="modal-header">
                 <h2>📸 Álbum de Mi Pececito</h2>
-                <button id="closeAlbum" class="close-btn">❌</button>
+                <div class="album-header-buttons">
+                    <button id="shareFromAlbum" class="album-action-btn" title="Compartir mi pez">📱</button>
+                    <button id="closeAlbum" class="close-btn">❌</button>
+                </div>
             </div>
             
             <div class="album-content">
@@ -3466,15 +3492,6 @@
                 }
             });
             
-            // Botón de compartir
-            document.getElementById('shareButton').addEventListener('click', () => {
-                if (window.game) {
-                    window.game.shareMyFish();
-                } else {
-                    console.warn('🚨 Game no disponible para compartir');
-                }
-                console.log('📱 Botón de compartir clickeado');
-            });
             
             // Cerrar inventario con animación
             document.getElementById('closeInventory').addEventListener('click', () => {
@@ -3587,6 +3604,16 @@
             // Cerrar álbum
             document.getElementById('closeAlbum').addEventListener('click', () => {
                 document.getElementById('albumModal').style.display = 'none';
+            });
+            
+            // Compartir desde álbum
+            document.getElementById('shareFromAlbum').addEventListener('click', () => {
+                if (window.game) {
+                    window.game.shareMyFish();
+                } else {
+                    console.warn('🚨 Game no disponible para compartir');
+                }
+                console.log('📱 Compartir desde álbum clickeado');
             });
             
             // 🎮 MODAL DE JUEGOS
