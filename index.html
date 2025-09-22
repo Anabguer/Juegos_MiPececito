@@ -11367,6 +11367,10 @@ Comida premium y de cumpleaños
                     // Reiniciar juego de simón
                     startSimonGame();
                 }
+                else if (gameName === 'memoria') {
+                    // Reiniciar juego de memoria
+                    startMemoriaGame();
+                }
                 // Aquí añadiremos los otros juegos
             });
             
@@ -12701,6 +12705,7 @@ Comida premium y de cumpleaños
             // Configurar juego básico de memoria
             const EMOJIS = ["🐟","🐠","🐚","🦀","🐙","⭐","🪸","🌊"];
             let cards = [], moves = 0, timeStart = 0, timeInterval = null;
+            let flippedCards = [], matchedPairs = 0;
             
             function initMemoriaGame() {
                 const board = gameOverlay.querySelector('#memoria-board');
@@ -12736,13 +12741,95 @@ Comida premium y de cumpleaños
                         transform: rotateY(180deg); backface-visibility: hidden;
                     `;
                     card.addEventListener('click', () => {
-                        if(card.style.transform.includes('180deg')) return;
+                        if(card.style.transform.includes('180deg') || flippedCards.length >= 2) return;
+                        
                         card.style.transform = 'rotateY(180deg)';
+                        flippedCards.push({card, emoji: emoji});
                         moves++;
                         document.getElementById('memoria-moves').textContent = moves;
+                        
+                        // Verificar si hay 2 cartas volteadas
+                        if (flippedCards.length === 2) {
+                            setTimeout(() => {
+                                checkMatch();
+                            }, 500);
+                        }
                     });
                     board.appendChild(card);
                 });
+            }
+            
+            function checkMatch() {
+                if (flippedCards.length !== 2) return;
+                
+                const [card1, card2] = flippedCards;
+                
+                if (card1.emoji === card2.emoji) {
+                    // ¡Match! Mantener cartas volteadas
+                    matchedPairs++;
+                    card1.card.style.opacity = '0.7';
+                    card2.card.style.opacity = '0.7';
+                    
+                    // 🎆 EFECTO DE PERLAS HACIA EL CONTADOR
+                    const movesEl = document.getElementById('memoria-moves');
+                    if (movesEl) {
+                        const board = gameOverlay.querySelector('#memoria-board');
+                        const boardRect = board.getBoundingClientRect();
+                        const centerX = boardRect.left + boardRect.width / 2;
+                        const centerY = boardRect.top + boardRect.height / 2;
+                        createUnifiedPearlEffect(centerX, centerY, movesEl);
+                    }
+                    
+                    // Verificar si se completó el juego
+                    if (matchedPairs === EMOJIS.length) {
+                        setTimeout(() => {
+                            endGame();
+                        }, 1000);
+                    }
+                } else {
+                    // No match - voltear cartas de vuelta
+                    setTimeout(() => {
+                        card1.card.style.transform = 'rotateY(0deg)';
+                        card2.card.style.transform = 'rotateY(0deg)';
+                    }, 1000);
+                }
+                
+                flippedCards = [];
+            }
+            
+            function endGame() {
+                if (timeInterval) clearInterval(timeInterval);
+                
+                // Calcular recompensas basadas en movimientos y tiempo
+                const timeElapsed = Math.floor((Date.now() - timeStart) / 1000);
+                const score = Math.max(0, 1000 - moves * 10 - timeElapsed);
+                const bubbles = Math.floor(score / 50);
+                const stars = Math.floor(score / 100);
+                const best = Math.max(parseInt(localStorage.getItem('memoria-best') || '0'), score);
+                const isNewRecord = score > parseInt(localStorage.getItem('memoria-best') || '0');
+                
+                // Actualizar récord si es necesario
+                if (isNewRecord) {
+                    localStorage.setItem('memoria-best', score.toString());
+                }
+                
+                // Dar recompensas al juego principal
+                if (window.game) {
+                    window.game.gameState.bubbles += bubbles;
+                    window.game.gameState.stars += stars;
+                    window.game.saveGame();
+                    
+                    // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
+                    if (stars > 0 || bubbles > 0) {
+                        window.game.createRewardAnimation(stars, bubbles);
+                    }
+                }
+                
+                // Cerrar modal del juego
+                gameOverlay.remove();
+                
+                // Mostrar pantalla unificada de fin de juego
+                createUnifiedEndGameModal('memoria', score, best, bubbles, stars, isNewRecord);
             }
             
             // Event listeners
