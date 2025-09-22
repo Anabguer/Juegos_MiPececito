@@ -11400,29 +11400,29 @@ Comida premium y de cumpleaños
             // Burbujas buenas (verde)
             const goodLegend = legend.querySelector('.legend-item.good');
             goodLegend.style.cssText = `
-                background: linear-gradient(135deg, #4CAF50, #66BB6A);
-                border: 2px solid #2E7D32;
+                background: rgba(76, 175, 80, 0.1);
+                border: 1px solid rgba(46, 125, 50, 0.3);
                 border-radius: 8px;
                 padding: 4px 12px;
                 font-size: 14px;
                 font-weight: bold;
-                color: white;
-                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-                box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+                color: #2E7D32;
+                text-shadow: none;
+                box-shadow: none;
             `;
             
             // Burbujas malas (rojo)
             const badLegend = legend.querySelector('.legend-item.bad');
             badLegend.style.cssText = `
-                background: linear-gradient(135deg, #F44336, #EF5350);
-                border: 2px solid #C62828;
+                background: rgba(244, 67, 54, 0.1);
+                border: 1px solid rgba(198, 40, 40, 0.3);
                 border-radius: 8px;
                 padding: 4px 12px;
                 font-size: 14px;
                 font-weight: bold;
-                color: white;
-                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-                box-shadow: 0 2px 4px rgba(244, 67, 54, 0.2);
+                color: #C62828;
+                text-shadow: none;
+                box-shadow: none;
             `;
             
             // Área de juego
@@ -11613,6 +11613,7 @@ Comida premium y de cumpleaños
                 const isGood = Math.random() < 0.7;
                 const size = 35 + Math.random() * 25; // 35-60px
                 const stageRect = elements.stage.getBoundingClientRect();
+                console.log('🫧 Creando burbuja - Stage rect:', stageRect);
                 const x = size + Math.random() * (stageRect.width - size * 2);
                 const y = stageRect.height + size;
                 const speed = 80 + Math.random() * 60 + gameState.score * 0.8;
@@ -11908,6 +11909,7 @@ Comida premium y de cumpleaños
             
             // 🚀 INICIAR JUEGO
             function startGame() {
+                console.log('🚀 STARTGAME LLAMADO');
                 gameState.running = true;
                 gameState.score = 0;
                 gameState.lastSpawn = 0;
@@ -11920,7 +11922,8 @@ Comida premium y de cumpleaños
                 gameState.bubbles.forEach(bubble => bubble.el.remove());
                 gameState.bubbles = [];
                 
-                console.log('🫧 ¡Juego iniciado!');
+                console.log('🫧 ¡Juego iniciado! Stage:', elements.stage);
+                console.log('🫧 Stage rect:', elements.stage.getBoundingClientRect());
                 requestAnimationFrame(gameLoop);
             }
             
