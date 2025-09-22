@@ -692,13 +692,15 @@
         
         /* 🎯 ÁREA DE JUEGO MÁS GRANDE */
         #bubbleStage {
-            width: 100% !important;
-            height: 400px !important;
+            width: 90% !important;
+            height: 500px !important;
             position: relative !important;
             overflow: hidden !important;
             background: linear-gradient(180deg, #4fc3f7 0%, #29b6f6 30%, #0288d1 70%, #0277bd 100%) !important;
             border-radius: 15px !important;
             border: 2px solid rgba(255, 255, 255, 0.3) !important;
+            margin: 0 auto !important;
+            display: block !important;
         }
         
         .game-locked-overlay {
@@ -11222,7 +11224,7 @@ Comida premium y de cumpleaños
                     <div class="bubble-game-header">
                         <div class="game-title">🫧 Atrapa Burbujas</div>
                         <div class="game-stats-simple">
-                            <span id="bubble-score">0</span> 💎
+                            <span id="bubble-score">0</span> <img src="images/perlas.png" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 5px; border: 2px solid #FFD700; border-radius: 50%; padding: 2px;">
                         </div>
                         <button class="game-close-btn">✕</button>
                     </div>
@@ -11236,11 +11238,6 @@ Comida premium y de cumpleaños
                     <!-- 🎯 ÁREA DE JUEGO -->
                     <div class="bubble-stage-container">
                         <div id="bubbleStage" class="bubble-stage"></div>
-                    </div>
-                    
-                    <!-- 🎮 CONTROLES SIMPLES -->
-                    <div class="bubble-controls">
-                        <button id="bubbleStartBtn" class="bubble-btn primary big-yellow">JUGAR</button>
                     </div>
                 </div>
                 
@@ -11277,6 +11274,11 @@ Comida premium y de cumpleaños
                             <button id="bubble-finish-btn" class="bubble-btn secondary">SALIR</button>
                         </div>
                     </div>
+                </div>
+                
+                <!-- 🎮 BOTÓN JUGAR EN PARTE INFERIOR -->
+                <div class="bubble-controls" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1001;">
+                    <button id="bubbleStartBtn" class="bubble-btn primary big-yellow">JUGAR</button>
                 </div>
             `;
             
@@ -11400,29 +11402,29 @@ Comida premium y de cumpleaños
             // Burbujas buenas (verde)
             const goodLegend = legend.querySelector('.legend-item.good');
             goodLegend.style.cssText = `
-                background: rgba(76, 175, 80, 0.1);
-                border: 1px solid rgba(46, 125, 50, 0.3);
+                background: rgba(76, 175, 80, 0.2);
+                border: 2px solid #4CAF50;
                 border-radius: 8px;
                 padding: 4px 12px;
                 font-size: 14px;
                 font-weight: bold;
                 color: #2E7D32;
                 text-shadow: none;
-                box-shadow: none;
+                box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
             `;
             
             // Burbujas malas (rojo)
             const badLegend = legend.querySelector('.legend-item.bad');
             badLegend.style.cssText = `
-                background: rgba(244, 67, 54, 0.1);
-                border: 1px solid rgba(198, 40, 40, 0.3);
+                background: rgba(244, 67, 54, 0.2);
+                border: 2px solid #F44336;
                 border-radius: 8px;
                 padding: 4px 12px;
                 font-size: 14px;
                 font-weight: bold;
                 color: #C62828;
                 text-shadow: none;
-                box-shadow: none;
+                box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
             `;
             
             // Área de juego
