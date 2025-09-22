@@ -695,7 +695,10 @@
             text-align: center !important;
             white-space: nowrap !important;
             overflow: hidden !important;
-            display: block !important; /* Asegurar que sea block para centrado */
+            display: block !important;
+            position: relative !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
         }
         
         .bubble-btn.primary:hover {
@@ -11252,7 +11255,7 @@ Comida premium y de cumpleaños
                                 <span id="bubble-level" style="font-size: 14px; font-weight: bold; color: white;">NIVEL 1</span>
                             </div>
                             <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 5px;">
-                                <img src="images/perlas.png" style="width: 20px; height: 20px;">
+                                <span style="font-size: 16px;">💎</span>
                                 <span id="bubble-score" style="font-size: 14px; font-weight: bold; color: white;">0</span>
                             </div>
                         </div>
@@ -11279,8 +11282,8 @@ Comida premium y de cumpleaños
                 <div class="bubble-results-modal" style="display: none;">
                     <div class="results-content">
                         <div style="position: relative; margin-bottom: 15px;">
-                            <button class="bubble-close-results-btn" style="position: absolute; top: -5px; left: -5px; width: 35px; height: 35px; font-size: 18px; padding: 0; background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">✕</button>
-                            <h2 id="results-title" style="margin: 0; text-align: center; padding-top: 10px;">¡Fin de partida!</h2>
+                            <button class="bubble-close-results-btn" style="position: absolute; top: 0; right: 0; width: 25px; height: 25px; font-size: 12px; padding: 0; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">✕</button>
+                            <h2 id="results-title" style="margin: 0; text-align: center; padding-right: 30px;">¡Fin de partida!</h2>
                         </div>
                         <div class="results-stats">
                             <div class="result-item">
