@@ -11222,7 +11222,7 @@ Comida premium y de cumpleaños
                     <div class="bubble-game-header">
                         <div class="game-title">🫧 Atrapa Burbujas</div>
                         <div class="game-stats-simple">
-                            <span id="bubble-score">0</span> <img src="images/perla.png" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 5px;">
+                            <span id="bubble-score">0</span> 💎
                         </div>
                         <button class="game-close-btn">✕</button>
                     </div>
@@ -11604,8 +11604,8 @@ Comida premium y de cumpleaños
             };
             
             // UI inicial
-            elements.bestEl.textContent = getBest();
-            elements.starsEl.textContent = getStars();
+            if (elements.bestEl) elements.bestEl.textContent = getBest();
+            if (elements.starsEl) elements.starsEl.textContent = getStars();
             
             // 🫧 CREAR BURBUJA
             function createBubble(now) {
