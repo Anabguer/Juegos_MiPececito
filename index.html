@@ -685,17 +685,24 @@
             display: block !important;
         }
         
-        /* 🎮 BOTÓN REINTENTAR ARREGLADO */
+        /* 🎮 BOTÓN REINTENTAR RECREADO DESDE CERO */
         .bubble-btn.primary#bubble-again-btn {
-            width: 80% !important;
-            max-width: 200px !important;
-            padding: 10px 25px !important;
-            font-size: 14px !important;
+            width: 200px !important;
+            height: 45px !important;
+            padding: 0 !important;
             margin: 15px auto !important;
-            text-align: center !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
             display: block !important;
+            text-align: center !important;
+            line-height: 45px !important;
+            font-size: 14px !important;
+            font-weight: bold !important;
+            background: linear-gradient(135deg, #ff6b35, #ff8e53) !important;
+            border: none !important;
+            border-radius: 25px !important;
+            color: white !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4) !important;
         }
         
         .bubble-btn.primary:hover {
@@ -11279,7 +11286,7 @@ Comida premium y de cumpleaños
                 <div class="bubble-results-modal" style="display: none;">
                     <div class="results-content">
                         <div style="position: relative; margin-bottom: 15px;">
-                            <button class="bubble-close-results-btn" style="position: absolute; top: -10px; left: -10px; width: 25px; height: 25px; font-size: 12px; padding: 0; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">✕</button>
+                            <button class="bubble-close-results-btn" style="position: absolute; top: -10px; right: -10px; width: 25px; height: 25px; font-size: 12px; padding: 0; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">✕</button>
                             <h2 id="results-title" style="margin: 0; text-align: center;">¡Fin de partida!</h2>
                         </div>
                         <div class="results-stats">
