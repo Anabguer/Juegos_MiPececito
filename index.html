@@ -11719,20 +11719,66 @@ Comida premium y de cumpleaños
                             window.audioManager.playSound('eat');
                         }
                         
+                        // 🎆 EFECTO DE PERLAS HACIA EL CONTADOR
+                        createPearlEffect(bubble.x, bubble.y, elements.scoreEl);
+                        
                         removeBubble(bubble, true);
                         bubbleEl.style.transform += ' scale(1.2)';
                         bubbleEl.style.opacity = '0';
                         setTimeout(() => bubbleEl.remove(), 200);
                     } else {
-                        // 🔊 SONIDO AL TOCAR BURBUJA MALA
+                        // 🔊 SONIDO AL TOCAR BURBUJA MALA (CAMBIADO)
                         if (window.audioManager && soundEnabled) {
-                            window.audioManager.playSound('hatch'); // Usar sonido de nacimiento como "error"
+                            window.audioManager.playSound('clean'); // Usar sonido de limpieza como "error"
                         }
                         endGame(false, "¡Tocaste una mala!");
                     }
                 });
                 
                 gameState.spawnEvery = Math.max(300, 800 - gameState.score * 10);
+            }
+            
+            // 🎆 CREAR EFECTO DE PERLAS HACIA EL CONTADOR
+            function createPearlEffect(startX, startY, targetEl) {
+                const pearlCount = 3; // Número de perlas que van al contador
+                
+                for (let i = 0; i < pearlCount; i++) {
+                    const pearl = document.createElement('div');
+                    pearl.innerHTML = '🫧';
+                    pearl.style.cssText = `
+                        position: absolute;
+                        left: ${startX}px;
+                        top: ${startY}px;
+                        font-size: 20px;
+                        pointer-events: none;
+                        z-index: 1000;
+                        transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                        transform: scale(1);
+                    `;
+                    
+                    elements.stage.appendChild(pearl);
+                    
+                    // Obtener posición del contador
+                    const targetRect = targetEl.getBoundingClientRect();
+                    const stageRect = elements.stage.getBoundingClientRect();
+                    const targetX = targetRect.left - stageRect.left + targetRect.width / 2;
+                    const targetY = targetRect.top - stageRect.top + targetRect.height / 2;
+                    
+                    // Añadir delay aleatorio para efecto más natural
+                    setTimeout(() => {
+                        pearl.style.left = `${targetX}px`;
+                        pearl.style.top = `${targetY}px`;
+                        pearl.style.transform = 'scale(0.3)';
+                        pearl.style.opacity = '0.7';
+                    }, i * 100);
+                    
+                    // Remover perla después de la animación
+                    setTimeout(() => {
+                        if (pearl.parentNode) {
+                            pearl.parentNode.removeChild(pearl);
+                        }
+                    }, 800 + (i * 100));
+                }
             }
             
             // 🗑️ REMOVER BURBUJA
