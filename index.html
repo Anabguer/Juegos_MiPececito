@@ -11239,14 +11239,17 @@ Comida premium y de cumpleaños
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                             <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">🫧 Burbujas</div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <button id="sound-toggle" style="background: none; border: none; cursor: pointer; padding: 2px; font-size: 20px; color: white;">🔊</button>
-                                <button class="game-close-btn" style="width: 30px; height: 30px; font-size: 14px; padding: 0;">✕</button>
+                                <button id="sound-toggle" style="background: none; border: none; cursor: pointer; padding: 2px;">
+                                    <img src="images/altavoz.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
+                                </button>
+                                <button class="game-close-btn" style="width: 20px; height: 20px; font-size: 12px; padding: 0;">✕</button>
                             </div>
                         </div>
                         
-                        <!-- SEGUNDA LÍNEA: NIVEL + PERLAS -->
+                        <!-- SEGUNDA LÍNEA: NIVEL CENTRO + PERLAS DERECHA -->
                         <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <div style="text-align: left;">
+                            <div style="width: 60px;"></div> <!-- Espaciador izquierdo -->
+                            <div style="text-align: center;">
                                 <span id="bubble-level" style="font-size: 14px; font-weight: bold; color: white;">NIVEL 1</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 5px;">
@@ -12007,9 +12010,12 @@ Comida premium y de cumpleaños
             const soundBtn = gameModal.querySelector('#sound-toggle');
             let soundEnabled = true;
             if (soundBtn) {
+                const soundImg = soundBtn.querySelector('img');
                 soundBtn.addEventListener('click', () => {
                     soundEnabled = !soundEnabled;
-                    soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
+                    if (soundImg) {
+                        soundImg.style.filter = soundEnabled ? 'brightness(0) invert(1)' : 'brightness(0) invert(1) grayscale(1)';
+                    }
                     if (window.audioManager) {
                         if (soundEnabled) {
                             window.audioManager.playSound('background');
