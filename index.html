@@ -11351,6 +11351,14 @@ Comida premium y de cumpleaños
                     // Reiniciar juego de correr
                     startCorrerGame();
                 }
+                else if (gameName === 'caza') {
+                    // Reiniciar juego de caza
+                    startCazaGame();
+                }
+                else if (gameName === 'secuencia') {
+                    // Reiniciar juego de secuencia
+                    startSecuenciaGame();
+                }
                 // Aquí añadiremos los otros juegos
             });
             
@@ -13772,6 +13780,16 @@ Comida premium y de cumpleaños
                     tokenElement.style.transform = 'scale(0.8)';
                     tokenElement.style.opacity = '0.3';
                     
+                    // 🎆 EFECTO DE PERLAS HACIA EL CONTADOR
+                    const scoreEl = document.getElementById('caza-score');
+                    if (scoreEl) {
+                        const board = document.querySelector('.caza-board');
+                        const boardRect = board.getBoundingClientRect();
+                        const centerX = boardRect.left + boardRect.width / 2;
+                        const centerY = boardRect.top + boardRect.height / 2;
+                        createUnifiedPearlEffect(centerX, centerY, scoreEl);
+                    }
+                    
                     // Verificar si quedan más objetivos
                     setTimeout(() => {
                         const remaining = board.querySelectorAll(`[data-type="${currentTarget}"]`).length - 1;
@@ -13826,29 +13844,34 @@ Comida premium y de cumpleaños
                 gameActive = false;
                 if (gameTimer) clearInterval(gameTimer);
                 
-                if (score > best) {
-                    best = score;
-                    localStorage.setItem('caza-best', best.toString());
+                // Calcular recompensas
+                const bubbles = Math.floor(score / 8);
+                const stars = Math.floor(score / 10);
+                const best = Math.max(parseInt(localStorage.getItem('caza-best') || '0'), score);
+                const isNewRecord = score > parseInt(localStorage.getItem('caza-best') || '0');
+                
+                // Actualizar récord si es necesario
+                if (isNewRecord) {
+                    localStorage.setItem('caza-best', score.toString());
                 }
                 
-                // Dar recompensas
-                const bubbles = Math.floor(score / 8);  // Menos burbujas
-                const stars = Math.floor(score / 10);   // Más estrellas
-                
-                if (window.game && bubbles > 0) {
+                // Dar recompensas al juego principal
+                if (window.game) {
                     window.game.gameState.bubbles += bubbles;
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
                     
                     // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
-                    window.game.createRewardAnimation(stars, bubbles);
+                    if (stars > 0 || bubbles > 0) {
+                        window.game.createRewardAnimation(stars, bubbles);
+                    }
                 }
                 
-                setTimeout(() => {
-                    alert(`🎯 ¡Fin de caza!\\n🌊 Puntuación: ${score}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
-                }, 300);
+                // Cerrar modal del juego
+                gameOverlay.remove();
                 
-                updateUI();
+                // Mostrar pantalla unificada de fin de juego
+                createUnifiedEndGameModal('caza', score, best, bubbles, stars, isNewRecord);
             }
             
             function updateUI() {
@@ -14038,6 +14061,16 @@ Comida premium y de cumpleaños
                     token.style.boxShadow = '0 0 12px rgba(27, 179, 122, 0.6)';
                     score += 5;
                     
+                    // 🎆 EFECTO DE PERLAS HACIA EL CONTADOR
+                    const scoreEl = document.getElementById('secuencia-score');
+                    if (scoreEl) {
+                        const board = document.querySelector('.secuencia-board');
+                        const boardRect = board.getBoundingClientRect();
+                        const centerX = boardRect.left + boardRect.width / 2;
+                        const centerY = boardRect.top + boardRect.height / 2;
+                        createUnifiedPearlEffect(centerX, centerY, scoreEl);
+                    }
+                    
                     if (playerInput.length === sequence.length) {
                         // Secuencia completa
                         setTimeout(() => {
@@ -14069,27 +14102,34 @@ Comida premium y de cumpleaños
                 gameActive = false;
                 if (gameTimer) clearInterval(gameTimer);
                 
-                if (score > best) {
-                    best = score;
-                    localStorage.setItem('secuencia-best', best.toString());
+                // Calcular recompensas
+                const bubbles = Math.floor(score / 6);
+                const stars = Math.floor(score / 8);
+                const best = Math.max(parseInt(localStorage.getItem('secuencia-best') || '0'), score);
+                const isNewRecord = score > parseInt(localStorage.getItem('secuencia-best') || '0');
+                
+                // Actualizar récord si es necesario
+                if (isNewRecord) {
+                    localStorage.setItem('secuencia-best', score.toString());
                 }
                 
-                // Dar recompensas
-                const bubbles = Math.floor(score / 6);  // Menos burbujas
-                const stars = Math.floor(score / 8);    // Más estrellas
-                
-                if (window.game && bubbles > 0) {
+                // Dar recompensas al juego principal
+                if (window.game) {
                     window.game.gameState.bubbles += bubbles;
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
                     
                     // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
-                    window.game.createRewardAnimation(stars, bubbles);
+                    if (stars > 0 || bubbles > 0) {
+                        window.game.createRewardAnimation(stars, bubbles);
+                    }
                 }
                 
-                setTimeout(() => {
-                    alert(`🌊 ¡Fin de secuencia!\\n🌊 Ronda: ${round}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
-                }, 300);
+                // Cerrar modal del juego
+                gameOverlay.remove();
+                
+                // Mostrar pantalla unificada de fin de juego
+                createUnifiedEndGameModal('secuencia', score, best, bubbles, stars, isNewRecord);
             }
             
             function updateUI() {
