@@ -11363,6 +11363,10 @@ Comida premium y de cumpleaños
                     // Reiniciar juego de toca3
                     startToca3Game();
                 }
+                else if (gameName === 'simon') {
+                    // Reiniciar juego de simón
+                    startSimonGame();
+                }
                 // Aquí añadiremos los otros juegos
             });
             
@@ -12942,6 +12946,17 @@ Comida premium y de cumpleaños
                 // Si completó la secuencia
                 if (playerSequence.length === sequence.length) {
                     isPlayerTurn = false;
+                    
+                    // 🎆 EFECTO DE PERLAS HACIA EL CONTADOR
+                    const roundEl = document.getElementById('simon-round');
+                    if (roundEl) {
+                        const board = gameOverlay.querySelector('.simon-board');
+                        const boardRect = board.getBoundingClientRect();
+                        const centerX = boardRect.left + boardRect.width / 2;
+                        const centerY = boardRect.top + boardRect.height / 2;
+                        createUnifiedPearlEffect(centerX, centerY, roundEl);
+                    }
+                    
                     setTimeout(() => {
                         addToSequence();
                     }, 1000);
@@ -12952,29 +12967,35 @@ Comida premium y de cumpleaños
                 gameActive = false;
                 isPlayerTurn = false;
                 
-                if (round - 1 > best) {
-                    best = round - 1;
-                    localStorage.setItem('simon-best', best.toString());
+                // Calcular recompensas
+                const score = round - 1;
+                const bubbles = score * 2;
+                const stars = Math.floor(score / 5);
+                const best = Math.max(parseInt(localStorage.getItem('simon-best') || '0'), score);
+                const isNewRecord = score > parseInt(localStorage.getItem('simon-best') || '0');
+                
+                // Actualizar récord si es necesario
+                if (isNewRecord) {
+                    localStorage.setItem('simon-best', score.toString());
                 }
                 
-                // Dar recompensas
-                const bubbles = (round - 1) * 2;
-                const stars = Math.floor((round - 1) / 5);
-                
-                if (window.game && bubbles > 0) {
+                // Dar recompensas al juego principal
+                if (window.game) {
                     window.game.gameState.bubbles += bubbles;
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
                     
                     // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
-                    window.game.createRewardAnimation(stars, bubbles);
+                    if (stars > 0 || bubbles > 0) {
+                        window.game.createRewardAnimation(stars, bubbles);
+                    }
                 }
                 
-                setTimeout(() => {
-                    alert(`🎵 ¡Juego terminado!\\n🌊 Ronda alcanzada: ${round - 1}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
-                }, 500);
+                // Cerrar modal del juego
+                gameOverlay.remove();
                 
-                updateUI();
+                // Mostrar pantalla unificada de fin de juego
+                createUnifiedEndGameModal('simon', score, best, bubbles, stars, isNewRecord);
             }
             
             function updateUI() {
