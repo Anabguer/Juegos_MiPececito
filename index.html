@@ -11234,11 +11234,16 @@ Comida premium y de cumpleaños
                 <div class="bubble-game-container">
                     <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
                     <div class="bubble-game-header">
-                        <!-- FILA SUPERIOR: ALTAVOZ + TÍTULO + X -->
+                        <!-- FILA SUPERIOR: X + ALTAVOZ + TÍTULO -->
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                            <button id="sound-toggle" style="background: none; border: none; font-size: 20px; cursor: pointer; color: white; padding: 5px;">🔊</button>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button class="game-close-btn" style="width: 30px; height: 30px; font-size: 14px; padding: 0;">✕</button>
+                                <button id="sound-toggle" style="background: none; border: none; cursor: pointer; padding: 2px;">
+                                    <img src="images/altavoz.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
+                                </button>
+                            </div>
                             <div class="game-title" style="text-align: center; flex: 1; font-size: 18px; font-weight: bold; color: white;">🫧 Burbujas</div>
-                            <button class="game-close-btn">✕</button>
+                            <div style="width: 60px;"></div> <!-- Espaciador para centrar título -->
                         </div>
                         
                         <!-- FILA INFERIOR: NIVEL CENTRO + PERLAS DERECHA -->
@@ -11707,7 +11712,7 @@ Comida premium y de cumpleaños
                     } else {
                         // 🔊 SONIDO AL TOCAR BURBUJA MALA
                         if (window.audioManager && soundEnabled) {
-                            window.audioManager.playSound('clean'); // Usar sonido de limpieza como "error"
+                            window.audioManager.playSound('hatch'); // Usar sonido de nacimiento como "error"
                         }
                         endGame(false, "¡Tocaste una mala!");
                     }
@@ -12003,9 +12008,12 @@ Comida premium y de cumpleaños
             const soundBtn = gameModal.querySelector('#sound-toggle');
             let soundEnabled = true;
             if (soundBtn) {
+                const soundImg = soundBtn.querySelector('img');
                 soundBtn.addEventListener('click', () => {
                     soundEnabled = !soundEnabled;
-                    soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
+                    if (soundImg) {
+                        soundImg.style.filter = soundEnabled ? 'brightness(0) invert(1)' : 'brightness(0) invert(1) grayscale(1)';
+                    }
                     if (window.audioManager) {
                         if (soundEnabled) {
                             window.audioManager.playSound('background');
