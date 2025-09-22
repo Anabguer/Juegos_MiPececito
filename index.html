@@ -9286,27 +9286,114 @@ Comida premium y de cumpleaños
             saveGame() {
                 const saveData = {
                     version: '1.0.0',
-                    gameState: this.gameState,
+                    
+                    // 👤 DATOS DEL USUARIO
+                    userId: this.gameState.userId || null,
+                    username: this.gameState.username || null,
+                    
+                    // 🐠 DATOS DEL PEZ
+                    fishName: this.gameState.fishName,
+                    fishStage: this.gameState.stage,
+                    fishAge: this.gameState.ageInDays || 0,
+                    fishBirthTime: this.gameState.birthTime,
+                    fishEvolutionTimes: {
+                        toYoung: this.gameState.hasEvolvedToYoung ? this.gameState.evolutionToYoungTime : null,
+                        toAdult: this.gameState.hasEvolvedToAdult ? this.gameState.evolutionToAdultTime : null
+                    },
+                    
+                    // 🎨 FONDO ACTUAL Y DESBLOQUEADOS
+                    currentBackground: this.gameState.currentBackground,
+                    unlockedBackgrounds: this.availableBackgrounds?.filter(bg => bg.unlocked).map(bg => bg.name) || [],
+                    
+                    // 💰 CURRENCY
+                    bubbles: this.gameState.bubbles,
+                    stars: this.gameState.stars,
+                    
+                    // 📊 NECESIDADES
+                    needs: this.gameState.needs,
+                    
+                    // 🏆 LOGROS Y PROGRESO
+                    achievements: this.gameState.achievements || [],
+                    album: this.gameState.album || [],
+                    
+                    // 🎮 PROGRESO DE JUEGOS
+                    gameProgress: {
+                        bubbleGame: {
+                            bestScore: this.gameState.bubbleGame?.bestScore || 0,
+                            totalGames: this.gameState.bubbleGame?.totalGames || 0,
+                            starsEarned: this.gameState.bubbleGame?.starsEarned || 0
+                        },
+                        memoryGame: {
+                            bestScore: this.gameState.memoryGame?.bestScore || 0,
+                            totalGames: this.gameState.memoryGame?.totalGames || 0,
+                            starsEarned: this.gameState.memoryGame?.starsEarned || 0
+                        },
+                        simonGame: {
+                            bestScore: this.gameState.simonGame?.bestScore || 0,
+                            totalGames: this.gameState.simonGame?.totalGames || 0,
+                            starsEarned: this.gameState.simonGame?.starsEarned || 0
+                        },
+                        carrilGame: {
+                            bestScore: this.gameState.carrilGame?.bestScore || 0,
+                            totalGames: this.gameState.carrilGame?.totalGames || 0,
+                            starsEarned: this.gameState.carrilGame?.starsEarned || 0
+                        },
+                        correrGame: {
+                            bestScore: this.gameState.correrGame?.bestScore || 0,
+                            totalGames: this.gameState.correrGame?.totalGames || 0,
+                            starsEarned: this.gameState.correrGame?.starsEarned || 0
+                        },
+                        cazaGame: {
+                            bestScore: this.gameState.cazaGame?.bestScore || 0,
+                            totalGames: this.gameState.cazaGame?.totalGames || 0,
+                            starsEarned: this.gameState.cazaGame?.starsEarned || 0
+                        },
+                        secuenciaGame: {
+                            bestScore: this.gameState.secuenciaGame?.bestScore || 0,
+                            totalGames: this.gameState.secuenciaGame?.totalGames || 0,
+                            starsEarned: this.gameState.secuenciaGame?.starsEarned || 0
+                        },
+                        toca3Game: {
+                            bestScore: this.gameState.toca3Game?.bestScore || 0,
+                            totalGames: this.gameState.toca3Game?.totalGames || 0,
+                            starsEarned: this.gameState.toca3Game?.starsEarned || 0
+                        },
+                        bloquesGame: {
+                            bestScore: this.gameState.bloquesGame?.bestScore || 0,
+                            totalGames: this.gameState.bloquesGame?.totalGames || 0,
+                            starsEarned: this.gameState.bloquesGame?.starsEarned || 0
+                        }
+                    },
+                    
+                    // 🥚 ESTADO DEL HUEVO
                     egg: this.egg,
-                    fish: this.fish,
+                    eggStartTime: this.gameState.eggStartTime,
                     explosionHappened: this.explosionHappened,
-                    availableBackgrounds: this.availableBackgrounds?.map(bg => ({
-                        name: bg.name,
-                        cost: bg.cost,
-                        unlocked: bg.unlocked
-                    })),
+                    
+                    // 🐠 DATOS DEL PEZ (para compatibilidad)
+                    fish: this.fish,
+                    
+                    // ⏰ METADATOS
+                    lastPlayed: Date.now(),
+                    totalPlayTime: this.gameState.totalPlayTime || 0,
                     timestamp: Date.now()
                 };
                 
                 try {
                     localStorage.setItem('miPececito_gameData', JSON.stringify(saveData));
                     console.log('💾 Juego guardado correctamente');
-                    console.log('📊 Guardado:', {
-                        nombre: this.gameState.fishName,
+                    console.log('📊 Guardado completo:', {
+                        usuario: this.gameState.username || 'Anónimo',
+                        pez: this.gameState.fishName || 'Sin nombre',
+                        etapa: this.gameState.stage,
+                        edad: this.gameState.ageInDays || 0,
                         fondo: this.gameState.currentBackground,
+                        fondosDesbloqueados: this.availableBackgrounds?.filter(bg => bg.unlocked).length || 0,
                         burbujas: this.gameState.bubbles,
                         estrellas: this.gameState.stars,
-                        edad: this.gameState.ageInDays
+                        logros: this.gameState.achievements?.length || 0,
+                        album: this.gameState.album?.length || 0,
+                        juegosJugados: Object.values(saveData.gameProgress).reduce((total, game) => total + (game.totalGames || 0), 0)
                     });
                 } catch (error) {
                     console.error('❌ Error guardando:', error);
@@ -12220,23 +12307,17 @@ Comida premium y de cumpleaños
             gameOverlay.innerHTML = `
                 <div class="memoria-game-container">
                     <div class="memoria-header">
-                        <h2>🧠 Memoflip</h2>
-                        <div class="memoria-stats">
-                            <span>⏱ <span id="memoria-time">00:00</span></span>
-                            <span>🌀 <span id="memoria-moves">0</span></span>
+                        <div class="game-title">🧠 Memoflip</div>
+                        <div class="game-stats-simple">
+                            <span id="memoria-moves">0</span> movimientos
                         </div>
-                        <button class="memoria-close-btn">✕</button>
+                        <button class="game-close-btn">✕</button>
                     </div>
                     <div class="memoria-board-wrap">
                         <div class="memoria-board" id="memoria-board"></div>
                     </div>
                     <div class="memoria-footer">
-                        <select id="memoria-grid-sel">
-                            <option value="3x4">3×4</option>
-                            <option value="4x4" selected>4×4</option>
-                        </select>
-                        <button class="memoria-btn" id="memoria-start">▶️ Empezar</button>
-                        <button class="memoria-btn" id="memoria-reset">↺ Reset</button>
+                        <button class="memoria-btn" id="memoria-start">JUGAR</button>
                     </div>
                 </div>
             `;
@@ -12339,12 +12420,11 @@ Comida premium y de cumpleaños
             gameOverlay.innerHTML = `
                 <div class="simon-game-container">
                     <div class="simon-header">
-                        <h2>🎵 Simón Marino</h2>
-                        <div class="simon-stats">
-                            <span>Ronda: <span id="simon-round">0</span></span>
-                            <span>Récord: <span id="simon-best">0</span></span>
+                        <div class="game-title">🎵 Simón Marino</div>
+                        <div class="game-stats-simple">
+                            Ronda <span id="simon-round">0</span>
                         </div>
-                        <button class="simon-close-btn">✕</button>
+                        <button class="game-close-btn">✕</button>
                     </div>
                     <div class="simon-board-wrap">
                         <div class="simon-board" id="simon-board">
@@ -12355,8 +12435,7 @@ Comida premium y de cumpleaños
                         </div>
                     </div>
                     <div class="simon-footer">
-                        <button class="simon-btn" id="simon-start">▶️ Empezar</button>
-                        <div class="simon-message">Un fallo = fin de partida</div>
+                        <button class="simon-btn" id="simon-start">JUGAR</button>
                     </div>
                 </div>
             `;
