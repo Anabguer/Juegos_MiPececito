@@ -11394,16 +11394,22 @@ Comida premium y de cumpleaños
             
             // Stats ya están en el HTML inline, no necesitamos modificar
             
-            // Botón de cerrar bonito
+            // Botón de cerrar pequeño como el de resultados
             const closeBtn = gameModal.querySelector('.game-close-btn');
             closeBtn.style.cssText = `
-                font-size: 22px;
-                font-weight: 800;
-                color: #fff;
-                text-shadow: 
-                    0 2px 8px rgba(79, 195, 247, 0.8),
-                    0 0 20px rgba(129, 212, 250, 0.6);
-                letter-spacing: 0.5px;
+                width: 25px !important;
+                height: 25px !important;
+                font-size: 12px !important;
+                padding: 0 !important;
+                background: rgba(255, 255, 255, 0.2) !important;
+                border: 1px solid rgba(255, 255, 255, 0.5) !important;
+                border-radius: 50% !important;
+                color: white !important;
+                cursor: pointer !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                transition: all 0.3s ease !important;
             `;
             
             // Stats ya configurados arriba, no necesitamos esto
