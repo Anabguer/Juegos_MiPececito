@@ -11744,12 +11744,11 @@ Comida premium y de cumpleaños
                 
                 for (let i = 0; i < pearlCount; i++) {
                     const pearl = document.createElement('div');
-                    pearl.innerHTML = '🫧';
+                    pearl.innerHTML = `<img src="images/ui/perlas.png" style="width: 20px; height: 20px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));">`;
                     pearl.style.cssText = `
                         position: absolute;
                         left: ${startX}px;
                         top: ${startY}px;
-                        font-size: 20px;
                         pointer-events: none;
                         z-index: 1000;
                         transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
