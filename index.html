@@ -685,13 +685,16 @@
             display: block !important;
         }
         
-        /* 🎮 BOTÓN REINTENTAR MÁS PEQUEÑO */
+        /* 🎮 BOTÓN REINTENTAR ARREGLADO */
         .bubble-btn.primary#bubble-again-btn {
-            width: 60% !important;
-            max-width: 180px !important;
-            padding: 8px 20px !important;
+            width: 80% !important;
+            max-width: 200px !important;
+            padding: 10px 25px !important;
             font-size: 14px !important;
-            margin: 10px auto !important;
+            margin: 15px auto !important;
+            text-align: center !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
         }
         
         .bubble-btn.primary:hover {
@@ -11229,22 +11232,26 @@ Comida premium y de cumpleaños
             gameModal.className = 'bubble-game-modal';
             gameModal.innerHTML = `
                 <div class="bubble-game-container">
-                    <!-- 🏆 HEADER SIMPLE Y BONITO -->
+                    <!-- 🏆 HEADER REORGANIZADO -->
                     <div class="bubble-game-header">
-                        <div class="game-title">🫧 Burbujas</div>
-                        <div class="game-stats-simple">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div style="display: flex; align-items: center; background: rgba(255, 215, 0, 0.1); border: 2px solid #FFD700; border-radius: 20px; padding: 4px 8px;">
-                                    <img src="images/perlas.png" style="width: 20px; height: 20px; margin-right: 4px;">
-                                    <span id="bubble-score">0</span>
-                                </div>
-                                <div style="display: flex; align-items: center; background: rgba(76, 175, 80, 0.1); border: 2px solid #4CAF50; border-radius: 20px; padding: 4px 8px;">
-                                    <span style="font-size: 12px; font-weight: bold; color: #2E7D32;">NIVEL</span>
-                                    <span id="bubble-level" style="font-size: 14px; font-weight: bold; color: #2E7D32; margin-left: 4px;">1</span>
-                                </div>
-                            </div>
+                        <!-- FILA SUPERIOR: X + TÍTULO -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                            <button class="game-close-btn">✕</button>
+                            <div class="game-title" style="text-align: center; flex: 1;">🫧 Burbujas</div>
+                            <button id="sound-toggle" style="background: none; border: none; font-size: 20px; cursor: pointer; color: white; padding: 5px;">🔊</button>
                         </div>
-                        <button class="game-close-btn">✕</button>
+                        
+                        <!-- FILA INFERIOR: PERLAS IZQUIERDA + NIVEL CENTRO -->
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <img src="images/perlas.png" style="width: 24px; height: 24px;">
+                                <span id="bubble-score" style="font-size: 16px; font-weight: bold; color: white;">0</span>
+                            </div>
+                            <div style="text-align: center;">
+                                <span id="bubble-level" style="font-size: 18px; font-weight: bold; color: #FFD700;">NIVEL 1</span>
+                            </div>
+                            <div style="width: 60px;"></div> <!-- Espaciador para centrar nivel -->
+                        </div>
                     </div>
                     
                     <!-- 📖 LEYENDA -->
@@ -11693,7 +11700,12 @@ Comida premium y de cumpleaños
                         const newLevel = Math.floor(gameState.score / 10) + 1;
                         const levelEl = gameModal.querySelector('#bubble-level');
                         if (levelEl) {
-                            levelEl.textContent = newLevel;
+                            levelEl.textContent = `NIVEL ${newLevel}`;
+                        }
+                        
+                        // 🔊 SONIDO AL HACER CLICK EN BURBUJA BUENA
+                        if (window.audioManager && soundEnabled) {
+                            window.audioManager.playSound('eat');
                         }
                         
                         removeBubble(bubble, true);
@@ -11701,6 +11713,10 @@ Comida premium y de cumpleaños
                         bubbleEl.style.opacity = '0';
                         setTimeout(() => bubbleEl.remove(), 200);
                     } else {
+                        // 🔊 SONIDO AL TOCAR BURBUJA MALA
+                        if (window.audioManager && soundEnabled) {
+                            window.audioManager.playSound('clean'); // Usar sonido de limpieza como "error"
+                        }
                         endGame(false, "¡Tocaste una mala!");
                     }
                 });
@@ -11947,7 +11963,7 @@ Comida premium y de cumpleaños
                 elements.scoreEl.textContent = '0';
                 const levelEl = gameModal.querySelector('#bubble-level');
                 if (levelEl) {
-                    levelEl.textContent = '1';
+                    levelEl.textContent = 'NIVEL 1';
                 }
                 elements.resultsModal.style.display = 'none';
                 
@@ -11989,6 +12005,24 @@ Comida premium y de cumpleaños
             if (closeBtn) {
                 closeBtn.addEventListener('click', closeGame);
                 console.log('✅ Botón cerrar configurado correctamente');
+            }
+            
+            // Botón de sonido
+            const soundBtn = gameModal.querySelector('#sound-toggle');
+            let soundEnabled = true;
+            if (soundBtn) {
+                soundBtn.addEventListener('click', () => {
+                    soundEnabled = !soundEnabled;
+                    soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
+                    if (window.audioManager) {
+                        if (soundEnabled) {
+                            window.audioManager.playSound('background');
+                        } else {
+                            window.audioManager.stopSound('background');
+                        }
+                    }
+                });
+                console.log('✅ Botón sonido configurado correctamente');
             }
             
             // Mantener compatibilidad con elementos existentes
