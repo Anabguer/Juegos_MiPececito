@@ -12255,9 +12255,6 @@ Comida premium y de cumpleaños
                 </div>
             `;
             
-            // Aplicar estilos unificados
-            applyUnifiedGameStyles(gameOverlay, 'bloques');
-            
             const container = gameOverlay.querySelector('.bloques-game-container');
             container.style.cssText = `
                 background: rgba(8, 49, 80, 0.95);
@@ -12272,6 +12269,9 @@ Comida premium y de cumpleaños
                 color: #e9f6ff;
                 font-family: system-ui, Arial, sans-serif;
             `;
+            
+            // Aplicar estilos unificados DESPUÉS para no sobrescribir el container
+            applyUnifiedGameStyles(gameOverlay, 'bloques');
             
             // El header ya tiene estilos aplicados por el template unificado
             
