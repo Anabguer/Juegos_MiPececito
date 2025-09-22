@@ -667,20 +667,20 @@
         /* 🎮 ESTILOS ESPECÍFICOS PARA JUEGO BURBUJAS */
         .bubble-btn.primary {
             background: linear-gradient(135deg, #FFD700, #FFA500) !important;
-            border: 3px solid #FF8C00 !important;
-            border-radius: 25px !important;
-            padding: 15px 40px !important;
-            font-size: 24px !important;
+            border: 2px solid #FF8C00 !important;
+            border-radius: 20px !important;
+            padding: 10px 25px !important;
+            font-size: 18px !important;
             font-weight: bold !important;
             color: #8B4513 !important;
-            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8) !important;
-            box-shadow: 0 6px 15px rgba(255, 215, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.6) !important;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
             cursor: pointer !important;
             transition: all 0.3s ease !important;
             text-transform: uppercase !important;
-            letter-spacing: 1.5px !important;
-            width: 70% !important;
-            max-width: 250px !important;
+            letter-spacing: 1px !important;
+            width: 60% !important;
+            max-width: 200px !important;
             margin: 0 auto !important;
             display: block !important;
         }
@@ -688,6 +688,17 @@
         .bubble-btn.primary:hover {
             transform: translateY(-3px) scale(1.08) !important;
             box-shadow: 0 12px 25px rgba(255, 215, 0, 0.7) !important;
+        }
+        
+        /* 🎯 ÁREA DE JUEGO MÁS GRANDE */
+        #bubbleStage {
+            width: 100% !important;
+            height: 300px !important;
+            position: relative !important;
+            overflow: hidden !important;
+            background: linear-gradient(180deg, #4fc3f7 0%, #29b6f6 30%, #0288d1 70%, #0277bd 100%) !important;
+            border-radius: 15px !important;
+            border: 2px solid rgba(255, 255, 255, 0.3) !important;
         }
         
         .game-locked-overlay {
@@ -11222,14 +11233,14 @@ Comida premium y de cumpleaños
                         <div class="legend-item bad">💀 🦈 ⚠️ 🧨 🪝</div>
                     </div>
                     
-                    <!-- 🎯 ÁREA DE JUEGO -->
-                    <div class="bubble-stage-container">
-                        <div id="bubbleStage" class="bubble-stage"></div>
-                    </div>
-                    
                     <!-- 🎮 CONTROLES SIMPLES -->
                     <div class="bubble-controls">
                         <button id="bubbleStartBtn" class="bubble-btn primary big-yellow">JUGAR</button>
+                    </div>
+                    
+                    <!-- 🎯 ÁREA DE JUEGO -->
+                    <div class="bubble-stage-container">
+                        <div id="bubbleStage" class="bubble-stage"></div>
                     </div>
                 </div>
                 
@@ -11418,19 +11429,19 @@ Comida premium y de cumpleaños
             const stageContainer = gameModal.querySelector('.bubble-stage-container');
             stageContainer.style.cssText = `
                 background: linear-gradient(135deg, 
-                    rgba(76, 175, 80, 0.08) 0%, 
-                    rgba(244, 67, 54, 0.08) 100%);
-                padding: 8px 15px;
+                    rgba(76, 175, 80, 0.03) 0%, 
+                    rgba(244, 67, 54, 0.03) 100%);
+                padding: 5px 10px;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 gap: 20px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
                 font-size: 12px;
                 font-weight: 600;
-                min-height: 160px;
-                border-radius: 10px;
-                margin: 8px 20px;
+                min-height: 120px;
+                border-radius: 8px;
+                margin: 5px 20px;
             `;
             
             // Items de leyenda ya configurados arriba con bordes de colores
