@@ -695,6 +695,7 @@
             text-align: center !important;
             white-space: nowrap !important;
             overflow: hidden !important;
+            display: block !important; /* Asegurar que sea block para centrado */
         }
         
         .bubble-btn.primary:hover {
@@ -11234,16 +11235,16 @@ Comida premium y de cumpleaños
                 <div class="bubble-game-container">
                     <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
                     <div class="bubble-game-header">
-                        <!-- FILA SUPERIOR: X + ALTAVOZ + TÍTULO -->
+                        <!-- FILA SUPERIOR: TÍTULO + ALTAVOZ + X -->
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                            <div style="width: 60px;"></div> <!-- Espaciador para centrar título -->
+                            <div class="game-title" style="text-align: center; flex: 1; font-size: 18px; font-weight: bold; color: white;">🫧 Burbujas</div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <button class="game-close-btn" style="width: 30px; height: 30px; font-size: 14px; padding: 0;">✕</button>
                                 <button id="sound-toggle" style="background: none; border: none; cursor: pointer; padding: 2px;">
                                     <img src="images/altavoz.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
                                 </button>
+                                <button class="game-close-btn" style="width: 30px; height: 30px; font-size: 14px; padding: 0;">✕</button>
                             </div>
-                            <div class="game-title" style="text-align: center; flex: 1; font-size: 18px; font-weight: bold; color: white;">🫧 Burbujas</div>
-                            <div style="width: 60px;"></div> <!-- Espaciador para centrar título -->
                         </div>
                         
                         <!-- FILA INFERIOR: NIVEL CENTRO + PERLAS DERECHA -->
@@ -11279,7 +11280,10 @@ Comida premium y de cumpleaños
                 <!-- 🏆 MODAL DE RESULTADOS -->
                 <div class="bubble-results-modal" style="display: none;">
                     <div class="results-content">
-                        <h2 id="results-title">¡Fin de partida!</h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h2 id="results-title" style="margin: 0; flex: 1; text-align: center;">¡Fin de partida!</h2>
+                            <button class="bubble-close-results-btn" style="width: 30px; height: 30px; font-size: 14px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
+                        </div>
                         <div class="results-stats">
                             <div class="result-item">
                                 <span class="result-label">Puntos</span>
@@ -12028,6 +12032,13 @@ Comida premium y de cumpleaños
             // Mantener compatibilidad con elementos existentes
             if (elements.backBtn) elements.backBtn.addEventListener('click', closeGame);
             gameModal.querySelector('#bubble-finish-btn')?.addEventListener('click', closeGame);
+            
+            // Botón X del modal de resultados
+            const closeResultsBtn = gameModal.querySelector('.bubble-close-results-btn');
+            if (closeResultsBtn) {
+                closeResultsBtn.addEventListener('click', closeGame);
+                console.log('✅ Botón X de resultados configurado correctamente');
+            }
             
             console.log('🎮 Juego de burbujas inicializado completamente');
         }
