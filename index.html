@@ -12671,12 +12671,25 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'memoriaGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="memoria-game-container">
-                    <div class="memoria-header">
-                        <div class="game-title">🧠 Memoflip</div>
-                        <div class="game-stats-simple">
-                            <span id="memoria-moves">0</span> movimientos
+                    <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
+                    <div class="memoria-game-header">
+                        <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">🧠 Memoflip</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button id="memoria-sound-toggle" style="width: 25px; height: 25px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                                    <img src="images/ui/sonidoOn.png" style="width: 16px; height: 16px;">
+                                </button>
+                                <button class="memoria-close-btn" style="width: 12px; height: 12px; font-size: 6px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
+                            </div>
                         </div>
-                        <button class="game-close-btn">✕</button>
+                        
+                        <!-- SEGUNDA LÍNEA: MOVIMIENTOS CENTRO -->
+                        <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="text-align: center;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;"><span id="memoria-moves">0</span> movimientos</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="memoria-board-wrap">
                         <div class="memoria-board" id="memoria-board"></div>
@@ -12867,12 +12880,25 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'simonGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="simon-game-container">
-                    <div class="simon-header">
-                        <div class="game-title">🎵 Simón Marino</div>
-                        <div class="game-stats-simple">
-                            Ronda <span id="simon-round">0</span>
+                    <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
+                    <div class="simon-game-header">
+                        <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">🎵 Simón Marino</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button id="simon-sound-toggle" style="width: 25px; height: 25px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                                    <img src="images/ui/sonidoOn.png" style="width: 16px; height: 16px;">
+                                </button>
+                                <button class="simon-close-btn" style="width: 12px; height: 12px; font-size: 6px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
+                            </div>
                         </div>
-                        <button class="game-close-btn">✕</button>
+                        
+                        <!-- SEGUNDA LÍNEA: RONDA CENTRO -->
+                        <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="text-align: center;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Ronda <span id="simon-round">0</span></span>
+                            </div>
+                        </div>
                     </div>
                     <div class="simon-board-wrap">
                         <div class="simon-board" id="simon-board">
@@ -13131,14 +13157,29 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'carrilGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="carril-game-container">
-                    <div class="carril-header">
-                        <h2>🐬 Carril del Delfín</h2>
-                        <div class="carril-stats">
-                            <span>⏱ <span id="carril-time">60</span>s</span>
-                            <span>Pts <span id="carril-score">0</span></span>
-                            <span>Rec <span id="carril-best">0</span></span>
+                    <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
+                    <div class="carril-game-header">
+                        <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">🐬 Carril del Delfín</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button id="carril-sound-toggle" style="width: 25px; height: 25px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                                    <img src="images/ui/sonidoOn.png" style="width: 16px; height: 16px;">
+                                </button>
+                                <button class="carril-close-btn" style="width: 12px; height: 12px; font-size: 6px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
+                            </div>
                         </div>
-                        <button class="carril-close-btn">✕</button>
+                        
+                        <!-- SEGUNDA LÍNEA: TIEMPO CENTRO + PUNTOS + RÉCORD DERECHA -->
+                        <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="text-align: center;">
+                                <span id="carril-time" style="font-size: 14px; font-weight: bold; color: white;">⏱ 60s</span>
+                            </div>
+                            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Pts <span id="carril-score">0</span></span>
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Rec <span id="carril-best">0</span></span>
+                            </div>
+                        </div>
                     </div>
                     <div class="carril-stage" id="carril-stage">
                         <div class="carril-lanes">
@@ -13454,13 +13495,28 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'correrGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="correr-game-container">
-                    <div class="correr-header">
-                        <h2>🐉 Dragón Marino</h2>
-                        <div class="correr-stats">
-                            <span>Pts <span id="correr-score">0</span></span>
-                            <span>Rec <span id="correr-best">0</span></span>
+                    <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
+                    <div class="correr-game-header">
+                        <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">🐉 Dragón Marino</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button id="correr-sound-toggle" style="width: 25px; height: 25px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                                    <img src="images/ui/sonidoOn.png" style="width: 16px; height: 16px;">
+                                </button>
+                                <button class="correr-close-btn" style="width: 12px; height: 12px; font-size: 6px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
+                            </div>
                         </div>
-                        <button class="correr-close-btn">✕</button>
+                        
+                        <!-- SEGUNDA LÍNEA: PUNTOS CENTRO + RÉCORD DERECHA -->
+                        <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="text-align: center;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Pts <span id="correr-score">0</span></span>
+                            </div>
+                            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Rec <span id="correr-best">0</span></span>
+                            </div>
+                        </div>
                     </div>
                     <div class="correr-stage">
                         <canvas id="correr-canvas" width="400" height="300"></canvas>
@@ -13730,14 +13786,29 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'cazaGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="caza-game-container">
-                    <div class="caza-header">
-                        <h2>🎯 Caza de Peces</h2>
-                        <div class="caza-stats">
-                            <span>Pts <span id="caza-score">0</span></span>
-                            <span>Ronda <span id="caza-round">1</span></span>
-                            <span>Rec <span id="caza-best">0</span></span>
+                    <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
+                    <div class="caza-game-header">
+                        <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">🎯 Caza de Peces</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button id="caza-sound-toggle" style="width: 25px; height: 25px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                                    <img src="images/ui/sonidoOn.png" style="width: 16px; height: 16px;">
+                                </button>
+                                <button class="caza-close-btn" style="width: 12px; height: 12px; font-size: 6px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
+                            </div>
                         </div>
-                        <button class="caza-close-btn">✕</button>
+                        
+                        <!-- SEGUNDA LÍNEA: PUNTOS CENTRO + RONDA + RÉCORD DERECHA -->
+                        <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="text-align: center;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Pts <span id="caza-score">0</span></span>
+                            </div>
+                            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Ronda <span id="caza-round">1</span></span>
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Rec <span id="caza-best">0</span></span>
+                            </div>
+                        </div>
                     </div>
                     <div class="caza-game-area">
                         <div class="caza-timebar">
@@ -14033,14 +14104,29 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'secuenciaGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="secuencia-game-container">
-                    <div class="secuencia-header">
-                        <h2>🌊 Secuencia de Mareas</h2>
-                        <div class="secuencia-stats">
-                            <span>Ronda <span id="secuencia-round">0</span></span>
-                            <span>Pts <span id="secuencia-score">0</span></span>
-                            <span>Rec <span id="secuencia-best">0</span></span>
+                    <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
+                    <div class="secuencia-game-header">
+                        <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">🌊 Secuencia de Mareas</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button id="secuencia-sound-toggle" style="width: 25px; height: 25px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                                    <img src="images/ui/sonidoOn.png" style="width: 16px; height: 16px;">
+                                </button>
+                                <button class="secuencia-close-btn" style="width: 12px; height: 12px; font-size: 6px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
+                            </div>
                         </div>
-                        <button class="secuencia-close-btn">✕</button>
+                        
+                        <!-- SEGUNDA LÍNEA: RONDA CENTRO + PUNTOS + RÉCORD DERECHA -->
+                        <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="text-align: center;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Ronda <span id="secuencia-round">0</span></span>
+                            </div>
+                            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Pts <span id="secuencia-score">0</span></span>
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Rec <span id="secuencia-best">0</span></span>
+                            </div>
+                        </div>
                     </div>
                     <div class="secuencia-game-area">
                         <div class="secuencia-timebar">
@@ -14280,13 +14366,28 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'toca3GameOverlay';
             gameOverlay.innerHTML = `
                 <div class="toca3-game-container">
-                    <div class="toca3-header">
-                        <h2>🏖️ Toca-3 Marino</h2>
-                        <div class="toca3-stats">
-                            <span>Pts <span id="toca3-score">0</span></span>
-                            <span>Rec <span id="toca3-best">0</span></span>
+                    <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
+                    <div class="toca3-game-header">
+                        <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">🏖️ Toca-3 Marino</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button id="toca3-sound-toggle" style="width: 25px; height: 25px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                                    <img src="images/ui/sonidoOn.png" style="width: 16px; height: 16px;">
+                                </button>
+                                <button class="toca3-close-btn" style="width: 12px; height: 12px; font-size: 6px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
+                            </div>
                         </div>
-                        <button class="toca3-close-btn">✕</button>
+                        
+                        <!-- SEGUNDA LÍNEA: PUNTOS CENTRO + RÉCORD DERECHA -->
+                        <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="text-align: center;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Pts <span id="toca3-score">0</span></span>
+                            </div>
+                            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">Rec <span id="toca3-best">0</span></span>
+                            </div>
+                        </div>
                     </div>
                     <div class="toca3-game-area">
                         <div class="toca3-timebar">
