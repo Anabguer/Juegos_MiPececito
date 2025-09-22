@@ -11224,7 +11224,10 @@ Comida premium y de cumpleaños
                     <div class="bubble-game-header">
                         <div class="game-title">🫧 Atrapa Burbujas</div>
                         <div class="game-stats-simple">
-                            <span id="bubble-score">0</span> <img src="images/perlas.png" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 3px; border: 2px solid #FFD700; border-radius: 50%; padding: 1px; background: rgba(255, 215, 0, 0.1);">
+                            <div style="display: flex; align-items: center; background: rgba(255, 215, 0, 0.1); border: 2px solid #FFD700; border-radius: 20px; padding: 4px 8px;">
+                                <span id="bubble-score">0</span>
+                                <img src="images/perlas.png" style="width: 16px; height: 16px; margin-left: 4px;">
+                            </div>
                         </div>
                         <button class="game-close-btn">✕</button>
                     </div>
@@ -11275,8 +11278,7 @@ Comida premium y de cumpleaños
                             text-align: center;
                         "></div>
                         <div class="results-buttons">
-                            <button id="bubble-again-btn" class="bubble-btn primary">OTRA</button>
-                            <button id="bubble-finish-btn" class="bubble-btn secondary">SALIR</button>
+                            <button id="bubble-again-btn" class="bubble-btn primary">REINTENTAR</button>
                         </div>
                     </div>
                 </div>
@@ -11751,7 +11753,6 @@ Comida premium y de cumpleaños
                 
                 // ⭐ 1 ESTRELLA POR JUGAR (siempre)
                 starsWon += 1;
-                rewardReasons.push("🎮 Por jugar");
                 
                 // ⭐ ESTRELLAS POR PUNTOS (cada 15 puntos = 1 estrella)
                 const starsFromPoints = Math.floor(finalScore / 15);
