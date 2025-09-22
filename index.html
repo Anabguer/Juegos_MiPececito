@@ -693,7 +693,7 @@
         /* 🎯 ÁREA DE JUEGO MÁS GRANDE */
         #bubbleStage {
             width: 100% !important;
-            height: 300px !important;
+            height: 400px !important;
             position: relative !important;
             overflow: hidden !important;
             background: linear-gradient(180deg, #4fc3f7 0%, #29b6f6 30%, #0288d1 70%, #0277bd 100%) !important;
@@ -11222,7 +11222,7 @@ Comida premium y de cumpleaños
                     <div class="bubble-game-header">
                         <div class="game-title">🫧 Atrapa Burbujas</div>
                         <div class="game-stats-simple">
-                            <span id="bubble-score">0</span> perlas
+                            <span id="bubble-score">0</span> <img src="images/perla.png" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 5px;">
                         </div>
                         <button class="game-close-btn">✕</button>
                     </div>
@@ -11448,10 +11448,11 @@ Comida premium y de cumpleaños
             
             // Área de juego ya configurada arriba
             const instructions = gameModal.querySelector('.game-instructions');
-            instructions.style.cssText = `
-                position: absolute;
-                bottom: 0;
-                left: 0;
+            if (instructions) {
+                instructions.style.cssText = `
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
                 right: 0;
                 height: 35px;
                 background: linear-gradient(135deg, rgba(79, 195, 247, 0.4), rgba(129, 212, 250, 0.3));
@@ -11463,7 +11464,8 @@ Comida premium y de cumpleaños
                 font-weight: 700;
                 text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
                 border-top: 2px solid rgba(255, 255, 255, 0.3);
-            `;
+                `;
+            }
             
             // Controles centrados y bonitos
             const controls = gameModal.querySelector('.bubble-controls');
