@@ -11970,7 +11970,7 @@ Comida premium y de cumpleaños
                 
                 console.log('🫧 ¡Juego iniciado! Stage:', elements.stage);
                 console.log('🫧 Stage rect:', elements.stage.getBoundingClientRect());
-                requestAnimationFrame(gameLoop);
+                gameState.rafId = requestAnimationFrame(gameLoop);
             }
             
             // 📱 EVENT LISTENERS
