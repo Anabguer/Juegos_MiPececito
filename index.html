@@ -13195,32 +13195,16 @@ Comida premium y de cumpleaños
             // Crear overlay del juego
             const gameOverlay = document.createElement('div');
             gameOverlay.id = 'carrilGameOverlay';
+            
+            // Usar template unificado
+            const header = createUnifiedGameHeader('carril', 'Carril del Delfín', '🐬', {
+                center: '<span id="carril-time" style="font-size: 14px; font-weight: bold; color: white;">⏱ 60s</span>',
+                right: '<span id="carril-score" style="font-size: 14px; font-weight: bold; color: white;">⭐ 0</span><span id="carril-best" style="font-size: 14px; font-weight: bold; color: white;">🏆 0</span>'
+            });
+            
             gameOverlay.innerHTML = `
                 <div class="carril-game-container">
-                    <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
-                    <div class="carril-game-header">
-                        <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                            <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">🐬 Carril del Delfín</div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <button id="carril-sound-toggle" style="width: 25px; height: 25px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
-                                    <img src="images/ui/sonidoOn.png" style="width: 16px; height: 16px;">
-                                </button>
-                                <button class="carril-close-btn" style="width: 12px; height: 12px; font-size: 6px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
-                            </div>
-                        </div>
-                        
-                        <!-- SEGUNDA LÍNEA: TIEMPO CENTRO + PUNTOS + RÉCORD DERECHA -->
-                        <div style="display: flex; align-items: center; justify-content: center; position: relative;">
-                            <div style="text-align: center;">
-                                <span id="carril-time" style="font-size: 14px; font-weight: bold; color: white;">⏱ 60s</span>
-                            </div>
-                            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 14px; font-weight: bold; color: white;">Pts <span id="carril-score">0</span></span>
-                                <span style="font-size: 14px; font-weight: bold; color: white;">Rec <span id="carril-best">0</span></span>
-                            </div>
-                        </div>
-                    </div>
+                    ${header}
                     <div class="carril-stage" id="carril-stage">
                         <div class="carril-lanes">
                             <div class="carril-lane" id="carril-lane-0"></div>
@@ -13239,33 +13223,8 @@ Comida premium y de cumpleaños
                 </div>
             `;
             
-            // Aplicar estilos
-            gameOverlay.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: linear-gradient(#0a3d66, #0e5a92);
-                display: flex; align-items: center; justify-content: center;
-                z-index: 9999; animation: fadeIn 0.3s ease;
-            `;
-            
-            // Header del juego - Dos líneas separadas
-            const header = gameOverlay.querySelector('.carril-game-header');
-            header.style.cssText = `
-                background: linear-gradient(135deg, 
-                    rgba(79, 195, 247, 0.3) 0%, 
-                    rgba(129, 212, 250, 0.2) 100%);
-                padding: 15px 20px;
-                display: flex;
-                flex-direction: column;
-                border-bottom: 2px solid rgba(255, 255, 255, 0.25);
-                gap: 8px;
-            `;
-            
-            const container = gameOverlay.querySelector('.carril-game-container');
-            container.style.cssText = `
-                background: rgba(7, 42, 68, 0.95); border: 2px solid rgba(255, 255, 255, 0.2);
-                border-radius: 20px; width: 90vw; height: 90vh; max-width: 400px; max-height: 700px;
-                display: flex; flex-direction: column; color: #e9f6ff; font-family: system-ui, Arial, sans-serif;
-            `;
+            // Aplicar diseño perfecto (igual que Burbujas)
+            applyPerfectGameStyles(gameOverlay, 'carril');
             
             const stage = gameOverlay.querySelector('.carril-stage');
             stage.style.cssText = `
