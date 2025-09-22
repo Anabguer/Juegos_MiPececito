@@ -2973,7 +2973,7 @@
                 
                 <div class="game-card available" data-game="bloques">
                     <div class="game-icon">💎</div>
-                    <div class="game-title">Mar Match-3</div>
+                    <div class="game-title">Conecta 3</div>
                     <div class="game-description">Conecta 3 gemas marinas</div>
                     <div class="game-stats">
                         <span class="best-score">Mejor: <span id="bloques-best">0</span></span>
@@ -12208,7 +12208,7 @@ Comida premium y de cumpleaños
         
         // 💎 JUEGO DE BLOQUES (MAR MATCH-3) - INTEGRADO COMPLETO
         function startBloquesGame() {
-            console.log('💎 Iniciando juego Mar Match-3 integrado...');
+            console.log('💎 Iniciando juego Conecta 3 integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
@@ -12218,13 +12218,28 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'bloquesGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="bloques-game-container">
-                    <div class="bloques-header">
-                        <h2>💎 Mar Match-3</h2>
-                        <div class="bloques-stats">
-                            <span>⭐ <span id="bloques-score">0</span></span>
-                            <span>⏰ <span id="bloques-time">60</span>s</span>
+                    <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
+                    <div class="bloques-game-header">
+                        <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">💎 Conecta 3</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <button id="bloques-sound-toggle" style="width: 25px; height: 25px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                                    <img src="images/ui/sonidoOn.png" style="width: 16px; height: 16px;">
+                                </button>
+                                <button class="bloques-close-btn" style="width: 12px; height: 12px; font-size: 6px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
+                            </div>
                         </div>
-                        <button class="bloques-close-btn">✕</button>
+                        
+                        <!-- SEGUNDA LÍNEA: PUNTOS CENTRO + TIEMPO DERECHA -->
+                        <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                            <div style="text-align: center;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">⭐ <span id="bloques-score">0</span></span>
+                            </div>
+                            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 14px; font-weight: bold; color: white;">⏰ <span id="bloques-time">60</span>s</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="bloques-board" id="bloques-board"></div>
                     <div class="bloques-footer">
@@ -12639,7 +12654,7 @@ Comida premium y de cumpleaños
             closeBtn.addEventListener('click', () => {
                 if(timerId) clearInterval(timerId);
                 gameOverlay.remove();
-                console.log('💎 Juego Mar Match-3 cerrado');
+                console.log('💎 Juego Conecta 3 cerrado');
             });
             
             restartBtn.addEventListener('click', () => {
@@ -12656,7 +12671,7 @@ Comida premium y de cumpleaños
             
             document.body.appendChild(gameOverlay);
             initBloquesGame();
-            console.log('💎 Juego Mar Match-3 iniciado');
+            console.log('💎 Juego Conecta 3 iniciado');
         }
         
         // 🧠 JUEGO DE MEMORIA - INTEGRADO BÁSICO
@@ -12709,7 +12724,7 @@ Comida premium y de cumpleaños
             `;
             
             // Header del juego - Dos líneas separadas
-            const header = gameOverlay.querySelector('.memoria-game-header');
+            const header = gameOverlay.querySelector('.bloques-game-header');
             header.style.cssText = `
                 background: linear-gradient(135deg, 
                     rgba(79, 195, 247, 0.3) 0%, 
@@ -12721,7 +12736,7 @@ Comida premium y de cumpleaños
                 gap: 8px;
             `;
             
-            const container = gameOverlay.querySelector('.memoria-game-container');
+            const container = gameOverlay.querySelector('.bloques-game-container');
             container.style.cssText = `
                 background: rgba(7, 35, 52, 0.95); border: 2px solid rgba(255, 255, 255, 0.2);
                 border-radius: 20px; width: 90vw; height: 90vh; max-width: 500px; max-height: 700px;
