@@ -11225,6 +11225,16 @@ Comida premium y de cumpleaños
                                 <span class="result-value" id="final-stars">1</span>
                             </div>
                         </div>
+                        <div class="reward-reasons" id="reward-reasons" style="
+                            background: rgba(0,0,0,0.1);
+                            border-radius: 10px;
+                            padding: 10px;
+                            margin: 10px 0;
+                            font-size: 12px;
+                            color: #4CAF50;
+                            white-space: pre-line;
+                            text-align: center;
+                        "></div>
                         <div class="results-buttons">
                             <button id="bubble-again-btn" class="bubble-btn primary">OTRA</button>
                             <button id="bubble-finish-btn" class="bubble-btn secondary">SALIR</button>
@@ -11742,22 +11752,63 @@ Comida premium y de cumpleaños
                 
                 const finalScore = gameState.score;
                 const bestPrev = getBest();
-                let starsWon = 1;
+                let starsWon = 0;
+                let rewardReasons = [];
                 
+                // ⭐ 1 ESTRELLA POR JUGAR (siempre)
+                starsWon += 1;
+                rewardReasons.push("🎮 Por jugar");
+                
+                // ⭐ ESTRELLAS POR PUNTOS (cada 15 puntos = 1 estrella)
+                const starsFromPoints = Math.floor(finalScore / 15);
+                if (starsFromPoints > 0) {
+                    starsWon += starsFromPoints;
+                    rewardReasons.push(`⭐ ${starsFromPoints} por puntos (${finalScore})`);
+                }
+                
+                // ⭐ 1 ESTRELLA EXTRA POR RÉCORD PERSONAL
                 if (finalScore > bestPrev) {
-                    starsWon = 2;
+                    starsWon += 1;
+                    rewardReasons.push("🏆 ¡Nuevo récord personal!");
                     setBest(finalScore);
+                }
+                
+                // ⭐ 1 ESTRELLA EXTRA POR RÉCORD GLOBAL (simulado)
+                const globalRecord = 1000; // Simulamos un récord global
+                if (finalScore > globalRecord) {
+                    starsWon += 1;
+                    rewardReasons.push("🌍 ¡RÉCORD GLOBAL!");
                 }
                 
                 const totalStars = addStars(starsWon);
                 elements.bestEl.textContent = getBest();
                 elements.starsEl.textContent = totalStars;
                 
-                // Mostrar resultados
+                // 🎆 INTEGRAR CON SISTEMA PRINCIPAL
+                if (window.game && starsWon > 0) {
+                    window.game.gameState.stars += starsWon;
+                    window.game.saveGame();
+                    
+                    // Animación especial si son muchas estrellas
+                    if (starsWon >= 3) {
+                        window.game.createRewardAnimation(starsWon, 0);
+                    }
+                    
+                    console.log(`🏆 Burbujas: +${starsWon} estrellas ganadas`);
+                }
+                
+                // Mostrar resultados con razones
                 gameModal.querySelector('#results-title').textContent = won ? "¡Perfecto!" : "Fin de partida";
                 gameModal.querySelector('#final-score').textContent = finalScore;
                 gameModal.querySelector('#final-best').textContent = getBest();
                 gameModal.querySelector('#final-stars').textContent = starsWon;
+                
+                // Mostrar razones de recompensas
+                const reasonsText = rewardReasons.join('\n');
+                const reasonsEl = gameModal.querySelector('#reward-reasons');
+                if (reasonsEl) {
+                    reasonsEl.textContent = reasonsText;
+                }
                 
                 elements.resultsModal.style.display = 'flex';
                 elements.resultsModal.style.cssText += `
