@@ -12707,24 +12707,7 @@ Comida premium y de cumpleaños
             `;
             
             // Header del juego - Dos líneas separadas
-            const header = gameOverlay.querySelector('.bloques-game-header');
-            header.style.cssText = `
-                background: linear-gradient(135deg, 
-                    rgba(79, 195, 247, 0.3) 0%, 
-                    rgba(129, 212, 250, 0.2) 100%);
-                padding: 15px 20px;
-                display: flex;
-                flex-direction: column;
-                border-bottom: 2px solid rgba(255, 255, 255, 0.25);
-                gap: 8px;
-            `;
-            
-            const container = gameOverlay.querySelector('.bloques-game-container');
-            container.style.cssText = `
-                background: rgba(7, 35, 52, 0.95); border: 2px solid rgba(255, 255, 255, 0.2);
-                border-radius: 20px; width: 90vw; height: 90vh; max-width: 500px; max-height: 700px;
-                display: flex; flex-direction: column; color: #e9f6ff; font-family: system-ui, Arial, sans-serif;
-            `;
+            // El header y container ya tienen estilos aplicados por el template unificado
             
             // Configurar juego básico de memoria
             const EMOJIS = ["🐟","🐠","🐚","🦀","🐙","⭐","🪸","🌊"];
