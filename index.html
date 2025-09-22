@@ -11332,23 +11332,51 @@ Comida premium y de cumpleaños
                 letter-spacing: 0.5px;
             `;
             
-            // Stats más vistosas
-            const stats = gameModal.querySelector('.game-stats');
-            stats.style.cssText = `
-                display: flex;
-                gap: 20px;
-                font-size: 14px;
-                font-weight: 700;
-                color: #ffd700;
-                text-shadow: 
-                    0 2px 4px rgba(0, 0, 0, 0.5),
-                    0 0 10px rgba(255, 215, 0, 0.6);
-            `;
+            // Stats ya configurados arriba, no necesitamos esto
             
             
-            // Leyenda más colorida
+            // Leyenda con bordes de colores
             const legend = gameModal.querySelector('.bubble-legend');
             legend.style.cssText = `
+                display: flex;
+                justify-content: space-around;
+                padding: 15px;
+                background: rgba(0, 0, 0, 0.1);
+                border-radius: 15px;
+                margin: 10px 20px;
+            `;
+            
+            // Burbujas buenas (verde)
+            const goodLegend = legend.querySelector('.legend-item.good');
+            goodLegend.style.cssText = `
+                background: linear-gradient(135deg, #4CAF50, #66BB6A);
+                border: 3px solid #2E7D32;
+                border-radius: 12px;
+                padding: 8px 16px;
+                font-size: 16px;
+                font-weight: bold;
+                color: white;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+            `;
+            
+            // Burbujas malas (rojo)
+            const badLegend = legend.querySelector('.legend-item.bad');
+            badLegend.style.cssText = `
+                background: linear-gradient(135deg, #F44336, #EF5350);
+                border: 3px solid #C62828;
+                border-radius: 12px;
+                padding: 8px 16px;
+                font-size: 16px;
+                font-weight: bold;
+                color: white;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+            `;
+            
+            // Área de juego
+            const stageContainer = gameModal.querySelector('.bubble-stage-container');
+            stageContainer.style.cssText = `
                 background: linear-gradient(135deg, 
                     rgba(76, 175, 80, 0.15) 0%, 
                     rgba(244, 67, 54, 0.15) 100%);
@@ -11436,18 +11464,49 @@ Comida premium y de cumpleaños
                 border-top: 2px solid rgba(255, 255, 255, 0.3);
             `;
             
-            // Controles más gaming
+            // Controles centrados y bonitos
             const controls = gameModal.querySelector('.bubble-controls');
             controls.style.cssText = `
                 background: linear-gradient(135deg, 
                     rgba(79, 195, 247, 0.2) 0%, 
                     rgba(129, 212, 250, 0.15) 100%);
-                padding: 12px;
+                padding: 20px;
                 display: flex;
                 justify-content: center;
-                gap: 15px;
+                align-items: center;
                 border-top: 2px solid rgba(255, 255, 255, 0.25);
             `;
+            
+            // Botón JUGAR estilo gamer
+            const playBtn = gameModal.querySelector('#bubbleStartBtn');
+            playBtn.style.cssText = `
+                background: linear-gradient(135deg, #4CAF50, #66BB6A);
+                border: 3px solid #2E7D32;
+                border-radius: 25px;
+                padding: 15px 40px;
+                font-size: 20px;
+                font-weight: bold;
+                color: white;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+                box-shadow: 
+                    0 6px 15px rgba(76, 175, 80, 0.4),
+                    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            `;
+            
+            // Efecto hover para el botón
+            playBtn.addEventListener('mouseenter', () => {
+                playBtn.style.transform = 'translateY(-2px) scale(1.05)';
+                playBtn.style.boxShadow = '0 8px 20px rgba(76, 175, 80, 0.6)';
+            });
+            
+            playBtn.addEventListener('mouseleave', () => {
+                playBtn.style.transform = 'translateY(0) scale(1)';
+                playBtn.style.boxShadow = '0 6px 15px rgba(76, 175, 80, 0.4)';
+            });
             
             // Botón JUGAR - Más llamativo
             const startBtn = gameModal.querySelector('.bubble-btn.primary');
@@ -12257,8 +12316,8 @@ Comida premium y de cumpleaños
                 
                 // Dar recompensas
                 if (window.game) {
-                    const bubbles = Math.floor(score / 10);
-                    const stars = Math.floor(score / 50);
+                    const bubbles = Math.floor(score / 20); // Menos burbujas
+                    const stars = Math.floor(score / 15);   // Más estrellas
                     window.game.gameState.bubbles += bubbles;
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
@@ -12882,8 +12941,8 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas
-                const bubbles = Math.floor(score / 2);
-                const stars = Math.floor(score / 20);
+                const bubbles = Math.floor(score / 5);  // Menos burbujas
+                const stars = Math.floor(score / 8);    // Más estrellas
                 
                 if (window.game && bubbles > 0) {
                     window.game.gameState.bubbles += bubbles;
@@ -13158,8 +13217,8 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas
-                const bubbles = Math.floor(score / 5);
-                const stars = Math.floor(score / 30);
+                const bubbles = Math.floor(score / 10); // Menos burbujas
+                const stars = Math.floor(score / 12);   // Más estrellas
                 
                 if (window.game && bubbles > 0) {
                     window.game.gameState.bubbles += bubbles;
@@ -13457,8 +13516,8 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas
-                const bubbles = Math.floor(score / 3);
-                const stars = Math.floor(score / 25);
+                const bubbles = Math.floor(score / 8);  // Menos burbujas
+                const stars = Math.floor(score / 10);   // Más estrellas
                 
                 if (window.game && bubbles > 0) {
                     window.game.gameState.bubbles += bubbles;
@@ -13700,8 +13759,8 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas
-                const bubbles = Math.floor(score / 2);
-                const stars = Math.floor(score / 15);
+                const bubbles = Math.floor(score / 6);  // Menos burbujas
+                const stars = Math.floor(score / 8);    // Más estrellas
                 
                 if (window.game && bubbles > 0) {
                     window.game.gameState.bubbles += bubbles;
@@ -13949,8 +14008,8 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas
-                const bubbles = Math.floor(score / 3);
-                const stars = Math.floor(score / 20);
+                const bubbles = Math.floor(score / 8);  // Menos burbujas
+                const stars = Math.floor(score / 10);   // Más estrellas
                 
                 if (window.game && bubbles > 0) {
                     window.game.gameState.bubbles += bubbles;
