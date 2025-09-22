@@ -11235,17 +11235,16 @@ Comida premium y de cumpleaños
                 <div class="bubble-game-container">
                     <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
                     <div class="bubble-game-header">
-                        <!-- FILA SUPERIOR: TÍTULO + ALTAVOZ + X -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                            <div style="width: 60px;"></div> <!-- Espaciador para centrar título -->
-                            <div class="game-title" style="text-align: center; flex: 1; font-size: 18px; font-weight: bold; color: white;">🫧 Burbujas</div>
+                        <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">🫧 Burbujas</div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <button id="sound-toggle" style="background: none; border: none; cursor: pointer; padding: 2px; font-size: 20px; color: white;">🔊</button>
                                 <button class="game-close-btn" style="width: 30px; height: 30px; font-size: 14px; padding: 0;">✕</button>
                             </div>
                         </div>
                         
-                        <!-- FILA INFERIOR: NIVEL IZQUIERDA + PERLAS DERECHA -->
+                        <!-- SEGUNDA LÍNEA: NIVEL + PERLAS -->
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <div style="text-align: left;">
                                 <span id="bubble-level" style="font-size: 14px; font-weight: bold; color: white;">NIVEL 1</span>
@@ -11277,9 +11276,9 @@ Comida premium y de cumpleaños
                 <!-- 🏆 MODAL DE RESULTADOS -->
                 <div class="bubble-results-modal" style="display: none;">
                     <div class="results-content">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h2 id="results-title" style="margin: 0; flex: 1; text-align: center;">¡Fin de partida!</h2>
-                            <button class="bubble-close-results-btn" style="width: 30px; height: 30px; font-size: 14px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
+                        <div style="position: relative; margin-bottom: 15px;">
+                            <button class="bubble-close-results-btn" style="position: absolute; top: -5px; left: -5px; width: 35px; height: 35px; font-size: 18px; padding: 0; background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">✕</button>
+                            <h2 id="results-title" style="margin: 0; text-align: center; padding-top: 10px;">¡Fin de partida!</h2>
                         </div>
                         <div class="results-stats">
                             <div class="result-item">
@@ -12031,6 +12030,20 @@ Comida premium y de cumpleaños
             const closeResultsBtn = gameModal.querySelector('.bubble-close-results-btn');
             if (closeResultsBtn) {
                 closeResultsBtn.addEventListener('click', closeGame);
+                
+                // Hover effect para la X más mona
+                closeResultsBtn.addEventListener('mouseenter', () => {
+                    closeResultsBtn.style.background = 'rgba(255, 255, 255, 0.3)';
+                    closeResultsBtn.style.border = '2px solid rgba(255, 255, 255, 0.8)';
+                    closeResultsBtn.style.transform = 'scale(1.1)';
+                });
+                
+                closeResultsBtn.addEventListener('mouseleave', () => {
+                    closeResultsBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                    closeResultsBtn.style.border = '2px solid rgba(255, 255, 255, 0.5)';
+                    closeResultsBtn.style.transform = 'scale(1)';
+                });
+                
                 console.log('✅ Botón X de resultados configurado correctamente');
             }
             
