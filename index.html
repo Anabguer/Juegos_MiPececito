@@ -11240,9 +11240,9 @@ Comida premium y de cumpleaños
                             <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">🫧 Burbujas</div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <button id="sound-toggle" style="background: none; border: none; cursor: pointer; padding: 2px;">
-                                    <img src="images/altavoz.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
+                                    <img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">
                                 </button>
-                                <button class="game-close-btn" style="width: 20px; height: 20px; font-size: 12px; padding: 0;">✕</button>
+                                <button class="game-close-btn" style="width: 20px; height: 20px; font-size: 10px; padding: 0;">✕</button>
                             </div>
                         </div>
                         
@@ -11253,7 +11253,7 @@ Comida premium y de cumpleaños
                                 <span id="bubble-level" style="font-size: 14px; font-weight: bold; color: white;">NIVEL 1</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 5px;">
-                                <span style="font-size: 16px;">💎</span>
+                                <img src="images/perlas.png" style="width: 20px; height: 20px;">
                                 <span id="bubble-score" style="font-size: 14px; font-weight: bold; color: white;">0</span>
                             </div>
                         </div>
@@ -12014,7 +12014,7 @@ Comida premium y de cumpleaños
                 soundBtn.addEventListener('click', () => {
                     soundEnabled = !soundEnabled;
                     if (soundImg) {
-                        soundImg.style.filter = soundEnabled ? 'brightness(0) invert(1)' : 'brightness(0) invert(1) grayscale(1)';
+                        soundImg.src = soundEnabled ? 'images/ui/sonidoOn.png' : 'images/ui/sonidoOff.png';
                     }
                     if (window.audioManager) {
                         if (soundEnabled) {
