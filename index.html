@@ -669,7 +669,7 @@
             background: linear-gradient(135deg, #FFD700, #FFA500) !important;
             border: 2px solid #FF8C00 !important;
             border-radius: 20px !important;
-            padding: 10px 25px !important;
+            padding: 12px 30px !important;
             font-size: 18px !important;
             font-weight: bold !important;
             color: #8B4513 !important;
@@ -679,9 +679,9 @@
             transition: all 0.3s ease !important;
             text-transform: uppercase !important;
             letter-spacing: 1px !important;
-            width: 60% !important;
-            max-width: 200px !important;
-            margin: 0 auto !important;
+            width: 80% !important;
+            max-width: 250px !important;
+            margin: 15px auto !important;
             display: block !important;
         }
         
@@ -11239,6 +11239,11 @@ Comida premium y de cumpleaños
                     <div class="bubble-stage-container">
                         <div id="bubbleStage" class="bubble-stage"></div>
                     </div>
+                    
+                    <!-- 🎮 BOTÓN JUGAR DENTRO DEL MODAL -->
+                    <div class="bubble-controls">
+                        <button id="bubbleStartBtn" class="bubble-btn primary big-yellow">JUGAR</button>
+                    </div>
                 </div>
                 
                 <!-- 🏆 MODAL DE RESULTADOS -->
@@ -11274,11 +11279,6 @@ Comida premium y de cumpleaños
                             <button id="bubble-finish-btn" class="bubble-btn secondary">SALIR</button>
                         </div>
                     </div>
-                </div>
-                
-                <!-- 🎮 BOTÓN JUGAR EN PARTE INFERIOR -->
-                <div class="bubble-controls" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1001;">
-                    <button id="bubbleStartBtn" class="bubble-btn primary big-yellow">JUGAR</button>
                 </div>
             `;
             
