@@ -685,6 +685,15 @@
             display: block !important;
         }
         
+        /* 🎮 BOTÓN REINTENTAR MÁS PEQUEÑO */
+        .bubble-btn.primary#bubble-again-btn {
+            width: 60% !important;
+            max-width: 180px !important;
+            padding: 8px 20px !important;
+            font-size: 14px !important;
+            margin: 10px auto !important;
+        }
+        
         .bubble-btn.primary:hover {
             transform: translateY(-3px) scale(1.08) !important;
             box-shadow: 0 12px 25px rgba(255, 215, 0, 0.7) !important;
@@ -11224,9 +11233,15 @@ Comida premium y de cumpleaños
                     <div class="bubble-game-header">
                         <div class="game-title">🫧 Burbujas</div>
                         <div class="game-stats-simple">
-                            <div style="display: flex; align-items: center; background: rgba(255, 215, 0, 0.1); border: 2px solid #FFD700; border-radius: 20px; padding: 4px 8px;">
-                                <img src="images/perlas.png" style="width: 20px; height: 20px; margin-right: 4px;">
-                                <span id="bubble-score">0</span>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="display: flex; align-items: center; background: rgba(255, 215, 0, 0.1); border: 2px solid #FFD700; border-radius: 20px; padding: 4px 8px;">
+                                    <img src="images/perlas.png" style="width: 20px; height: 20px; margin-right: 4px;">
+                                    <span id="bubble-score">0</span>
+                                </div>
+                                <div style="display: flex; align-items: center; background: rgba(76, 175, 80, 0.1); border: 2px solid #4CAF50; border-radius: 20px; padding: 4px 8px;">
+                                    <span style="font-size: 12px; font-weight: bold; color: #2E7D32;">NIVEL</span>
+                                    <span id="bubble-level" style="font-size: 14px; font-weight: bold; color: #2E7D32; margin-left: 4px;">1</span>
+                                </div>
                             </div>
                         </div>
                         <button class="game-close-btn">✕</button>
@@ -11673,6 +11688,14 @@ Comida premium y de cumpleaños
                     if (bubble.isGood) {
                         gameState.score++;
                         elements.scoreEl.textContent = gameState.score;
+                        
+                        // 🎯 ACTUALIZAR NIVEL
+                        const newLevel = Math.floor(gameState.score / 10) + 1;
+                        const levelEl = gameModal.querySelector('#bubble-level');
+                        if (levelEl) {
+                            levelEl.textContent = newLevel;
+                        }
+                        
                         removeBubble(bubble, true);
                         bubbleEl.style.transform += ' scale(1.2)';
                         bubbleEl.style.opacity = '0';
@@ -11922,6 +11945,10 @@ Comida premium y de cumpleaños
                 gameState.startTime = 0;
                 
                 elements.scoreEl.textContent = '0';
+                const levelEl = gameModal.querySelector('#bubble-level');
+                if (levelEl) {
+                    levelEl.textContent = '1';
+                }
                 elements.resultsModal.style.display = 'none';
                 
                 gameState.bubbles.forEach(bubble => bubble.el.remove());
