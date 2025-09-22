@@ -11232,32 +11232,32 @@ Comida premium y de cumpleaños
             gameModal.className = 'bubble-game-modal';
             gameModal.innerHTML = `
                 <div class="bubble-game-container">
-                    <!-- 🏆 HEADER REORGANIZADO -->
+                    <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
                     <div class="bubble-game-header">
-                        <!-- FILA SUPERIOR: X + TÍTULO -->
+                        <!-- FILA SUPERIOR: ALTAVOZ + TÍTULO + X -->
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                            <button class="game-close-btn">✕</button>
-                            <div class="game-title" style="text-align: center; flex: 1;">🫧 Burbujas</div>
                             <button id="sound-toggle" style="background: none; border: none; font-size: 20px; cursor: pointer; color: white; padding: 5px;">🔊</button>
+                            <div class="game-title" style="text-align: center; flex: 1; font-size: 18px; font-weight: bold; color: white;">🫧 Burbujas</div>
+                            <button class="game-close-btn">✕</button>
                         </div>
                         
-                        <!-- FILA INFERIOR: PERLAS IZQUIERDA + NIVEL CENTRO -->
+                        <!-- FILA INFERIOR: NIVEL CENTRO + PERLAS DERECHA -->
                         <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 5px;">
-                                <img src="images/perlas.png" style="width: 24px; height: 24px;">
-                                <span id="bubble-score" style="font-size: 16px; font-weight: bold; color: white;">0</span>
-                            </div>
+                            <div style="width: 60px;"></div> <!-- Espaciador izquierdo -->
                             <div style="text-align: center;">
-                                <span id="bubble-level" style="font-size: 18px; font-weight: bold; color: #FFD700;">NIVEL 1</span>
+                                <span id="bubble-level" style="font-size: 14px; font-weight: bold; color: white;">NIVEL 1</span>
                             </div>
-                            <div style="width: 60px;"></div> <!-- Espaciador para centrar nivel -->
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <img src="images/perlas.png" style="width: 20px; height: 20px;">
+                                <span id="bubble-score" style="font-size: 14px; font-weight: bold; color: white;">0</span>
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- 📖 LEYENDA -->
-                    <div class="bubble-legend">
-                        <div class="legend-item good">🐟 🐠 🐚 🪸 ⭐</div>
-                        <div class="legend-item bad">💀 🦈 ⚠️ 🧨 🪝</div>
+                    <!-- 📖 LEYENDA LADO A LADO -->
+                    <div class="bubble-legend" style="display: flex; justify-content: center; gap: 20px; margin: 10px 0;">
+                        <div class="legend-item good" style="background: rgba(76, 175, 80, 0.2); border: 2px solid #4CAF50; border-radius: 8px; padding: 4px 12px; font-size: 14px; font-weight: bold; color: #2E7D32;">🐟 🐠 🐚 🪸 ⭐</div>
+                        <div class="legend-item bad" style="background: rgba(244, 67, 54, 0.2); border: 2px solid #F44336; border-radius: 8px; padding: 4px 12px; font-size: 14px; font-weight: bold; color: #C62828;">💀 🦈 ⚠️ 🧨 🪝</div>
                     </div>
                     
                     <!-- 🎯 ÁREA DE JUEGO -->
@@ -11383,15 +11383,7 @@ Comida premium y de cumpleaños
                 margin: 0;
             `;
             
-            // Stats centrados
-            const statsSimple = gameModal.querySelector('.game-stats-simple');
-            statsSimple.style.cssText = `
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                text-align: center;
-                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            `;
+            // Stats ya están en el HTML inline, no necesitamos modificar
             
             // Botón de cerrar bonito
             const closeBtn = gameModal.querySelector('.game-close-btn');
