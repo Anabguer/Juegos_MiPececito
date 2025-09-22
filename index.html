@@ -3558,9 +3558,12 @@
             
             // Botón de álbum
             document.getElementById('albumButton').addEventListener('click', () => {
-                if (game) {
-                    game.showAlbum();
+                if (window.game) {
+                    window.game.showAlbum();
+                } else {
+                    console.warn('🚨 Game no disponible para álbum');
                 }
+                console.log('📸 Botón de álbum clickeado');
             });
 
             // Botón de reset (calavera)
@@ -7806,30 +7809,7 @@ Comida premium y de cumpleaños
                 });
             }
             
-            // 📸 MOSTRAR ÁLBUM (PLACEHOLDER)
-            showAlbum() {
-                console.log('📸 Abriendo álbum...');
-                
-                this.showCustomModal({
-                    title: '📸 Álbum de Mi Pececito',
-                    message: `
-                        <div style="text-align: center; padding: 20px;">
-                            <div style="margin-bottom: 15px; font-size: 16px;">📅 Momentos Especiales</div>
-                            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin: 10px 0;">
-                                <div style="font-weight: bold; margin-bottom: 5px;">🐣 ¡He nacido!</div>
-                                <div style="font-size: 12px; color: #666;">Mi primer día en el mundo</div>
-                                <div style="font-size: 11px; color: #999;">Hace unos momentos</div>
-                            </div>
-                            <div style="color: #666; font-style: italic;">Más recuerdos aparecerán aquí...</div>
-                        </div>
-                    `,
-                    confirmText: '❌ Cerrar',
-                    showCancel: false,
-                    onConfirm: () => {
-                        console.log('📸 Álbum cerrado');
-                    }
-                });
-            }
+            // 📸 FUNCIÓN PLACEHOLDER ELIMINADA - USAR LA FUNCIÓN REAL MÁS ABAJO
             
             // 🔄 DETECCIÓN MUY TEMPRANA DE BORDES
             handleSimpleFishBoundaries() {
