@@ -11224,7 +11224,7 @@ Comida premium y de cumpleaños
                     <div class="bubble-game-header">
                         <div class="game-title">🫧 Atrapa Burbujas</div>
                         <div class="game-stats-simple">
-                            <span id="bubble-score">0</span> <img src="images/perlas.png" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 5px; border: 2px solid #FFD700; border-radius: 50%; padding: 2px;">
+                            <span id="bubble-score">0</span> <img src="images/perlas.png" style="width: 18px; height: 18px; vertical-align: middle; margin-left: 3px; border: 2px solid #FFD700; border-radius: 50%; padding: 1px; background: rgba(255, 215, 0, 0.1);">
                         </div>
                         <button class="game-close-btn">✕</button>
                     </div>
@@ -11775,8 +11775,8 @@ Comida premium y de cumpleaños
                 }
                 
                 const totalStars = addStars(starsWon);
-                elements.bestEl.textContent = getBest();
-                elements.starsEl.textContent = totalStars;
+                if (elements.bestEl) elements.bestEl.textContent = getBest();
+                if (elements.starsEl) elements.starsEl.textContent = totalStars;
                 
                 // 🎆 INTEGRAR CON SISTEMA PRINCIPAL
                 if (window.game && starsWon > 0) {
