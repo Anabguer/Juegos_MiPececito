@@ -11434,6 +11434,60 @@ Comida premium y de cumpleaños
             }
         }
 
+        // 🎮 SISTEMA DE TEMPLATE UNIFICADO PARA JUEGOS
+        function createUnifiedGameHeader(gameName, gameTitle, gameIcon, stats) {
+            return `
+                <!-- 🏆 HEADER UNIFICADO PARA TODOS LOS JUEGOS -->
+                <div class="${gameName}-game-header">
+                    <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">${gameIcon} ${gameTitle}</div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button id="${gameName}-sound-toggle" style="width: 25px; height: 25px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                                <img src="images/ui/sonidoOn.png" style="width: 16px; height: 16px;">
+                            </button>
+                            <button class="${gameName}-close-btn" style="width: 12px; height: 12px; font-size: 6px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
+                        </div>
+                    </div>
+                    
+                    <!-- SEGUNDA LÍNEA: STATS CENTRO + INFO ADICIONAL DERECHA -->
+                    <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                        <div style="text-align: center;">
+                            ${stats.center}
+                        </div>
+                        <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 10px;">
+                            ${stats.right}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function applyUnifiedGameStyles(gameOverlay, gameName) {
+            // Estilos del overlay
+            gameOverlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: linear-gradient(135deg, #072334 0%, #1d4b6b 100%);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 9999; animation: fadeIn 0.3s ease;
+            `;
+            
+            // Header unificado - Gradiente azul hermoso
+            const header = gameOverlay.querySelector(`.${gameName}-game-header`);
+            if (header) {
+                header.style.cssText = `
+                    background: linear-gradient(135deg, 
+                        rgba(79, 195, 247, 0.3) 0%, 
+                        rgba(129, 212, 250, 0.2) 100%);
+                    padding: 15px 20px;
+                    display: flex;
+                    flex-direction: column;
+                    border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+                    gap: 8px;
+                `;
+            }
+        }
+
         // 🎮 JUEGO DE BURBUJAS INTEGRADO HERMOSO
         function startBubbleGame() {
             console.log('🫧 Iniciando juego de burbujas integrado...');
@@ -12206,7 +12260,7 @@ Comida premium y de cumpleaños
             console.log('🎮 Juego de burbujas inicializado completamente');
         }
         
-        // 💎 JUEGO DE BLOQUES (MAR MATCH-3) - INTEGRADO COMPLETO
+        // 💎 JUEGO DE BLOQUES (CONECTA 3) - INTEGRADO COMPLETO
         function startBloquesGame() {
             console.log('💎 Iniciando juego Conecta 3 integrado...');
             
@@ -12216,31 +12270,16 @@ Comida premium y de cumpleaños
             // Crear overlay del juego
             const gameOverlay = document.createElement('div');
             gameOverlay.id = 'bloquesGameOverlay';
+            
+            // Usar template unificado
+            const header = createUnifiedGameHeader('bloques', 'Conecta 3', '💎', {
+                center: '<span style="font-size: 14px; font-weight: bold; color: white;">⭐ <span id="bloques-score">0</span></span>',
+                right: '<span style="font-size: 14px; font-weight: bold; color: white;">⏰ <span id="bloques-time">60</span>s</span>'
+            });
+            
             gameOverlay.innerHTML = `
                 <div class="bloques-game-container">
-                    <!-- 🏆 HEADER EXACTO COMO PEDIDO -->
-                    <div class="bloques-game-header">
-                        <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                            <div class="game-title" style="font-size: 18px; font-weight: bold; color: white;">💎 Conecta 3</div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <button id="bloques-sound-toggle" style="width: 25px; height: 25px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
-                                    <img src="images/ui/sonidoOn.png" style="width: 16px; height: 16px;">
-                                </button>
-                                <button class="bloques-close-btn" style="width: 12px; height: 12px; font-size: 6px; padding: 0; background: none; border: none; color: white; cursor: pointer;">✕</button>
-                            </div>
-                        </div>
-                        
-                        <!-- SEGUNDA LÍNEA: PUNTOS CENTRO + TIEMPO DERECHA -->
-                        <div style="display: flex; align-items: center; justify-content: center; position: relative;">
-                            <div style="text-align: center;">
-                                <span style="font-size: 14px; font-weight: bold; color: white;">⭐ <span id="bloques-score">0</span></span>
-                            </div>
-                            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 14px; font-weight: bold; color: white;">⏰ <span id="bloques-time">60</span>s</span>
-                            </div>
-                        </div>
-                    </div>
+                    ${header}
                     <div class="bloques-board" id="bloques-board"></div>
                     <div class="bloques-footer">
                         <button class="bloques-btn" id="bloques-restart">🔄 Reiniciar</button>
@@ -12248,20 +12287,8 @@ Comida premium y de cumpleaños
                 </div>
             `;
             
-            // Aplicar estilos
-            gameOverlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(135deg, #083150 0%, #1d4b6b 50%, #2a6287 100%);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 9999;
-                animation: fadeIn 0.3s ease;
-            `;
+            // Aplicar estilos unificados
+            applyUnifiedGameStyles(gameOverlay, 'bloques');
             
             const container = gameOverlay.querySelector('.bloques-game-container');
             container.style.cssText = `
