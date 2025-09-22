@@ -11567,12 +11567,12 @@ Comida premium y de cumpleaños
             document.body.appendChild(gameModal);
             
             
-            // 🎨 APLICAR DISEÑO PERFECTO Y INICIALIZAR JUEGO
-            applyPerfectGameStyles(gameModal, 'bubble');
+            // 🎨 APLICAR ESTILOS Y INICIALIZAR JUEGO
+            applyBubbleGameStyles(gameModal);
             initBubbleGameLogic(gameModal);
         }
         
-        // 🎨 DISEÑO PERFECTO PARA TODOS LOS JUEGOS (basado en Burbujas)
+        // 🎨 DISEÑO PERFECTO PARA TODOS LOS JUEGOS (IGUAL QUE BURBUJAS)
         function applyPerfectGameStyles(gameOverlay, gameName) {
             // Estilos del overlay
             gameOverlay.style.cssText = `
@@ -11582,7 +11582,7 @@ Comida premium y de cumpleaños
                 z-index: 9999; animation: fadeIn 0.3s ease;
             `;
             
-            // Contenedor principal - Diseño tipo acuario colorido (IGUAL QUE BURBUJAS)
+            // Contenedor principal - EXACTAMENTE IGUAL QUE BURBUJAS
             const container = gameOverlay.querySelector(`.${gameName}-game-container`);
             if (container) {
                 container.style.cssText = `
@@ -11608,7 +11608,7 @@ Comida premium y de cumpleaños
                 `;
             }
             
-            // Header del juego - Dos líneas separadas (IGUAL QUE BURBUJAS)
+            // Header del juego - EXACTAMENTE IGUAL QUE BURBUJAS
             const header = gameOverlay.querySelector(`.${gameName}-game-header`);
             if (header) {
                 header.style.cssText = `
