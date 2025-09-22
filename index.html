@@ -11233,14 +11233,14 @@ Comida premium y de cumpleaños
                         <div class="legend-item bad">💀 🦈 ⚠️ 🧨 🪝</div>
                     </div>
                     
-                    <!-- 🎮 CONTROLES SIMPLES -->
-                    <div class="bubble-controls">
-                        <button id="bubbleStartBtn" class="bubble-btn primary big-yellow">JUGAR</button>
-                    </div>
-                    
                     <!-- 🎯 ÁREA DE JUEGO -->
                     <div class="bubble-stage-container">
                         <div id="bubbleStage" class="bubble-stage"></div>
+                    </div>
+                    
+                    <!-- 🎮 CONTROLES SIMPLES -->
+                    <div class="bubble-controls">
+                        <button id="bubbleStartBtn" class="bubble-btn primary big-yellow">JUGAR</button>
                     </div>
                 </div>
                 
@@ -11930,8 +11930,22 @@ Comida premium y de cumpleaños
             }
             
             // 📱 EVENT LISTENERS
-            elements.startBtn.addEventListener('click', startGame);
-            gameModal.querySelector('#bubble-again-btn').addEventListener('click', startGame);
+            console.log('🔗 Configurando event listeners...');
+            console.log('🔗 startBtn encontrado:', elements.startBtn);
+            console.log('🔗 againBtn encontrado:', gameModal.querySelector('#bubble-again-btn'));
+            
+            if (elements.startBtn) {
+                elements.startBtn.addEventListener('click', startGame);
+                console.log('✅ Event listener JUGAR configurado');
+            } else {
+                console.error('❌ startBtn no encontrado!');
+            }
+            
+            const againBtn = gameModal.querySelector('#bubble-again-btn');
+            if (againBtn) {
+                againBtn.addEventListener('click', startGame);
+                console.log('✅ Event listener OTRA configurado');
+            }
             
             const closeGame = () => {
                 if (gameState.rafId) cancelAnimationFrame(gameState.rafId);
