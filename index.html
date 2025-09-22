@@ -11240,21 +11240,18 @@ Comida premium y de cumpleaños
                             <div style="width: 60px;"></div> <!-- Espaciador para centrar título -->
                             <div class="game-title" style="text-align: center; flex: 1; font-size: 18px; font-weight: bold; color: white;">🫧 Burbujas</div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <button id="sound-toggle" style="background: none; border: none; cursor: pointer; padding: 2px;">
-                                    <img src="images/altavoz.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);">
-                                </button>
+                                <button id="sound-toggle" style="background: none; border: none; cursor: pointer; padding: 2px; font-size: 20px; color: white;">🔊</button>
                                 <button class="game-close-btn" style="width: 30px; height: 30px; font-size: 14px; padding: 0;">✕</button>
                             </div>
                         </div>
                         
-                        <!-- FILA INFERIOR: NIVEL CENTRO + PERLAS DERECHA -->
+                        <!-- FILA INFERIOR: NIVEL IZQUIERDA + PERLAS DERECHA -->
                         <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <div style="width: 60px;"></div> <!-- Espaciador izquierdo -->
-                            <div style="text-align: center;">
+                            <div style="text-align: left;">
                                 <span id="bubble-level" style="font-size: 14px; font-weight: bold; color: white;">NIVEL 1</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 5px;">
-                                <img src="images/perlas.png" style="width: 20px; height: 20px;">
+                                <span style="font-size: 16px;">💎</span>
                                 <span id="bubble-score" style="font-size: 14px; font-weight: bold; color: white;">0</span>
                             </div>
                         </div>
@@ -12012,12 +12009,9 @@ Comida premium y de cumpleaños
             const soundBtn = gameModal.querySelector('#sound-toggle');
             let soundEnabled = true;
             if (soundBtn) {
-                const soundImg = soundBtn.querySelector('img');
                 soundBtn.addEventListener('click', () => {
                     soundEnabled = !soundEnabled;
-                    if (soundImg) {
-                        soundImg.style.filter = soundEnabled ? 'brightness(0) invert(1)' : 'brightness(0) invert(1) grayscale(1)';
-                    }
+                    soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
                     if (window.audioManager) {
                         if (soundEnabled) {
                             window.audioManager.playSound('background');
