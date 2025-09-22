@@ -1410,13 +1410,15 @@
         }
         
         .game-card {
-            background: rgba(255,255,255,0.15);
-            border: 3px solid rgba(255,255,255,0.3);
+            background: linear-gradient(135deg, #1e88e5 0%, #2196f3 50%, #42a5f5 100%);
+            border: 3px solid rgba(255,255,255,0.4);
             border-radius: 20px;
             padding: 20px;
             text-align: center;
             position: relative;
             transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
         }
         
         .game-card.available {
@@ -2400,11 +2402,12 @@
         }
         
         .game-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, #26c6da 0%, #4fc3f7 50%, #81d4fa 100%);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
             border-radius: 16px;
             padding: 20px;
+            color: white;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2599,11 +2602,12 @@
         }
         
         .game-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,248,255,0.9) 100%);
-            border: 2px solid rgba(255,255,255,0.9);
+            background: linear-gradient(135deg, #29b6f6 0%, #42a5f5 50%, #64b5f6 100%);
+            border: 2px solid rgba(255,255,255,0.5);
             border-radius: 8px;
             padding: 6px 4px;
             text-align: center;
+            color: white;
             cursor: pointer;
             transition: all 0.3s ease;
             color: #0066cc;
@@ -4160,6 +4164,8 @@
                     this.updateFlyers(deltaTime);          // Corazones voladores
                     this.updateLabels(deltaTime);          // 🍎 LABELS ("Ñam")
                     this.updateEatingParticles(deltaTime); // ✨ PARTÍCULAS DE COMIDA
+                    this.updateRewardParticles(deltaTime); // 🎆 PARTÍCULAS DE RECOMPENSA
+                    this.updateFloatingMessages(deltaTime); // 💬 MENSAJES FLOTANTES
                     
                     // Actualizar UI cada pocos segundos
                     if (Math.random() < 0.05) { // MÁS FRECUENTE PARA DEBUG (era 0.01)
@@ -4393,6 +4399,12 @@
                 
                 // ✨ DIBUJAR PARTÍCULAS DE COMIDA
                 this.drawEatingParticles();
+                
+                // 🎆 DIBUJAR PARTÍCULAS DE RECOMPENSA
+                this.drawRewardParticles();
+                
+                // 💬 DIBUJAR MENSAJES FLOTANTES
+                this.drawFloatingMessages();
                 
                 // 🍎 DIBUJAR LABELS ("Ñam") ENCIMA DE TODO
                 this.drawLabels();
@@ -8631,6 +8643,173 @@ Comida premium y de cumpleaños
                 this.checkAchievements();
             }
             
+            // 🎆 ANIMACIONES DINÁMICAS PARA RECOMPENSAS EXTRA
+            createRewardAnimation(stars, bubbles, sourceElement = null) {
+                if (stars >= 2 || bubbles >= 10) {
+                    console.log(`🎆 ¡RECOMPENSA EXTRA! ${stars} estrellas, ${bubbles} burbujas`);
+                    
+                    // Crear explosión de partículas doradas
+                    if (!this.rewardParticles) this.rewardParticles = [];
+                    
+                    const centerX = sourceElement ? sourceElement.offsetLeft + sourceElement.offsetWidth/2 : this.canvas.width/2;
+                    const centerY = sourceElement ? sourceElement.offsetTop + sourceElement.offsetHeight/2 : this.canvas.height/2;
+                    
+                    // Crear partículas especiales basadas en las recompensas
+                    const particleCount = Math.min(stars * 15 + Math.floor(bubbles/2), 50);
+                    
+                    for (let i = 0; i < particleCount; i++) {
+                        const angle = (Math.PI * 2 * i) / particleCount;
+                        const speed = 100 + Math.random() * 150;
+                        const life = 2 + Math.random() * 1.5;
+                        
+                        // Colores especiales para diferentes recompensas
+                        let color = '#FFD700'; // Dorado por defecto
+                        if (stars >= 3) color = '#FF6B9D'; // Rosa para 3+ estrellas
+                        else if (stars >= 2) color = '#4ECDC4'; // Cyan para 2+ estrellas
+                        else if (bubbles >= 20) color = '#45B7D1'; // Azul para muchas burbujas
+                        
+                        this.rewardParticles.push({
+                            x: centerX + (Math.random() - 0.5) * 40,
+                            y: centerY + (Math.random() - 0.5) * 40,
+                            vx: Math.cos(angle) * speed,
+                            vy: Math.sin(angle) * speed - 30,
+                            r: 3 + Math.random() * 5,
+                            life: life,
+                            maxLife: life,
+                            color: color,
+                            sparkle: Math.random() < 0.6,
+                            type: stars >= 2 ? 'star' : 'bubble'
+                        });
+                    }
+                    
+                    // Sonido especial para recompensas extra
+                    if (window.audioManager && stars >= 2) {
+                        window.audioManager.playSound('achievement');
+                    }
+                    
+                    // Mensaje flotante
+                    this.showFloatingMessage(
+                        stars >= 3 ? '🌟 ¡INCREÍBLE!' : 
+                        stars >= 2 ? '⭐ ¡EXCELENTE!' : '🫧 ¡GENIAL!',
+                        centerX, centerY - 50
+                    );
+                }
+            }
+            
+            // 💫 ACTUALIZAR PARTÍCULAS DE RECOMPENSA
+            updateRewardParticles(deltaTime) {
+                if (!this.rewardParticles) return;
+                
+                for (let i = this.rewardParticles.length - 1; i >= 0; i--) {
+                    const p = this.rewardParticles[i];
+                    p.life -= deltaTime;
+                    
+                    // Física de partículas
+                    p.vy += 150 * deltaTime; // Gravedad
+                    p.x += p.vx * deltaTime;
+                    p.y += p.vy * deltaTime;
+                    
+                    // Eliminar partículas muertas
+                    if (p.life <= 0 || p.y > this.canvas.height + 50) {
+                        this.rewardParticles.splice(i, 1);
+                    }
+                }
+            }
+            
+            // ✨ DIBUJAR PARTÍCULAS DE RECOMPENSA
+            drawRewardParticles() {
+                if (!this.rewardParticles || this.rewardParticles.length === 0) return;
+                
+                this.ctx.save();
+                for (const p of this.rewardParticles) {
+                    const alpha = Math.max(0, p.life / p.maxLife);
+                    this.ctx.globalAlpha = alpha;
+                    
+                    if (p.type === 'star') {
+                        // Dibujar estrella
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.beginPath();
+                        const spikes = 5;
+                        const outerRadius = p.r * 1.5;
+                        const innerRadius = p.r * 0.7;
+                        
+                        for (let i = 0; i < spikes * 2; i++) {
+                            const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                            const angle = (i * Math.PI) / spikes;
+                            const x = p.x + Math.cos(angle) * radius;
+                            const y = p.y + Math.sin(angle) * radius;
+                            if (i === 0) this.ctx.moveTo(x, y);
+                            else this.ctx.lineTo(x, y);
+                        }
+                        this.ctx.closePath();
+                        this.ctx.fill();
+                    } else {
+                        // Dibujar burbuja
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        if (p.sparkle) {
+                            this.ctx.fillStyle = 'white';
+                            this.ctx.beginPath();
+                            this.ctx.arc(p.x - p.r * 0.3, p.y - p.r * 0.3, p.r * 0.2, 0, Math.PI * 2);
+                            this.ctx.fill();
+                        }
+                    }
+                }
+                this.ctx.restore();
+            }
+            
+            // 💬 MOSTRAR MENSAJE FLOTANTE
+            showFloatingMessage(text, x, y) {
+                if (!this.floatingMessages) this.floatingMessages = [];
+                
+                this.floatingMessages.push({
+                    text: text,
+                    x: x,
+                    y: y,
+                    life: 2.5,
+                    maxLife: 2.5,
+                    vy: -60 // Velocidad hacia arriba
+                });
+            }
+            
+            // 📝 ACTUALIZAR MENSAJES FLOTANTES
+            updateFloatingMessages(deltaTime) {
+                if (!this.floatingMessages) return;
+                
+                for (let i = this.floatingMessages.length - 1; i >= 0; i--) {
+                    const msg = this.floatingMessages[i];
+                    msg.life -= deltaTime;
+                    msg.y += msg.vy * deltaTime;
+                    
+                    if (msg.life <= 0) {
+                        this.floatingMessages.splice(i, 1);
+                    }
+                }
+            }
+            
+            // ✨ DIBUJAR MENSAJES FLOTANTES
+            drawFloatingMessages() {
+                if (!this.floatingMessages || this.floatingMessages.length === 0) return;
+                
+                this.ctx.save();
+                for (const msg of this.floatingMessages) {
+                    const alpha = Math.max(0, msg.life / msg.maxLife);
+                    this.ctx.globalAlpha = alpha;
+                    this.ctx.font = 'bold 24px Arial';
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.strokeStyle = '#000';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.textAlign = 'center';
+                    
+                    this.ctx.strokeText(msg.text, msg.x, msg.y);
+                    this.ctx.fillText(msg.text, msg.x, msg.y);
+                }
+                this.ctx.restore();
+            }
+            
             // 🏆 SISTEMA DE LOGROS INTEGRADO
             checkAchievements() {
                 if (!this.gameState.achievements) {
@@ -10915,14 +11094,13 @@ Comida premium y de cumpleaños
             gameModal.className = 'bubble-game-modal';
             gameModal.innerHTML = `
                 <div class="bubble-game-container">
-                    <!-- 🏆 HEADER DEL JUEGO -->
+                    <!-- 🏆 HEADER SIMPLE Y BONITO -->
                     <div class="bubble-game-header">
                         <div class="game-title">🫧 Atrapa Burbujas</div>
-                        <div class="game-stats">
-                            <span>Puntos: <span id="bubble-score">0</span></span>
-                            <span>Récord: <span id="bubble-best">0</span></span>
-                            <span>⭐ <span id="bubble-stars">0</span></span>
+                        <div class="game-stats-simple">
+                            <span id="bubble-score">0</span> puntos
                         </div>
+                        <button class="game-close-btn">✕</button>
                     </div>
                     
                     <!-- 📖 LEYENDA -->
@@ -10934,13 +11112,11 @@ Comida premium y de cumpleaños
                     <!-- 🎯 ÁREA DE JUEGO -->
                     <div class="bubble-stage-container">
                         <div id="bubbleStage" class="bubble-stage"></div>
-                        <div class="game-instructions">Toca ✅ Evita ❌</div>
                     </div>
                     
-                    <!-- 🎮 CONTROLES -->
+                    <!-- 🎮 CONTROLES SIMPLES -->
                     <div class="bubble-controls">
-                        <button id="bubbleStartBtn" class="bubble-btn primary">▶️ JUGAR</button>
-                        <button class="bubble-btn secondary bubble-back-btn">🏠 SALIR</button>
+                        <button id="bubbleStartBtn" class="bubble-btn primary">JUGAR</button>
                     </div>
                 </div>
                 
@@ -11023,13 +11199,13 @@ Comida premium y de cumpleaños
                     inset 0 2px 0 rgba(255, 255, 255, 0.4);
             `;
             
-            // Header del juego - Más colorido
+            // Header del juego - Centrado y bonito
             const header = gameModal.querySelector('.bubble-game-header');
             header.style.cssText = `
                 background: linear-gradient(135deg, 
                     rgba(79, 195, 247, 0.3) 0%, 
                     rgba(129, 212, 250, 0.2) 100%);
-                padding: 12px 20px;
+                padding: 15px 20px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -11037,9 +11213,29 @@ Comida premium y de cumpleaños
                 gap: 15px;
             `;
             
-            // Título más llamativo
+            // Título centrado y bonito
             const title = gameModal.querySelector('.game-title');
             title.style.cssText = `
+                color: white;
+                font-size: 20px;
+                font-weight: bold;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+                margin: 0;
+            `;
+            
+            // Stats centrados
+            const stats = gameModal.querySelector('.game-stats-simple');
+            stats.style.cssText = `
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                text-align: center;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            `;
+            
+            // Botón de cerrar bonito
+            const closeBtn = gameModal.querySelector('.game-close-btn');
+            closeBtn.style.cssText = `
                 font-size: 22px;
                 font-weight: 800;
                 color: #fff;
@@ -11576,8 +11772,13 @@ Comida premium y de cumpleaños
                 console.log('🫧 Juego cerrado');
             };
             
-            elements.backBtn.addEventListener('click', closeGame);
-            gameModal.querySelector('#bubble-finish-btn').addEventListener('click', closeGame);
+            // Event listeners para cerrar
+            const closeBtn = gameModal.querySelector('.game-close-btn');
+            if (closeBtn) closeBtn.addEventListener('click', closeGame);
+            
+            // Mantener compatibilidad con elementos existentes
+            if (elements.backBtn) elements.backBtn.addEventListener('click', closeGame);
+            gameModal.querySelector('#bubble-finish-btn')?.addEventListener('click', closeGame);
             
             console.log('🎮 Juego de burbujas inicializado completamente');
         }
@@ -11975,6 +12176,9 @@ Comida premium y de cumpleaños
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
                     
+                    // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
+                    window.game.createRewardAnimation(stars, bubbles);
+                    
                     alert(`🎉 ¡Juego terminado!\\n⭐ Puntuación: ${score}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
                 }
             }
@@ -12325,6 +12529,9 @@ Comida premium y de cumpleaños
                     window.game.gameState.bubbles += bubbles;
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
+                    
+                    // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
+                    window.game.createRewardAnimation(stars, bubbles);
                 }
                 
                 setTimeout(() => {
@@ -12603,6 +12810,9 @@ Comida premium y de cumpleaños
                     window.game.gameState.bubbles += bubbles;
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
+                    
+                    // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
+                    window.game.createRewardAnimation(stars, bubbles);
                 }
                 
                 setTimeout(() => {
@@ -12876,6 +13086,9 @@ Comida premium y de cumpleaños
                     window.game.gameState.bubbles += bubbles;
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
+                    
+                    // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
+                    window.game.createRewardAnimation(stars, bubbles);
                 }
                 
                 setTimeout(() => {
@@ -13172,6 +13385,9 @@ Comida premium y de cumpleaños
                     window.game.gameState.bubbles += bubbles;
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
+                    
+                    // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
+                    window.game.createRewardAnimation(stars, bubbles);
                 }
                 
                 setTimeout(() => {
@@ -13412,6 +13628,9 @@ Comida premium y de cumpleaños
                     window.game.gameState.bubbles += bubbles;
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
+                    
+                    // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
+                    window.game.createRewardAnimation(stars, bubbles);
                 }
                 
                 setTimeout(() => {
@@ -13658,6 +13877,9 @@ Comida premium y de cumpleaños
                     window.game.gameState.bubbles += bubbles;
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
+                    
+                    // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
+                    window.game.createRewardAnimation(stars, bubbles);
                 }
                 
                 setTimeout(() => {
