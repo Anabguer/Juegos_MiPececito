@@ -13435,6 +13435,16 @@ Comida premium y de cumpleaños
                     min-height: 0;
                 `;
 
+                // Eventos para mouse
+                el.addEventListener('mousedown', onPointerDown);
+                el.addEventListener('mouseenter', onPointerEnter);
+                el.addEventListener('mouseup', onPointerUp);
+                
+                // Eventos para touch
+                el.addEventListener('touchstart', onPointerDown);
+                el.addEventListener('touchend', onPointerUp);
+                
+                // Eventos pointer como fallback
                 el.addEventListener('pointerdown', onPointerDown);
                 el.addEventListener('pointerenter', onPointerEnter);
                 el.addEventListener('pointerup', onPointerUp);
@@ -13452,26 +13462,41 @@ Comida premium y de cumpleaños
             // --- INPUT (drag por celdas adyacentes)
             let drag = null;
             function onPointerDown(e){
-                if (busy || timeLeft <= 0) return;
+                console.log('🎯 onPointerDown disparado!', {busy, timeLeft, event: e.type});
+                if (busy || timeLeft <= 0) {
+                    console.log('❌ Bloqueado por busy o timeLeft');
+                    return;
+                }
                 const el = e.currentTarget;
                 drag = { r: +el.dataset.r, c: +el.dataset.c, el };
                 el.style.opacity = '0.7';
                 el.style.transform = 'scale(0.95)';
+                console.log('✅ Drag iniciado:', drag);
             }
             function onPointerEnter(e){
-                if(!drag) return;
+                console.log('🎯 onPointerEnter disparado!', {drag, event: e.type});
+                if(!drag) {
+                    console.log('❌ No hay drag activo');
+                    return;
+                }
                 const target = e.currentTarget;
                 const r2 = +target.dataset.r, c2 = +target.dataset.c;
                 const {r,c} = drag;
+                console.log('🔄 Intentando intercambio:', {from: {r,c}, to: {r2,c2}});
                 if(isAdjacent(r,c,r2,c2)){
+                    console.log('✅ Son adyacentes, intercambiando...');
                     doSwap(r,c,r2,c2, true);
                     const matches = findMatches();
+                    console.log('🔍 Matches encontrados:', matches.length);
                     if(matches.length>0){
                         removeMatches(matches);
                     } else {
+                        console.log('❌ No hay matches, revirtiendo...');
                         doSwap(r2,c2,r,c, true);
                     }
                     endDrag();
+                } else {
+                    console.log('❌ No son adyacentes');
                 }
             }
             function onPointerUp(){ if(drag) endDrag(); }
