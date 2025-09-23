@@ -3115,7 +3115,7 @@
                 
                 <div class="game-card available" data-game="bloques">
                     <div class="game-icon">💎</div>
-                    <div class="game-title">Mar Match-3</div>
+                    <div class="game-title">Conecta 3</div>
                     <div class="game-description">Conecta 3 gemas marinas</div>
                     <div class="game-stats">
                         <span class="best-score">Mejor: <span id="bloques-best">0</span></span>
@@ -13250,7 +13250,7 @@ Comida premium y de cumpleaños
             gameOverlay.innerHTML = `
                 <div class="bloques-game-container">
                     <div class="bloques-header">
-                        <h2>💎 Mar Match-3</h2>
+                        <h2>💎 Conecta 3</h2>
                         <div class="bloques-stats">
                             <span>⭐ <span id="bloques-score">0</span></span>
                             <span>⏰ <span id="bloques-time">60</span>s</span>
@@ -13600,16 +13600,24 @@ Comida premium y de cumpleaños
             }
             
             // Event listeners
-            closeBtn.addEventListener('click', () => {
-                if(timerId) clearInterval(timerId);
-                gameOverlay.remove();
-                console.log('💎 Juego Mar Match-3 cerrado');
-            });
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    if(timerId) clearInterval(timerId);
+                    gameOverlay.remove();
+                    console.log('💎 Juego Mar Match-3 cerrado');
+                });
+            } else {
+                console.error('❌ No se puede configurar el event listener del botón cerrar - closeBtn es null');
+            }
             
-            restartBtn.addEventListener('click', () => {
-                if(timerId) clearInterval(timerId);
-                initBloquesGame();
-            });
+            if (restartBtn) {
+                restartBtn.addEventListener('click', () => {
+                    if(timerId) clearInterval(timerId);
+                    initBloquesGame();
+                });
+            } else {
+                console.error('❌ No se puede configurar el event listener del botón reiniciar - restartBtn es null');
+            }
             
             gameOverlay.addEventListener('click', (e) => {
                 if (e.target === gameOverlay) {
