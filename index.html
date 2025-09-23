@@ -13451,27 +13451,29 @@ Comida premium y de cumpleaños
             
             // --- INPUT (drag por celdas adyacentes)
             let drag = null;
+            let isDragging = false;
             function onPointerDown(e){
-                console.log('🎯 onPointerDown disparado!', {busy, timeLeft, event: e.type});
+                console.log('🎯 onPointerDown disparado!', {busy, timeLeft, event: e.type, isDragging});
                 if (busy || timeLeft <= 0) {
                     console.log('❌ Bloqueado por busy o timeLeft');
                     return;
                 }
-                if (drag) {
+                if (isDragging) {
                     console.log('⚠️ Ya hay un drag activo, ignorando');
                     return;
                 }
                 e.preventDefault(); // Prevenir comportamiento por defecto
                 const el = e.currentTarget;
                 drag = { r: +el.dataset.r, c: +el.dataset.c, el };
+                isDragging = true;
                 el.style.opacity = '0.7';
                 el.style.transform = 'scale(0.95)';
-                console.log('✅ Drag iniciado:', drag);
+                console.log('✅ Drag iniciado:', drag, 'isDragging:', isDragging);
             }
             function onPointerEnter(e){
-                console.log('🎯 onPointerEnter disparado!', {drag, event: e.type});
-                if(!drag) {
-                    console.log('❌ No hay drag activo');
+                console.log('🎯 onPointerEnter disparado!', {drag, isDragging, event: e.type});
+                if(!isDragging || !drag) {
+                    console.log('❌ No hay drag activo', {isDragging, drag});
                     return;
                 }
                 const target = e.currentTarget;
@@ -13496,10 +13498,13 @@ Comida premium y de cumpleaños
             }
             function onPointerUp(){ if(drag) endDrag(); }
             function endDrag(){ 
+                console.log('🛑 endDrag llamado', {drag, isDragging});
                 if(drag){ 
                     drag.el.style.opacity = '1'; 
                     drag.el.style.transform = 'scale(1)'; 
                     drag = null; 
+                    isDragging = false;
+                    console.log('✅ Drag terminado');
                 } 
             }
             function isAdjacent(r1,c1,r2,c2){ return (Math.abs(r1-r2)+Math.abs(c1-c2))===1; }
