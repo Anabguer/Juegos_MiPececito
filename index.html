@@ -13496,7 +13496,11 @@ Comida premium y de cumpleaños
                     console.log('✅ Selección limpiada');
                 }
             }
-            function isAdjacent(r1,c1,r2,c2){ return (Math.abs(r1-r2)+Math.abs(c1-c2))===1; }
+            function isAdjacent(r1,c1,r2,c2){ 
+                const result = (Math.abs(r1-r2)+Math.abs(c1-c2))===1;
+                console.log(`🔍 isAdjacent(${r1},${c1}, ${r2},${c2}): ${result} (diff: ${Math.abs(r1-r2)}+${Math.abs(c1-c2)}=${Math.abs(r1-r2)+Math.abs(c1-c2)})`);
+                return result;
+            }
 
             function doSwap(r1,c1,r2,c2, animate=false){
                 const a = grid[r1][c1], b = grid[r2][c2];
