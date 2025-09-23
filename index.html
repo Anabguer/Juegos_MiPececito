@@ -13435,10 +13435,8 @@ Comida premium y de cumpleaños
                     min-height: 0;
                 `;
 
-                // Solo eventos mouse para evitar conflictos
-                el.addEventListener('mousedown', onPointerDown);
-                el.addEventListener('mouseenter', onPointerEnter);
-                el.addEventListener('mouseup', onPointerUp);
+                // Sistema de click simple
+                el.addEventListener('click', onClick);
 
                 return el;
             }
@@ -13449,63 +13447,55 @@ Comida premium y de cumpleaños
             
             function randomType(){ return Math.floor(Math.random()*TYPES.length); }
             
-            // --- INPUT (drag por celdas adyacentes)
-            let drag = null;
-            let isDragging = false;
-            function onPointerDown(e){
-                console.log('🎯 onPointerDown disparado!', {busy, timeLeft, event: e.type, isDragging});
+            // --- INPUT (sistema de click simple)
+            let selected = null;
+            
+            function onClick(e){
+                console.log('🎯 onClick disparado!', {busy, timeLeft});
                 if (busy || timeLeft <= 0) {
                     console.log('❌ Bloqueado por busy o timeLeft');
                     return;
                 }
-                if (isDragging) {
-                    console.log('⚠️ Ya hay un drag activo, ignorando');
-                    return;
-                }
-                e.preventDefault(); // Prevenir comportamiento por defecto
+                
                 const el = e.currentTarget;
-                drag = { r: +el.dataset.r, c: +el.dataset.c, el };
-                isDragging = true;
-                el.style.opacity = '0.7';
-                el.style.transform = 'scale(0.95)';
-                console.log('✅ Drag iniciado:', drag, 'isDragging:', isDragging);
-            }
-            function onPointerEnter(e){
-                console.log('🎯 onPointerEnter disparado!', {drag, isDragging, event: e.type});
-                if(!isDragging || !drag) {
-                    console.log('❌ No hay drag activo', {isDragging, drag});
-                    return;
-                }
-                const target = e.currentTarget;
-                const r2 = +target.dataset.r, c2 = +target.dataset.c;
-                const {r,c} = drag;
-                console.log('🔄 Intentando intercambio:', {from: {r,c}, to: {r2,c2}});
-                if(isAdjacent(r,c,r2,c2)){
-                    console.log('✅ Son adyacentes, intercambiando...');
-                    doSwap(r,c,r2,c2, true);
-                    const matches = findMatches();
-                    console.log('🔍 Matches encontrados:', matches.length);
-                    if(matches.length>0){
-                        removeMatches(matches);
-                    } else {
-                        console.log('❌ No hay matches, revirtiendo...');
-                        doSwap(r2,c2,r,c, true);
-                    }
-                    endDrag();
+                const r = +el.dataset.r;
+                const c = +el.dataset.c;
+                
+                console.log('🎯 Click en ficha:', {r, c});
+                
+                if (!selected) {
+                    // Primera selección
+                    selected = { r, c, el };
+                    el.style.opacity = '0.7';
+                    el.style.transform = 'scale(0.95)';
+                    console.log('✅ Primera ficha seleccionada:', selected);
                 } else {
-                    console.log('❌ No son adyacentes');
+                    // Segunda selección
+                    const {r: r1, c: c1} = selected;
+                    console.log('🔄 Intentando intercambio:', {from: {r1, c1}, to: {r, c}});
+                    
+                    if (isAdjacent(r1, c1, r, c)) {
+                        console.log('✅ Son adyacentes, intercambiando...');
+                        doSwap(r1, c1, r, c, true);
+                        const matches = findMatches();
+                        console.log('🔍 Matches encontrados:', matches.length);
+                        
+                        if (matches.length > 0) {
+                            removeMatches(matches);
+                        } else {
+                            console.log('❌ No hay matches, revirtiendo...');
+                            doSwap(r, c, r1, c1, true);
+                        }
+                    } else {
+                        console.log('❌ No son adyacentes');
+                    }
+                    
+                    // Limpiar selección
+                    selected.el.style.opacity = '1';
+                    selected.el.style.transform = 'scale(1)';
+                    selected = null;
+                    console.log('✅ Selección limpiada');
                 }
-            }
-            function onPointerUp(){ if(drag) endDrag(); }
-            function endDrag(){ 
-                console.log('🛑 endDrag llamado', {drag, isDragging});
-                if(drag){ 
-                    drag.el.style.opacity = '1'; 
-                    drag.el.style.transform = 'scale(1)'; 
-                    drag = null; 
-                    isDragging = false;
-                    console.log('✅ Drag terminado');
-                } 
             }
             function isAdjacent(r1,c1,r2,c2){ return (Math.abs(r1-r2)+Math.abs(c1-c2))===1; }
 
