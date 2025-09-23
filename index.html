@@ -3265,6 +3265,7 @@
                 
                 // Crear juego completo
                 game = new CompleteGame();
+                window.game = game; // Asignar inmediatamente para que esté disponible
                 console.log('✅ CompleteGame creado correctamente');
                 
                 // Crear AudioManager
@@ -10737,8 +10738,7 @@ Comida premium y de cumpleaños
             }
         }
         
-        // 🌐 Exponer game para debug
-        window.game = game;
+        // 🌐 game ya está expuesto globalmente arriba
         
         // 🚨 SISTEMA DE EMERGENCIA PARA MODALES
         setTimeout(() => {
@@ -12698,8 +12698,8 @@ Comida premium y de cumpleaños
                     
                     console.log(`🔍 DEBUG: Estrellas después: ${window.game.gameState.stars}`);
                     
-                    // Animación especial si son muchas estrellas
-                    if (starsWon >= 3) {
+                    // Animación de estrellas ganadas (siempre)
+                    if (starsWon > 0) {
                         window.game.createRewardAnimation(starsWon, 0);
                     }
                     
@@ -12709,11 +12709,22 @@ Comida premium y de cumpleaños
                 }
                 
                 // Mostrar resultados con razones
-                gameModal.querySelector('#results-title').textContent = won ? "¡Perfecto!" : "Fin de partida";
-                gameModal.querySelector('#final-level').textContent = gameState.level;
-                gameModal.querySelector('#final-score').textContent = finalScore;
-                gameModal.querySelector('#final-best').textContent = getBest();
-                gameModal.querySelector('#final-stars').textContent = starsWon;
+                console.log(`🔍 Mostrando resultados: ${finalScore} puntos, ${starsWon} estrellas`);
+                
+                // Verificar que los elementos existan antes de actualizarlos
+                const resultsTitle = gameModal.querySelector('#results-title');
+                const finalLevel = gameModal.querySelector('#final-level');
+                const finalScoreEl = gameModal.querySelector('#final-score');
+                const finalBest = gameModal.querySelector('#final-best');
+                const finalStars = gameModal.querySelector('#final-stars');
+                
+                if (resultsTitle) resultsTitle.textContent = won ? "¡Perfecto!" : "Fin de partida";
+                if (finalLevel) finalLevel.textContent = gameState.level;
+                if (finalScoreEl) finalScoreEl.textContent = finalScore;
+                if (finalBest) finalBest.textContent = getBest();
+                if (finalStars) finalStars.textContent = starsWon;
+                
+                console.log(`🔍 Modal actualizado: estrellas=${starsWon}`);
                 
                 // Mostrar razones de recompensas
                 const reasonsText = rewardReasons.join('\n');
