@@ -13250,9 +13250,12 @@ Comida premium y de cumpleaños
                         </div>
                         <button class="bloques-close-btn">✕</button>
                     </div>
+                    <div class="bloques-timer-bar">
+                        <div class="bloques-timer-fill" id="bloques-timer-fill"></div>
+                    </div>
                     <div class="bloques-board" id="bloques-board"></div>
                     <div class="bloques-footer">
-                        <button class="bloques-btn" id="bloques-restart">🔄 Reiniciar</button>
+                        <button class="bloques-btn" id="bloques-restart">JUGAR</button>
                     </div>
                 </div>
             `;
@@ -13281,15 +13284,37 @@ Comida premium y de cumpleaños
                 console.error('❌ No se encontró el botón de cerrar en el juego de bloques');
             }
             
+            // Barra de progreso del timer
+            const timerBar = gameOverlay.querySelector('.bloques-timer-bar');
+            if (timerBar) {
+                timerBar.style.cssText = `
+                    height: 6px;
+                    background: rgba(255, 255, 255, 0.1);
+                    margin: 0 20px;
+                    border-radius: 3px;
+                    overflow: hidden;
+                `;
+            }
+
+            const timerFill = gameOverlay.querySelector('.bloques-timer-fill');
+            if (timerFill) {
+                timerFill.style.cssText = `
+                    height: 100%;
+                    background: linear-gradient(90deg, #4CAF50, #FFC107, #F44336);
+                    width: 100%;
+                    transition: width 1s linear;
+                `;
+            }
+
             const board = gameOverlay.querySelector('.bloques-board');
             if (board) {
                 board.style.cssText = `
                     flex: 1;
                     display: grid;
-                    grid-template-columns: repeat(8, 1fr);
-                    grid-template-rows: repeat(8, 1fr);
-                    gap: 2px;
-                    padding: 10px;
+                    grid-template-columns: repeat(6, 1fr);
+                    grid-template-rows: repeat(6, 1fr);
+                    gap: 4px;
+                    padding: 15px;
                     background: rgba(255, 255, 255, 0.06);
                     margin: 10px;
                     border-radius: 14px;
@@ -13339,16 +13364,16 @@ Comida premium y de cumpleaños
             
             // Inicializar juego
             function initBloquesGame() {
-                grid = new Array(8);
+                grid = new Array(6);
                 board.innerHTML = "";
                 score = 0;
                 timeLeft = 60;
                 busy = true; // Juego pausado hasta que haga clic en JUGAR
                 updateUI();
                 
-                for(let r = 0; r < 8; r++) {
-                    grid[r] = new Array(8);
-                    for(let c = 0; c < 8; c++) {
+                for(let r = 0; r < 6; r++) {
+                    grid[r] = new Array(6);
+                    for(let c = 0; c < 6; c++) {
                         let t;
                         do {
                             t = Math.floor(Math.random() * TYPES.length);
@@ -13381,14 +13406,14 @@ Comida premium y de cumpleaños
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    border-radius: 8px;
+                    border-radius: 12px;
                     aspect-ratio: 1/1;
                     cursor: pointer;
                     user-select: none;
-                    font-size: 16px;
+                    font-size: 24px;
                     background: linear-gradient(160deg, #0e4e76, #0a3757);
                     border: 1px solid rgba(255, 255, 255, 0.18);
-                    box-shadow: 0 2px 4px rgba(0,0,0,.35);
+                    box-shadow: 0 4px 8px rgba(0,0,0,.35);
                     transition: all 0.2s ease;
                     min-width: 0;
                     min-height: 0;
@@ -13528,9 +13553,9 @@ Comida premium y de cumpleaños
                 const matches = [];
                 
                 // Buscar matches horizontales
-                for(let r = 0; r < 8; r++) {
+                for(let r = 0; r < 6; r++) {
                     let count = 1;
-                    for(let c = 1; c < 8; c++) {
+                    for(let c = 1; c < 6; c++) {
                         if(getT(r, c) === getT(r, c-1)) {
                             count++;
                         } else {
@@ -13544,15 +13569,15 @@ Comida premium y de cumpleaños
                     }
                     if(count >= 3) {
                         for(let i = 0; i < count; i++) {
-                            matches.push({r, c: 7-i});
+                            matches.push({r, c: 5-i});
                         }
                     }
                 }
                 
                 // Buscar matches verticales
-                for(let c = 0; c < 8; c++) {
+                for(let c = 0; c < 6; c++) {
                     let count = 1;
-                    for(let r = 1; r < 8; r++) {
+                    for(let r = 1; r < 6; r++) {
                         if(getT(r, c) === getT(r-1, c)) {
                             count++;
                         } else {
@@ -13566,7 +13591,7 @@ Comida premium y de cumpleaños
                     }
                     if(count >= 3) {
                         for(let i = 0; i < count; i++) {
-                            matches.push({r: 7-i, c});
+                            matches.push({r: 5-i, c});
                         }
                     }
                 }
@@ -13644,6 +13669,7 @@ Comida premium y de cumpleaños
             function updateUI() {
                 const scoreEl = document.getElementById('bloques-score');
                 const timeEl = document.getElementById('bloques-time');
+                const timerFill = document.getElementById('bloques-timer-fill');
                 
                 if (scoreEl) {
                     scoreEl.textContent = score;
@@ -13655,6 +13681,13 @@ Comida premium y de cumpleaños
                     timeEl.textContent = timeLeft;
                 } else {
                     console.error('❌ No se encontró el elemento bloques-time');
+                }
+
+                if (timerFill) {
+                    const percentage = (timeLeft / 60) * 100;
+                    timerFill.style.width = `${percentage}%`;
+                } else {
+                    console.error('❌ No se encontró el elemento bloques-timer-fill');
                 }
             }
             
