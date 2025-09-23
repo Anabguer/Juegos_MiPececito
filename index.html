@@ -1863,6 +1863,36 @@
                 opacity: 0;
             }
         }
+
+        @keyframes starExplosion {
+            0% {
+                transform: scale(0) translate(0, 0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1) translate(var(--random-x, 0), var(--random-y, 0));
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0.3) translate(calc(var(--random-x, 0) * 2), calc(var(--random-y, 0) * 2));
+                opacity: 0;
+            }
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateX(-50%) translateY(0) scale(0.5);
+                opacity: 0;
+            }
+            20% {
+                transform: translateX(-50%) translateY(-20px) scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-50%) translateY(-100px) scale(1);
+                opacity: 0;
+            }
+        }
         
         .loading-spinner {
             width: 40px;
@@ -12704,11 +12734,66 @@ Comida premium y de cumpleaños
                     window.game.gameState.stars += starsWon;
                     window.game.saveGame();
                     
+                    // Actualizar UI inmediatamente
+                    window.game.updateUI();
+                    
                     console.log(`🔍 DEBUG: Estrellas después: ${window.game.gameState.stars}`);
                     
-                    // Animación de estrellas ganadas (siempre)
+                    // 🎆 ANIMACIÓN DE ESTRELLAS INMEDIATAMENTE (ANTES DEL MODAL)
                     if (starsWon > 0) {
-                        window.game.createRewardAnimation(starsWon, 0);
+                        // Crear animación directamente en el modal del juego
+                        const gameModal = document.querySelector('.bubble-game-container');
+                        if (gameModal) {
+                            const gameRect = gameModal.getBoundingClientRect();
+                            const centerX = gameRect.left + gameRect.width / 2;
+                            const centerY = gameRect.top + gameRect.height / 2;
+                            
+                            // Crear partículas de estrellas
+                            for (let i = 0; i < starsWon * 10; i++) {
+                                const particle = document.createElement('div');
+                                const randomX = (Math.random() - 0.5) * 200;
+                                const randomY = (Math.random() - 0.5) * 200;
+                                
+                                particle.style.cssText = `
+                                    position: fixed;
+                                    width: 8px;
+                                    height: 8px;
+                                    background: #FFD700;
+                                    border-radius: 50%;
+                                    z-index: 99999;
+                                    pointer-events: none;
+                                    left: ${centerX}px;
+                                    top: ${centerY}px;
+                                    --random-x: ${randomX}px;
+                                    --random-y: ${randomY}px;
+                                    animation: starExplosion 1.5s ease-out forwards;
+                                `;
+                                document.body.appendChild(particle);
+                                
+                                // Eliminar partícula después de la animación
+                                setTimeout(() => particle.remove(), 1500);
+                            }
+                            
+                            // Mensaje flotante
+                            const message = document.createElement('div');
+                            message.style.cssText = `
+                                position: fixed;
+                                left: ${centerX}px;
+                                top: ${centerY - 50}px;
+                                transform: translateX(-50%);
+                                font-size: 24px;
+                                font-weight: bold;
+                                color: #FFD700;
+                                text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+                                z-index: 99999;
+                                pointer-events: none;
+                                animation: floatUp 2s ease-out forwards;
+                            `;
+                            message.textContent = starsWon >= 2 ? '⭐ ¡EXCELENTE!' : '🫧 ¡GENIAL!';
+                            document.body.appendChild(message);
+                            
+                            setTimeout(() => message.remove(), 2000);
+                        }
                     }
                     
                     console.log(`🏆 Burbujas: +${starsWon} estrellas ganadas`);
