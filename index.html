@@ -11441,18 +11441,61 @@ Comida premium y de cumpleaños
                 `;
             }
             
-            // 📐 ARREGLAR LEYENDA EN UNA SOLA LÍNEA
+            // 📐 ARREGLAR LEYENDA EN UNA SOLA LÍNEA - TODOS LOS ICONOS JUNTOS
             const legend = gameModal.querySelector('.bubble-legend');
             if (legend) {
+                // Cambiar el HTML para poner todos los iconos en una sola línea
+                legend.innerHTML = `
+                    <div class="legend-item good">🐟 🐠 🐚 🪸 ⭐</div>
+                    <div class="legend-item bad">💀 🦈 ⚠️ 🧨 🪝</div>
+                `;
+                
                 legend.style.cssText = `
                     display: flex !important;
                     justify-content: center !important;
                     align-items: center !important;
-                    gap: 20px !important;
+                    gap: 15px !important;
                     margin: 10px 0 !important;
                     padding: 0 20px !important;
                     flex-wrap: nowrap !important;
+                    white-space: nowrap !important;
                 `;
+                
+                // Re-aplicar estilos a los elementos recién creados
+                const goodLegend = legend.querySelector('.legend-item.good');
+                const badLegend = legend.querySelector('.legend-item.bad');
+                
+                if (goodLegend) {
+                    goodLegend.style.cssText = `
+                        background: rgba(76, 175, 80, 0.3) !important;
+                        border: 3px solid #4CAF50 !important;
+                        border-radius: 12px !important;
+                        padding: 6px 12px !important;
+                        font-size: 14px !important;
+                        font-weight: bold !important;
+                        color: #2E7D32 !important;
+                        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4) !important;
+                        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+                        white-space: nowrap !important;
+                        display: inline-block !important;
+                    `;
+                }
+                
+                if (badLegend) {
+                    badLegend.style.cssText = `
+                        background: rgba(244, 67, 54, 0.3) !important;
+                        border: 3px solid #F44336 !important;
+                        border-radius: 12px !important;
+                        padding: 6px 12px !important;
+                        font-size: 14px !important;
+                        font-weight: bold !important;
+                        color: #C62828 !important;
+                        box-shadow: 0 4px 8px rgba(244, 67, 54, 0.4) !important;
+                        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+                        white-space: nowrap !important;
+                        display: inline-block !important;
+                    `;
+                }
             }
             
             // 🎮 ASEGURAR QUE EL BOTÓN JUGAR SE VEA
