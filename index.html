@@ -13288,12 +13288,16 @@ Comida premium y de cumpleaños
                     display: grid;
                     grid-template-columns: repeat(8, 1fr);
                     grid-template-rows: repeat(8, 1fr);
-                    gap: 3px;
-                    padding: 20px;
+                    gap: 2px;
+                    padding: 10px;
                     background: rgba(255, 255, 255, 0.06);
                     margin: 10px;
                     border-radius: 14px;
                     border: 1px solid rgba(255, 255, 255, 0.15);
+                    max-width: 400px;
+                    max-height: 400px;
+                    aspect-ratio: 1;
+                    overflow: hidden;
                 `;
             } else {
                 console.error('❌ No se encontró el tablero en el juego de bloques');
@@ -13339,6 +13343,7 @@ Comida premium y de cumpleaños
                 board.innerHTML = "";
                 score = 0;
                 timeLeft = 60;
+                busy = true; // Juego pausado hasta que haga clic en JUGAR
                 updateUI();
                 
                 for(let r = 0; r < 8; r++) {
@@ -13358,7 +13363,8 @@ Comida premium y de cumpleaños
                     }
                 }
                 
-                startTimer();
+                // NO iniciar timer automáticamente
+                console.log('🎮 Juego Conecta 3 inicializado - Haz clic en JUGAR para empezar');
             }
             
             function getT(r, c) {
@@ -13375,15 +13381,17 @@ Comida premium y de cumpleaños
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    border-radius: 14px;
+                    border-radius: 8px;
                     aspect-ratio: 1/1;
                     cursor: pointer;
                     user-select: none;
-                    font-size: 24px;
+                    font-size: 16px;
                     background: linear-gradient(160deg, #0e4e76, #0a3757);
                     border: 1px solid rgba(255, 255, 255, 0.18);
-                    box-shadow: 0 4px 8px rgba(0,0,0,.35);
+                    box-shadow: 0 2px 4px rgba(0,0,0,.35);
                     transition: all 0.2s ease;
+                    min-width: 0;
+                    min-height: 0;
                 `;
                 
                 // Click (desktop)
@@ -13683,7 +13691,9 @@ Comida premium y de cumpleaños
             if (restartBtn) {
                 restartBtn.addEventListener('click', () => {
                     if(timerId) clearInterval(timerId);
-                    initBloquesGame();
+                    busy = false; // Iniciar juego
+                    startTimer(); // Iniciar timer
+                    console.log('🎮 ¡Juego iniciado! Timer corriendo...');
                 });
             } else {
                 console.error('❌ No se puede configurar el event listener del botón reiniciar - restartBtn es null');
