@@ -13365,33 +13365,32 @@ Comida premium y de cumpleaños
             
             // Inicializar juego
             function initBloquesGame() {
-                // Inicializar con la lógica del prototipo
                 score = 0;
                 timeLeft = 60;
-                busy = true;
+                busy = true;               // bloqueamos mientras pintamos
                 updateUI();
-                
-                // Limpiar DOM y estado
+
                 board.innerHTML = '';
                 grid = [...Array(9)].map(()=>Array(6).fill(null));
 
-                for(let r=0;r<9;r++){
-                    for(let c=0;c<6;c++){
+                for (let r=0; r<9; r++) {
+                    for (let c=0; c<6; c++) {
                         let t = Math.floor(Math.random() * TYPES.length);
-                        // evita nacimientos con match inmediato
                         const left1 = c>0 ? grid[r][c-1]?.t : -1;
                         const left2 = c>1 ? grid[r][c-2]?.t : -2;
-                        const up1 = r>0 ? grid[r-1][c]?.t : -1;
-                        const up2 = r>1 ? grid[r-2][c]?.t : -2;
-                        while((left1===t && left2===t) || (up1===t && up2===t)) t = Math.floor(Math.random() * TYPES.length);
-                        
+                        const up1   = r>0 ? grid[r-1][c]?.t : -1;
+                        const up2   = r>1 ? grid[r-2][c]?.t : -2;
+                        while ((left1===t && left2===t) || (up1===t && up2===t)) t = Math.floor(Math.random()*TYPES.length);
+
                         const el = makeCell(r,c,t);
                         grid[r][c] = { t, el };
                         board.appendChild(el);
                     }
                 }
-                
-                console.log('🎮 Juego Conecta 3 inicializado - Haz clic en JUGAR para empezar');
+
+                // 👇 IMPORTANTE: desbloquear interacción al terminar
+                busy = false;
+                console.log('🎮 Juego Conecta 3 inicializado');
             }
             
             function showCells() {
@@ -13417,32 +13416,28 @@ Comida premium y de cumpleaños
                 const el = document.createElement('div');
                 el.className = 'bloques-cell';
                 el.dataset.r = r; el.dataset.c = c; el.dataset.t = t;
-                el.innerHTML = ICONS[t];
-                el.style.cssText = `
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 12px;
-                    aspect-ratio: 1/1;
-                    cursor: pointer;
-                    user-select: none;
-                    font-size: 24px;
-                    background: linear-gradient(160deg, #0e4e76, #0a3757);
-                    border: 1px solid rgba(255, 255, 255, 0.18);
-                    box-shadow: 0 4px 8px rgba(0,0,0,.35);
-                    transition: all 0.2s ease;
-                    min-width: 0;
-                    min-height: 0;
+                el.textContent = ICONS[t];
+
+                // Si usas GRID, usa order para colocación lógica (opción simple)
+                el.style.order = r*6 + c;
+
+                // estilos base
+                el.style.cssText += `
+                    display:flex;align-items:center;justify-content:center;
+                    border-radius:12px;aspect-ratio:1/1;cursor:pointer;user-select:none;
+                    font-size:28px;background:linear-gradient(160deg,#0e4e76,#0a3757);
+                    border:1px solid rgba(255,255,255,.18);box-shadow:0 4px 8px rgba(0,0,0,.35);
+                    transition:transform .18s ease, opacity .18s ease;
                 `;
 
-                // Sistema de click simple
                 el.addEventListener('click', onClick);
-
                 return el;
             }
             
             function placeCell(r,c, cell){
                 cell.dataset.r = r; cell.dataset.c = c;
+                // Si sigues en grid, actualiza el order para que "se mueva"
+                cell.style.order = r*6 + c;
             }
             
             function randomType(){ return Math.floor(Math.random()*TYPES.length); }
@@ -13450,51 +13445,40 @@ Comida premium y de cumpleaños
             // --- INPUT (sistema de click simple)
             
             function onClick(e){
-                console.log('🎯 onClick disparado!', {busy, timeLeft});
-                if (busy || timeLeft <= 0) {
-                    console.log('❌ Bloqueado por busy o timeLeft');
-                    return;
-                }
-                
+                if (busy || timeLeft <= 0) return;
+
                 const el = e.currentTarget;
-                const r = +el.dataset.r;
-                const c = +el.dataset.c;
-                
-                console.log('🎯 Click en ficha:', {r, c});
-                
+                const r = +el.dataset.r, c = +el.dataset.c;
+
                 if (!selected) {
-                    // Primera selección
                     selected = { r, c, el };
                     el.style.opacity = '0.7';
                     el.style.transform = 'scale(0.95)';
-                    console.log('✅ Primera ficha seleccionada:', selected);
-                } else {
-                    // Segunda selección
-                    const {r: r1, c: c1} = selected;
-                    console.log('🔄 Intentando intercambio:', {from: {r1, c1}, to: {r, c}});
-                    
-                    if (isAdjacent(r1, c1, r, c)) {
-                        console.log('✅ Son adyacentes, intercambiando...');
-                        doSwap(r1, c1, r, c, true);
-                        const matches = findMatches();
-                        console.log('🔍 Matches encontrados:', matches.length);
-                        
-                        if (matches.length > 0) {
-                            removeMatches(matches);
-                        } else {
-                            console.log('❌ No hay matches, revirtiendo...');
-                            doSwap(r, c, r1, c1, true);
-                        }
-                    } else {
-                        console.log('❌ No son adyacentes');
-                    }
-                    
-                    // Limpiar selección
-                    selected.el.style.opacity = '1';
-                    selected.el.style.transform = 'scale(1)';
-                    selected = null;
-                    console.log('✅ Selección limpiada');
+                    return;
                 }
+
+                const { r: r1, c: c1, el: el1 } = selected;
+
+                if (r === r1 && c === c1) { // deselección
+                    el1.style.opacity = '1';
+                    el1.style.transform = 'scale(1)';
+                    selected = null;
+                    return;
+                }
+
+                if (isAdjacent(r1, c1, r, c)) {
+                    doSwap(r1, c1, r, c, true);
+                    const matches = findMatches();
+                    if (matches.length > 0) {
+                        removeMatches(matches);
+                    } else {
+                        doSwap(r, c, r1, c1, true); // revertir
+                    }
+                }
+
+                el1.style.opacity = '1';
+                el1.style.transform = 'scale(1)';
+                selected = null;
             }
             function isAdjacent(r1,c1,r2,c2){ 
                 const result = (Math.abs(r1-r2)+Math.abs(c1-c2))===1;
