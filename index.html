@@ -11441,16 +11441,53 @@ Comida premium y de cumpleaños
                 `;
             }
             
-            // 📐 ARREGLAR LEYENDA LADO A LADO
+            // 📐 ARREGLAR LEYENDA EN UNA SOLA LÍNEA
             const legend = gameModal.querySelector('.bubble-legend');
             if (legend) {
                 legend.style.cssText = `
                     display: flex !important;
                     justify-content: center !important;
-                    gap: 30px !important;
-                    margin: 15px 0 !important;
+                    align-items: center !important;
+                    gap: 20px !important;
+                    margin: 10px 0 !important;
                     padding: 0 20px !important;
+                    flex-wrap: nowrap !important;
                 `;
+            }
+            
+            // 🎮 ASEGURAR QUE EL BOTÓN JUGAR SE VEA
+            const playBtn = gameModal.querySelector('#bubbleStartBtn');
+            if (playBtn) {
+                playBtn.style.cssText = `
+                    background: linear-gradient(135deg, #ff6b35, #ff8e53) !important;
+                    border: 2px solid #FF8C00 !important;
+                    border-radius: 20px !important;
+                    padding: 12px 30px !important;
+                    font-size: 18px !important;
+                    font-weight: bold !important;
+                    color: white !important;
+                    cursor: pointer !important;
+                    transition: all 0.3s ease !important;
+                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+                    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4) !important;
+                    text-transform: uppercase !important;
+                    letter-spacing: 1px !important;
+                    width: 80% !important;
+                    max-width: 250px !important;
+                    margin: 15px auto !important;
+                    display: block !important;
+                `;
+                
+                // Efecto hover
+                playBtn.addEventListener('mouseenter', () => {
+                    playBtn.style.transform = 'translateY(-3px) scale(1.08)';
+                    playBtn.style.boxShadow = '0 12px 25px rgba(255, 107, 53, 0.7)';
+                });
+                
+                playBtn.addEventListener('mouseleave', () => {
+                    playBtn.style.transform = 'translateY(0) scale(1)';
+                    playBtn.style.boxShadow = '0 6px 20px rgba(255, 107, 53, 0.4)';
+                });
             }
         }
         
