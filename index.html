@@ -12215,12 +12215,20 @@ Comida premium y de cumpleaños
             const elements = {
                 stage: gameModal.querySelector('#bubbleStage'),
                 scoreEl: gameModal.querySelector('#bubble-score'),
-                bestEl: gameModal.querySelector('#bubble-best'),
-                starsEl: gameModal.querySelector('#bubble-stars'),
+                bestEl: gameModal.querySelector('#bubble-best') || gameModal.querySelector('.score'), // Fallback
+                starsEl: gameModal.querySelector('#bubble-stars') || gameModal.querySelector('.stars'), // Fallback
                 startBtn: gameModal.querySelector('#bubbleStartBtn'),
                 backBtn: gameModal.querySelector('.bubble-back-btn'),
                 resultsModal: gameModal.querySelector('.bubble-results-modal')
             };
+            
+            // Si no encuentra los elementos, crear elementos temporales para evitar errores
+            if (!elements.bestEl) {
+                elements.bestEl = { textContent: '' };
+            }
+            if (!elements.starsEl) {
+                elements.starsEl = { textContent: '' };
+            }
             
             // Persistencia
             const getBest = () => Number(localStorage.getItem('bubbles_best') || 0);
