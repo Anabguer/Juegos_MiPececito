@@ -3332,6 +3332,22 @@
         function updateGamesUI() {
             // Obtener estrellas totales del juego principal
             const totalStars = window.game ? window.game.gameState.stars : 0;
+            console.log(`🔍 updateGamesUI: totalStars=${totalStars}, window.game=${!!window.game}`);
+            
+            // Si no hay estrellas, intentar cargar desde localStorage como fallback
+            let finalStars = totalStars;
+            if (totalStars === 0 && window.game) {
+                const savedData = localStorage.getItem('miPececito_gameState');
+                if (savedData) {
+                    try {
+                        const parsed = JSON.parse(savedData);
+                        finalStars = parsed.stars || 0;
+                        console.log(`🔍 Fallback: Estrellas desde localStorage: ${finalStars}`);
+                    } catch (e) {
+                        console.log(`❌ Error parsing savedData: ${e}`);
+                    }
+                }
+            }
             
             // Actualizar juego de burbujas
             const bubblesBest = document.getElementById('bubbles-best');
@@ -3345,14 +3361,15 @@
                 bubblesLevel.textContent = localStorage.getItem('bubbles_level') || '1';
             }
             if (bubblesStars) {
-                bubblesStars.textContent = totalStars; // Mostrar estrellas totales del juego principal
+                bubblesStars.textContent = finalStars;
+                console.log(`🔍 Actualizando bubbles-stars a: ${finalStars}`);
             }
             
             // Actualizar todos los demás juegos con las estrellas totales
             const allGameStars = document.querySelectorAll('[id$="-stars"]');
             allGameStars.forEach(starEl => {
                 if (starEl.id !== 'bubbles-stars') { // Ya actualizado arriba
-                    starEl.textContent = totalStars;
+                    starEl.textContent = finalStars;
                 }
             });
         }
@@ -12630,9 +12647,16 @@ Comida premium y de cumpleaños
                 }
                 
                 // 🎆 INTEGRAR CON SISTEMA PRINCIPAL
+                console.log(`🔍 DEBUG ESTRELLAS: starsWon=${starsWon}, window.game=${!!window.game}`);
+                if (window.game) {
+                    console.log(`🔍 DEBUG: Estrellas antes: ${window.game.gameState.stars}`);
+                }
+                
                 if (window.game && starsWon > 0) {
                     window.game.gameState.stars += starsWon;
                     window.game.saveGame();
+                    
+                    console.log(`🔍 DEBUG: Estrellas después: ${window.game.gameState.stars}`);
                     
                     // Animación especial si son muchas estrellas
                     if (starsWon >= 3) {
@@ -12640,6 +12664,8 @@ Comida premium y de cumpleaños
                     }
                     
                     console.log(`🏆 Burbujas: +${starsWon} estrellas ganadas`);
+                } else {
+                    console.log(`❌ ERROR: No se pudieron añadir estrellas - window.game=${!!window.game}, starsWon=${starsWon}`);
                 }
                 
                 // Mostrar resultados con razones
