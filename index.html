@@ -11734,7 +11734,7 @@ Comida premium y de cumpleaños
             document.head.appendChild(style);
         }
         
-        // 🎨 FUNCIÓN UNIFICADA PARA APLICAR DISEÑO PERFECTO DE BURBUJAS A TODOS LOS JUEGOS
+        // 🎨 FUNCIÓN UNIFICADA SIMPLE PARA TODOS LOS JUEGOS
         function applyPerfectBubbleDesign(gameOverlay, gameName) {
             // Estilos del overlay principal - AZUL MÁS CLARO Y SEMI-TRANSPARENTE
             gameOverlay.style.cssText = `
@@ -11748,257 +11748,215 @@ Comida premium y de cumpleaños
                 z-index: 9999; animation: fadeIn 0.4s ease;
             `;
             
-            // Contenedor principal - EXACTAMENTE IGUAL QUE BURBUJAS
-            const container = gameOverlay.querySelector(`.${gameName}-game-container`);
+            // Contenedor principal - SIMPLE Y FUNCIONAL
+            const container = gameOverlay.querySelector(`.${gameName}-game-container, .${gameName}-container`);
             if (container) {
                 container.style.cssText = `
-                    background: linear-gradient(180deg, 
-                        rgba(129, 212, 250, 0.25) 0%,
-                        rgba(79, 195, 247, 0.2) 30%,
-                        rgba(41, 182, 246, 0.15) 70%,
-                        rgba(13, 71, 161, 0.2) 100%);
-                    backdrop-filter: blur(30px) saturate(200%);
-                    border: 2px solid rgba(255, 255, 255, 0.3);
-                    border-radius: 28px;
-                    width: 95vw;
-                    height: 95vh;
-                    max-width: 420px;
-                    max-height: 800px;
+                    background: rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(20px);
+                    border: 2px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 20px;
+                    width: 90vw;
+                    height: 90vh;
+                    max-width: 500px;
+                    max-height: 700px;
                     display: flex;
                     flex-direction: column;
                     overflow: hidden;
-                    box-shadow: 
-                        0 30px 100px rgba(79, 195, 247, 0.3),
-                        0 0 60px rgba(129, 212, 250, 0.2),
-                        inset 0 2px 0 rgba(255, 255, 255, 0.4);
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
                 `;
             }
             
-            // Header del juego - DOS LÍNEAS COMO NOS GUSTABA
-            const header = gameOverlay.querySelector(`.${gameName}-header, .${gameName}-game-header`);
-            if (header) {
-                header.style.cssText = `
-                    background: linear-gradient(135deg, 
-                        rgba(79, 195, 247, 0.3) 0%, 
-                        rgba(129, 212, 250, 0.2) 100%);
-                    padding: 15px 20px;
-                    display: flex;
-                    flex-direction: column;
-                    border-bottom: 2px solid rgba(255, 255, 255, 0.25);
-                    gap: 8px;
-                `;
+            // 🏆 CREAR HEADER UNIFICADO PARA TODOS LOS JUEGOS
+            const existingHeader = gameOverlay.querySelector(`.${gameName}-header, .${gameName}-game-header`);
+            if (existingHeader) {
+                existingHeader.remove();
+            }
+            
+            // Crear header unificado
+            const unifiedHeader = document.createElement('div');
+            unifiedHeader.className = `${gameName}-unified-header`;
+            unifiedHeader.innerHTML = `
+                <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                <div class="header-top">
+                    <div class="game-title">${getGameTitle(gameName)}</div>
+                    <div class="header-controls">
+                        <button class="sound-btn">🔊</button>
+                        <button class="close-btn">✕</button>
+                    </div>
+                </div>
                 
-                // Primera línea: Título + Altavoz + X
-                const headerTop = header.querySelector('.header-top');
-                if (headerTop) {
-                    headerTop.style.cssText = `
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    `;
-                }
-                
-                // Segunda línea: Stats centrados
-                const headerBottom = header.querySelector('.header-bottom');
-                if (headerBottom) {
-                    headerBottom.style.cssText = `
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                    `;
-                }
+                <!-- SEGUNDA LÍNEA: NIVEL + PERLAS -->
+                <div class="header-bottom">
+                    <div class="game-stats">
+                        <span class="level">NIVEL 1</span>
+                        <span class="perlas">
+                            <img src="images/ui/perlas.png" style="width: 20px; height: 20px;">
+                            <span class="score">0</span>
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            // Insertar header al principio del contenedor
+            if (container) {
+                container.insertBefore(unifiedHeader, container.firstChild);
             }
             
-            // Título del juego
-            const title = gameOverlay.querySelector(`.${gameName}-header h2, .${gameName}-game-header .game-title`);
-            if (title) {
-                title.style.cssText = `
-                    color: white;
-                    font-size: 18px;
-                    font-weight: bold;
-                    margin: 0;
-                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                `;
+            // Estilos del header unificado
+            unifiedHeader.style.cssText = `
+                background: linear-gradient(135deg, 
+                    rgba(79, 195, 247, 0.3) 0%, 
+                    rgba(129, 212, 250, 0.2) 100%);
+                padding: 15px 20px;
+                display: flex;
+                flex-direction: column;
+                border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+                gap: 8px;
+            `;
+            
+            // Primera línea: Título + Altavoz + X
+            const headerTop = unifiedHeader.querySelector('.header-top');
+            headerTop.style.cssText = `
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            `;
+            
+            // Segunda línea: Nivel + Perlas
+            const headerBottom = unifiedHeader.querySelector('.header-bottom');
+            headerBottom.style.cssText = `
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            `;
+            
+            // Stats centrados
+            const gameStats = unifiedHeader.querySelector('.game-stats');
+            gameStats.style.cssText = `
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+            `;
+            
+            // Título
+            const title = unifiedHeader.querySelector('.game-title');
+            title.style.cssText = `
+                color: white;
+                font-size: 18px;
+                font-weight: bold;
+                margin: 0;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            `;
+            
+            // Controles del header
+            const headerControls = unifiedHeader.querySelector('.header-controls');
+            headerControls.style.cssText = `
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+            
+            // Función para obtener el título del juego
+            function getGameTitle(gameName) {
+                const titles = {
+                    'bubble': '🫧 Atrapa Burbujas',
+                    'bloques': '💎 Conecta 3',
+                    'carril': '🐬 Carril del Delfín',
+                    'correr': '🐉 Dragón Marino',
+                    'caza': '🎯 Caza de Peces',
+                    'secuencia': '🌊 Secuencia de Mareas',
+                    'toca3': '🏖️ Toca-3 Marino',
+                    'simon': '🎵 Simón Marino',
+                    'memoria': '🧠 Memoflip'
+                };
+                return titles[gameName] || '🎮 Juego';
             }
             
-            // Stats del juego
-            const stats = gameOverlay.querySelector(`.${gameName}-stats, .${gameName}-game-header .game-stats-simple`);
-            if (stats) {
-                stats.style.cssText = `
-                    color: white;
+            // 🎯 CONFIGURAR BOTONES DEL HEADER UNIFICADO
+            const soundBtn = unifiedHeader.querySelector('.sound-btn');
+            const closeBtn = unifiedHeader.querySelector('.close-btn');
+            
+            // Botón de sonido
+            if (soundBtn) {
+                soundBtn.style.cssText = `
+                    width: 30px;
+                    height: 30px;
                     font-size: 16px;
-                    font-weight: bold;
-                    text-align: center;
-                    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-                `;
-            }
-            
-            // Leyenda verde/roja lado a lado
-            const legend = gameOverlay.querySelector(`.${gameName}-legend`);
-            if (legend) {
-                legend.style.cssText = `
-                    display: flex;
-                    justify-content: center;
-                    gap: 20px;
-                    margin: 10px 0;
-                `;
-                
-                // Buenas (verde con fondo transparente)
-                const goodLegend = legend.querySelector('.legend-item.good, .good');
-                if (goodLegend) {
-                    goodLegend.style.cssText = `
-                        background: rgba(76, 175, 80, 0.2);
-                        border: 2px solid #4CAF50;
-                        border-radius: 8px;
-                        padding: 4px 12px;
-                        font-size: 14px;
-                        font-weight: bold;
-                        color: #2E7D32;
-                        box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
-                    `;
-                }
-                
-                // Malas (rojo con fondo transparente)
-                const badLegend = legend.querySelector('.legend-item.bad, .bad');
-                if (badLegend) {
-                    badLegend.style.cssText = `
-                        background: rgba(244, 67, 54, 0.2);
-                        border: 2px solid #F44336;
-                        border-radius: 8px;
-                        padding: 4px 12px;
-                        font-size: 14px;
-                        font-weight: bold;
-                        color: #C62828;
-                        box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
-                    `;
-                }
-            }
-            
-            // Área de juego MÁS LARGA (casi el doble)
-            const stageContainer = gameOverlay.querySelector(`.${gameName}-stage-container, .${gameName}-game-area, .${gameName}-board-wrap`);
-            if (stageContainer) {
-                stageContainer.style.cssText = `
-                    background: linear-gradient(135deg, 
-                        rgba(79, 195, 247, 0.1) 0%, 
-                        rgba(41, 182, 246, 0.05) 100%);
-                    border: 2px solid rgba(255, 255, 255, 0.2);
-                    border-radius: 15px;
-                    margin: 10px 20px;
-                    padding: 15px;
-                    flex: 1;
+                    color: #fff;
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 2px solid rgba(255, 255, 255, 0.5);
+                    border-radius: 50%;
+                    cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    min-height: 400px;
+                    transition: all 0.3s ease;
                 `;
+                
+                soundBtn.addEventListener('mouseenter', () => {
+                    soundBtn.style.background = 'rgba(255, 255, 255, 0.3)';
+                    soundBtn.style.transform = 'scale(1.1)';
+                });
+                
+                soundBtn.addEventListener('mouseleave', () => {
+                    soundBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                    soundBtn.style.transform = 'scale(1)';
+                });
             }
             
-            // 🔍 BUSCAR Y UNIFICAR TODOS LOS BOTONES DE CERRAR
-            const closeSelectors = [
-                `.${gameName}-close-btn`,
-                `.${gameName}-game-header .game-close-btn`,
-                `button[class*="close"]`,
-                `button[class*="${gameName}-close"]`
-            ];
+            // Botón de cerrar
+            if (closeBtn) {
+                closeBtn.style.cssText = `
+                    width: 30px;
+                    height: 30px;
+                    font-size: 18px;
+                    font-weight: 800;
+                    color: #fff;
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 2px solid rgba(255, 255, 255, 0.5);
+                    border-radius: 50%;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s ease;
+                `;
+                
+                closeBtn.addEventListener('mouseenter', () => {
+                    closeBtn.style.background = 'rgba(255, 255, 255, 0.3)';
+                    closeBtn.style.transform = 'scale(1.1)';
+                });
+                
+                closeBtn.addEventListener('mouseleave', () => {
+                    closeBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                    closeBtn.style.transform = 'scale(1)';
+                });
+                
+                // Event listener para cerrar
+                closeBtn.addEventListener('click', () => {
+                    gameOverlay.remove();
+                });
+            }
             
-            closeSelectors.forEach(selector => {
-                const closeBtn = gameOverlay.querySelector(selector);
-                if (closeBtn) {
-                    closeBtn.style.cssText = `
-                        position: absolute;
-                        top: 15px;
-                        right: 15px;
-                        width: 30px;
-                        height: 30px;
-                        font-size: 18px;
-                        font-weight: 800;
-                        color: #fff;
-                        background: rgba(255, 255, 255, 0.2);
-                        border: 2px solid rgba(255, 255, 255, 0.5);
-                        border-radius: 50%;
-                        cursor: pointer;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        transition: all 0.3s ease;
-                        z-index: 1000;
-                    `;
-                    
-                    // Efecto hover
-                    closeBtn.addEventListener('mouseenter', () => {
-                        closeBtn.style.background = 'rgba(255, 255, 255, 0.3)';
-                        closeBtn.style.transform = 'scale(1.1)';
-                    });
-                    
-                    closeBtn.addEventListener('mouseleave', () => {
-                        closeBtn.style.background = 'rgba(255, 255, 255, 0.2)';
-                        closeBtn.style.transform = 'scale(1)';
-                    });
-                    
-                    // Event listener para cerrar
-                    closeBtn.addEventListener('click', () => {
-                        gameOverlay.remove();
-                    });
-                }
-            });
-            
-            // 🔍 BUSCAR Y UNIFICAR TODOS LOS BOTONES DE JUGAR
-            const playSelectors = [
-                `#${gameName}-start`,
-                `#${gameName}StartBtn`,
-                `.${gameName}-btn`,
-                `button[class*="${gameName}"]`
-            ];
-            
-            playSelectors.forEach(selector => {
-                const playBtn = gameOverlay.querySelector(selector);
-                if (playBtn) {
-                    // Cambiar texto a "JUGAR" siempre
-                    playBtn.textContent = 'JUGAR';
-                    
-                    playBtn.style.cssText = `
-                        background: linear-gradient(135deg, #ff6b35, #ff8e53);
-                        border: 2px solid #FF8C00;
-                        border-radius: 20px;
-                        padding: 12px 30px;
-                        font-size: 18px;
-                        font-weight: bold;
-                        color: white;
-                        cursor: pointer;
-                        transition: all 0.3s ease;
-                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
-                        text-transform: uppercase;
-                        letter-spacing: 1px;
-                        width: 80%;
-                        max-width: 250px;
-                        margin: 15px auto;
-                        display: block;
-                    `;
-                    
-                    // Efecto hover unificado
-                    playBtn.addEventListener('mouseenter', () => {
-                        playBtn.style.transform = 'translateY(-3px) scale(1.08)';
-                        playBtn.style.boxShadow = '0 12px 25px rgba(255, 107, 53, 0.7)';
-                    });
-                    
-                    playBtn.addEventListener('mouseleave', () => {
-                        playBtn.style.transform = 'translateY(0) scale(1)';
-                        playBtn.style.boxShadow = '0 6px 20px rgba(255, 107, 53, 0.4)';
-                    });
-                }
-            });
-            
-            // 🔍 BUSCAR BOTONES POR TEXTO (método alternativo) - EXCLUIR BOTÓN CERRAR
+            // 🎮 BUSCAR Y UNIFICAR BOTONES DE JUGAR - MÉTODO SIMPLE
             const allButtons = gameOverlay.querySelectorAll('button');
             allButtons.forEach(btn => {
-                const text = btn.textContent.toLowerCase();
-                const isCloseBtn = btn.classList.contains('close-btn') || btn.classList.contains(`${gameName}-close-btn`) || text.includes('✕') || text.includes('×') || text.includes('x');
+                const text = btn.textContent.toLowerCase().trim();
+                const isCloseBtn = text === '✕' || text === '×' || text === 'x' || btn.classList.contains('close-btn');
+                const isSoundBtn = text === '🔊' || btn.classList.contains('sound-btn');
                 
-                if (!isCloseBtn && (text.includes('jugar') || text.includes('empezar') || text.includes('▶️') || text.includes('reiniciar') || text.includes('🔄'))) {
-                    // Cambiar texto a "JUGAR" siempre (solo botones de jugar, no cerrar)
-                    btn.textContent = 'JUGAR';
+                // Solo procesar botones que NO sean cerrar ni sonido
+                if (!isCloseBtn && !isSoundBtn) {
+                    // Cambiar texto a "JUGAR" si parece un botón de juego
+                    if (text.includes('jugar') || text.includes('empezar') || text.includes('▶️') || text.includes('reiniciar') || text.includes('🔄') || text.includes('start') || text.includes('play')) {
+                        btn.textContent = 'JUGAR';
+                    }
                     
+                    // Aplicar estilos unificados
                     btn.style.cssText = `
                         background: linear-gradient(135deg, #ff6b35, #ff8e53);
                         border: 2px solid #FF8C00;
