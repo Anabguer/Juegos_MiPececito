@@ -12641,18 +12641,12 @@ Comida premium y de cumpleaños
                 let starsWon = 0;
                 let rewardReasons = [];
                 
-                // ⭐ 1 ESTRELLA POR JUGAR (siempre)
+                // ⭐ SISTEMA DE ESTRELLAS CORRECTO
+                // 1 estrella por jugar (siempre)
                 starsWon += 1;
                 rewardReasons.push("🎮 Por jugar");
                 
-                // ⭐ ESTRELLAS POR PUNTOS (cada 15 puntos = 1 estrella)
-                const starsFromPoints = Math.floor(finalScore / 15);
-                if (starsFromPoints > 0) {
-                    starsWon += starsFromPoints;
-                    rewardReasons.push(`⭐ ${starsFromPoints} por puntos (${finalScore})`);
-                }
-                
-                // ⭐ 1 ESTRELLA EXTRA POR RÉCORD PERSONAL
+                // +1 estrella si superas tu récord personal
                 if (finalScore > bestPrev) {
                     starsWon += 1;
                     rewardReasons.push("🏆 ¡Nuevo récord personal!");
@@ -12665,7 +12659,7 @@ Comida premium y de cumpleaños
                     }
                 }
                 
-                // ⭐ 1 ESTRELLA EXTRA POR RÉCORD GLOBAL (simulado)
+                // +1 estrella si superas el récord global (simulado)
                 const globalRecord = 1000; // Simulamos un récord global
                 if (finalScore > globalRecord) {
                     starsWon += 1;
@@ -12777,14 +12771,15 @@ Comida premium y de cumpleaños
                 `;
                 
                 // Título de resultados - COMPACTO
-                const resultsTitle = gameModal.querySelector('#results-title');
-                resultsTitle.style.cssText = `
-                    font-size: 20px;
-                    font-weight: 800;
-                    margin-bottom: 15px;
-                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                    color: #fff;
-                `;
+                if (resultsTitle) {
+                    resultsTitle.style.cssText = `
+                        font-size: 20px;
+                        font-weight: 800;
+                        margin-bottom: 15px;
+                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                        color: #fff;
+                    `;
+                }
                 
                 // Stats de resultados - COMPACTO
                 const resultsStats = gameModal.querySelector('.results-stats');
