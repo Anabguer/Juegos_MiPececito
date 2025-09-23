@@ -3053,7 +3053,7 @@
                     <div class="inventory-square-name">Coral</div>
                     <div class="inventory-lock-overlay">
                         <div class="lock-icon-small">🔒</div>
-                        <div class="lock-stars">5⭐</div>
+                        <div class="lock-stars">5🫧</div>
                     </div>
                 </div>
                 
@@ -3062,7 +3062,7 @@
                     <div class="inventory-square-name">Abismo</div>
                     <div class="inventory-lock-overlay">
                         <div class="lock-icon-small">🔒</div>
-                        <div class="lock-stars">15⭐</div>
+                        <div class="lock-stars">15🫧</div>
                     </div>
                 </div>
                 
@@ -3071,7 +3071,7 @@
                     <div class="inventory-square-name">Tropical</div>
                     <div class="inventory-lock-overlay">
                         <div class="lock-icon-small">🔒</div>
-                        <div class="lock-stars">25⭐</div>
+                        <div class="lock-stars">25🫧</div>
                     </div>
                 </div>
                 
@@ -3080,7 +3080,7 @@
                     <div class="inventory-square-name">Comida</div>
                     <div class="inventory-lock-overlay">
                         <div class="lock-icon-small">🔒</div>
-                        <div class="lock-stars">30⭐</div>
+                        <div class="lock-stars">30🫧</div>
                     </div>
                 </div>
                 
@@ -3089,7 +3089,7 @@
                     <div class="inventory-square-name">Deco</div>
                     <div class="inventory-lock-overlay">
                         <div class="lock-icon-small">🔒</div>
-                        <div class="lock-stars">40⭐</div>
+                        <div class="lock-stars">40🫧</div>
                     </div>
                 </div>
             </div>
@@ -3641,8 +3641,8 @@
                     } else if (isLocked) {
                         console.log(`🔒 Item bloqueado: ${itemId}`);
                         // Mostrar mensaje de item bloqueado
-                        const starsNeeded = card.querySelector('.lock-stars')?.textContent || '';
-                        window.game?.showItemLocked?.(starsNeeded);
+                        const bubblesNeeded = card.querySelector('.lock-stars')?.textContent || '';
+                        window.game?.showItemLocked?.(bubblesNeeded);
                     }
                 });
             });
@@ -6978,6 +6978,46 @@
                     confirmText: '💪 ¡Entendido!',
                     onConfirm: () => {}
                 });
+            }
+            
+            showItemLocked(bubblesNeeded) {
+                this.showCustomModal({
+                    title: '🔒 Item Bloqueado',
+                    message: `🐠💭 "¡Necesitamos más burbujas para este item!"\n\n🫧 Tienes: ${this.gameState.bubbles || 0} burbujas\n🫧 Necesitas: ${bubblesNeeded} burbujas\n\n🎮 ¡Juega para ganar burbujas!`,
+                    confirmText: '💪 ¡Entendido!',
+                    onConfirm: () => {}
+                });
+            }
+            
+            // 🎒 USAR ITEM DEL INVENTARIO
+            useInventoryItem(itemId) {
+                console.log(`🎒 Usando item del inventario: ${itemId}`);
+                
+                // Definir costos de items (en burbujas)
+                const itemCosts = {
+                    'bg-coral': 5,
+                    'bg-deep': 15,
+                    'bg-tropical': 25,
+                    'food-special': 30,
+                    'decoration': 40
+                };
+                
+                const cost = itemCosts[itemId];
+                if (cost && this.gameState.bubbles >= cost) {
+                    // Desbloquear item
+                    this.gameState.bubbles -= cost;
+                    this.updateUI();
+                    this.saveGame();
+                    
+                    this.showCustomModal({
+                        title: '🎉 ¡Item Desbloqueado!',
+                        message: `🐠💭 "¡Gracias por comprarme este item!"\n\n🫧 Costo: ${cost} burbujas\n🫧 Restantes: ${this.gameState.bubbles} burbujas\n\n✨ ¡El item está ahora disponible!`,
+                        confirmText: '🎮 ¡Genial!',
+                        onConfirm: () => {}
+                    });
+                } else {
+                    this.showItemLocked(`${cost}🫧`);
+                }
             }
             
             startGame(gameId) {
