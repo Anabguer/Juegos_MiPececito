@@ -13742,14 +13742,30 @@ Comida premium y de cumpleaños
             }
             
             if (restartBtn) {
+                console.log('✅ Botón JUGAR encontrado, configurando event listener...');
                 restartBtn.addEventListener('click', () => {
+                    console.log('🎮 ¡CLICK EN JUGAR DETECTADO!');
                     if(timerId) clearInterval(timerId);
                     busy = false; // Permitir interacciones
                     startTimer(); // Iniciar timer
-                    console.log('🎮 ¡Juego iniciado!');
+                    console.log('🎮 ¡Juego iniciado! busy=false, timer iniciado');
                 });
             } else {
                 console.error('❌ No se puede configurar el event listener del botón reiniciar - restartBtn es null');
+                // Buscar el botón de otra manera
+                const altBtn = gameOverlay.querySelector('#bloques-restart');
+                if (altBtn) {
+                    console.log('✅ Botón JUGAR encontrado por ID alternativo');
+                    altBtn.addEventListener('click', () => {
+                        console.log('🎮 ¡CLICK EN JUGAR DETECTADO (alternativo)!');
+                        if(timerId) clearInterval(timerId);
+                        busy = false;
+                        startTimer();
+                        console.log('🎮 ¡Juego iniciado! busy=false, timer iniciado');
+                    });
+                } else {
+                    console.error('❌ No se encontró el botón JUGAR por ningún método');
+                }
             }
             
             gameOverlay.addEventListener('click', (e) => {
