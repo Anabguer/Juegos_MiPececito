@@ -11363,7 +11363,95 @@ Comida premium y de cumpleaños
             // 🎨 APLICAR ESTILOS Y INICIALIZAR JUEGO
             // Aplicar diseño perfecto unificado (el hermoso de Burbujas para todos)
             applyPerfectBubbleDesign(gameModal, 'bubble');
+            
+            // 🎯 ARREGLAR ESPECÍFICAMENTE EL JUEGO DE BURBUJAS
+            fixBubbleGameSpecifics(gameModal);
+            
             initBubbleGameLogic(gameModal);
+        }
+        
+        // 🎯 FUNCIÓN ESPECÍFICA PARA ARREGLAR EL JUEGO DE BURBUJAS
+        function fixBubbleGameSpecifics(gameModal) {
+            // 🟢 ARREGLAR LEYENDA DE BUENAS (VERDE CON BORDE Y FONDO)
+            const goodLegend = gameModal.querySelector('.legend-item.good');
+            if (goodLegend) {
+                goodLegend.style.cssText = `
+                    background: rgba(76, 175, 80, 0.3) !important;
+                    border: 3px solid #4CAF50 !important;
+                    border-radius: 12px !important;
+                    padding: 8px 16px !important;
+                    font-size: 16px !important;
+                    font-weight: bold !important;
+                    color: #2E7D32 !important;
+                    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4) !important;
+                    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+                `;
+            }
+            
+            // 🔴 ARREGLAR LEYENDA DE MALAS (ROJO CON BORDE Y FONDO)
+            const badLegend = gameModal.querySelector('.legend-item.bad');
+            if (badLegend) {
+                badLegend.style.cssText = `
+                    background: rgba(244, 67, 54, 0.3) !important;
+                    border: 3px solid #F44336 !important;
+                    border-radius: 12px !important;
+                    padding: 8px 16px !important;
+                    font-size: 16px !important;
+                    font-weight: bold !important;
+                    color: #C62828 !important;
+                    box-shadow: 0 4px 8px rgba(244, 67, 54, 0.4) !important;
+                    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+                `;
+            }
+            
+            // 📏 HACER LA CAJITA DEL JUEGO MÁS ALTA
+            const stageContainer = gameModal.querySelector('.bubble-stage-container');
+            if (stageContainer) {
+                stageContainer.style.cssText = `
+                    background: linear-gradient(135deg, 
+                        rgba(79, 195, 247, 0.1) 0%, 
+                        rgba(41, 182, 246, 0.05) 100%) !important;
+                    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+                    border-radius: 15px !important;
+                    margin: 15px 20px !important;
+                    padding: 20px !important;
+                    flex: 1 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    min-height: 500px !important;
+                    max-height: 600px !important;
+                `;
+            }
+            
+            // 🎯 ARREGLAR EL GRID DEL JUEGO
+            const bubbleStage = gameModal.querySelector('#bubbleStage');
+            if (bubbleStage) {
+                bubbleStage.style.cssText = `
+                    width: 100% !important;
+                    height: 100% !important;
+                    min-height: 450px !important;
+                    display: grid !important;
+                    grid-template-columns: repeat(4, 1fr) !important;
+                    grid-template-rows: repeat(6, 1fr) !important;
+                    gap: 8px !important;
+                    padding: 10px !important;
+                    background: rgba(255, 255, 255, 0.05) !important;
+                    border-radius: 10px !important;
+                `;
+            }
+            
+            // 📐 ARREGLAR LEYENDA LADO A LADO
+            const legend = gameModal.querySelector('.bubble-legend');
+            if (legend) {
+                legend.style.cssText = `
+                    display: flex !important;
+                    justify-content: center !important;
+                    gap: 30px !important;
+                    margin: 15px 0 !important;
+                    padding: 0 20px !important;
+                `;
+            }
         }
         
         // 🎨 DISEÑO PERFECTO UNIFICADO PARA TODOS LOS JUEGOS (BASADO EN BURBUJAS)
