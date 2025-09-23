@@ -1844,7 +1844,7 @@
             height: 100px;
             border-radius: 50%;
             background: radial-gradient(circle, rgba(255,215,0,0.8), transparent);
-            z-index: 1999;
+            z-index: 99999;
             pointer-events: none;
             animation: rewardExplosion 0.8s ease-out forwards;
         }
@@ -3332,28 +3332,36 @@
         // 🎮 ACTUALIZAR UI DE JUEGOS
         function updateGamesUI() {
             // Obtener estrellas totales del juego principal
-            const totalStars = window.game ? window.game.gameState.stars : 0;
-            console.log(`🔍 updateGamesUI: totalStars=${totalStars}, window.game=${!!window.game}`);
+            let totalStars = 0;
+            if (window.game && window.game.gameState) {
+                totalStars = window.game.gameState.stars || 0;
+            }
             
-            // Si no hay estrellas, intentar cargar desde localStorage como fallback
-            let finalStars = totalStars;
-            if (totalStars === 0 && window.game) {
-                const savedData = localStorage.getItem('miPececito_gameState');
+            // Fallback: cargar desde localStorage si no hay estrellas
+            if (totalStars === 0) {
+                const savedData = localStorage.getItem('miPececito_gameData');
                 if (savedData) {
                     try {
                         const parsed = JSON.parse(savedData);
-                        finalStars = parsed.stars || 0;
-                        console.log(`🔍 Fallback: Estrellas desde localStorage: ${finalStars}`);
+                        totalStars = parsed.stars || 0;
+                        console.log(`🔍 Fallback: Estrellas desde localStorage: ${totalStars}`);
                     } catch (e) {
                         console.log(`❌ Error parsing savedData: ${e}`);
                     }
                 }
             }
             
+            console.log(`🔍 updateGamesUI: totalStars=${totalStars}, window.game=${!!window.game}`);
+            
             // Actualizar juego de burbujas
             const bubblesBest = document.getElementById('bubbles-best');
             const bubblesLevel = document.getElementById('bubbles-level');
             const bubblesStars = document.getElementById('bubbles-stars');
+            
+            if (bubblesStars) {
+                bubblesStars.textContent = totalStars;
+                console.log(`🔍 Actualizado bubbles-stars: ${totalStars}`);
+            }
             
             if (bubblesBest) {
                 bubblesBest.textContent = localStorage.getItem('bubbles_best') || '0';
@@ -3362,15 +3370,15 @@
                 bubblesLevel.textContent = localStorage.getItem('bubbles_level') || '1';
             }
             if (bubblesStars) {
-                bubblesStars.textContent = finalStars;
-                console.log(`🔍 Actualizando bubbles-stars a: ${finalStars}`);
+                bubblesStars.textContent = totalStars;
+                console.log(`🔍 Actualizando bubbles-stars a: ${totalStars}`);
             }
             
             // Actualizar todos los demás juegos con las estrellas totales
             const allGameStars = document.querySelectorAll('[id$="-stars"]');
             allGameStars.forEach(starEl => {
                 if (starEl.id !== 'bubbles-stars') { // Ya actualizado arriba
-                    starEl.textContent = finalStars;
+                    starEl.textContent = totalStars;
                 }
             });
         }
@@ -8820,12 +8828,18 @@ Comida premium y de cumpleaños
                         window.audioManager.playSound('achievement');
                     }
                     
-                    // Mensaje flotante
-                    this.showFloatingMessage(
-                        stars >= 3 ? '🌟 ¡INCREÍBLE!' : 
-                        stars >= 2 ? '⭐ ¡EXCELENTE!' : '🫧 ¡GENIAL!',
-                        centerX, centerY - 50
-                    );
+                    // Mensaje flotante - CENTRADO EN EL JUEGO DE BURBUJAS
+                    const gameModal = document.querySelector('.bubble-game-container');
+                    if (gameModal) {
+                        const gameRect = gameModal.getBoundingClientRect();
+                        const gameCenterX = gameRect.left + gameRect.width / 2;
+                        const gameCenterY = gameRect.top + gameRect.height / 2;
+                        this.showFloatingMessage(
+                            stars >= 3 ? '🌟 ¡INCREÍBLE!' : 
+                            stars >= 2 ? '⭐ ¡EXCELENTE!' : '🫧 ¡GENIAL!',
+                            gameCenterX, gameCenterY - 50
+                        );
+                    }
                 }
             }
             
