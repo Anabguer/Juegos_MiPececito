@@ -11989,12 +11989,14 @@ Comida premium y de cumpleaños
                 }
             });
             
-            // 🔍 BUSCAR BOTONES POR TEXTO (método alternativo)
+            // 🔍 BUSCAR BOTONES POR TEXTO (método alternativo) - EXCLUIR BOTÓN CERRAR
             const allButtons = gameOverlay.querySelectorAll('button');
             allButtons.forEach(btn => {
                 const text = btn.textContent.toLowerCase();
-                if (text.includes('jugar') || text.includes('empezar') || text.includes('▶️') || text.includes('reiniciar') || text.includes('🔄')) {
-                    // Cambiar texto a "JUGAR" siempre
+                const isCloseBtn = btn.classList.contains('close-btn') || btn.classList.contains(`${gameName}-close-btn`) || text.includes('✕') || text.includes('×') || text.includes('x');
+                
+                if (!isCloseBtn && (text.includes('jugar') || text.includes('empezar') || text.includes('▶️') || text.includes('reiniciar') || text.includes('🔄'))) {
+                    // Cambiar texto a "JUGAR" siempre (solo botones de jugar, no cerrar)
                     btn.textContent = 'JUGAR';
                     
                     btn.style.cssText = `
