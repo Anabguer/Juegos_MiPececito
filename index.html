@@ -13311,18 +13311,19 @@ Comida premium y de cumpleaños
                 board.style.cssText = `
                     flex: 1;
                     display: grid;
-                    grid-template-columns: repeat(6, 1fr);
+                    grid-template-columns: repeat(9, 1fr);
                     grid-template-rows: repeat(6, 1fr);
-                    gap: 4px;
+                    gap: 3px;
                     padding: 15px;
-                    background: rgba(255, 255, 255, 0.06);
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
                     margin: 10px;
                     border-radius: 14px;
-                    border: 1px solid rgba(255, 255, 255, 0.15);
-                    max-width: 400px;
-                    max-height: 400px;
-                    aspect-ratio: 1;
+                    border: 1px solid rgba(255, 255, 255, 0.25);
+                    max-width: 500px;
+                    max-height: 350px;
+                    aspect-ratio: 9/6;
                     overflow: hidden;
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
                 `;
             } else {
                 console.error('❌ No se encontró el tablero en el juego de bloques');
@@ -13371,9 +13372,10 @@ Comida premium y de cumpleaños
                 busy = true; // Juego pausado hasta que haga clic en JUGAR
                 updateUI();
                 
+                // Crear fichas ocultas inicialmente
                 for(let r = 0; r < 6; r++) {
-                    grid[r] = new Array(6);
-                    for(let c = 0; c < 6; c++) {
+                    grid[r] = new Array(9);
+                    for(let c = 0; c < 9; c++) {
                         let t;
                         do {
                             t = Math.floor(Math.random() * TYPES.length);
@@ -13384,6 +13386,11 @@ Comida premium y de cumpleaños
                         
                         const cell = makeCell(r, c, t);
                         grid[r][c] = {t: t, el: cell};
+                        
+                        // Ocultar inicialmente
+                        cell.style.opacity = '0';
+                        cell.style.transform = 'scale(0.3) rotate(180deg)';
+                        
                         board.appendChild(cell);
                     }
                 }
@@ -13555,7 +13562,7 @@ Comida premium y de cumpleaños
                 // Buscar matches horizontales
                 for(let r = 0; r < 6; r++) {
                     let count = 1;
-                    for(let c = 1; c < 6; c++) {
+                    for(let c = 1; c < 9; c++) {
                         if(getT(r, c) === getT(r, c-1)) {
                             count++;
                         } else {
@@ -13569,13 +13576,13 @@ Comida premium y de cumpleaños
                     }
                     if(count >= 3) {
                         for(let i = 0; i < count; i++) {
-                            matches.push({r, c: 5-i});
+                            matches.push({r, c: 8-i});
                         }
                     }
                 }
                 
                 // Buscar matches verticales
-                for(let c = 0; c < 6; c++) {
+                for(let c = 0; c < 9; c++) {
                     let count = 1;
                     for(let r = 1; r < 6; r++) {
                         if(getT(r, c) === getT(r-1, c)) {
@@ -13691,6 +13698,44 @@ Comida premium y de cumpleaños
                 }
             }
             
+            function startShuffleEffect() {
+                console.log('🎲 Iniciando efecto de barajado...');
+                
+                // Animar todas las fichas con efecto de barajado
+                const cells = board.querySelectorAll('.bloques-cell');
+                cells.forEach((cell, index) => {
+                    // Posición aleatoria temporal
+                    const randomX = (Math.random() - 0.5) * 200;
+                    const randomY = (Math.random() - 0.5) * 200;
+                    const randomRotation = Math.random() * 720 - 360;
+                    
+                    cell.style.position = 'relative';
+                    cell.style.left = `${randomX}px`;
+                    cell.style.top = `${randomY}px`;
+                    cell.style.transform = `scale(0.5) rotate(${randomRotation}deg)`;
+                    cell.style.opacity = '0.7';
+                    cell.style.transition = 'all 0.1s ease';
+                    
+                    // Animar hacia la posición final con delay escalonado
+                    setTimeout(() => {
+                        cell.style.left = '0px';
+                        cell.style.top = '0px';
+                        cell.style.transform = 'scale(1) rotate(0deg)';
+                        cell.style.opacity = '1';
+                        cell.style.transition = 'all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                        
+                        // Iniciar juego después de la animación
+                        if (index === cells.length - 1) {
+                            setTimeout(() => {
+                                busy = false; // Iniciar juego
+                                startTimer(); // Iniciar timer
+                                console.log('🎮 ¡Juego iniciado! Timer corriendo...');
+                            }, 800);
+                        }
+                    }, index * 50); // Delay escalonado
+                });
+            }
+            
             function endGame() {
                 clearInterval(timerId);
                 busy = true;
@@ -13724,9 +13769,8 @@ Comida premium y de cumpleaños
             if (restartBtn) {
                 restartBtn.addEventListener('click', () => {
                     if(timerId) clearInterval(timerId);
-                    busy = false; // Iniciar juego
-                    startTimer(); // Iniciar timer
-                    console.log('🎮 ¡Juego iniciado! Timer corriendo...');
+                    startShuffleEffect(); // Efecto de barajado
+                    console.log('🎮 ¡Juego iniciado! Efecto de barajado...');
                 });
             } else {
                 console.error('❌ No se puede configurar el event listener del botón reiniciar - restartBtn es null');
