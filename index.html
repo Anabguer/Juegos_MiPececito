@@ -11774,7 +11774,7 @@ Comida premium y de cumpleaños
                 `;
             }
             
-            // Botón de cerrar
+            // Botón de cerrar unificado
             const closeBtn = gameOverlay.querySelector(`.${gameName}-close-btn, .${gameName}-game-header .game-close-btn`);
             if (closeBtn) {
                 closeBtn.style.cssText = `
@@ -11789,6 +11789,53 @@ Comida premium y de cumpleaños
                     border: none;
                     cursor: pointer;
                     transition: all 0.3s ease;
+                `;
+            }
+            
+            // Botón JUGAR unificado - Siempre abajo del todo
+            const playBtn = gameOverlay.querySelector(`#${gameName}-start, .${gameName}-btn`);
+            if (playBtn) {
+                playBtn.style.cssText = `
+                    background: linear-gradient(135deg, #ff6b35, #ff8e53);
+                    border: 2px solid #FF8C00;
+                    border-radius: 20px;
+                    padding: 10px 25px;
+                    font-size: 18px;
+                    font-weight: bold;
+                    color: white;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    width: 60%;
+                    max-width: 200px;
+                    margin: 0 auto;
+                    display: block;
+                `;
+                
+                // Efecto hover unificado
+                playBtn.addEventListener('mouseenter', () => {
+                    playBtn.style.transform = 'translateY(-3px) scale(1.08)';
+                    playBtn.style.boxShadow = '0 12px 25px rgba(255, 107, 53, 0.7)';
+                });
+                
+                playBtn.addEventListener('mouseleave', () => {
+                    playBtn.style.transform = 'translateY(0) scale(1)';
+                    playBtn.style.boxShadow = '0 6px 20px rgba(255, 107, 53, 0.4)';
+                });
+            }
+            
+            // Asegurar que el footer esté abajo del todo
+            const footer = gameOverlay.querySelector(`.${gameName}-footer`);
+            if (footer) {
+                footer.style.cssText = `
+                    padding: 20px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-top: auto;
                 `;
             }
         }
