@@ -13440,7 +13440,8 @@ Comida premium y de cumpleaños
                 if (busy || timeLeft <= 0) return;
                 const el = e.currentTarget;
                 drag = { r: +el.dataset.r, c: +el.dataset.c, el };
-                el.classList.add('ghost');
+                el.style.opacity = '0.7';
+                el.style.transform = 'scale(0.95)';
             }
             function onPointerEnter(e){
                 if(!drag) return;
@@ -13459,7 +13460,13 @@ Comida premium y de cumpleaños
                 }
             }
             function onPointerUp(){ if(drag) endDrag(); }
-            function endDrag(){ if(drag){ drag.el.classList.remove('ghost'); drag = null; } }
+            function endDrag(){ 
+                if(drag){ 
+                    drag.el.style.opacity = '1'; 
+                    drag.el.style.transform = 'scale(1)'; 
+                    drag = null; 
+                } 
+            }
             function isAdjacent(r1,c1,r2,c2){ return (Math.abs(r1-r2)+Math.abs(c1-c2))===1; }
 
             function doSwap(r1,c1,r2,c2, animate=false){
@@ -13737,8 +13744,9 @@ Comida premium y de cumpleaños
             if (restartBtn) {
                 restartBtn.addEventListener('click', () => {
                     if(timerId) clearInterval(timerId);
-                    startShuffleEffect(); // Efecto de barajado
-                    console.log('🎮 ¡Juego iniciado! Efecto de barajado...');
+                    busy = false; // Permitir interacciones
+                    startTimer(); // Iniciar timer
+                    console.log('🎮 ¡Juego iniciado!');
                 });
             } else {
                 console.error('❌ No se puede configurar el event listener del botón reiniciar - restartBtn es null');
