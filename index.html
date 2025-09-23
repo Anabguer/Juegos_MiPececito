@@ -11498,7 +11498,7 @@ Comida premium y de cumpleaños
                 }
             }
             
-            // 🎮 ASEGURAR QUE EL BOTÓN JUGAR SE VEA
+            // 🎮 ASEGURAR QUE EL BOTÓN JUGAR SE VEA DEBAJO DE LA CAJA
             const playBtn = gameModal.querySelector('#bubbleStartBtn');
             if (playBtn) {
                 playBtn.style.cssText = `
@@ -11517,8 +11517,10 @@ Comida premium y de cumpleaños
                     letter-spacing: 1px !important;
                     width: 80% !important;
                     max-width: 250px !important;
-                    margin: 15px auto !important;
+                    margin: 20px auto !important;
                     display: block !important;
+                    position: relative !important;
+                    z-index: 10 !important;
                 `;
                 
                 // Efecto hover
@@ -11531,6 +11533,21 @@ Comida premium y de cumpleaños
                     playBtn.style.transform = 'translateY(0) scale(1)';
                     playBtn.style.boxShadow = '0 6px 20px rgba(255, 107, 53, 0.4)';
                 });
+            }
+            
+            // 📍 ASEGURAR QUE EL CONTENEDOR DE CONTROLES ESTÉ BIEN POSICIONADO
+            const controlsContainer = gameModal.querySelector('.bubble-controls');
+            if (controlsContainer) {
+                controlsContainer.style.cssText = `
+                    padding: 20px !important;
+                    display: flex !important;
+                    justify-content: center !important;
+                    align-items: center !important;
+                    margin-top: auto !important;
+                    position: relative !important;
+                    background: rgba(255, 255, 255, 0.05) !important;
+                    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+                `;
             }
         }
         
