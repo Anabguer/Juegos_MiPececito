@@ -826,6 +826,39 @@
             transform: scale(0.95);
         }
         
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .mobile-help-btn {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            line-height: 1;
+        }
+        
+        .mobile-help-btn:hover {
+            background: rgba(255, 193, 7, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .mobile-help-btn:active {
+            transform: scale(0.95);
+        }
+        
         /* 🎮 GRID DE JUEGOS 3x3 */
         .games-grid-3x3 {
             display: grid;
@@ -2498,6 +2531,65 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         
+        /* ❓ MODAL DE AYUDA */
+        .help-modal-content {
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .help-content {
+            padding: 20px;
+        }
+        
+        .help-section {
+            margin-bottom: 25px;
+        }
+        
+        .help-section h3 {
+            color: #FFD700;
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .help-section p {
+            color: #fff;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .star-rules {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .star-rule-help {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .star-icon {
+            font-size: 24px;
+            filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.6));
+        }
+        
+        .rule-text {
+            color: #fff;
+            line-height: 1.4;
+        }
+        
+        .rule-text strong {
+            color: #FFD700;
+            font-size: 16px;
+        }
+        
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -2992,18 +3084,14 @@
         <div class="mobile-modal-content games-modal-content">
             <div class="mobile-modal-header">
                 <h2>🎮 Juegos</h2>
-                <button id="closeGames" class="mobile-close-btn">×</button>
+                <div class="header-buttons">
+                    <button id="helpGames" class="mobile-help-btn" title="¿Cómo ganar estrellas?">?</button>
+                    <button id="closeGames" class="mobile-close-btn">×</button>
+                </div>
             </div>
             
-            <!-- 🏆 SISTEMA DE ESTRELLAS -->
+            <!-- 🏆 ESTRELLAS TOTALES DEL USUARIO -->
             <div class="games-info">
-                <div class="star-system">
-                    <div class="star-rule">⭐ Jugar = 1 estrella</div>
-                    <div class="star-rule">⭐⭐ Logro = 2 estrellas</div>
-                    <div class="star-rule">⭐⭐⭐ Record = 3 estrellas</div>
-                </div>
-                
-                <!-- Estrellas totales del usuario -->
                 <div class="user-stars-display">
                     <div class="stars-total">
                         <span class="stars-icon">⭐</span>
@@ -3095,6 +3183,55 @@
                     <div class="game-stats">
                         <span class="best-score">Mejor: <span id="toca3-best">0</span></span>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ❓ MODAL DE AYUDA - ESTRELLAS -->
+    <div id="helpModal" class="mobile-modal-overlay" style="display: none;">
+        <div class="mobile-modal-content help-modal-content">
+            <div class="mobile-modal-header">
+                <h2>❓ ¿Cómo ganar estrellas?</h2>
+                <button id="closeHelp" class="mobile-close-btn">×</button>
+            </div>
+            
+            <div class="help-content">
+                <div class="help-section">
+                    <h3>⭐ Sistema de Estrellas</h3>
+                    <p>Las estrellas son la moneda principal para desbloquear nuevos juegos y contenido.</p>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🎮 Cómo ganar estrellas:</h3>
+                    <div class="star-rules">
+                        <div class="star-rule-help">
+                            <span class="star-icon">⭐</span>
+                            <div class="rule-text">
+                                <strong>1 estrella</strong><br>
+                                Por jugar cualquier juego (ganes o pierdas)
+                            </div>
+                        </div>
+                        <div class="star-rule-help">
+                            <span class="star-icon">⭐⭐</span>
+                            <div class="rule-text">
+                                <strong>2 estrellas</strong><br>
+                                Si superas tu récord personal
+                            </div>
+                        </div>
+                        <div class="star-rule-help">
+                            <span class="star-icon">⭐⭐⭐</span>
+                            <div class="rule-text">
+                                <strong>3 estrellas</strong><br>
+                                Si superas el récord global
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="help-section">
+                    <h3>🔓 Desbloqueo de juegos:</h3>
+                    <p>Algunos juegos requieren un número mínimo de estrellas para desbloquearse. ¡Juega más para acceder a todo el contenido!</p>
                 </div>
             </div>
         </div>
@@ -3664,6 +3801,20 @@
                 const modal = document.getElementById('gamesModal');
                 modal.style.opacity = '0';
                 setTimeout(() => modal.style.display = 'none', 300);
+            });
+            
+            // Botón de ayuda
+            document.getElementById('helpGames').addEventListener('click', () => {
+                const helpModal = document.getElementById('helpModal');
+                helpModal.style.display = 'flex';
+                setTimeout(() => helpModal.style.opacity = '1', 10);
+            });
+            
+            // Cerrar ayuda
+            document.getElementById('closeHelp').addEventListener('click', () => {
+                const helpModal = document.getElementById('helpModal');
+                helpModal.style.opacity = '0';
+                setTimeout(() => helpModal.style.display = 'none', 300);
             });
             
             // Event listeners para las tarjetas de juegos cuadradas
