@@ -9050,11 +9050,7 @@ Comida premium y de cumpleaños
                         const gameRect = gameModal.getBoundingClientRect();
                         const gameCenterX = gameRect.left + gameRect.width / 2;
                         const gameCenterY = gameRect.top + gameRect.height / 2;
-                        this.showFloatingMessage(
-                            stars >= 3 ? '🌟 ¡INCREÍBLE!' : 
-                            stars >= 2 ? '⭐ ¡EXCELENTE!' : '🫧 ¡GENIAL!',
-                            gameCenterX, gameCenterY - 50
-                        );
+                        // Solo mostrar efecto de estrellas, sin mensaje
                     }
                 }
             }
@@ -12975,10 +12971,7 @@ Comida premium y de cumpleaños
                                 pointer-events: none;
                                 animation: floatUp 2s ease-out forwards;
                             `;
-                            message.textContent = starsWon >= 2 ? '⭐ ¡EXCELENTE!' : '🫧 ¡GENIAL!';
-                            document.body.appendChild(message);
-                            
-                            setTimeout(() => message.remove(), 2000);
+                            // Solo efecto de partículas, sin mensaje flotante
                         }
                     }
                     
