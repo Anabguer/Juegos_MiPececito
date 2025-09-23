@@ -13393,18 +13393,23 @@ Comida premium y de cumpleaños
             function onCellClick(r, c) {
                 if (busy || timeLeft <= 0) return;
                 
+                console.log(`🎯 Click en celda (${r}, ${c})`);
                 const cell = grid[r][c];
+                
                 if (!selected) {
                     selected = {r, c};
                     cell.el.style.transform = 'scale(1.1)';
                     cell.el.style.boxShadow = '0 0 20px rgba(255,255,255,0.6)';
+                    console.log(`✅ Celda seleccionada: (${r}, ${c})`);
                 } else if (selected.r === r && selected.c === c) {
                     // Deseleccionar
                     cell.el.style.transform = 'scale(1)';
                     cell.el.style.boxShadow = '0 4px 8px rgba(0,0,0,.35)';
                     selected = null;
+                    console.log(`❌ Celda deseleccionada: (${r}, ${c})`);
                 } else if (isAdjacent(selected, {r, c})) {
                     // Intercambiar
+                    console.log(`🔄 Intercambiando (${selected.r}, ${selected.c}) con (${r}, ${c})`);
                     swapCells(selected, {r, c});
                     selected = null;
                 } else {
@@ -13414,6 +13419,7 @@ Comida premium y de cumpleaños
                     selected = {r, c};
                     cell.el.style.transform = 'scale(1.1)';
                     cell.el.style.boxShadow = '0 0 20px rgba(255,255,255,0.6)';
+                    console.log(`🔄 Nueva celda seleccionada: (${r}, ${c})`);
                 }
             }
             
@@ -13424,6 +13430,8 @@ Comida premium y de cumpleaños
             function swapCells(a, b) {
                 const ta = grid[a.r][a.c].t;
                 const tb = grid[b.r][b.c].t;
+                
+                console.log(`🔄 Intercambiando tipos: ${ta} ↔ ${tb}`);
                 
                 grid[a.r][a.c].t = tb;
                 grid[b.r][b.c].t = ta;
@@ -13439,9 +13447,12 @@ Comida premium y de cumpleaños
                 // Verificar matches
                 setTimeout(() => {
                     const matches = findMatches();
+                    console.log(`🔍 Matches encontrados: ${matches.length}`);
                     if (matches.length > 0) {
+                        console.log(`✅ Matches válidos, eliminando...`);
                         removeMatches(matches);
                     } else {
+                        console.log(`❌ No hay matches, revirtiendo intercambio...`);
                         // Revertir si no hay matches
                         grid[a.r][a.c].t = ta;
                         grid[b.r][b.c].t = tb;
