@@ -11547,7 +11547,35 @@ Comida premium y de cumpleaños
                     position: relative !important;
                     background: rgba(255, 255, 255, 0.05) !important;
                     border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+                    min-height: 80px !important;
+                    width: 100% !important;
                 `;
+                
+                // Asegurar que el botón esté visible dentro del contenedor
+                const playBtn = controlsContainer.querySelector('#bubbleStartBtn');
+                if (playBtn) {
+                    playBtn.style.cssText = `
+                        background: linear-gradient(135deg, #ff6b35, #ff8e53) !important;
+                        border: 2px solid #FF8C00 !important;
+                        border-radius: 20px !important;
+                        padding: 12px 30px !important;
+                        font-size: 18px !important;
+                        font-weight: bold !important;
+                        color: white !important;
+                        cursor: pointer !important;
+                        transition: all 0.3s ease !important;
+                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+                        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4) !important;
+                        text-transform: uppercase !important;
+                        letter-spacing: 1px !important;
+                        width: 80% !important;
+                        max-width: 250px !important;
+                        margin: 0 auto !important;
+                        display: block !important;
+                        position: relative !important;
+                        z-index: 10 !important;
+                    `;
+                }
             }
         }
         
