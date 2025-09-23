@@ -13576,8 +13576,20 @@ Comida premium y de cumpleaños
             }
             
             function updateUI() {
-                document.getElementById('bloques-score').textContent = score;
-                document.getElementById('bloques-time').textContent = timeLeft;
+                const scoreEl = document.getElementById('bloques-score');
+                const timeEl = document.getElementById('bloques-time');
+                
+                if (scoreEl) {
+                    scoreEl.textContent = score;
+                } else {
+                    console.error('❌ No se encontró el elemento bloques-score');
+                }
+                
+                if (timeEl) {
+                    timeEl.textContent = timeLeft;
+                } else {
+                    console.error('❌ No se encontró el elemento bloques-time');
+                }
             }
             
             function endGame() {
