@@ -13311,17 +13311,17 @@ Comida premium y de cumpleaños
                 board.style.cssText = `
                     flex: 1;
                     display: grid;
-                    grid-template-columns: repeat(9, 1fr);
-                    grid-template-rows: repeat(6, 1fr);
+                    grid-template-columns: repeat(6, 1fr);
+                    grid-template-rows: repeat(9, 1fr);
                     gap: 3px;
                     padding: 15px;
                     background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
                     margin: 10px;
                     border-radius: 14px;
                     border: 1px solid rgba(255, 255, 255, 0.25);
-                    max-width: 500px;
-                    max-height: 350px;
-                    aspect-ratio: 9/6;
+                    max-width: 350px;
+                    max-height: 500px;
+                    aspect-ratio: 6/9;
                     overflow: hidden;
                     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
                 `;
@@ -13365,7 +13365,7 @@ Comida premium y de cumpleaños
             
             // Inicializar juego
             function initBloquesGame() {
-                grid = new Array(6);
+                grid = new Array(9);
                 board.innerHTML = "";
                 score = 0;
                 timeLeft = 60;
@@ -13373,9 +13373,9 @@ Comida premium y de cumpleaños
                 updateUI();
                 
                 // Crear fichas ocultas inicialmente
-                for(let r = 0; r < 6; r++) {
-                    grid[r] = new Array(9);
-                    for(let c = 0; c < 9; c++) {
+                for(let r = 0; r < 9; r++) {
+                    grid[r] = new Array(6);
+                    for(let c = 0; c < 6; c++) {
                         let t;
                         do {
                             t = Math.floor(Math.random() * TYPES.length);
@@ -13560,9 +13560,9 @@ Comida premium y de cumpleaños
                 const matches = [];
                 
                 // Buscar matches horizontales
-                for(let r = 0; r < 6; r++) {
+                for(let r = 0; r < 9; r++) {
                     let count = 1;
-                    for(let c = 1; c < 9; c++) {
+                    for(let c = 1; c < 6; c++) {
                         if(getT(r, c) === getT(r, c-1)) {
                             count++;
                         } else {
@@ -13576,15 +13576,15 @@ Comida premium y de cumpleaños
                     }
                     if(count >= 3) {
                         for(let i = 0; i < count; i++) {
-                            matches.push({r, c: 8-i});
+                            matches.push({r, c: 5-i});
                         }
                     }
                 }
                 
                 // Buscar matches verticales
-                for(let c = 0; c < 9; c++) {
+                for(let c = 0; c < 6; c++) {
                     let count = 1;
-                    for(let r = 1; r < 6; r++) {
+                    for(let r = 1; r < 9; r++) {
                         if(getT(r, c) === getT(r-1, c)) {
                             count++;
                         } else {
@@ -13598,7 +13598,7 @@ Comida premium y de cumpleaños
                     }
                     if(count >= 3) {
                         for(let i = 0; i < count; i++) {
-                            matches.push({r: 5-i, c});
+                            matches.push({r: 8-i, c});
                         }
                     }
                 }
