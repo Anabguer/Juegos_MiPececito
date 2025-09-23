@@ -13610,16 +13610,18 @@ Comida premium y de cumpleaños
                 score += matches.length * 10;
                 updateUI();
                 
+                console.log(`🗑️ Eliminando ${matches.length} matches:`, matches);
+                
                 matches.forEach(({r, c}) => {
                     grid[r][c].el.style.opacity = '0.3';
                     grid[r][c].el.style.transform = 'scale(0.8)';
                 });
                 
                 setTimeout(() => {
-                    // Rellenar desde arriba
-                    for(let c = 0; c < 8; c++) {
-                        let writePos = 7;
-                        for(let r = 7; r >= 0; r--) {
+                    // Rellenar desde arriba (6 columnas x 9 filas)
+                    for(let c = 0; c < 6; c++) {
+                        let writePos = 8;
+                        for(let r = 8; r >= 0; r--) {
                             const isMatch = matches.some(m => m.r === r && m.c === c);
                             if(!isMatch) {
                                 if(writePos !== r) {
