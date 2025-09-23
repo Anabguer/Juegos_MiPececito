@@ -13616,24 +13616,18 @@ Comida premium y de cumpleaños
             function removeMatches(matches) {
                 score += matches.length * 10;
                 updateUI();
-                
-                console.log(`🗑️ Eliminando ${matches.length} matches:`, matches);
-                
+
                 // eliminar del DOM + marcar vacíos
                 for(const {r,c} of matches){
                     const item = grid[r][c];
-                    if(item && item.el){ 
-                        item.el.style.opacity='0'; 
-                        item.el.style.transform='scale(.6)'; 
-                        setTimeout(()=>item.el.remove(),150); 
-                    }
+                    if(item && item.el){ item.el.style.opacity='0'; item.el.style.transform='scale(.6)'; setTimeout(()=>item.el.remove(),150); }
                     grid[r][c] = null;
                 }
-                
+
                 // caída por columnas
                 setTimeout(()=>{
                     for(let c=0;c<6;c++){
-                        let write = 8; // 9 filas (0-8)
+                        let write = 8;
                         for(let r=8;r>=0;r--){
                             if(grid[r][c]){
                                 if(write!==r){
@@ -13648,18 +13642,16 @@ Comida premium y de cumpleaños
                         for(let r=write;r>=0;r--){
                             const t = Math.floor(Math.random() * TYPES.length);
                             const el = makeCell(r,c,t);
-                            el.style.opacity='0'; 
-                            el.style.transform='translateY(-24px)';
+                            el.style.opacity='0'; el.style.transform='translateY(-24px)';
                             grid[r][c] = {t, el};
                             board.appendChild(el);
                             requestAnimationFrame(()=>{
                                 el.style.transition='transform .35s ease, opacity .35s ease';
-                                el.style.opacity='1'; 
-                                el.style.transform='translateY(0)';
+                                el.style.opacity='1'; el.style.transform='translateY(0)';
                             });
                         }
                     }
-                    
+
                     // cascada
                     setTimeout(()=>{
                         const again = findMatches();
