@@ -11774,70 +11774,123 @@ Comida premium y de cumpleaños
                 `;
             }
             
-            // Botón de cerrar unificado
-            const closeBtn = gameOverlay.querySelector(`.${gameName}-close-btn, .${gameName}-game-header .game-close-btn`);
-            if (closeBtn) {
-                closeBtn.style.cssText = `
-                    font-size: 22px;
-                    font-weight: 800;
-                    color: #fff;
-                    text-shadow: 
-                        0 2px 8px rgba(79, 195, 247, 0.8),
-                        0 0 20px rgba(129, 212, 250, 0.6);
-                    letter-spacing: 0.5px;
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                `;
-            }
+            // 🔍 BUSCAR Y UNIFICAR TODOS LOS BOTONES DE CERRAR
+            const closeSelectors = [
+                `.${gameName}-close-btn`,
+                `.${gameName}-game-header .game-close-btn`,
+                `button[class*="close"]`,
+                `button:contains("✕")`,
+                `button:contains("×")`,
+                `button:contains("X")`
+            ];
             
-            // Botón JUGAR unificado - Siempre abajo del todo
-            const playBtn = gameOverlay.querySelector(`#${gameName}-start, .${gameName}-btn`);
-            if (playBtn) {
-                playBtn.style.cssText = `
-                    background: linear-gradient(135deg, #ff6b35, #ff8e53);
-                    border: 2px solid #FF8C00;
-                    border-radius: 20px;
-                    padding: 10px 25px;
-                    font-size: 18px;
-                    font-weight: bold;
-                    color: white;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                    width: 60%;
-                    max-width: 200px;
-                    margin: 0 auto;
-                    display: block;
-                `;
-                
-                // Efecto hover unificado
-                playBtn.addEventListener('mouseenter', () => {
-                    playBtn.style.transform = 'translateY(-3px) scale(1.08)';
-                    playBtn.style.boxShadow = '0 12px 25px rgba(255, 107, 53, 0.7)';
-                });
-                
-                playBtn.addEventListener('mouseleave', () => {
-                    playBtn.style.transform = 'translateY(0) scale(1)';
-                    playBtn.style.boxShadow = '0 6px 20px rgba(255, 107, 53, 0.4)';
-                });
-            }
+            closeSelectors.forEach(selector => {
+                const closeBtn = gameOverlay.querySelector(selector);
+                if (closeBtn) {
+                    closeBtn.style.cssText = `
+                        position: absolute;
+                        top: 15px;
+                        right: 15px;
+                        width: 30px;
+                        height: 30px;
+                        font-size: 18px;
+                        font-weight: 800;
+                        color: #fff;
+                        background: rgba(255, 255, 255, 0.2);
+                        border: 2px solid rgba(255, 255, 255, 0.5);
+                        border-radius: 50%;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.3s ease;
+                        z-index: 1000;
+                    `;
+                    
+                    // Efecto hover
+                    closeBtn.addEventListener('mouseenter', () => {
+                        closeBtn.style.background = 'rgba(255, 255, 255, 0.3)';
+                        closeBtn.style.transform = 'scale(1.1)';
+                    });
+                    
+                    closeBtn.addEventListener('mouseleave', () => {
+                        closeBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                        closeBtn.style.transform = 'scale(1)';
+                    });
+                }
+            });
             
-            // Asegurar que el footer esté abajo del todo
-            const footer = gameOverlay.querySelector(`.${gameName}-footer`);
-            if (footer) {
-                footer.style.cssText = `
-                    padding: 20px;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    margin-top: auto;
-                `;
-            }
+            // 🔍 BUSCAR Y UNIFICAR TODOS LOS BOTONES DE JUGAR
+            const playSelectors = [
+                `#${gameName}-start`,
+                `#${gameName}StartBtn`,
+                `.${gameName}-btn`,
+                `button:contains("JUGAR")`,
+                `button:contains("Empezar")`,
+                `button:contains("▶️")`,
+                `button:contains("Reiniciar")`,
+                `button:contains("🔄")`
+            ];
+            
+            playSelectors.forEach(selector => {
+                const playBtn = gameOverlay.querySelector(selector);
+                if (playBtn) {
+                    // Cambiar texto a "JUGAR" siempre
+                    playBtn.textContent = 'JUGAR';
+                    
+                    playBtn.style.cssText = `
+                        background: linear-gradient(135deg, #ff6b35, #ff8e53);
+                        border: 2px solid #FF8C00;
+                        border-radius: 20px;
+                        padding: 12px 30px;
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: white;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        width: 80%;
+                        max-width: 250px;
+                        margin: 15px auto;
+                        display: block;
+                    `;
+                    
+                    // Efecto hover unificado
+                    playBtn.addEventListener('mouseenter', () => {
+                        playBtn.style.transform = 'translateY(-3px) scale(1.08)';
+                        playBtn.style.boxShadow = '0 12px 25px rgba(255, 107, 53, 0.7)';
+                    });
+                    
+                    playBtn.addEventListener('mouseleave', () => {
+                        playBtn.style.transform = 'translateY(0) scale(1)';
+                        playBtn.style.boxShadow = '0 6px 20px rgba(255, 107, 53, 0.4)';
+                    });
+                }
+            });
+            
+            // 📍 ASEGURAR QUE EL FOOTER ESTÉ ABAJO DEL TODO
+            const footerSelectors = [
+                `.${gameName}-footer`,
+                `.${gameName}-controls`,
+                `.${gameName}-game-container > div:last-child`
+            ];
+            
+            footerSelectors.forEach(selector => {
+                const footer = gameOverlay.querySelector(selector);
+                if (footer) {
+                    footer.style.cssText = `
+                        padding: 20px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        margin-top: auto;
+                        position: relative;
+                    `;
+                }
+            });
         }
         
         // 🎮 LÓGICA DEL JUEGO DE BURBUJAS
