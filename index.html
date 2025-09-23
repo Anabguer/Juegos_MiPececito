@@ -13435,20 +13435,10 @@ Comida premium y de cumpleaños
                     min-height: 0;
                 `;
 
-                // Eventos para mouse
+                // Solo eventos mouse para evitar conflictos
                 el.addEventListener('mousedown', onPointerDown);
                 el.addEventListener('mouseenter', onPointerEnter);
                 el.addEventListener('mouseup', onPointerUp);
-                
-                // Eventos para touch
-                el.addEventListener('touchstart', onPointerDown);
-                el.addEventListener('touchend', onPointerUp);
-                
-                // Eventos pointer como fallback
-                el.addEventListener('pointerdown', onPointerDown);
-                el.addEventListener('pointerenter', onPointerEnter);
-                el.addEventListener('pointerup', onPointerUp);
-                el.addEventListener('pointercancel', onPointerUp);
 
                 return el;
             }
@@ -13467,6 +13457,11 @@ Comida premium y de cumpleaños
                     console.log('❌ Bloqueado por busy o timeLeft');
                     return;
                 }
+                if (drag) {
+                    console.log('⚠️ Ya hay un drag activo, ignorando');
+                    return;
+                }
+                e.preventDefault(); // Prevenir comportamiento por defecto
                 const el = e.currentTarget;
                 drag = { r: +el.dataset.r, c: +el.dataset.c, el };
                 el.style.opacity = '0.7';
