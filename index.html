@@ -13365,37 +13365,32 @@ Comida premium y de cumpleaños
             
             // Inicializar juego
             function initBloquesGame() {
-                grid = new Array(9);
-                board.innerHTML = "";
+                // Inicializar con la lógica del prototipo
                 score = 0;
                 timeLeft = 60;
-                busy = true; // Juego pausado hasta que haga clic en JUGAR
+                busy = true;
                 updateUI();
                 
-                // Crear fichas ocultas inicialmente
-                for(let r = 0; r < 9; r++) {
-                    grid[r] = new Array(6);
-                    for(let c = 0; c < 6; c++) {
-                        let t;
-                        do {
-                            t = Math.floor(Math.random() * TYPES.length);
-                        } while(
-                            (c >= 2 && getT(r,c-1) === t && getT(r,c-2) === t) ||
-                            (r >= 2 && getT(r-1,c) === t && getT(r-2,c) === t)
-                        );
+                // Limpiar DOM y estado
+                board.innerHTML = '';
+                grid = [...Array(9)].map(()=>Array(6).fill(null));
+
+                for(let r=0;r<9;r++){
+                    for(let c=0;c<6;c++){
+                        let t = Math.floor(Math.random() * TYPES.length);
+                        // evita nacimientos con match inmediato
+                        const left1 = c>0 ? grid[r][c-1]?.t : -1;
+                        const left2 = c>1 ? grid[r][c-2]?.t : -2;
+                        const up1 = r>0 ? grid[r-1][c]?.t : -1;
+                        const up2 = r>1 ? grid[r-2][c]?.t : -2;
+                        while((left1===t && left2===t) || (up1===t && up2===t)) t = Math.floor(Math.random() * TYPES.length);
                         
-                        const cell = makeCell(r, c, t);
-                        grid[r][c] = {t: t, el: cell};
-                        
-                        // Ocultar inicialmente
-                        cell.style.opacity = '0';
-                        cell.style.transform = 'scale(0.3) rotate(180deg)';
-                        
-                        board.appendChild(cell);
+                        const el = makeCell(r,c,t);
+                        grid[r][c] = { t, el };
+                        board.appendChild(el);
                     }
                 }
                 
-                // NO iniciar timer automáticamente
                 console.log('🎮 Juego Conecta 3 inicializado - Haz clic en JUGAR para empezar');
             }
             
@@ -13403,13 +13398,12 @@ Comida premium y de cumpleaños
                 return (grid[r] && grid[r][c]) ? grid[r][c].t : null;
             }
             
-            function makeCell(r, c, t) {
-                const cell = document.createElement('div');
-                cell.className = 'bloques-cell';
-                cell.dataset.r = r;
-                cell.dataset.c = c;
-                cell.innerHTML = ICONS[t];
-                cell.style.cssText = `
+            function makeCell(r,c,t){
+                const el = document.createElement('div');
+                el.className = 'bloques-cell';
+                el.dataset.r = r; el.dataset.c = c; el.dataset.t = t;
+                el.innerHTML = ICONS[t];
+                el.style.cssText = `
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -13425,63 +13419,59 @@ Comida premium y de cumpleaños
                     min-width: 0;
                     min-height: 0;
                 `;
-                
-                // Click (desktop)
-                cell.addEventListener('click', () => onCellClick(r, c));
 
-                // Drag & Drop (mouse)
-                let dragStart = null;
-                const boardEl = board; // scope de cierre
-                cell.draggable = true;
-                cell.addEventListener('dragstart', (e) => {
-                    dragStart = { r, c };
-                    e.dataTransfer.setData('text/plain', JSON.stringify(dragStart));
-                });
-                cell.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                });
-                cell.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    let from = dragStart;
-                    try {
-                        from = JSON.parse(e.dataTransfer.getData('text/plain'));
-                    } catch {}
-                    const to = { r, c };
-                    if (!busy && timeLeft > 0 && from && isAdjacent(from, to)) {
-                        swapCells(from, to);
-                    }
-                });
+                el.addEventListener('pointerdown', onPointerDown);
+                el.addEventListener('pointerenter', onPointerEnter);
+                el.addEventListener('pointerup', onPointerUp);
+                el.addEventListener('pointercancel', onPointerUp);
 
-                // Touch drag (mobile)
-                let touchStart = null;
-                cell.addEventListener('touchstart', (e) => {
-                    const t = e.changedTouches[0];
-                    touchStart = { r, c, x: t.clientX, y: t.clientY };
-                }, { passive: true });
-                cell.addEventListener('touchend', (e) => {
-                    if (!touchStart) return;
-                    const t = e.changedTouches[0];
-                    const dx = t.clientX - touchStart.x;
-                    const dy = t.clientY - touchStart.y;
-                    const absX = Math.abs(dx);
-                    const absY = Math.abs(dy);
-                    // Detectar dirección dominante
-                    let to = null;
-                    if (absX > absY && absX > 10) {
-                        // horizontal
-                        to = { r, c: c + (dx > 0 ? 1 : -1) };
-                    } else if (absY > 10) {
-                        // vertical
-                        to = { r: r + (dy > 0 ? 1 : -1), c };
+                return el;
+            }
+            
+            function placeCell(r,c, cell){
+                cell.dataset.r = r; cell.dataset.c = c;
+            }
+            
+            function randomType(){ return Math.floor(Math.random()*TYPES.length); }
+            
+            // --- INPUT (drag por celdas adyacentes)
+            let drag = null;
+            function onPointerDown(e){
+                if (busy || timeLeft <= 0) return;
+                const el = e.currentTarget;
+                drag = { r: +el.dataset.r, c: +el.dataset.c, el };
+                el.classList.add('ghost');
+            }
+            function onPointerEnter(e){
+                if(!drag) return;
+                const target = e.currentTarget;
+                const r2 = +target.dataset.r, c2 = +target.dataset.c;
+                const {r,c} = drag;
+                if(isAdjacent(r,c,r2,c2)){
+                    doSwap(r,c,r2,c2, true);
+                    const matches = findMatches();
+                    if(matches.length>0){
+                        removeMatches(matches);
+                    } else {
+                        doSwap(r2,c2,r,c, true);
                     }
-                    if (to && grid[to.r] && grid[to.r][to.c]) {
-                        if (!busy && timeLeft > 0 && isAdjacent({ r, c }, to)) {
-                            swapCells({ r, c }, to);
-                        }
-                    }
-                    touchStart = null;
-                }, { passive: true });
-                return cell;
+                    endDrag();
+                }
+            }
+            function onPointerUp(){ if(drag) endDrag(); }
+            function endDrag(){ if(drag){ drag.el.classList.remove('ghost'); drag = null; } }
+            function isAdjacent(r1,c1,r2,c2){ return (Math.abs(r1-r2)+Math.abs(c1-c2))===1; }
+
+            function doSwap(r1,c1,r2,c2, animate=false){
+                const a = grid[r1][c1], b = grid[r2][c2];
+                grid[r1][c1] = b; grid[r2][c2] = a;
+                if(animate){
+                    placeCell(r1,c1,b.el); placeCell(r2,c2,a.el);
+                    a.el.classList.add('pulse'); b.el.classList.add('pulse');
+                    setTimeout(()=>{a.el.classList.remove('pulse'); b.el.classList.remove('pulse');}, 250);
+                } else {
+                    placeCell(r1,c1,b.el); placeCell(r2,c2,a.el);
+                }
             }
             
             function placeCell(r, c, cell) {
@@ -13563,54 +13553,35 @@ Comida premium y de cumpleaños
                 }, 100);
             }
             
-            function findMatches() {
+            function findMatches(){
+                const seen = Array.from({length:9},()=>Array(6).fill(false));
                 const matches = [];
-                
-                // Buscar matches horizontales
-                for(let r = 0; r < 9; r++) {
-                    let count = 1;
-                    for(let c = 1; c < 6; c++) {
-                        if(getT(r, c) === getT(r, c-1)) {
-                            count++;
-                        } else {
-                            if(count >= 3) {
-                                for(let i = 0; i < count; i++) {
-                                    matches.push({r, c: c-1-i});
-                                }
+                const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+
+                for(let r=0;r<9;r++){
+                    for(let c=0;c<6;c++){
+                        if(!grid[r][c] || seen[r][c]) continue;
+                        const t = grid[r][c].t;
+                        const stack=[[r,c]]; const group=[];
+                        seen[r][c]=true;
+                        while(stack.length){
+                            const [rr,cc]=stack.pop(); group.push({r:rr,c:cc});
+                            for(const [dr,dc] of dirs){
+                                const nr=rr+dr,nc=cc+dc;
+                                if(nr<0||nr>=9||nc<0||nc>=6) continue;
+                                if(seen[nr][nc]) continue;
+                                if(grid[nr][nc] && grid[nr][nc].t===t){ seen[nr][nc]=true; stack.push([nr,nc]); }
                             }
-                            count = 1;
                         }
-                    }
-                    if(count >= 3) {
-                        for(let i = 0; i < count; i++) {
-                            matches.push({r, c: 5-i});
-                        }
+                        if(group.length>=3) matches.push(...group);
                     }
                 }
-                
-                // Buscar matches verticales
-                for(let c = 0; c < 6; c++) {
-                    let count = 1;
-                    for(let r = 1; r < 9; r++) {
-                        if(getT(r, c) === getT(r-1, c)) {
-                            count++;
-                        } else {
-                            if(count >= 3) {
-                                for(let i = 0; i < count; i++) {
-                                    matches.push({r: r-1-i, c});
-                                }
-                            }
-                            count = 1;
-                        }
-                    }
-                    if(count >= 3) {
-                        for(let i = 0; i < count; i++) {
-                            matches.push({r: 8-i, c});
-                        }
-                    }
-                }
-                
-                return matches;
+
+                // eliminar duplicados
+                const key = p=>p.r+":"+p.c;
+                const uniq = new Map();
+                for(const m of matches) uniq.set(key(m), m);
+                return [...uniq.values()];
             }
             
             function removeMatches(matches) {
