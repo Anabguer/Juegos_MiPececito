@@ -11947,11 +11947,7 @@ Comida premium y de cumpleaños
                 `#${gameName}-start`,
                 `#${gameName}StartBtn`,
                 `.${gameName}-btn`,
-                `button:contains("JUGAR")`,
-                `button:contains("Empezar")`,
-                `button:contains("▶️")`,
-                `button:contains("Reiniciar")`,
-                `button:contains("🔄")`
+                `button[class*="${gameName}"]`
             ];
             
             playSelectors.forEach(selector => {
@@ -11989,6 +11985,47 @@ Comida premium y de cumpleaños
                     playBtn.addEventListener('mouseleave', () => {
                         playBtn.style.transform = 'translateY(0) scale(1)';
                         playBtn.style.boxShadow = '0 6px 20px rgba(255, 107, 53, 0.4)';
+                    });
+                }
+            });
+            
+            // 🔍 BUSCAR BOTONES POR TEXTO (método alternativo)
+            const allButtons = gameOverlay.querySelectorAll('button');
+            allButtons.forEach(btn => {
+                const text = btn.textContent.toLowerCase();
+                if (text.includes('jugar') || text.includes('empezar') || text.includes('▶️') || text.includes('reiniciar') || text.includes('🔄')) {
+                    // Cambiar texto a "JUGAR" siempre
+                    btn.textContent = 'JUGAR';
+                    
+                    btn.style.cssText = `
+                        background: linear-gradient(135deg, #ff6b35, #ff8e53);
+                        border: 2px solid #FF8C00;
+                        border-radius: 20px;
+                        padding: 12px 30px;
+                        font-size: 18px;
+                        font-weight: bold;
+                        color: white;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        width: 80%;
+                        max-width: 250px;
+                        margin: 15px auto;
+                        display: block;
+                    `;
+                    
+                    // Efecto hover unificado
+                    btn.addEventListener('mouseenter', () => {
+                        btn.style.transform = 'translateY(-3px) scale(1.08)';
+                        btn.style.boxShadow = '0 12px 25px rgba(255, 107, 53, 0.7)';
+                    });
+                    
+                    btn.addEventListener('mouseleave', () => {
+                        btn.style.transform = 'translateY(0) scale(1)';
+                        btn.style.boxShadow = '0 6px 20px rgba(255, 107, 53, 0.4)';
                     });
                 }
             });
