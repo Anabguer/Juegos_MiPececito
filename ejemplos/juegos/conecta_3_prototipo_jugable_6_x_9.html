@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Conecta 3 – Prototipo</title>
+<style>
+  :root{
+    --cols: 6;
+    --rows: 9;
+    --cell: 64px;
+    --gap: 6px;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,Segoe UI,Roboto,Arial; background:#0f172a; color:#e5e7eb;
+    display:flex; align-items:center; justify-content:center; min-height:100dvh; padding:24px;
+  }
+  .wrap{display:grid; gap:16px; grid-template-columns:auto auto; align-items:start}
+  .hud{
+    background:#0b1227; border:1px solid #1f2a4a; padding:14px 16px; border-radius:16px; min-width:240px;
+    box-shadow:0 6px 30px rgba(0,0,0,.35);
+  }
+  .hud h1{font-size:18px; margin:0 0 8px}
+  .hud .row{display:flex; gap:10px; align-items:center; margin:8px 0}
+  .badge{background:#101a36; border:1px solid #1e2a4c; padding:6px 10px; border-radius:999px}
+  .btn{cursor:pointer; padding:8px 12px; border-radius:10px; border:1px solid #29407a; background:#122252; color:#E5E7EB; font-weight:600}
+  .btn:active{transform:translateY(1px)}
+  .board{
+    position:relative;
+    width:calc(var(--cols)*var(--cell) + (var(--cols)-1)*var(--gap));
+    height:calc(var(--rows)*var(--cell) + (var(--rows)-1)*var(--gap));
+    background:radial-gradient(120% 100% at 50% 0%, #0b1227 0%, #0b1227 50%, #0a1021 100%);
+    padding:0; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,.45) inset, 0 8px 30px rgba(0,0,0,.4);
+    border:1px solid #1b2750;
+  }
+  .cell{
+    position:absolute; width:var(--cell); height:var(--cell);
+    border-radius:var(--radius); display:grid; place-items:center; font-weight:900; color:#fff;
+    user-select:none; -webkit-user-drag:none; touch-action:none; cursor:grab;
+    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .18s ease;
+    background:#0e1a3a;
+    box-shadow:inset 0 8px 14px rgba(255,255,255,.08), inset 0 -10px 18px rgba(0,0,0,.35), 0 6px 12px rgba(0,0,0,.25);
+  }
+  .cell span{font-size:36px; line-height:1}
+  .cell:active{cursor:grabbing}
+  .ghost{opacity:.7; filter:brightness(1.15)}
+  .pop{animation:pop .25s ease}
+  @keyframes pop{from{transform:scale(.85)} to{transform:scale(1)}}
+
+  /* Pistas sutiles por tipo (bordecito) */
+  .t0{ outline:2px solid #4ac1ff22 }
+  .t1{ outline:2px solid #7aff7a22 }
+  .t2{ outline:2px solid #ffd84a22 }
+  .t3{ outline:2px solid #ff7adf22 }
+  .t4{ outline:2px solid #a88bff22 }
+  .t5{ outline:2px solid #ff9a4a22 }
+
+  .pulse{animation:pulse .9s ease-in-out infinite}
+  @keyframes pulse{0%{box-shadow:inset 0 8px 14px rgba(255,255,255,.08), inset 0 -10px 18px rgba(0,0,0,.35), 0 0 0 0 rgba(255,255,255,.15)} 50%{box-shadow:inset 0 8px 14px rgba(255,255,255,.08), inset 0 -10px 18px rgba(0,0,0,.35), 0 0 0 8px rgba(255,255,255,0)} 100%{box-shadow:inset 0 8px 14px rgba(255,255,255,.08), inset 0 -10px 18px rgba(0,0,0,.35), 0 0 0 0 rgba(255,255,255,0)}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hud">
+      <h1>🌊 Conecta Marino</h1>
+      <div class="row"><span class="badge">Puntuación:</span> <strong id="score">0</strong></div>
+      <div class="row"><span class="badge">Movimientos:</span> <strong id="moves">0</strong></div>
+      <div class="row"><button class="btn" id="reset">Reiniciar</button><button class="btn" id="shuffle">Mezclar</button></div>
+      <div class="row" style="font-size:12px;opacity:.8">Arrastra para intercambiar fichas adyacentes. Solo vale si creas 3+ iguales.</div>
+    </div>
+
+    <div id="board" class="board" aria-label="tablero"></div>
+  </div>
+
+<script>
+(() => {
+  // --- CONFIG
+  const COLS = 6, ROWS = 9, TYPES = 6;
+  const CELL = 64, GAP = 6;
+  const ICONS = ['🐚','🐟','🐙','🐠','🦀','🐬']; // tema marino
+
+  const board = document.getElementById('board');
+  const scoreEl = document.getElementById('score');
+  const movesEl = document.getElementById('moves');
+  const resetBtn = document.getElementById('reset');
+  const shuffleBtn = document.getElementById('shuffle');
+
+  board.style.setProperty('--cols', COLS);
+  board.style.setProperty('--rows', ROWS);
+
+  // --- ESTADO
+  let grid = [...Array(ROWS)].map(()=>Array(COLS).fill(null));
+  let score = 0, moves = 0;
+  let drag = null; // {r,c, el}
+
+  // --- UTILS
+  const posToXY = (r,c) => ({
+    x: c * (CELL + GAP),
+    y: r * (CELL + GAP)
+  });
+  function updateUI(){ scoreEl.textContent = score; movesEl.textContent = moves; }
+
+  function makeCell(r,c,t){
+    const el = document.createElement('div');
+    el.className = `cell t${t}`;
+    el.dataset.r = r; el.dataset.c = c; el.dataset.t = t;
+    const {x,y} = posToXY(r,c);
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.classList.add('pop');
+
+    const span = document.createElement('span');
+    span.textContent = ICONS[t];
+    el.appendChild(span);
+
+    el.addEventListener('pointerdown', onPointerDown);
+    el.addEventListener('pointerenter', onPointerEnter);
+    el.addEventListener('pointerup', onPointerUp);
+    el.addEventListener('pointercancel', onPointerUp);
+
+    return el;
+  }
+
+  function placeCell(r,c, cell){
+    const {x,y} = posToXY(r,c);
+    cell.style.left = x + 'px';
+    cell.style.top = y + 'px';
+    cell.dataset.r = r; cell.dataset.c = c;
+  }
+
+  function randomType(){ return Math.floor(Math.random()*TYPES); }
+
+  function init(noCascades=true){
+    score = 0; moves = 0; updateUI();
+    // limpiar DOM y estado
+    board.innerHTML = '';
+    grid = [...Array(ROWS)].map(()=>Array(COLS).fill(null));
+
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        let t = randomType();
+        // evita nacimientos con match inmediato si noCascades=true
+        if(noCascades){
+          const left1 = c>0 ? grid[r][c-1]?.t : -1;
+          const left2 = c>1 ? grid[r][c-2]?.t : -2;
+          const up1 = r>0 ? grid[r-1][c]?.t : -1;
+          const up2 = r>1 ? grid[r-2][c]?.t : -2;
+          while((left1===t && left2===t) || (up1===t && up2===t)) t = randomType();
+        }
+        const el = makeCell(r,c,t);
+        grid[r][c] = { t, el };
+        board.appendChild(el);
+      }
+    }
+  }
+
+  // --- INPUT (drag por celdas adyacentes)
+  function onPointerDown(e){
+    const el = e.currentTarget;
+    drag = { r: +el.dataset.r, c: +el.dataset.c, el };
+    // ⚠️ no usamos setPointerCapture porque bloquea pointerenter en otras celdas
+    el.classList.add('ghost');
+  }
+  function onPointerEnter(e){
+    if(!drag) return; // solo si estamos arrastrando desde otra celda
+    const target = e.currentTarget;
+    const r2 = +target.dataset.r, c2 = +target.dataset.c;
+    const {r,c} = drag;
+    if(isAdjacent(r,c,r2,c2)){
+      doSwap(r,c,r2,c2, true);
+      const matches = findMatches();
+      if(matches.length>0){
+        moves++; updateUI();
+        removeMatches(matches);
+      } else {
+        // revertir si no hay match
+        doSwap(r2,c2,r,c, true);
+      }
+      endDrag();
+    }
+  }
+  function onPointerUp(){ if(drag) endDrag(); }
+  function endDrag(){ if(drag){ drag.el.classList.remove('ghost'); drag = null; } }
+  function isAdjacent(r1,c1,r2,c2){ return (Math.abs(r1-r2)+Math.abs(c1-c2))===1; }
+
+  function doSwap(r1,c1,r2,c2, animate=false){
+    const a = grid[r1][c1], b = grid[r2][c2];
+    grid[r1][c1] = b; grid[r2][c2] = a;
+    if(animate){
+      placeCell(r1,c1,b.el); placeCell(r2,c2,a.el);
+      a.el.classList.add('pulse'); b.el.classList.add('pulse');
+      setTimeout(()=>{a.el.classList.remove('pulse'); b.el.classList.remove('pulse');}, 250);
+    } else {
+      placeCell(r1,c1,b.el); placeCell(r2,c2,a.el);
+    }
+  }
+
+  // --- DETECCIÓN DE MATCHES (flood-fill 4 direcciones)
+  function findMatches(){
+    const seen = Array.from({length:ROWS},()=>Array(COLS).fill(false));
+    const matches = [];
+    const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        if(!grid[r][c] || seen[r][c]) continue;
+        const t = grid[r][c].t;
+        const stack=[[r,c]]; const group=[];
+        seen[r][c]=true;
+        while(stack.length){
+          const [rr,cc]=stack.pop(); group.push({r:rr,c:cc});
+          for(const [dr,dc] of dirs){
+            const nr=rr+dr,nc=cc+dc;
+            if(nr<0||nr>=ROWS||nc<0||nc>=COLS) continue;
+            if(seen[nr][nc]) continue;
+            if(grid[nr][nc] && grid[nr][nc].t===t){ seen[nr][nc]=true; stack.push([nr,nc]); }
+          }
+        }
+        if(group.length>=3) matches.push(...group);
+      }
+    }
+
+    // eliminar duplicados
+    const key = p=>p.r+":"+p.c;
+    const uniq = new Map();
+    for(const m of matches) uniq.set(key(m), m);
+    return [...uniq.values()];
+  }
+
+  // --- ELIMINACIÓN, GRAVEDAD Y RELLENO
+  function removeMatches(matches){
+    score += matches.length * 10;
+    updateUI();
+
+    // eliminar del DOM + marcar vacíos
+    for(const {r,c} of matches){
+      const item = grid[r][c];
+      if(item && item.el){ item.el.style.opacity='0'; item.el.style.transform='scale(.6)'; setTimeout(()=>item.el.remove(),150); }
+      grid[r][c] = null;
+    }
+
+    // caída por columnas
+    setTimeout(()=>{
+      for(let c=0;c<COLS;c++){
+        let write = ROWS-1;
+        for(let r=ROWS-1;r>=0;r--){
+          if(grid[r][c]){
+            if(write!==r){
+              grid[write][c]=grid[r][c];
+              placeCell(write,c, grid[write][c].el);
+              grid[r][c]=null;
+            }
+            write--;
+          }
+        }
+        // generar nuevas arriba
+        for(let r=write;r>=0;r--){
+          const t = randomType();
+          const el = makeCell(r,c,t);
+          el.style.opacity='0'; el.style.transform='translateY(-24px)';
+          grid[r][c] = {t, el};
+          board.appendChild(el);
+          requestAnimationFrame(()=>{
+            el.style.transition='transform .35s ease, opacity .35s ease';
+            el.style.opacity='1'; el.style.transform='translateY(0)';
+          });
+        }
+      }
+
+      // cascada
+      setTimeout(()=>{
+        const again = findMatches();
+        if(again.length>0) removeMatches(again);
+      }, 120);
+    }, 160);
+  }
+
+  // --- HERRAMIENTAS
+  function forceShuffle(){
+    const all = [];
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) all.push(grid[r][c].t);
+    for(let i=all.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [all[i],all[j]]=[all[j],all[i]]; }
+    let k=0;
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      const t = all[k++];
+      grid[r][c].t = t;
+      grid[r][c].el.className = `cell t${t}`;
+      const span = grid[r][c].el.querySelector('span');
+      if(span) span.textContent = ICONS[t];
+    }
+    const m=findMatches(); if(m.length>=3) removeMatches(m);
+  }
+
+  resetBtn.addEventListener('click', ()=>init(true));
+  shuffleBtn.addEventListener('click', forceShuffle);
+
+  // inicio
+  init(true);
+})();
+</script>
+</body>
+</html>

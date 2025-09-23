@@ -13484,6 +13484,13 @@ Comida premium y de cumpleaños
                 return cell;
             }
             
+            function placeCell(r, c, cell) {
+                // Esta función coloca una celda en la posición correcta
+                // No necesitamos calcular posiciones porque usamos CSS Grid
+                cell.dataset.r = r;
+                cell.dataset.c = c;
+            }
+            
             function onCellClick(r, c) {
                 if (busy || timeLeft <= 0) return;
                 
@@ -13612,56 +13619,53 @@ Comida premium y de cumpleaños
                 
                 console.log(`🗑️ Eliminando ${matches.length} matches:`, matches);
                 
-                // Eliminar físicamente las fichas del DOM
-                matches.forEach(({r, c}) => {
-                    if (grid[r][c] && grid[r][c].el) {
-                        grid[r][c].el.remove();
-                        grid[r][c] = null; // Marcar como vacío
+                // eliminar del DOM + marcar vacíos
+                for(const {r,c} of matches){
+                    const item = grid[r][c];
+                    if(item && item.el){ 
+                        item.el.style.opacity='0'; 
+                        item.el.style.transform='scale(.6)'; 
+                        setTimeout(()=>item.el.remove(),150); 
                     }
-                });
+                    grid[r][c] = null;
+                }
                 
-                setTimeout(() => {
-                    // Rellenar desde arriba (6 columnas x 9 filas)
-                    for(let c = 0; c < 6; c++) {
-                        // Mover fichas hacia abajo
-                        let writePos = 8;
-                        for(let r = 8; r >= 0; r--) {
-                            if(grid[r][c] && grid[r][c] !== null) {
-                                if(writePos !== r) {
-                                    grid[writePos][c] = grid[r][c];
-                                    grid[writePos][c].el.dataset.r = writePos;
-                                    grid[writePos][c].el.style.transform = 'translateY(0)';
+                // caída por columnas
+                setTimeout(()=>{
+                    for(let c=0;c<6;c++){
+                        let write = 8; // 9 filas (0-8)
+                        for(let r=8;r>=0;r--){
+                            if(grid[r][c]){
+                                if(write!==r){
+                                    grid[write][c]=grid[r][c];
+                                    placeCell(write,c, grid[write][c].el);
+                                    grid[r][c]=null;
                                 }
-                                writePos--;
+                                write--;
                             }
                         }
-                        
-                        // Llenar espacios vacíos con nuevas fichas
-                        for(let r = writePos; r >= 0; r--) {
+                        // generar nuevas arriba
+                        for(let r=write;r>=0;r--){
                             const t = Math.floor(Math.random() * TYPES.length);
-                            const cell = makeCell(r, c, t);
-                            grid[r][c] = {t: t, el: cell};
-                            board.appendChild(cell);
-                            cell.style.opacity = '0';
-                            cell.style.transform = 'translateY(-100px)';
-                            
-                            // Animar caída
-                            setTimeout(() => {
-                                cell.style.transition = 'all 0.5s ease';
-                                cell.style.opacity = '1';
-                                cell.style.transform = 'translateY(0)';
-                            }, (8-r) * 100);
+                            const el = makeCell(r,c,t);
+                            el.style.opacity='0'; 
+                            el.style.transform='translateY(-24px)';
+                            grid[r][c] = {t, el};
+                            board.appendChild(el);
+                            requestAnimationFrame(()=>{
+                                el.style.transition='transform .35s ease, opacity .35s ease';
+                                el.style.opacity='1'; 
+                                el.style.transform='translateY(0)';
+                            });
                         }
                     }
                     
-                    // Verificar nuevos matches después de rellenar
-                    setTimeout(() => {
-                        const newMatches = findMatches();
-                        if(newMatches.length > 0) {
-                            removeMatches(newMatches);
-                        }
-                    }, 1000);
-                }, 200);
+                    // cascada
+                    setTimeout(()=>{
+                        const again = findMatches();
+                        if(again.length>0) removeMatches(again);
+                    }, 120);
+                }, 160);
             }
             
             function startTimer() {
