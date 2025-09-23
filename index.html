@@ -13612,57 +13612,56 @@ Comida premium y de cumpleaños
                 
                 console.log(`🗑️ Eliminando ${matches.length} matches:`, matches);
                 
+                // Eliminar físicamente las fichas del DOM
                 matches.forEach(({r, c}) => {
-                    grid[r][c].el.style.opacity = '0.3';
-                    grid[r][c].el.style.transform = 'scale(0.8)';
+                    if (grid[r][c] && grid[r][c].el) {
+                        grid[r][c].el.remove();
+                        grid[r][c] = null; // Marcar como vacío
+                    }
                 });
                 
                 setTimeout(() => {
                     // Rellenar desde arriba (6 columnas x 9 filas)
                     for(let c = 0; c < 6; c++) {
+                        // Mover fichas hacia abajo
                         let writePos = 8;
                         for(let r = 8; r >= 0; r--) {
-                            const isMatch = matches.some(m => m.r === r && m.c === c);
-                            if(!isMatch) {
+                            if(grid[r][c] && grid[r][c] !== null) {
                                 if(writePos !== r) {
                                     grid[writePos][c] = grid[r][c];
                                     grid[writePos][c].el.dataset.r = writePos;
+                                    grid[writePos][c].el.style.transform = 'translateY(0)';
                                 }
                                 writePos--;
                             }
                         }
                         
-                        // Llenar espacios vacíos
+                        // Llenar espacios vacíos con nuevas fichas
                         for(let r = writePos; r >= 0; r--) {
                             const t = Math.floor(Math.random() * TYPES.length);
                             const cell = makeCell(r, c, t);
                             grid[r][c] = {t: t, el: cell};
                             board.appendChild(cell);
                             cell.style.opacity = '0';
-                            cell.style.transform = 'translateY(-50px)';
+                            cell.style.transform = 'translateY(-100px)';
+                            
+                            // Animar caída
                             setTimeout(() => {
+                                cell.style.transition = 'all 0.5s ease';
                                 cell.style.opacity = '1';
                                 cell.style.transform = 'translateY(0)';
-                            }, 50);
+                            }, (8-r) * 100);
                         }
                     }
                     
-                    // Limpiar matches del DOM
-                    matches.forEach(({r, c}) => {
-                        const oldCell = board.querySelector(`[data-r="${r}"][data-c="${c}"]`);
-                        if(oldCell && oldCell !== grid[r][c].el) {
-                            oldCell.remove();
-                        }
-                    });
-                    
-                    // Verificar nuevos matches
+                    // Verificar nuevos matches después de rellenar
                     setTimeout(() => {
                         const newMatches = findMatches();
                         if(newMatches.length > 0) {
                             removeMatches(newMatches);
                         }
-                    }, 300);
-                }, 300);
+                    }, 1000);
+                }, 200);
             }
             
             function startTimer() {
@@ -15494,3 +15493,4 @@ Comida premium y de cumpleaños
     </script>
 </body>
 </html>
+
