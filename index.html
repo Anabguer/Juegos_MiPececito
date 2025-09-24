@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>🐠 Mi Pececito - Tamagotchi Virtual</title>
     
     <!-- 🎨 CSS INTEGRADO PARA EVITAR PROBLEMAS DE CARGA -->
@@ -3036,7 +3036,7 @@
             border-radius: 20px;
             padding: 0;
             max-width: 90vw;
-            max-height: 90vh;
+            max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px);
             width: 400px;
             height: 600px;
             display: flex;
@@ -3046,6 +3046,8 @@
             overflow: hidden;
             position: relative;
             z-index: 1;
+            margin-top: max(20px, env(safe-area-inset-top));
+            margin-bottom: max(20px, env(safe-area-inset-bottom));
         }
 
         /* 🧠 Memoria - Estilos de la cabecera (igual que Conecta 3) */
@@ -3086,6 +3088,52 @@
             align-items: center;
             color: rgba(255, 255, 255, 0.9);
             font-size: 14px;
+        }
+
+        /* 🌊 Conecta 3 - Estilos del contenedor */
+        .bloques-game-container {
+            background: linear-gradient(135deg, 
+                rgba(30, 60, 114, 0.95) 0%, 
+                rgba(42, 82, 152, 0.9) 100%);
+            border-radius: 20px;
+            padding: 0;
+            max-width: 90vw;
+            max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px);
+            width: 400px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0,0,0,.6);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            margin-top: max(20px, env(safe-area-inset-top));
+            margin-bottom: max(20px, env(safe-area-inset-bottom));
+        }
+
+        /* 🫧 Burbujas - Estilos del contenedor */
+        .bubble-game-container {
+            background: linear-gradient(180deg, 
+                rgba(129, 212, 250, 0.25) 0%,
+                rgba(79, 195, 247, 0.2) 30%,
+                rgba(41, 182, 246, 0.15) 70%,
+                rgba(13, 71, 161, 0.2) 100%);
+            backdrop-filter: blur(30px) saturate(200%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 28px;
+            width: 95vw;
+            max-width: 500px;
+            max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px);
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0,0,0,.6);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            margin-top: max(20px, env(safe-area-inset-top));
+            margin-bottom: max(20px, env(safe-area-inset-bottom));
         }
 
         /* 🫧 Burbujas - Estilos de la cabecera (igual que Conecta 3) */
@@ -11529,7 +11577,7 @@ Comida premium y de cumpleaños
             async loadSounds() {
                 const soundFiles = {
                     background: './sound/fondo.mp3',
-                    eat: './sound/acierto.mp3',
+                    eat: './sound/comer.mp3',
                     hatch: './sound/eclosionar.mp3',
                     clean: './sound/limpiar.mp3',
                     fail: './sound/fallo.mp3',
