@@ -12714,7 +12714,7 @@ Comida premium y de cumpleaños
         function applyPerfectBubbleDesign(gameOverlay, gameName) {
             // Estilos del overlay principal - AZUL MÁS CLARO Y SEMI-TRANSPARENTE
             gameOverlay.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                position: fixed; top: 30px; left: 0; right: 0; bottom: 30px;
                 background: linear-gradient(135deg, 
                     rgba(79, 195, 247, 0.2) 0%, 
                     rgba(41, 182, 246, 0.15) 50%, 
@@ -13714,6 +13714,19 @@ Comida premium y de cumpleaños
             // Crear overlay del juego
             const gameOverlay = document.createElement('div');
             gameOverlay.id = 'bloquesGameOverlay';
+            gameOverlay.style.cssText = `
+                position: fixed;
+                top: 30px;
+                left: 0;
+                right: 0;
+                bottom: 30px;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 15000;
+                backdrop-filter: blur(10px);
+            `;
             gameOverlay.innerHTML = `
                 <div class="bloques-game-container">
                     <div class="bloques-game-header">
@@ -14392,7 +14405,10 @@ Comida premium y de cumpleaños
             gameOverlay.className = 'game-modal-overlay';
             gameOverlay.style.cssText = `
                 position: fixed;
-                inset: 0;
+                top: 30px;
+                left: 0;
+                right: 0;
+                bottom: 30px;
                 background: rgba(0, 0, 0, 0.9);
                 display: flex;
                 align-items: center;
