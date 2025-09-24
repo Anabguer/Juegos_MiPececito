@@ -136,12 +136,14 @@
             color: var(--text-primary);
             overflow: hidden;
             touch-action: manipulation;
+            padding: 30px 0;
+            box-sizing: border-box;
         }
         
         /* 🏆 CABECERA DEL JUEGO */
         #gameHeader {
             position: fixed;
-            top: 0;
+            top: 30px;
             left: 0;
             right: 0;
             height: 70px;
@@ -1684,10 +1686,10 @@
 
         #gameCanvas {
             position: fixed;
-            top: 100px; /* Header (60px) + Barra necesidades (40px) */
+            top: 130px; /* Header (70px) + margen superior (30px) + Barra necesidades (30px) */
             left: 0;
             right: 0;
-            bottom: 90px; /* Espacio para barra inferior */
+            bottom: 120px; /* Espacio para barra inferior + margen inferior (30px) */
             touch-action: none;
             background: var(--bg-primary);
         }
