@@ -1689,9 +1689,20 @@
             top: 130px; /* Header (70px) + margen superior (30px) + Barra necesidades (30px) */
             left: 0;
             right: 0;
-            bottom: 120px; /* Espacio para barra inferior + margen inferior (30px) */
+            bottom: 100px; /* Espacio para barra inferior */
             touch-action: none;
             background: var(--bg-primary);
+        }
+        
+        /* 📱 BARRA INFERIOR CON MARGEN */
+        .bottom-margin-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(135deg, #0d47a1, #1565c0, #1976d2);
+            z-index: 1000;
         }
         
         /* 🎮 UI Overlay */
@@ -3211,6 +3222,9 @@
     </style>
 </head>
 <body>
+    <!-- 📱 BARRA INFERIOR CON MARGEN -->
+    <div class="bottom-margin-bar"></div>
+    
     <!-- 🏆 CABECERA CON LOGO -->
     <div id="gameHeader">
         <!-- 🎨 LOGO DE LA WEB -->
