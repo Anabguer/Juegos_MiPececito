@@ -140,21 +140,11 @@
             box-sizing: border-box;
         }
         
-        /* 📱 MARGEN SUPERIOR CON MARGEN */
-        .top-margin-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 30px;
-            background: linear-gradient(135deg, #0d47a1, #1565c0, #1976d2);
-            z-index: 1000;
-        }
         
         /* 🏆 CABECERA DEL JUEGO */
         #gameHeader {
             position: fixed;
-            top: 30px;
+            top: 0;
             left: 0;
             right: 0;
             height: 70px;
@@ -1697,24 +1687,14 @@
 
         #gameCanvas {
             position: fixed;
-            top: 130px; /* Header (70px) + margen superior (30px) + Barra necesidades (30px) */
+            top: 100px; /* Header (70px) + Barra necesidades (30px) */
             left: 0;
             right: 0;
-            bottom: 100px; /* Espacio para barra inferior */
+            bottom: 60px; /* Espacio para barra inferior */
             touch-action: none;
             background: var(--bg-primary);
         }
         
-        /* 📱 BARRA INFERIOR CON MARGEN */
-        .bottom-margin-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 30px;
-            background: linear-gradient(135deg, #0d47a1, #1565c0, #1976d2);
-            z-index: 1000;
-        }
         
         /* 🎮 UI Overlay */
         .ui-overlay {
@@ -2126,7 +2106,7 @@
         /* 🎮 BARRA DE HERRAMIENTAS COMPACTA COMO CABECERA */
         .action-bar {
             position: fixed;
-            bottom: 30px;
+            bottom: 0;
             left: 0;
             right: 0;
             height: 60px; /* MÁS COMPACTA (era 90px) */
@@ -3233,12 +3213,6 @@
     </style>
 </head>
 <body>
-    <!-- 📱 BARRA SUPERIOR CON MARGEN -->
-    <div class="top-margin-bar"></div>
-    
-    <!-- 📱 BARRA INFERIOR CON MARGEN -->
-    <div class="bottom-margin-bar"></div>
-    
     <!-- 🏆 CABECERA CON LOGO -->
     <div id="gameHeader">
         <!-- 🎨 LOGO DE LA WEB -->
@@ -3784,14 +3758,6 @@
         <button class="debug-btn primary" id="forceHatchBtn" title="Forzar eclosión">🐣</button>
         <button class="debug-btn success" id="evolveToYoungBtn" title="Evolucionar a Joven">🌱</button>
         <button class="debug-btn info" id="evolveToAdultBtn" title="Evolucionar a Adulto">👑</button>
-        <button class="debug-btn warning" id="timeAdvanceBtn" title="Avanzar tiempo">⏰</button>
-        <button class="debug-btn success" id="maxFoodBtn" title="Máxima comida">🍎</button>
-        <button class="debug-btn info" id="maxCleanBtn" title="Máxima limpieza">🧹</button>
-        <button class="debug-btn warning" id="maxDirtBtn" title="Máxima suciedad">🦠</button>
-        <button class="debug-btn danger" id="minFunBtn" title="Mínima diversión">😢</button>
-        <button class="debug-btn purple" id="simulatePlayBtn" title="Simular juego">🎮</button>
-        <button class="debug-btn" id="addBubblesBtn" title="Añadir burbujas">🫧</button>
-        <button class="debug-btn" id="addStarsBtn" title="Añadir estrellas">⭐</button>
     </div>
     
     <!-- 🎨 Librería Lottie -->
