@@ -3027,6 +3027,77 @@
             color: #FFD700;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
+
+        /* 🫧 Burbujas - Estilos de la cabecera (igual que Conecta 3) */
+        .bubble-game-header {
+            background: linear-gradient(135deg, 
+                rgba(79, 195, 247, 0.3) 0%, 
+                rgba(129, 212, 250, 0.2) 100%);
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+            gap: 8px;
+        }
+
+        .bubble-game-header .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bubble-game-header .header-bottom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bubble-game-header .game-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .bubble-game-header .game-title {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .bubble-game-header .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bubble-game-header .best-score-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .bubble-game-header .best-label {
+            opacity: 0.8;
+            font-size: 11px;
+        }
+
+        .bubble-game-header .best-value {
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -11751,17 +11822,9 @@ Comida premium y de cumpleaños
                     <!-- 🏆 HEADER CON DOS LÍNEAS COMO NOS GUSTABA -->
                     <div class="bubble-game-header">
                         <!-- PRIMERA LÍNEA: TÍTULO + ALTAVOZ + X -->
-                        <div class="header-top" style="
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                        ">
+                        <div class="header-top">
                             <div class="game-title">🫧 Atrapa Burbujas</div>
-                            <div class="header-controls" style="
-                                display: flex;
-                                align-items: center;
-                                gap: 10px;
-                            ">
+                            <div class="header-controls">
                                 <button id="bubble-sound-toggle" class="sound-btn" style="
                                     background: rgba(255, 255, 255, 0.2);
                                     border: 2px solid rgba(255, 255, 255, 0.8);
