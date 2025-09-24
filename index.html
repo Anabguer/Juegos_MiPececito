@@ -2894,6 +2894,67 @@
                 padding: 4px 8px;
             }
         }
+
+        /* 🌊 Conecta 3 - Estilos del juego (basado en prototipo funcional) */
+        .bloques-cell {
+            position: absolute;
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            color: #fff;
+            user-select: none;
+            -webkit-user-drag: none;
+            touch-action: none;
+            cursor: grab;
+            transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .18s ease;
+            background: #0e1a3a;
+            box-shadow: inset 0 8px 14px rgba(255,255,255,.08), inset 0 -10px 18px rgba(0,0,0,.35), 0 6px 12px rgba(0,0,0,.25);
+        }
+
+        .bloques-cell span {
+            font-size: 36px;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .bloques-cell:active {
+            cursor: grabbing;
+        }
+
+        .bloques-cell.ghost {
+            opacity: 0.7;
+            filter: brightness(1.15);
+        }
+
+        .bloques-cell.pop {
+            animation: pop .25s ease;
+        }
+
+        @keyframes pop {
+            from { transform: scale(.85); }
+            to { transform: scale(1); }
+        }
+
+        .bloques-cell.pulse {
+            animation: pulse .9s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: inset 0 8px 14px rgba(255,255,255,.08), inset 0 -10px 18px rgba(0,0,0,.35), 0 0 0 0 rgba(255,255,255,.15); }
+            50% { box-shadow: inset 0 8px 14px rgba(255,255,255,.08), inset 0 -10px 18px rgba(0,0,0,.35), 0 0 0 8px rgba(255,255,255,0); }
+            100% { box-shadow: inset 0 8px 14px rgba(255,255,255,.08), inset 0 -10px 18px rgba(0,0,0,.35), 0 0 0 0 rgba(255,255,255,0); }
+        }
+
+        /* Pistas sutiles por tipo (bordecito) */
+        .bloques-cell.t0 { outline: 2px solid #4ac1ff22; }
+        .bloques-cell.t1 { outline: 2px solid #7aff7a22; }
+        .bloques-cell.t2 { outline: 2px solid #ffd84a22; }
+        .bloques-cell.t3 { outline: 2px solid #ff7adf22; }
+        .bloques-cell.t4 { outline: 2px solid #a88bff22; }
+        .bloques-cell.t5 { outline: 2px solid #ff9a4a22; }
     </style>
 </head>
 <body>
@@ -12315,102 +12376,111 @@ Comida premium y de cumpleaños
                 `;
             }
             
-            // 🏆 CREAR HEADER UNIFICADO PARA TODOS LOS JUEGOS
-            const existingHeader = gameOverlay.querySelector(`.${gameName}-header, .${gameName}-game-header`);
-            if (existingHeader) {
-                existingHeader.remove();
+            // 🏆 CREAR HEADER UNIFICADO PARA TODOS LOS JUEGOS (excepto Conecta 3)
+            if (gameName !== 'bloques') {
+                const existingHeader = gameOverlay.querySelector(`.${gameName}-header, .${gameName}-game-header`);
+                if (existingHeader) {
+                    existingHeader.remove();
+                }
             }
             
-            // Crear header unificado
-            const unifiedHeader = document.createElement('div');
-            unifiedHeader.className = `${gameName}-unified-header`;
-            unifiedHeader.innerHTML = `
-                <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
-                <div class="header-top">
-                    <div class="game-title">${getGameTitle(gameName)}</div>
-                    <div class="header-controls">
-                        <button class="sound-btn">🔊</button>
-                        <button class="close-btn">✕</button>
-                    </div>
-                </div>
-                
-                    <!-- SEGUNDA LÍNEA: NIVEL + PERLAS + MEJOR -->
-                    <div class="header-bottom">
-                        <div class="game-stats">
-                            <span class="level">NIVEL 1</span>
-                            <span class="perlas">
-                                <img src="images/ui/perlas.png" style="width: 28px; height: 28px; margin-bottom: 2px; vertical-align: middle;">
-                                <span class="score" id="bubble-score">0</span>
-                            </span>
-                            <span class="best-score-display">
-                                <span class="best-label">Mejor:</span>
-                                <span class="best-value" id="bubble-best-display">0</span>
-                            </span>
+            // Crear header unificado (solo para juegos que no sean Conecta 3)
+            if (gameName !== 'bloques') {
+                const unifiedHeader = document.createElement('div');
+                unifiedHeader.className = `${gameName}-unified-header`;
+                unifiedHeader.innerHTML = `
+                    <!-- PRIMERA LÍNEA: NOMBRE + ALTAVOZ + X -->
+                    <div class="header-top">
+                        <div class="game-title">${getGameTitle(gameName)}</div>
+                        <div class="header-controls">
+                            <button class="sound-btn">🔊</button>
+                            <button class="close-btn">✕</button>
                         </div>
                     </div>
-            `;
-            
-            // Insertar header al principio del contenedor
-            if (container) {
-                container.insertBefore(unifiedHeader, container.firstChild);
+                    
+                        <!-- SEGUNDA LÍNEA: NIVEL + PERLAS + MEJOR -->
+                        <div class="header-bottom">
+                            <div class="game-stats">
+                                <span class="level">NIVEL 1</span>
+                                <span class="perlas">
+                                    <img src="images/ui/perlas.png" style="width: 28px; height: 28px; margin-bottom: 2px; vertical-align: middle;">
+                                    <span class="score" id="bubble-score">0</span>
+                                </span>
+                                <span class="best-score-display">
+                                    <span class="best-label">Mejor:</span>
+                                    <span class="best-value" id="bubble-best-display">0</span>
+                                </span>
+                            </div>
+                        </div>
+                `;
+                
+                // Insertar header al principio del contenedor
+                if (container) {
+                    container.insertBefore(unifiedHeader, container.firstChild);
+                }
             }
             
-            // Estilos del header unificado
-            unifiedHeader.style.cssText = `
-                background: linear-gradient(135deg, 
-                    rgba(79, 195, 247, 0.3) 0%, 
-                    rgba(129, 212, 250, 0.2) 100%);
-                padding: 15px 20px;
-                display: flex;
-                flex-direction: column;
-                border-bottom: 2px solid rgba(255, 255, 255, 0.25);
-                gap: 8px;
-            `;
+            // Estilos del header unificado (solo para juegos que no sean Conecta 3)
+            if (gameName !== 'bloques') {
+                unifiedHeader.style.cssText = `
+                    background: linear-gradient(135deg, 
+                        rgba(79, 195, 247, 0.3) 0%, 
+                        rgba(129, 212, 250, 0.2) 100%);
+                    padding: 15px 20px;
+                    display: flex;
+                    flex-direction: column;
+                    border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+                    gap: 8px;
+                `;
+            }
             
-            // Primera línea: Título + Altavoz + X
-            const headerTop = unifiedHeader.querySelector('.header-top');
-            headerTop.style.cssText = `
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            `;
-            
-            // Segunda línea: Nivel + Perlas
-            const headerBottom = unifiedHeader.querySelector('.header-bottom');
-            headerBottom.style.cssText = `
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            `;
-            
-            // Stats centrados
-            const gameStats = unifiedHeader.querySelector('.game-stats');
-            gameStats.style.cssText = `
-                display: flex;
-                align-items: center;
-                gap: 15px;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-            `;
-            
-            // Título
-            const title = unifiedHeader.querySelector('.game-title');
-            title.style.cssText = `
-                color: white;
-                font-size: 18px;
-                font-weight: bold;
-                margin: 0;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            `;
-            
-            // Controles del header
-            const headerControls = unifiedHeader.querySelector('.header-controls');
-            headerControls.style.cssText = `
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            `;
+            // Estilos del header unificado (solo para juegos que no sean Conecta 3)
+            if (gameName !== 'bloques') {
+                // Primera línea: Título + Altavoz + X
+                const headerTop = unifiedHeader.querySelector('.header-top');
+                headerTop.style.cssText = `
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                `;
+                
+                // Segunda línea: Nivel + Perlas
+                const headerBottom = unifiedHeader.querySelector('.header-bottom');
+                headerBottom.style.cssText = `
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                `;
+                
+                // Stats centrados
+                const gameStats = unifiedHeader.querySelector('.game-stats');
+                gameStats.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                    color: white;
+                    font-size: 16px;
+                    font-weight: bold;
+                `;
+                
+                // Título
+                const title = unifiedHeader.querySelector('.game-title');
+                title.style.cssText = `
+                    color: white;
+                    font-size: 18px;
+                    font-weight: bold;
+                    margin: 0;
+                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                `;
+                
+                // Controles del header
+                const headerControls = unifiedHeader.querySelector('.header-controls');
+                headerControls.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                `;
+            }
             
             // Función para obtener el título del juego
             function getGameTitle(gameName) {
@@ -12428,46 +12498,47 @@ Comida premium y de cumpleaños
                 return titles[gameName] || '🎮 Juego';
             }
             
-            // 🎯 CONFIGURAR BOTONES DEL HEADER UNIFICADO
-            const soundBtn = unifiedHeader.querySelector('.sound-btn');
-            const closeBtn = unifiedHeader.querySelector('.close-btn');
+            // 🎯 CONFIGURAR BOTONES DEL HEADER UNIFICADO (solo para juegos que no sean Conecta 3)
+            if (gameName !== 'bloques') {
+                const soundBtn = unifiedHeader.querySelector('.sound-btn');
+                const closeBtn = unifiedHeader.querySelector('.close-btn');
             
-            // Estilo para el indicador de mejor puntuación
-            const bestScoreDisplay = unifiedHeader.querySelector('.best-score-display');
-            if (bestScoreDisplay) {
-                bestScoreDisplay.style.cssText = `
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                    background: rgba(255, 255, 255, 0.1);
-                    border: 1px solid rgba(255, 255, 255, 0.2);
-                    border-radius: 8px;
-                    padding: 4px 8px;
-                    font-size: 12px;
-                    color: #fff;
-                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-                `;
-                
-                const bestLabel = bestScoreDisplay.querySelector('.best-label');
-                if (bestLabel) {
-                    bestLabel.style.cssText = `
-                        opacity: 0.8;
-                        font-size: 11px;
+                // Estilo para el indicador de mejor puntuación
+                const bestScoreDisplay = unifiedHeader.querySelector('.best-score-display');
+                if (bestScoreDisplay) {
+                    bestScoreDisplay.style.cssText = `
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        background: rgba(255, 255, 255, 0.1);
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        border-radius: 8px;
+                        padding: 4px 8px;
+                        font-size: 12px;
+                        color: #fff;
+                        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
                     `;
+                    
+                    const bestLabel = bestScoreDisplay.querySelector('.best-label');
+                    if (bestLabel) {
+                        bestLabel.style.cssText = `
+                            opacity: 0.8;
+                            font-size: 11px;
+                        `;
+                    }
+                    
+                    const bestValue = bestScoreDisplay.querySelector('.best-value');
+                    if (bestValue) {
+                        bestValue.style.cssText = `
+                            font-weight: bold;
+                            color: #FFD700;
+                            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+                        `;
+                    }
                 }
-                
-                const bestValue = bestScoreDisplay.querySelector('.best-value');
-                if (bestValue) {
-                    bestValue.style.cssText = `
-                        font-weight: bold;
-                        color: #FFD700;
-                        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-                    `;
-                }
-            }
             
-            // Botón de sonido - SINCRONIZADO CON EL PRINCIPAL
-            if (soundBtn) {
+                // Botón de sonido - SINCRONIZADO CON EL PRINCIPAL
+                if (soundBtn) {
                 // Usar las mismas imágenes que el botón principal
                 const isMuted = window.audioManager ? window.audioManager.isMuted : false;
                 soundBtn.innerHTML = isMuted ? 
@@ -12511,8 +12582,8 @@ Comida premium y de cumpleaños
                 });
             }
             
-            // Botón de cerrar
-            if (closeBtn) {
+                // Botón de cerrar
+                if (closeBtn) {
                 closeBtn.style.cssText = `
                     width: 30px;
                     height: 30px;
@@ -12543,6 +12614,7 @@ Comida premium y de cumpleaños
                 closeBtn.addEventListener('click', () => {
                     gameOverlay.remove();
                 });
+                }
             }
             
             // 🎮 BUSCAR Y UNIFICAR BOTONES DE JUGAR - MÉTODO SIMPLE
@@ -13230,9 +13302,9 @@ Comida premium y de cumpleaños
             console.log('🎮 Juego de burbujas inicializado completamente');
         }
         
-        // 💎 JUEGO DE BLOQUES (MAR MATCH-3) - INTEGRADO COMPLETO
+        // 💎 JUEGO DE BLOQUES (MAR MATCH-3) - CÓDIGO EXACTO DEL HTML QUE FUNCIONA
         function startBloquesGame() {
-            console.log('💎 Iniciando juego Mar Match-3 integrado...');
+            console.log('💎 Iniciando juego Conecta 3 integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
@@ -13243,7 +13315,7 @@ Comida premium y de cumpleaños
             gameOverlay.innerHTML = `
                 <div class="bloques-game-container">
                     <div class="bloques-header">
-                        <h2>💎 Conecta 3</h2>
+                        <h2>🌊 Conecta 3</h2>
                         <div class="bloques-stats">
                             <span>⭐ <span id="bloques-score">0</span></span>
                             <span>⏰ <span id="bloques-time">60</span>s</span>
@@ -13264,38 +13336,79 @@ Comida premium y de cumpleaños
             applyPerfectBubbleDesign(gameOverlay, 'bloques');
             
             const closeBtn = gameOverlay.querySelector('.bloques-close-btn');
-            if (closeBtn) {
-                closeBtn.style.cssText = `
-                    background: rgba(255, 255, 255, 0.2);
-                    border: none;
-                    border-radius: 50%;
-                    width: 35px;
-                    height: 35px;
-                    color: white;
-                    font-size: 18px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: all 0.2s ease;
-                `;
-            } else {
-                console.error('❌ No se encontró el botón de cerrar en el juego de bloques');
+            const board = gameOverlay.querySelector('.bloques-board');
+            const footer = gameOverlay.querySelector('.bloques-footer');
+            const restartBtn = gameOverlay.querySelector('#bloques-restart');
+            
+            // Verificar que los elementos existen antes de usarlos
+            if (!closeBtn || !board || !footer || !restartBtn) {
+                console.error('❌ Elementos del juego no encontrados');
+                return;
             }
             
-            // Barra de progreso del timer
-            const timerBar = gameOverlay.querySelector('.bloques-timer-bar');
-            if (timerBar) {
-                timerBar.style.cssText = `
-                    height: 6px;
-                    background: rgba(255, 255, 255, 0.1);
-                    margin: 0 20px;
-                    border-radius: 3px;
-                    overflow: hidden;
-                `;
-            }
-
+            // Aplicar estilos específicos del tablero (basado en prototipo funcional)
+            board.style.cssText = `
+                position: relative;
+                width: calc(6 * 64px + 5 * 6px);
+                height: calc(9 * 64px + 8 * 6px);
+                background: radial-gradient(120% 100% at 50% 0%, #0b1227 0%, #0b1227 50%, #0a1021 100%);
+                padding: 0;
+                border-radius: 20px;
+                box-shadow: 0 20px 50px rgba(0,0,0,.45) inset, 0 8px 30px rgba(0,0,0,.4);
+                border: 1px solid #1b2750;
+                overflow: hidden;
+                margin: 10px auto;
+            `;
+            
+            // Aplicar estilos específicos del footer
+            footer.style.cssText = `
+                padding: 20px !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                margin-top: auto !important;
+                position: relative !important;
+                background: rgba(255, 255, 255, 0.05) !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+                min-height: 80px !important;
+                width: 100% !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                overflow: visible !important;
+                z-index: 100 !important;
+            `;
+            
+            // Aplicar estilos específicos del botón restart
+            restartBtn.style.cssText = `
+                background: linear-gradient(135deg, rgb(33, 150, 243), rgb(25, 118, 210)) !important;
+                border: 2px solid rgb(21, 101, 192) !important;
+                border-radius: 20px !important;
+                padding: 12px 30px !important;
+                font-size: 18px !important;
+                font-weight: bold !important;
+                color: white !important;
+                cursor: pointer !important;
+                transition: 0.3s !important;
+                text-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px !important;
+                box-shadow: rgba(33, 150, 243, 0.4) 0px 6px 20px !important;
+                text-transform: uppercase !important;
+                letter-spacing: 1px !important;
+                width: 80% !important;
+                max-width: 250px !important;
+                margin: 15px auto !important;
+                display: block !important;
+                position: relative !important;
+                z-index: 1000 !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                height: auto !important;
+                min-height: 50px !important;
+                overflow: visible !important;
+                clip: auto !important;
+                clip-path: none !important;
+            `;
+            
+            // Aplicar estilos específicos de la barra de tiempo
             const timerFill = gameOverlay.querySelector('.bloques-timer-fill');
             if (timerFill) {
                 timerFill.style.cssText = `
@@ -13306,185 +13419,133 @@ Comida premium y de cumpleaños
                 `;
             }
 
-            const board = gameOverlay.querySelector('.bloques-board');
-            if (board) {
-                board.style.cssText = `
-                    flex: 1;
-                    display: grid;
-                    grid-template-columns: repeat(6, 1fr);
-                    grid-template-rows: repeat(9, 1fr);
-                    gap: 3px;
-                    padding: 15px;
-                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
-                    margin: 10px;
-                    border-radius: 14px;
-                    border: 1px solid rgba(255, 255, 255, 0.25);
-                    max-width: 350px;
-                    max-height: 500px;
-                    aspect-ratio: 6/9;
-                    overflow: hidden;
-                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                `;
-            } else {
-                console.error('❌ No se encontró el tablero en el juego de bloques');
-            }
-            
-            const footer = gameOverlay.querySelector('.bloques-footer');
-            if (footer) {
-                footer.style.cssText = `
-                    padding: 15px 20px;
-                    display: flex;
-                    justify-content: center;
-                    border-top: 1px solid rgba(255, 255, 255, 0.1);
-                `;
-            } else {
-                console.error('❌ No se encontró el footer en el juego de bloques');
-            }
-            
-            const restartBtn = gameOverlay.querySelector('.bloques-btn');
-            if (restartBtn) {
-                restartBtn.style.cssText = `
-                    background: #1bb37a;
-                    color: white;
-                    border: none;
-                    border-radius: 999px;
-                    padding: 8px 16px;
-                    font-weight: 800;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                `;
-            } else {
-                console.error('❌ No se encontró el botón de reiniciar en el juego de bloques');
-            }
-            
-            // Variables del juego
-            const ICONS = ["🐟","⭐","🐚","🦀","🐙","🪸"];
-            const TYPES = [0,1,2,3,4,5];
-            let grid = [], score = 0, selected = null, busy = false;
-            let timerId = null, timeLeft = 60;
-            
-            // Inicializar juego
-            function initBloquesGame() {
-                score = 0;
-                timeLeft = 60;
-                busy = true;               // bloqueamos mientras pintamos
-                updateUI();
+            // === CÓDIGO EXACTO DEL HTML QUE FUNCIONA ===
+            const COLS = 6, ROWS = 9, TYPES = 6;
+            const CELL = 64, GAP = 6;
+            const ICONS = ['🐚','🐟','🐙','🐠','🦀','🐬']; // tema marino
 
+            let grid = [...Array(ROWS)].map(()=>Array(COLS).fill(null));
+            let score = 0, moves = 0;
+            let drag = null; // {r,c, el}
+
+            // --- UTILS
+            const posToXY = (r,c) => ({
+                x: c * (CELL + GAP),
+                y: r * (CELL + GAP)
+            });
+            function updateUI(){ 
+                const scoreEl = gameOverlay.querySelector('#bloques-score');
+                const timeEl = gameOverlay.querySelector('#bloques-time');
+                const timerFill = gameOverlay.querySelector('#bloques-timer-fill');
+                
+                if (scoreEl) scoreEl.textContent = score;
+                if (timeEl) timeEl.textContent = timeLeft;
+                if (timerFill) {
+                    const percentage = (timeLeft / 60) * 100;
+                    timerFill.style.width = percentage + '%';
+                }
+            }
+
+            function makeCell(r,c,t){
+                const el = document.createElement('div');
+                el.className = `bloques-cell t${t}`;
+                el.dataset.r = r; el.dataset.c = c; el.dataset.t = t;
+                const {x,y} = posToXY(r,c);
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+                el.classList.add('pop');
+
+                const span = document.createElement('span');
+                span.textContent = ICONS[t];
+                el.appendChild(span);
+
+                el.addEventListener('pointerdown', onPointerDown);
+                el.addEventListener('pointerenter', onPointerEnter);
+                el.addEventListener('pointerup', onPointerUp);
+                el.addEventListener('pointercancel', onPointerUp);
+
+                return el;
+            }
+
+            function placeCell(r,c, cell){
+                const {x,y} = posToXY(r,c);
+                cell.style.left = x + 'px';
+                cell.style.top = y + 'px';
+                cell.dataset.r = r; cell.dataset.c = c;
+            }
+
+            function randomType(){ return Math.floor(Math.random()*TYPES); }
+
+            function init(noCascades=true){
+                score = 0; moves = 0; updateUI();
+                // limpiar DOM y estado
                 board.innerHTML = '';
-                grid = [...Array(9)].map(()=>Array(6).fill(null));
+                grid = [...Array(ROWS)].map(()=>Array(COLS).fill(null));
 
-                for (let r=0; r<9; r++) {
-                    for (let c=0; c<6; c++) {
-                        let t = Math.floor(Math.random() * TYPES.length);
-                        const left1 = c>0 ? grid[r][c-1]?.t : -1;
-                        const left2 = c>1 ? grid[r][c-2]?.t : -2;
-                        const up1   = r>0 ? grid[r-1][c]?.t : -1;
-                        const up2   = r>1 ? grid[r-2][c]?.t : -2;
-                        while ((left1===t && left2===t) || (up1===t && up2===t)) t = Math.floor(Math.random()*TYPES.length);
-
+                for(let r=0;r<ROWS;r++){
+                    for(let c=0;c<COLS;c++){
+                        let t = randomType();
+                        // evita nacimientos con match inmediato si noCascades=true
+                        if(noCascades){
+                            const left1 = c>0 ? grid[r][c-1]?.t : -1;
+                            const left2 = c>1 ? grid[r][c-2]?.t : -2;
+                            const up1 = r>0 ? grid[r-1][c]?.t : -1;
+                            const up2 = r>1 ? grid[r-2][c]?.t : -2;
+                            while((left1===t && left2===t) || (up1===t && up2===t)) t = randomType();
+                        }
                         const el = makeCell(r,c,t);
                         grid[r][c] = { t, el };
                         board.appendChild(el);
                     }
                 }
-
-                // 👇 IMPORTANTE: desbloquear interacción al terminar
-                busy = false;
-                console.log('🎮 Juego Conecta 3 inicializado');
             }
-            
-            function showCells() {
-                // Mostrar todas las fichas con animación
-                const cells = board.querySelectorAll('.bloques-cell');
-                cells.forEach((cell, index) => {
-                    cell.style.opacity = '0';
-                    cell.style.transform = 'scale(0.3) rotate(180deg)';
-                    
-                    setTimeout(() => {
-                        cell.style.transition = 'all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-                        cell.style.opacity = '1';
-                        cell.style.transform = 'scale(1) rotate(0deg)';
-                    }, index * 50);
-                });
-            }
-            
-            function getT(r, c) {
-                return (grid[r] && grid[r][c]) ? grid[r][c].t : null;
-            }
-            
-            function makeCell(r,c,t){
-                const el = document.createElement('div');
-                el.className = 'bloques-cell';
-                el.dataset.r = r; el.dataset.c = c; el.dataset.t = t;
-                el.textContent = ICONS[t];
 
-                // Si usas GRID, usa order para colocación lógica (opción simple)
-                el.style.order = r*6 + c;
-
-                // estilos base
-                el.style.cssText += `
-                    display:flex;align-items:center;justify-content:center;
-                    border-radius:12px;aspect-ratio:1/1;cursor:pointer;user-select:none;
-                    font-size:28px;background:linear-gradient(160deg,#0e4e76,#0a3757);
-                    border:1px solid rgba(255,255,255,.18);box-shadow:0 4px 8px rgba(0,0,0,.35);
-                    transition:transform .18s ease, opacity .18s ease;
-                `;
-
-                el.addEventListener('click', onClick);
-                return el;
-            }
-            
-            function placeCell(r,c, cell){
-                cell.dataset.r = r; cell.dataset.c = c;
-                // Si sigues en grid, actualiza el order para que "se mueva"
-                cell.style.order = r*6 + c;
-            }
-            
-            function randomType(){ return Math.floor(Math.random()*TYPES.length); }
-            
-            // --- INPUT (sistema de click simple)
-            
-            function onClick(e){
-                if (busy || timeLeft <= 0) return;
-
+            // --- INPUT (drag por celdas adyacentes)
+            function onPointerDown(e){
+                console.log('🎯 onPointerDown disparado!');
                 const el = e.currentTarget;
-                const r = +el.dataset.r, c = +el.dataset.c;
-
-                if (!selected) {
-                    selected = { r, c, el };
-                    el.style.opacity = '0.7';
-                    el.style.transform = 'scale(0.95)';
-                    return;
-                }
-
-                const { r: r1, c: c1, el: el1 } = selected;
-
-                if (r === r1 && c === c1) { // deselección
-                    el1.style.opacity = '1';
-                    el1.style.transform = 'scale(1)';
-                    selected = null;
-                    return;
-                }
-
-                if (isAdjacent(r1, c1, r, c)) {
-                    doSwap(r1, c1, r, c, true);
+                drag = { r: +el.dataset.r, c: +el.dataset.c, el };
+                el.classList.add('ghost');
+                console.log('✅ Drag iniciado:', drag);
+            }
+            function onPointerEnter(e){
+                console.log('🎯 onPointerEnter disparado!', {drag: drag});
+                if(!drag) return; // solo si estamos arrastrando desde otra celda
+                const target = e.currentTarget;
+                const r2 = +target.dataset.r, c2 = +target.dataset.c;
+                const {r,c} = drag;
+                console.log('🔄 Intentando intercambio:', {from: {r,c}, to: {r2,c2}});
+                if(isAdjacent(r,c,r2,c2)){
+                    console.log('✅ Son adyacentes, intercambiando...');
+                    doSwap(r,c,r2,c2, true);
                     const matches = findMatches();
-                    if (matches.length > 0) {
+                    if(matches.length>0){
+                        console.log('🎉 Match encontrado!', matches.length);
+                        moves++; updateUI();
                         removeMatches(matches);
                     } else {
-                        doSwap(r, c, r1, c1, true); // revertir
+                        console.log('❌ No hay match, revirtiendo...');
+                        // revertir si no hay match
+                        doSwap(r2,c2,r,c, true);
                     }
+                    endDrag();
+                } else {
+                    console.log('❌ No son adyacentes');
                 }
-
-                el1.style.opacity = '1';
-                el1.style.transform = 'scale(1)';
-                selected = null;
             }
-            function isAdjacent(r1,c1,r2,c2){ 
-                const result = (Math.abs(r1-r2)+Math.abs(c1-c2))===1;
-                console.log(`🔍 isAdjacent(${r1},${c1}, ${r2},${c2}): ${result} (diff: ${Math.abs(r1-r2)}+${Math.abs(c1-c2)}=${Math.abs(r1-r2)+Math.abs(c1-c2)})`);
-                return result;
+            function onPointerUp(){ 
+                console.log('🎯 onPointerUp disparado!', {drag: drag});
+                if(drag) endDrag(); 
             }
+            function endDrag(){ 
+                console.log('🛑 endDrag llamado', {drag: drag});
+                if(drag){ 
+                    drag.el.classList.remove('ghost'); 
+                    drag = null; 
+                    console.log('✅ Drag terminado');
+                } 
+            }
+            function isAdjacent(r1,c1,r2,c2){ return (Math.abs(r1-r2)+Math.abs(c1-c2))===1; }
 
             function doSwap(r1,c1,r2,c2, animate=false){
                 const a = grid[r1][c1], b = grid[r2][c2];
@@ -13497,93 +13558,15 @@ Comida premium y de cumpleaños
                     placeCell(r1,c1,b.el); placeCell(r2,c2,a.el);
                 }
             }
-            
-            function placeCell(r, c, cell) {
-                // Esta función coloca una celda en la posición correcta
-                // No necesitamos calcular posiciones porque usamos CSS Grid
-                cell.dataset.r = r;
-                cell.dataset.c = c;
-            }
-            
-            function onCellClick(r, c) {
-                if (busy || timeLeft <= 0) return;
-                
-                console.log(`🎯 Click en celda (${r}, ${c})`);
-                const cell = grid[r][c];
-                
-                if (!selected) {
-                    selected = {r, c};
-                    cell.el.style.transform = 'scale(1.1)';
-                    cell.el.style.boxShadow = '0 0 20px rgba(255,255,255,0.6)';
-                    console.log(`✅ Celda seleccionada: (${r}, ${c})`);
-                } else if (selected.r === r && selected.c === c) {
-                    // Deseleccionar
-                    cell.el.style.transform = 'scale(1)';
-                    cell.el.style.boxShadow = '0 4px 8px rgba(0,0,0,.35)';
-                    selected = null;
-                    console.log(`❌ Celda deseleccionada: (${r}, ${c})`);
-                } else if (isAdjacent(selected, {r, c})) {
-                    // Intercambiar
-                    console.log(`🔄 Intercambiando (${selected.r}, ${selected.c}) con (${r}, ${c})`);
-                    swapCells(selected, {r, c});
-                    selected = null;
-                } else {
-                    // Seleccionar nueva celda
-                    grid[selected.r][selected.c].el.style.transform = 'scale(1)';
-                    grid[selected.r][selected.c].el.style.boxShadow = '0 4px 8px rgba(0,0,0,.35)';
-                    selected = {r, c};
-                    cell.el.style.transform = 'scale(1.1)';
-                    cell.el.style.boxShadow = '0 0 20px rgba(255,255,255,0.6)';
-                    console.log(`🔄 Nueva celda seleccionada: (${r}, ${c})`);
-                }
-            }
-            
-            function isAdjacent(a, b) {
-                return Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1;
-            }
-            
-            function swapCells(a, b) {
-                const ta = grid[a.r][a.c].t;
-                const tb = grid[b.r][b.c].t;
-                
-                console.log(`🔄 Intercambiando tipos: ${ta} ↔ ${tb}`);
-                
-                grid[a.r][a.c].t = tb;
-                grid[b.r][b.c].t = ta;
-                grid[a.r][a.c].el.innerHTML = ICONS[tb];
-                grid[b.r][b.c].el.innerHTML = ICONS[ta];
-                
-                // Reset styles
-                grid[a.r][a.c].el.style.transform = 'scale(1)';
-                grid[a.r][a.c].el.style.boxShadow = '0 4px 8px rgba(0,0,0,.35)';
-                grid[b.r][b.c].el.style.transform = 'scale(1)';
-                grid[b.r][b.c].el.style.boxShadow = '0 4px 8px rgba(0,0,0,.35)';
-                
-                // Verificar matches
-                setTimeout(() => {
-                    const matches = findMatches();
-                    console.log(`🔍 Matches encontrados: ${matches.length}`);
-                    if (matches.length > 0) {
-                        console.log(`✅ Matches válidos, eliminando...`);
-                        removeMatches(matches);
-                    } else {
-                        console.log(`❌ No hay matches, revirtiendo intercambio...`);
-                        // Revertir si no hay matches
-                        grid[a.r][a.c].t = ta;
-                        grid[b.r][b.c].t = tb;
-                        grid[a.r][a.c].el.innerHTML = ICONS[ta];
-                        grid[b.r][b.c].el.innerHTML = ICONS[tb];
-                    }
-                }, 100);
-            }
-            
+
+            // --- DETECCIÓN DE MATCHES (flood-fill 4 direcciones)
             function findMatches(){
-                const seen = Array.from({length:9},()=>Array(6).fill(false));
+                const seen = Array.from({length:ROWS},()=>Array(COLS).fill(false));
                 const matches = [];
                 const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
 
-                for(let r=0;r<9;r++){
-                    for(let c=0;c<6;c++){
+                for(let r=0;r<ROWS;r++){
+                    for(let c=0;c<COLS;c++){
                         if(!grid[r][c] || seen[r][c]) continue;
                         const t = grid[r][c].t;
                         const stack=[[r,c]]; const group=[];
@@ -13592,7 +13575,7 @@ Comida premium y de cumpleaños
                             const [rr,cc]=stack.pop(); group.push({r:rr,c:cc});
                             for(const [dr,dc] of dirs){
                                 const nr=rr+dr,nc=cc+dc;
-                                if(nr<0||nr>=9||nc<0||nc>=6) continue;
+                                if(nr<0||nr>=ROWS||nc<0||nc>=COLS) continue;
                                 if(seen[nr][nc]) continue;
                                 if(grid[nr][nc] && grid[nr][nc].t===t){ seen[nr][nc]=true; stack.push([nr,nc]); }
                             }
@@ -13607,8 +13590,9 @@ Comida premium y de cumpleaños
                 for(const m of matches) uniq.set(key(m), m);
                 return [...uniq.values()];
             }
-            
-            function removeMatches(matches) {
+
+            // --- ELIMINACIÓN, GRAVEDAD Y RELLENO
+            function removeMatches(matches){
                 score += matches.length * 10;
                 updateUI();
 
@@ -13621,9 +13605,9 @@ Comida premium y de cumpleaños
 
                 // caída por columnas
                 setTimeout(()=>{
-                    for(let c=0;c<6;c++){
-                        let write = 8;
-                        for(let r=8;r>=0;r--){
+                    for(let c=0;c<COLS;c++){
+                        let write = ROWS-1;
+                        for(let r=ROWS-1;r>=0;r--){
                             if(grid[r][c]){
                                 if(write!==r){
                                     grid[write][c]=grid[r][c];
@@ -13635,7 +13619,7 @@ Comida premium y de cumpleaños
                         }
                         // generar nuevas arriba
                         for(let r=write;r>=0;r--){
-                            const t = Math.floor(Math.random() * TYPES.length);
+                            const t = randomType();
                             const el = makeCell(r,c,t);
                             el.style.opacity='0'; el.style.transform='translateY(-24px)';
                             grid[r][c] = {t, el};
@@ -13654,149 +13638,36 @@ Comida premium y de cumpleaños
                     }, 120);
                 }, 160);
             }
-            
+
+            let timerId = null, timeLeft = 60;
             function startTimer() {
                 timerId = setInterval(() => {
                     timeLeft--;
                     updateUI();
-                    if(timeLeft <= 0) {
-                        endGame();
+                    if (timeLeft <= 0) {
+                        clearInterval(timerId);
+                        console.log('⏰ Tiempo agotado!');
                     }
                 }, 1000);
             }
             
-            function updateUI() {
-                const scoreEl = document.getElementById('bloques-score');
-                const timeEl = document.getElementById('bloques-time');
-                const timerFill = document.getElementById('bloques-timer-fill');
-                
-                if (scoreEl) {
-                    scoreEl.textContent = score;
-                } else {
-                    console.error('❌ No se encontró el elemento bloques-score');
-                }
-                
-                if (timeEl) {
-                    timeEl.textContent = timeLeft;
-                } else {
-                    console.error('❌ No se encontró el elemento bloques-time');
-                }
-
-                if (timerFill) {
-                    const percentage = (timeLeft / 60) * 100;
-                    timerFill.style.width = `${percentage}%`;
-                } else {
-                    console.error('❌ No se encontró el elemento bloques-timer-fill');
-                }
-            }
-            
-            function startShuffleEffect() {
-                console.log('🎲 Iniciando efecto de barajado...');
-                
-                // Animar todas las fichas con efecto de barajado
-                const cells = board.querySelectorAll('.bloques-cell');
-                cells.forEach((cell, index) => {
-                    // Posición aleatoria temporal
-                    const randomX = (Math.random() - 0.5) * 200;
-                    const randomY = (Math.random() - 0.5) * 200;
-                    const randomRotation = Math.random() * 720 - 360;
-                    
-                    cell.style.position = 'relative';
-                    cell.style.left = `${randomX}px`;
-                    cell.style.top = `${randomY}px`;
-                    cell.style.transform = `scale(0.5) rotate(${randomRotation}deg)`;
-                    cell.style.opacity = '0.7';
-                    cell.style.transition = 'all 0.1s ease';
-                    
-                    // Animar hacia la posición final con delay escalonado
-                    setTimeout(() => {
-                        cell.style.left = '0px';
-                        cell.style.top = '0px';
-                        cell.style.transform = 'scale(1) rotate(0deg)';
-                        cell.style.opacity = '1';
-                        cell.style.transition = 'all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-                        
-                        // Iniciar juego después de la animación
-                        if (index === cells.length - 1) {
-                            setTimeout(() => {
-                                busy = false; // Iniciar juego
-                                startTimer(); // Iniciar timer
-                                console.log('🎮 ¡Juego iniciado! Timer corriendo...');
-                            }, 800);
-                        }
-                    }, index * 50); // Delay escalonado
-                });
-            }
-            
-            function endGame() {
-                clearInterval(timerId);
-                busy = true;
-                
-                // Dar recompensas
-                if (window.game) {
-                    const bubbles = Math.floor(score / 20); // Menos burbujas
-                    const stars = Math.floor(score / 15);   // Más estrellas
-                    window.game.gameState.bubbles += bubbles;
-                    window.game.gameState.stars += stars;
-                    window.game.saveGame();
-                    
-                    // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
-                    window.game.createRewardAnimation(stars, bubbles);
-                    
-                    alert(`🎉 ¡Juego terminado!\\n⭐ Puntuación: ${score}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
-                }
-            }
-            
             // Event listeners
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => {
-                    if(timerId) clearInterval(timerId);
-                    gameOverlay.remove();
-                    console.log('💎 Juego Mar Match-3 cerrado');
-                });
-            } else {
-                console.error('❌ No se puede configurar el event listener del botón cerrar - closeBtn es null');
-            }
+            closeBtn.addEventListener('click', () => {
+                if (timerId) clearInterval(timerId);
+                gameOverlay.remove();
+            });
             
-            if (restartBtn) {
-                console.log('✅ Botón JUGAR encontrado, configurando event listener...');
-                restartBtn.addEventListener('click', () => {
-                    console.log('🎮 ¡CLICK EN JUGAR DETECTADO!');
-                    if(timerId) clearInterval(timerId);
-                    busy = false; // Permitir interacciones
-                    showCells(); // Mostrar fichas con animación
-                    startTimer(); // Iniciar timer
-                    console.log('🎮 ¡Juego iniciado! busy=false, timer iniciado, fichas mostradas');
-                });
-            } else {
-                console.error('❌ No se puede configurar el event listener del botón reiniciar - restartBtn es null');
-                // Buscar el botón de otra manera
-                const altBtn = gameOverlay.querySelector('#bloques-restart');
-                if (altBtn) {
-                    console.log('✅ Botón JUGAR encontrado por ID alternativo');
-                    altBtn.addEventListener('click', () => {
-                        console.log('🎮 ¡CLICK EN JUGAR DETECTADO (alternativo)!');
-                        if(timerId) clearInterval(timerId);
-                        busy = false;
-                        showCells(); // Mostrar fichas con animación
-                        startTimer();
-                        console.log('🎮 ¡Juego iniciado! busy=false, timer iniciado, fichas mostradas');
-                    });
-                } else {
-                    console.error('❌ No se encontró el botón JUGAR por ningún método');
-                }
-            }
-            
-            gameOverlay.addEventListener('click', (e) => {
-                if (e.target === gameOverlay) {
-                    if(timerId) clearInterval(timerId);
-                    gameOverlay.remove();
-                }
+            restartBtn.addEventListener('click', () => {
+                console.log('🎮 ¡CLICK EN JUGAR DETECTADO!');
+                if(timerId) clearInterval(timerId);
+                init(true);
+                startTimer();
+                console.log('🎮 ¡Juego iniciado!');
             });
             
             document.body.appendChild(gameOverlay);
-            initBloquesGame();
-            console.log('💎 Juego Mar Match-3 iniciado');
+            init(true);
+            console.log('💎 Juego Conecta 3 iniciado');
         }
         
         // 🧠 JUEGO DE MEMORIA - INTEGRADO BÁSICO
