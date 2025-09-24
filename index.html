@@ -13446,7 +13446,7 @@ Comida premium y de cumpleaños
                 border-radius: 20px;
                 box-shadow: 0 20px 50px rgba(0,0,0,.45) inset, 0 8px 30px rgba(0,0,0,.4);
                 border: 1px solid #2a5298;
-                overflow: hidden;
+                overflow: visible;
                 margin: 20px auto;
             `;
             
@@ -13769,22 +13769,25 @@ Comida premium y de cumpleaños
                 const cells = board.querySelectorAll('.bloques-cell');
                 
                 cells.forEach((cell, index) => {
-                    // Efecto de rotación y movimiento loco
-                    const randomX = (Math.random() - 0.5) * 200;
-                    const randomY = (Math.random() - 0.5) * 200;
-                    const randomRotate = Math.random() * 720; // 2 vueltas completas
-                    const randomScale = 0.5 + Math.random() * 0.5;
+                    // Efecto de rotación y movimiento loco más grande
+                    const randomX = (Math.random() - 0.5) * 400; // Más movimiento
+                    const randomY = (Math.random() - 0.5) * 400; // Más movimiento
+                    const randomRotate = Math.random() * 1080; // 3 vueltas completas
+                    const randomScale = 0.3 + Math.random() * 0.7; // Más variación de tamaño
                     
-                    cell.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    // Primera fase: movimiento loco
+                    cell.style.transition = 'all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                     cell.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotate}deg) scale(${randomScale})`;
-                    cell.style.opacity = '0.7';
+                    cell.style.opacity = '0.6';
+                    cell.style.zIndex = '1000'; // Asegurar que estén encima
                     
-                    // Efecto de rebote al final
+                    // Segunda fase: vuelta a casa con rebote
                     setTimeout(() => {
-                        cell.style.transition = 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                        cell.style.transition = 'all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
                         cell.style.transform = 'translate(0px, 0px) rotate(0deg) scale(1)';
                         cell.style.opacity = '1';
-                    }, 800 + (index * 20)); // Efecto escalonado
+                        cell.style.zIndex = '1';
+                    }, 1200 + (index * 30)); // Efecto escalonado más largo
                 });
             }
             
@@ -13805,7 +13808,7 @@ Comida premium y de cumpleaños
                     init(true);
                     startTimer();
                     console.log('🎮 ¡Juego iniciado!');
-                }, 1500); // Esperar a que termine el efecto
+                }, 2500); // Esperar a que termine el efecto completo
             });
             
             document.body.appendChild(gameOverlay);
