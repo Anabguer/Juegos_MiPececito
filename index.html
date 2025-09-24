@@ -11466,7 +11466,7 @@ Comida premium y de cumpleaños
                     clean: './sound/limpiar.mp3',
                     fail: './sound/fallo.mp3',
                     levelComplete: './sound/nivelcompletado.mp3',
-                    jugar: './sound/acierto.mp3'
+                    jugar: './sound/jugar.mp3'
                 };
                 
                 for (const [name, url] of Object.entries(soundFiles)) {
@@ -13655,7 +13655,9 @@ Comida premium y de cumpleaños
                     <div class="bloques-timer-bar">
                         <div class="bloques-timer-fill" id="bloques-timer-fill"></div>
                     </div>
-                    <div class="bloques-board" id="bloques-board"></div>
+                    <div class="bloques-stage-container">
+                        <div class="bloques-board" id="bloques-board"></div>
+                    </div>
                     <div class="bloques-footer">
                         <button class="bloques-btn" id="bloques-restart">JUGAR</button>
                     </div>
@@ -13676,20 +13678,34 @@ Comida premium y de cumpleaños
                 return;
             }
             
-            // Aplicar estilos específicos del tablero (basado en prototipo funcional)
+            // Aplicar estilos del contenedor exterior (igual que burbujas)
+            const stageContainer = gameOverlay.querySelector('.bloques-stage-container');
+            if (stageContainer) {
+                stageContainer.style.cssText = `
+                    background: linear-gradient(135deg, 
+                        rgba(79, 195, 247, 0.1) 0%, 
+                        rgba(41, 182, 246, 0.05) 100%);
+                    border: 2px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 14px;
+                    padding: 10px;
+                    margin: 10px;
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+            }
+            
+            // Aplicar estilos específicos del tablero (más pequeño, centrado)
             board.style.cssText = `
                 position: relative;
                 width: calc(6 * 48px + 5 * 2px);
                 height: calc(9 * 48px + 8 * 2px);
-                background: linear-gradient(135deg, 
-                    rgba(79, 195, 247, 0.1) 0%, 
-                    rgba(41, 182, 246, 0.05) 100%);
+                background: rgba(255, 255, 255, 0.05);
                 padding: 8px;
-                border-radius: 20px;
-                box-shadow: 0 20px 50px rgba(0,0,0,.45) inset, 0 8px 30px rgba(0,0,0,.4);
-                border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
                 overflow: visible;
-                margin: 20px auto;
             `;
             
             // Aplicar estilos específicos del footer

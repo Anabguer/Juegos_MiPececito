@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Conecta Marino – Absoluto</title>
+<style>
+  :root{
+    --cols: 6;
+    --rows: 9;
+    --cell: 64px;
+    --gap: 6px;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,Segoe UI,Roboto,Arial; background:#0f172a; color:#e5e7eb;
+    display:flex; align-items:center; justify-content:center; min-height:100dvh; padding:24px;
+  }
+  .wrap{display:grid; gap:16px; grid-template-columns:auto auto; align-items:start}
+  .hud{
+    background:#0b1227; border:1px solid #1f2a4a; padding:14px 16px; border-radius:16px; min-width:240px;
+    box-shadow:0 6px 30px rgba(0,0,0,.35);
+  }
+  .hud h1{font-size:18px; margin:0 0 8px}
+  .hud .row{display:flex; gap:10px; align-items:center; margin:8px 0}
+  .badge{background:#101a36; border:1px solid #1e2a4c; padding:6px 10px; border-radius:999px}
+  .btn{cursor:pointer; padding:8px 12px; border-radius:10px; border:1px solid #29407a; background:#122252; color:#E5E7EB; font-weight:600}
+  .btn:active{transform:translateY(1px)}
+
+  .board{
+    position:relative;
+    width:calc(var(--cols)*var(--cell) + (var(--cols)-1)*var(--gap));
+    height:calc(var(--rows)*var(--cell) + (var(--rows)-1)*var(--gap));
+    background:radial-gradient(120% 100% at 50% 0%, #0b1227 0%, #0b1227 50%, #0a1021 100%);
+    padding:0; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,.45) inset, 0 8px 30px rgba(0,0,0,.4);
+    border:1px solid #1b2750; overflow:hidden;
+  }
+  .cell{
+    position:absolute; width:var(--cell); height:var(--cell);
+    left:0; top:0;
+    border-radius:var(--radius); display:grid; place-items:center; color:#fff; font-size:36px;
+    user-select:none; -webkit-user-drag:none; touch-action:none; cursor:grab;
+    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .18s ease, left .18s ease, top .18s ease;
+    background:#0e1a3a; /* placa oscura para contraste */
+    box-shadow:inset 0 8px 14px rgba(255,255,255,.08), inset 0 -10px 18px rgba(0,0,0,.35), 0 6px 12px rgba(0,0,0,.25);
+  }
+  .cell span{pointer-events:none}
+  .cell:active{cursor:grabbing}
+  .ghost{opacity:.75; filter:brightness(1.1)}
+  .pop{animation:pop .25s ease}
+  @keyframes pop{from{transform:scale(.85)} to{transform:scale(1)}}
+  .pulse{animation:pulse .9s ease-in-out 1}
+  @keyframes pulse{0%{transform:scale(.95)} 50%{transform:scale(1.05)} 100%{transform:scale(1)}}
+  .disabled{pointer-events:none; filter:saturate(.75) opacity(.9)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hud">
+      <h1>🌊 Conecta Marino</h1>
+      <div class="row"><span class="badge">Puntuación:</span> <strong id="score">0</strong></div>
+      <div class="row"><span class="badge">Movs:</span> <strong id="moves">0</strong></div>
+      <div class="row"><button class="btn" id="reset">Reiniciar</button><button class="btn" id="shuffle">Mezclar</button></div>
+      <div class="row" style="font-size:12px;opacity:.8">Arrastra o haz click‑click sobre adyacentes. Solo acepta si crea 3+ iguales.</div>
+    </div>
+
+    <div id="board" class="board" aria-label="tablero"></div>
+  </div>
+
+<script>
+(() => {
+  // --- CONFIG
+  const COLS = 6, ROWS = 9; // 6x9
+  const CELL = 64, GAP = 6; // px
+  const ICONS = ['🐚','🐟','🐙','🐠','🦀','🐬']; // marino
+
+  const board = document.getElementById('board');
+  const scoreEl = document.getElementById('score');
+  const movesEl = document.getElementById('moves');
+  const resetBtn = document.getElementById('reset');
+  const shuffleBtn = document.getElementById('shuffle');
+
+  // --- ESTADO
+  let grid = [...Array(ROWS)].map(()=>Array(COLS).fill(null));
+  let score = 0, moves = 0;
+  let drag = null; // {r,c, el}
+  let selected = null; // click-to-swap
+  let locked = false; // evita input durante animaciones
+
+  // --- UTILS
+  const xy = (r,c) => ({
+    x: c * (CELL + GAP),
+    y: r * (CELL + GAP)
+  });
+  function pos(el, r,c){ const {x,y} = xy(r,c); el.style.left = x+'px'; el.style.top = y+'px'; el.dataset.r=r; el.dataset.c=c; }
+  function ui(){ scoreEl.textContent = score; movesEl.textContent = moves; }
+  function rnd(n){ return Math.floor(Math.random()*n); }
+
+  function makeCell(r,c,t){
+    const el = document.createElement('div');
+    el.className = 'cell';
+    el.dataset.t = t;
+    pos(el, r,c);
+
+    const span = document.createElement('span');
+    span.textContent = ICONS[t];
+    el.appendChild(span);
+
+    el.addEventListener('pointerdown', down);
+    el.addEventListener('pointerenter', enter);
+    el.addEventListener('pointerup', up);
+    el.addEventListener('click', clickCell);
+
+    return el;
+  }
+
+  function place(r,c, item){ pos(item.el, r,c); item.el.classList.add('pulse'); setTimeout(()=>item.el.classList.remove('pulse'), 220); }
+
+  function init(noStartMatches=true){
+    locked = true; score=0; moves=0; ui();
+    board.innerHTML='';
+    grid = [...Array(ROWS)].map(()=>Array(COLS).fill(null));
+
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        let t = rnd(ICONS.length);
+        if(noStartMatches){
+          const L1 = c>0 ? grid[r][c-1]?.t : -1, L2 = c>1 ? grid[r][c-2]?.t : -2;
+          const U1 = r>0 ? grid[r-1][c]?.t : -1, U2 = r>1 ? grid[r-2][c]?.t : -2;
+          while((L1===t && L2===t) || (U1===t && U2===t)) t = rnd(ICONS.length);
+        }
+        const el = makeCell(r,c,t);
+        grid[r][c] = {t, el};
+        // entrada desde arriba suave
+        el.style.opacity='0'; el.style.transform='translateY(-24px)';
+        board.appendChild(el);
+        requestAnimationFrame(()=>{
+          el.style.transition='transform .28s ease, opacity .28s ease, left .18s ease, top .18s ease';
+          el.style.opacity='1'; el.style.transform='translateY(0)';
+        });
+      }
+    }
+    setTimeout(()=>{ locked=false; }, 300);
+  }
+
+  // --- INPUT (drag + click)
+  function down(e){ if(locked) return; const el=e.currentTarget; drag={ r:+el.dataset.r, c:+el.dataset.c, el }; el.classList.add('ghost'); }
+  function enter(e){ if(locked || !drag) return; const el=e.currentTarget; const r2=+el.dataset.r, c2=+el.dataset.c; const {r,c}=drag; if(adj(r,c,r2,c2)){ doSwap(r,c,r2,c2,true); const m=findMatches(); if(m.length){ moves++; ui(); removeMatches(m); } else { doSwap(r2,c2,r,c,true); } endDrag(); } }
+  function up(){ if(drag) endDrag(); }
+  function endDrag(){ if(drag){ drag.el.classList.remove('ghost'); drag=null; } }
+
+  function clickCell(e){ if(locked) return; const el=e.currentTarget; const r=+el.dataset.r, c=+el.dataset.c; if(!selected){ selected={r,c,el}; el.classList.add('ghost'); return; } const {r:r1,c:c1,el:el1}=selected; if(r===r1 && c===c1){ el1.classList.remove('ghost'); selected=null; return;} if(adj(r1,c1,r,c)){ doSwap(r1,c1,r,c,true); const m=findMatches(); if(m.length){ moves++; ui(); removeMatches(m); } else { doSwap(r,c,r1,c1,true); } } el1.classList.remove('ghost'); selected=null; }
+
+  const adj = (r1,c1,r2,c2) => (Math.abs(r1-r2)+Math.abs(c1-c2))===1;
+
+  function doSwap(r1,c1,r2,c2, anim=false){
+    const A = grid[r1][c1], B = grid[r2][c2];
+    grid[r1][c1] = B; grid[r2][c2] = A;
+    if(anim){ place(r1,c1,B); place(r2,c2,A); } else { pos(B.el,r1,c1); pos(A.el,r2,c2); }
+  }
+
+  // --- MATCH DETECTION (grupos 3+ ortogonales)
+  function findMatches(){
+    const seen = Array.from({length:ROWS},()=>Array(COLS).fill(false));
+    const out = [];
+    const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      if(!grid[r][c] || seen[r][c]) continue;
+      const t = grid[r][c].t; const stack=[[r,c]]; const group=[]; seen[r][c]=true;
+      while(stack.length){
+        const [rr,cc]=stack.pop(); group.push({r:rr,c:cc});
+        for(const [dr,dc] of dirs){ const nr=rr+dr, nc=cc+dc; if(nr<0||nr>=ROWS||nc<0||nc>=COLS) continue; if(seen[nr][nc]) continue; if(grid[nr][nc] && grid[nr][nc].t===t){ seen[nr][nc]=true; stack.push([nr,nc]); } }
+      }
+      if(group.length>=3) out.push(...group);
+    }
+    // uniq
+    const key=p=>p.r+":"+p.c; const m=new Map(); for(const g of out) m.set(key(g),g); return [...m.values()];
+  }
+
+  // --- ELIMINAR + GRAVEDAD + RELLENO (con cascada)
+  function removeMatches(matches){
+    locked = true; score += matches.length*10; ui();
+
+    // animación de salida
+    for(const {r,c} of matches){ const it=grid[r][c]; if(it&&it.el){ it.el.style.opacity='0'; it.el.style.transform='scale(.6)'; setTimeout(()=>it.el.remove(),150);} grid[r][c]=null; }
+
+    // caída por columnas
+    setTimeout(()=>{
+      for(let c=0;c<COLS;c++){
+        let write = ROWS-1;
+        for(let r=ROWS-1;r>=0;r--){
+          if(grid[r][c]){
+            if(write!==r){ grid[write][c]=grid[r][c]; pos(grid[write][c].el, write,c); grid[r][c]=null; }
+            write--;
+          }
+        }
+        // rellenar desde arriba
+        for(let r=write;r>=0;r--){
+          const t=rnd(ICONS.length); const el=makeCell(r,c,t);
+          el.style.opacity='0'; el.style.transform='translateY(-24px)';
+          grid[r][c]={t,el}; board.appendChild(el);
+          requestAnimationFrame(()=>{ el.style.transition='transform .28s ease, opacity .28s ease, left .18s ease, top .18s ease'; el.style.opacity='1'; el.style.transform='translateY(0)'; });
+        }
+      }
+      // cascada
+      setTimeout(()=>{ const again=findMatches(); if(again.length){ removeMatches(again); } else { locked=false; } }, 160);
+    }, 160);
+  }
+
+  // --- TOOLS
+  function shuffle(){ if(locked) return; locked=true; const all=[]; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) all.push(grid[r][c].t); // FY
+    for(let i=all.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [all[i],all[j]]=[all[j],all[i]]; }
+    let k=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){ const t=all[k++]; grid[r][c].t=t; grid[r][c].el.querySelector('span').textContent=ICONS[t]; }
+    const m=findMatches(); if(m.length) removeMatches(m); else locked=false; }
+
+  resetBtn.addEventListener('click', ()=>init(true));
+  shuffleBtn.addEventListener('click', shuffle);
+
+  // inicio
+  init(true);
+})();
+</script>
+</body>
+</html>
