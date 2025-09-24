@@ -14275,6 +14275,9 @@ Comida premium y de cumpleaños
         function startMemoriaGame() {
             console.log('🧠 Iniciando PezFlip...');
             
+            // Cerrar modal de juegos
+            document.getElementById('gamesModal').style.display = 'none';
+            
             // Crear overlay del juego (igual que los otros)
             const gameOverlay = document.createElement('div');
             gameOverlay.className = 'game-modal-overlay';
