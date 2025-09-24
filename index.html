@@ -11785,13 +11785,17 @@ Comida premium y de cumpleaños
                             </div>
                         </div>
                         
-                        <!-- SEGUNDA LÍNEA: NIVEL + PERLAS -->
+                        <!-- SEGUNDA LÍNEA: NIVEL + PERLAS + MEJOR -->
                         <div class="header-bottom">
                             <div class="game-stats">
-                                <span id="bubble-level">NIVEL 1</span>
+                                <span class="level">NIVEL 1</span>
                                 <span class="perlas">
-                                    <img src="images/ui/perlas.png" style="width: 20px; height: 20px;">
-                                    <span id="bubble-score">0</span>
+                                    <img src="images/ui/perlas.png" style="width: 28px; height: 28px; margin-bottom: 2px; vertical-align: middle;">
+                                    <span class="score" id="bubble-score">0</span>
+                                </span>
+                                <span class="best-score-display">
+                                    <span class="best-label">Mejor:</span>
+                                    <span class="best-value" id="bubble-best-display">0</span>
                                 </span>
                             </div>
                         </div>
@@ -12234,13 +12238,69 @@ Comida premium y de cumpleaños
             
             // Stats centrados
             const statsSimple = gameModal.querySelector('.game-stats-simple');
-            statsSimple.style.cssText = `
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-                text-align: center;
-                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            `;
+            if (statsSimple) {
+                statsSimple.style.cssText = `
+                    color: white;
+                    font-size: 16px;
+                    font-weight: bold;
+                    text-align: center;
+                    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+                `;
+            }
+            
+            // Estilos para los nuevos elementos de la cabecera (igual que Conecta 3)
+            const level = gameModal.querySelector('.level');
+            if (level) {
+                level.style.cssText = `
+                    color: white;
+                    font-size: 16px;
+                    font-weight: bold;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                `;
+            }
+            
+            const score = gameModal.querySelector('.score');
+            if (score) {
+                score.style.cssText = `
+                    color: white;
+                    font-size: 16px;
+                    font-weight: bold;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                `;
+            }
+            
+            const bestScoreDisplay = gameModal.querySelector('.best-score-display');
+            if (bestScoreDisplay) {
+                bestScoreDisplay.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 8px;
+                    padding: 4px 8px;
+                    font-size: 12px;
+                    color: #fff;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                `;
+            }
+            
+            const bestLabel = gameModal.querySelector('.best-label');
+            if (bestLabel) {
+                bestLabel.style.cssText = `
+                    opacity: 0.8;
+                    font-size: 11px;
+                `;
+            }
+            
+            const bestValue = gameModal.querySelector('.best-value');
+            if (bestValue) {
+                bestValue.style.cssText = `
+                    font-weight: bold;
+                    color: #FFD700;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+                `;
+            }
             
             // Botón de cerrar bonito
             const closeBtn = gameModal.querySelector('.game-close-btn');
@@ -12659,10 +12719,10 @@ Comida premium y de cumpleaños
                 // Botón de sonido - SINCRONIZADO CON EL PRINCIPAL
                 if (soundBtn) {
                 // Usar las mismas imágenes que el botón principal
-                const isSoundOn = window.audioManager ? window.audioManager.isSoundOn : true;
-                soundBtn.innerHTML = isSoundOn ? 
-                    '<img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">' : 
-                    '<img src="images/ui/sonidoOff.png" style="width: 20px; height: 20px;">';
+                const isMuted = window.audioManager ? window.audioManager.isMuted : false;
+                soundBtn.innerHTML = isMuted ? 
+                    '<img src="images/ui/sonidoOff.png" style="width: 20px; height: 20px;">' : 
+                    '<img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">';
                 
                 soundBtn.style.cssText = `
                     width: 30px;
@@ -12691,16 +12751,12 @@ Comida premium y de cumpleaños
                 // Sincronizar con el AudioManager
                 soundBtn.addEventListener('click', () => {
                     if (window.audioManager) {
-                        if (window.audioManager.isSoundOn) {
-                            window.audioManager.muteSound();
-                        } else {
-                            window.audioManager.unmuteSound();
-                        }
+                        window.audioManager.toggleMute();
                         // Actualizar imagen según el estado
-                        const isSoundOn = window.audioManager.isSoundOn;
-                        soundBtn.innerHTML = isSoundOn ? 
-                            '<img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">' : 
-                            '<img src="images/ui/sonidoOff.png" style="width: 20px; height: 20px;">';
+                        const isMuted = window.audioManager.isMuted;
+                        soundBtn.innerHTML = isMuted ? 
+                            '<img src="images/ui/sonidoOff.png" style="width: 20px; height: 20px;">' : 
+                            '<img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">';
                     }
                 });
             }
@@ -13427,14 +13483,10 @@ Comida premium y de cumpleaños
             if (soundBtn) {
                 soundBtn.addEventListener('click', () => {
                     if (window.audioManager) {
-                        if (window.audioManager.isSoundOn) {
-                            window.audioManager.muteSound();
-                        } else {
-                            window.audioManager.unmuteSound();
-                        }
+                        window.audioManager.toggleMute();
                         const img = soundBtn.querySelector('img');
                         if (img) {
-                            img.src = window.audioManager.isSoundOn ? 'images/ui/sonidoOn.png' : 'images/ui/sonidoOff.png';
+                            img.src = window.audioManager.isMuted ? 'images/ui/sonidoOff.png' : 'images/ui/sonidoOn.png';
                         }
                     }
                 });
@@ -14053,14 +14105,10 @@ Comida premium y de cumpleaños
                 soundBtn.addEventListener('click', () => {
                     if (window.audioManager) {
                         // Usar el método correcto del AudioManager
-                        if (window.audioManager.isSoundOn) {
-                            window.audioManager.muteSound();
-                        } else {
-                            window.audioManager.unmuteSound();
-                        }
+                        window.audioManager.toggleMute();
                         const img = soundBtn.querySelector('img');
                         if (img) {
-                            img.src = window.audioManager.isSoundOn ? 'images/ui/sonidoOn.png' : 'images/ui/sonidoOff.png';
+                            img.src = window.audioManager.isMuted ? 'images/ui/sonidoOff.png' : 'images/ui/sonidoOn.png';
                         }
                     }
                 });
