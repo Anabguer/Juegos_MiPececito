@@ -2910,10 +2910,9 @@
             touch-action: none;
             cursor: grab;
             transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .18s ease;
-            background: rgba(255, 255, 255, 0.1);
+            background: #2c3e50;
             box-shadow: inset 0 6px 10px rgba(255,255,255,.15), inset 0 -8px 14px rgba(0,0,0,.3), 0 4px 8px rgba(0,0,0,.2);
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
+            border: 2px solid #34495e;
         }
 
         .bloques-cell span {
@@ -7377,6 +7376,11 @@
                 // Cerrar modal de juegos
                 document.getElementById('gamesModal').style.display = 'none';
                 
+                // 🔊 SONIDO DE INICIO DE JUEGO
+                if (window.audioManager) {
+                    window.audioManager.playSound('jugar');
+                }
+                
                 switch(gameId) {
                     case 'bubbles':
                         this.startBubbleGame();
@@ -11131,6 +11135,11 @@ Comida premium y de cumpleaños
             window.startBubbleGameDirect = function() {
                 console.log('🫧 Iniciando juego SIMPLE');
                 
+                // 🔊 SONIDO DE INICIO DE JUEGO
+                if (window.audioManager) {
+                    window.audioManager.playSound('jugar');
+                }
+                
                 // Si window.game existe, usar su método
                 if (window.game && window.game.runBubbleGame) {
                     window.game.runBubbleGame();
@@ -11744,8 +11753,35 @@ Comida premium y de cumpleaños
                         <div class="header-top">
                             <div class="game-title">🫧 Atrapa Burbujas</div>
                             <div class="header-controls">
-                                <button id="bubble-sound-toggle" class="sound-btn">🔊</button>
-                                <button class="bubble-close-btn">✕</button>
+                                <button id="bubble-sound-toggle" class="sound-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                ">
+                                    <img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">
+                                </button>
+                                <button class="bubble-close-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                    color: white;
+                                    font-size: 18px;
+                                    font-weight: bold;
+                                ">✕</button>
                             </div>
                         </div>
                         
@@ -12494,7 +12530,7 @@ Comida premium y de cumpleaños
             }
             
             // Estilos del header unificado (solo para juegos que no sean Conecta 3)
-            if (gameName !== 'bloques') {
+            if (gameName !== 'bloques' && typeof unifiedHeader !== 'undefined') {
                 unifiedHeader.style.cssText = `
                     background: linear-gradient(135deg, 
                         rgba(79, 195, 247, 0.3) 0%, 
@@ -12508,51 +12544,61 @@ Comida premium y de cumpleaños
             }
             
             // Estilos del header unificado (solo para juegos que no sean Conecta 3)
-            if (gameName !== 'bloques') {
+            if (gameName !== 'bloques' && typeof unifiedHeader !== 'undefined') {
                 // Primera línea: Título + Altavoz + X
                 const headerTop = unifiedHeader.querySelector('.header-top');
-                headerTop.style.cssText = `
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                `;
+                if (headerTop) {
+                    headerTop.style.cssText = `
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    `;
+                }
                 
                 // Segunda línea: Nivel + Perlas
                 const headerBottom = unifiedHeader.querySelector('.header-bottom');
-                headerBottom.style.cssText = `
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                `;
+                if (headerBottom) {
+                    headerBottom.style.cssText = `
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    `;
+                }
                 
                 // Stats centrados
                 const gameStats = unifiedHeader.querySelector('.game-stats');
-                gameStats.style.cssText = `
-                    display: flex;
-                    align-items: center;
-                    gap: 15px;
-                    color: white;
-                    font-size: 16px;
-                    font-weight: bold;
-                `;
+                if (gameStats) {
+                    gameStats.style.cssText = `
+                        display: flex;
+                        align-items: center;
+                        gap: 15px;
+                        color: white;
+                        font-size: 16px;
+                        font-weight: bold;
+                    `;
+                }
                 
                 // Título
                 const title = unifiedHeader.querySelector('.game-title');
-                title.style.cssText = `
-                    color: white;
-                    font-size: 18px;
-                    font-weight: bold;
-                    margin: 0;
-                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                `;
+                if (title) {
+                    title.style.cssText = `
+                        color: white;
+                        font-size: 18px;
+                        font-weight: bold;
+                        margin: 0;
+                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                    `;
+                }
                 
                 // Controles del header
                 const headerControls = unifiedHeader.querySelector('.header-controls');
-                headerControls.style.cssText = `
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                `;
+                if (headerControls) {
+                    headerControls.style.cssText = `
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    `;
+                }
             }
             
             // Función para obtener el título del juego
@@ -12572,7 +12618,7 @@ Comida premium y de cumpleaños
             }
             
             // 🎯 CONFIGURAR BOTONES DEL HEADER UNIFICADO (solo para juegos que no sean Conecta 3)
-            if (gameName !== 'bloques') {
+            if (gameName !== 'bloques' && typeof unifiedHeader !== 'undefined') {
                 const soundBtn = unifiedHeader.querySelector('.sound-btn');
                 const closeBtn = unifiedHeader.querySelector('.close-btn');
             
@@ -12613,10 +12659,10 @@ Comida premium y de cumpleaños
                 // Botón de sonido - SINCRONIZADO CON EL PRINCIPAL
                 if (soundBtn) {
                 // Usar las mismas imágenes que el botón principal
-                const isMuted = window.audioManager ? window.audioManager.isMuted : false;
-                soundBtn.innerHTML = isMuted ? 
-                    '<img src="images/ui/sonidoOff.png" style="width: 20px; height: 20px;">' : 
-                    '<img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">';
+                const isSoundOn = window.audioManager ? window.audioManager.isSoundOn : true;
+                soundBtn.innerHTML = isSoundOn ? 
+                    '<img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">' : 
+                    '<img src="images/ui/sonidoOff.png" style="width: 20px; height: 20px;">';
                 
                 soundBtn.style.cssText = `
                     width: 30px;
@@ -12645,12 +12691,16 @@ Comida premium y de cumpleaños
                 // Sincronizar con el AudioManager
                 soundBtn.addEventListener('click', () => {
                     if (window.audioManager) {
-                        window.audioManager.toggleMute();
+                        if (window.audioManager.isSoundOn) {
+                            window.audioManager.muteSound();
+                        } else {
+                            window.audioManager.unmuteSound();
+                        }
                         // Actualizar imagen según el estado
-                        const isMuted = window.audioManager.isMuted;
-                        soundBtn.innerHTML = isMuted ? 
-                            '<img src="images/ui/sonidoOff.png" style="width: 20px; height: 20px;">' : 
-                            '<img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">';
+                        const isSoundOn = window.audioManager.isSoundOn;
+                        soundBtn.innerHTML = isSoundOn ? 
+                            '<img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">' : 
+                            '<img src="images/ui/sonidoOff.png" style="width: 20px; height: 20px;">';
                     }
                 });
             }
@@ -12684,9 +12734,11 @@ Comida premium y de cumpleaños
                 });
                 
                 // Event listener para cerrar
-                closeBtn.addEventListener('click', () => {
-                    gameOverlay.remove();
-                });
+                    closeBtn.addEventListener('click', () => {
+                        gameOverlay.remove();
+                        // Volver a la ventana de juegos, no a la pecera
+                        document.getElementById('gamesModal').style.display = 'flex';
+                    });
                 }
             }
             
@@ -13296,7 +13348,7 @@ Comida premium y de cumpleaños
                 
                 // 🔊 SONIDO DE INICIO DE JUEGO
                 if (window.audioManager) {
-                    window.audioManager.playSound('hatch');
+                    window.audioManager.playSound('jugar');
                 }
                 
                 requestAnimationFrame(gameLoop);
@@ -13358,14 +13410,35 @@ Comida premium y de cumpleaños
                 if (gameState.rafId) cancelAnimationFrame(gameState.rafId);
                 gameState.running = false;
                 gameModal.remove();
+                // Volver a la ventana de juegos, no a la pecera
+                document.getElementById('gamesModal').style.display = 'flex';
                 console.log('🫧 Juego cerrado');
             };
             
             // Event listeners para cerrar
-            const closeBtn = gameModal.querySelector('.game-close-btn');
+            const closeBtn = gameModal.querySelector('.bubble-close-btn');
             if (closeBtn) {
                 closeBtn.addEventListener('click', closeGame);
                 console.log('✅ Botón cerrar configurado correctamente');
+            }
+            
+            // Botón de sonido del juego de burbujas
+            const soundBtn = gameModal.querySelector('#bubble-sound-toggle');
+            if (soundBtn) {
+                soundBtn.addEventListener('click', () => {
+                    if (window.audioManager) {
+                        if (window.audioManager.isSoundOn) {
+                            window.audioManager.muteSound();
+                        } else {
+                            window.audioManager.unmuteSound();
+                        }
+                        const img = soundBtn.querySelector('img');
+                        if (img) {
+                            img.src = window.audioManager.isSoundOn ? 'images/ui/sonidoOn.png' : 'images/ui/sonidoOff.png';
+                        }
+                    }
+                });
+                console.log('✅ Botón sonido configurado correctamente');
             }
             
             // Mantener compatibilidad con elementos existentes
@@ -13391,10 +13464,37 @@ Comida premium y de cumpleaños
                         <!-- PRIMERA LÍNEA: TÍTULO + ALTAVOZ + X -->
                         <div class="header-top">
                             <div class="game-title">🌊 Conecta 3</div>
-                            <div class="header-controls">
-                                <button id="bloques-sound-toggle" class="sound-btn">🔊</button>
-                                <button class="bloques-close-btn">✕</button>
-                            </div>
+                                <div class="header-controls">
+                                    <button id="bloques-sound-toggle" class="sound-btn" style="
+                                        background: rgba(255, 255, 255, 0.2);
+                                        border: 2px solid rgba(255, 255, 255, 0.8);
+                                        border-radius: 50%;
+                                        width: 40px;
+                                        height: 40px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        cursor: pointer;
+                                        transition: all 0.3s ease;
+                                    ">
+                                        <img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">
+                                    </button>
+                                    <button class="bloques-close-btn" style="
+                                        background: rgba(255, 255, 255, 0.2);
+                                        border: 2px solid rgba(255, 255, 255, 0.8);
+                                        border-radius: 50%;
+                                        width: 40px;
+                                        height: 40px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        cursor: pointer;
+                                        transition: all 0.3s ease;
+                                        color: white;
+                                        font-size: 18px;
+                                        font-weight: bold;
+                                    ">✕</button>
+                                </div>
                         </div>
                         
                         <!-- SEGUNDA LÍNEA: NIVEL + PERLAS + MEJOR -->
@@ -13499,13 +13599,28 @@ Comida premium y de cumpleaños
             `;
             
             // Aplicar estilos específicos de la barra de tiempo
+            const timerBar = gameOverlay.querySelector('.bloques-timer-bar');
             const timerFill = gameOverlay.querySelector('.bloques-timer-fill');
+            
+            if (timerBar) {
+                timerBar.style.cssText = `
+                    width: 100%;
+                    height: 8px;
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 4px;
+                    overflow: hidden;
+                    margin: 10px 0;
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                `;
+            }
+            
             if (timerFill) {
                 timerFill.style.cssText = `
                     height: 100%;
                     background: linear-gradient(90deg, #4CAF50, #FFC107, #F44336);
                     width: 100%;
                     transition: width 1s linear;
+                    border-radius: 3px;
                 `;
             }
 
@@ -13564,7 +13679,7 @@ Comida premium y de cumpleaños
 
             function randomType(){ return Math.floor(Math.random()*TYPES); }
 
-            function init(noCascades=true){
+            function init(noCascades=true, showCards=false){
                 score = 0; moves = 0; updateUI();
                 // limpiar DOM y estado
                 board.innerHTML = '';
@@ -13585,9 +13700,15 @@ Comida premium y de cumpleaños
                         grid[r][c] = { t, el };
                         board.appendChild(el);
                         
-                        // Hacer que las cartas aparezcan inmediatamente sin animación
-                        el.style.opacity = '1';
-                        el.style.transform = 'scale(1)';
+                        if (showCards) {
+                            // Mostrar cartas con efecto
+                            el.style.opacity = '1';
+                            el.style.transform = 'scale(1)';
+                        } else {
+                            // Ocultar cartas inicialmente
+                            el.style.opacity = '0';
+                            el.style.transform = 'scale(0.8)';
+                        }
                     }
                 }
             }
@@ -13707,6 +13828,14 @@ Comida premium y de cumpleaños
                 score += matches.length * 10;
                 updateUI();
 
+                // Sonido de acierto
+                if (window.audioManager) {
+                    window.audioManager.playSound('acierto');
+                }
+
+                // Efecto de perlas volando al contador desde las posiciones de match
+                createPearlEffectFromMatches(matches);
+
                 // eliminar del DOM + marcar vacíos
                 for(const {r,c} of matches){
                     const item = grid[r][c];
@@ -13758,36 +13887,155 @@ Comida premium y de cumpleaños
                     if (timeLeft <= 0) {
                         clearInterval(timerId);
                         console.log('⏰ Tiempo agotado!');
+                        
+                        // Sonido de fin de partida
+                        if (window.audioManager) {
+                            window.audioManager.playSound('fail');
+                        }
+                        
+                        // Mostrar pantalla de fin de partida
+                        showEndGameModal();
                     }
                 }, 1000);
             }
 
-            function shuffleEffect() {
-                console.log('🎲 Iniciando efecto de barajado...');
+            function showCardsEffect() {
+                console.log('✨ Mostrando cartas con efecto...');
                 
                 // Obtener todas las cartas existentes
                 const cells = board.querySelectorAll('.bloques-cell');
                 
+                // Hacer aparecer las cartas una por una con efecto suave
                 cells.forEach((cell, index) => {
-                    // Efecto de rotación y movimiento loco más grande
-                    const randomX = (Math.random() - 0.5) * 400; // Más movimiento
-                    const randomY = (Math.random() - 0.5) * 400; // Más movimiento
-                    const randomRotate = Math.random() * 1080; // 3 vueltas completas
-                    const randomScale = 0.3 + Math.random() * 0.7; // Más variación de tamaño
-                    
-                    // Primera fase: movimiento loco
-                    cell.style.transition = 'all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                    cell.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotate}deg) scale(${randomScale})`;
-                    cell.style.opacity = '0.6';
-                    cell.style.zIndex = '1000'; // Asegurar que estén encima
-                    
-                    // Segunda fase: vuelta a casa con rebote
                     setTimeout(() => {
-                        cell.style.transition = 'all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-                        cell.style.transform = 'translate(0px, 0px) rotate(0deg) scale(1)';
+                        cell.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                         cell.style.opacity = '1';
-                        cell.style.zIndex = '1';
-                    }, 1200 + (index * 30)); // Efecto escalonado más largo
+                        cell.style.transform = 'scale(1)';
+                    }, index * 30); // Cada carta aparece con 30ms de diferencia
+                });
+                
+                // Calcular tiempo total: (cells.length * 30ms) + 600ms (última animación)
+                const totalTime = (cells.length * 30) + 600;
+                return totalTime;
+            }
+
+            function createPearlEffectFromMatches(matches) {
+                console.log(`💎 Creando efecto de perlas desde ${matches.length} matches...`);
+                
+                // Obtener posición del contador de perlas
+                const pearlCounter = gameOverlay.querySelector('.perlas');
+                if (!pearlCounter) return;
+                
+                const counterRect = pearlCounter.getBoundingClientRect();
+                const targetX = counterRect.left + counterRect.width / 2;
+                const targetY = counterRect.top + counterRect.height / 2;
+                
+                // Crear perlas desde cada posición de match (máximo 5 para que no sea demasiado)
+                const maxPearls = Math.min(matches.length, 5);
+                for (let i = 0; i < maxPearls; i++) {
+                    const match = matches[i];
+                    const cell = grid[match.r][match.c];
+                    
+                    if (cell && cell.el) {
+                        // Obtener posición de la celda que hizo match
+                        const cellRect = cell.el.getBoundingClientRect();
+                        const startX = cellRect.left + cellRect.width / 2;
+                        const startY = cellRect.top + cellRect.height / 2;
+                        
+                        const pearl = document.createElement('div');
+                        pearl.innerHTML = '<img src="images/ui/perlas.png" style="width: 24px; height: 24px;">';
+                        pearl.style.cssText = `
+                            position: fixed;
+                            z-index: 10000;
+                            pointer-events: none;
+                            left: ${startX}px;
+                            top: ${startY}px;
+                            opacity: 0;
+                            transform: scale(0.5);
+                            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                        `;
+                        
+                        document.body.appendChild(pearl);
+                        
+                        // Aparecer y volar hacia el contador
+                        setTimeout(() => {
+                            pearl.style.opacity = '1';
+                            pearl.style.transform = 'scale(1)';
+                            
+                            setTimeout(() => {
+                                pearl.style.left = targetX + 'px';
+                                pearl.style.top = targetY + 'px';
+                                pearl.style.transform = 'scale(0.3)';
+                                pearl.style.opacity = '0.7';
+                            }, 200);
+                        }, i * 100);
+                        
+                        // Remover después de la animación
+                        setTimeout(() => {
+                            pearl.remove();
+                        }, 1000 + (i * 100));
+                    }
+                }
+            }
+
+            function showEndGameModal() {
+                console.log('🏁 Mostrando modal de fin de partida...');
+                
+                // Crear modal de fin de partida
+                const endModal = document.createElement('div');
+                endModal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 20000;
+                `;
+                
+                endModal.innerHTML = `
+                    <div style="
+                        background: linear-gradient(135deg, #1e3c72, #2a5298);
+                        padding: 30px;
+                        border-radius: 20px;
+                        text-align: center;
+                        color: white;
+                        box-shadow: 0 20px 50px rgba(0,0,0,.5);
+                        border: 2px solid #34495e;
+                        min-width: 300px;
+                    ">
+                        <h2 style="margin: 0 0 20px; font-size: 24px;">🌊 ¡Tiempo Agotado!</h2>
+                        <p style="margin: 0 0 20px; font-size: 18px;">Puntuación: <strong>${score}</strong></p>
+                        <button id="bloques-play-again" style="
+                            background: linear-gradient(135deg, rgb(33, 150, 243), rgb(25, 118, 210));
+                            border: 2px solid rgb(21, 101, 192);
+                            border-radius: 20px;
+                            padding: 12px 30px;
+                            font-size: 18px;
+                            font-weight: bold;
+                            color: white;
+                            cursor: pointer;
+                            transition: 0.3s;
+                            text-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px;
+                            box-shadow: rgba(33, 150, 243, 0.4) 0px 6px 20px;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                        ">JUGAR</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(endModal);
+                
+                // Event listener para el botón
+                const playAgainBtn = endModal.querySelector('#bloques-play-again');
+                playAgainBtn.addEventListener('click', () => {
+                    endModal.remove();
+                    // Reiniciar juego
+                    timeLeft = 60;
+                    init(true, false);
                 });
             }
             
@@ -13795,24 +14043,49 @@ Comida premium y de cumpleaños
             closeBtn.addEventListener('click', () => {
                 if (timerId) clearInterval(timerId);
                 gameOverlay.remove();
+                // Volver a la ventana de juegos, no a la pecera
+                document.getElementById('gamesModal').style.display = 'flex';
             });
+            
+            // Botón de sonido
+            const soundBtn = gameOverlay.querySelector('#bloques-sound-toggle');
+            if (soundBtn) {
+                soundBtn.addEventListener('click', () => {
+                    if (window.audioManager) {
+                        // Usar el método correcto del AudioManager
+                        if (window.audioManager.isSoundOn) {
+                            window.audioManager.muteSound();
+                        } else {
+                            window.audioManager.unmuteSound();
+                        }
+                        const img = soundBtn.querySelector('img');
+                        if (img) {
+                            img.src = window.audioManager.isSoundOn ? 'images/ui/sonidoOn.png' : 'images/ui/sonidoOff.png';
+                        }
+                    }
+                });
+            }
             
             restartBtn.addEventListener('click', () => {
                 console.log('🎮 ¡CLICK EN JUGAR DETECTADO!');
                 if(timerId) clearInterval(timerId);
                 
-                // Efecto de barajado chulo
-                shuffleEffect();
+                // Sonido de inicio
+                if (window.audioManager) {
+                    window.audioManager.playSound('jugar');
+                }
+                
+                // Efecto de mostrar cartas
+                const effectTime = showCardsEffect();
                 
                 setTimeout(() => {
-                    init(true);
                     startTimer();
                     console.log('🎮 ¡Juego iniciado!');
-                }, 2500); // Esperar a que termine el efecto completo
+                }, effectTime); // Esperar a que termine el efecto
             });
             
             document.body.appendChild(gameOverlay);
-            init(true);
+            init(true, false); // No mostrar cartas inicialmente
             console.log('💎 Juego Conecta 3 iniciado');
         }
         
