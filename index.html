@@ -3028,6 +3028,66 @@
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
 
+        /* 🧠 Memoria - Estilos del contenedor */
+        .memory-game-container {
+            background: linear-gradient(135deg, 
+                rgba(30, 60, 114, 0.95) 0%, 
+                rgba(42, 82, 152, 0.9) 100%);
+            border-radius: 20px;
+            padding: 0;
+            max-width: 90vw;
+            max-height: 90vh;
+            width: 400px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0,0,0,.6);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 🧠 Memoria - Estilos de la cabecera (igual que Conecta 3) */
+        .memory-game-header {
+            background: linear-gradient(135deg, 
+                rgba(79, 195, 247, 0.3) 0%, 
+                rgba(129, 212, 250, 0.2) 100%);
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+            gap: 8px;
+        }
+
+        .memory-game-header .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .memory-game-header .game-title {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .memory-game-header .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .memory-game-header .game-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+
         /* 🫧 Burbujas - Estilos de la cabecera (igual que Conecta 3) */
         .bubble-game-header {
             background: linear-gradient(135deg, 
@@ -14294,51 +14354,12 @@ Comida premium y de cumpleaños
             `;
             
             gameOverlay.innerHTML = `
-                <div class="memory-game-container" style="
-                    background: linear-gradient(135deg, 
-                        rgba(30, 60, 114, 0.95) 0%, 
-                        rgba(42, 82, 152, 0.9) 100%);
-                    border-radius: 20px;
-                    padding: 0;
-                    max-width: 90vw;
-                    max-height: 90vh;
-                    width: 400px;
-                    height: 600px;
-                    display: flex;
-                    flex-direction: column;
-                    box-shadow: 0 25px 60px rgba(0,0,0,.6);
-                    border: 2px solid rgba(255, 255, 255, 0.2);
-                    overflow: hidden;
-                    position: relative;
-                    z-index: 1;
-                ">
+                <div class="memory-game-container">
                     <!-- 🧠 CABECERA DEL JUEGO (igual que los otros) -->
-                    <div class="memory-game-header" style="
-                        background: linear-gradient(135deg, 
-                            rgba(79, 195, 247, 0.3) 0%, 
-                            rgba(129, 212, 250, 0.2) 100%);
-                        padding: 15px 20px;
-                        display: flex;
-                        flex-direction: column;
-                        border-bottom: 2px solid rgba(255, 255, 255, 0.25);
-                        gap: 8px;
-                    ">
-                        <div class="header-top" style="
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                        ">
-                            <div class="game-title" style="
-                                color: white;
-                                font-size: 18px;
-                                font-weight: bold;
-                                text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-                            ">🧠 PezFlip</div>
-                            <div class="header-controls" style="
-                                display: flex;
-                                align-items: center;
-                                gap: 10px;
-                            ">
+                    <div class="memory-game-header">
+                        <div class="header-top">
+                            <div class="game-title">🧠 PezFlip</div>
+                            <div class="header-controls">
                                 <button class="game-sound-btn" style="
                                     background: rgba(255, 255, 255, 0.2);
                                     border: 2px solid rgba(255, 255, 255, 0.3);
@@ -14369,13 +14390,7 @@ Comida premium y de cumpleaños
                                 ">×</button>
                             </div>
                         </div>
-                        <div class="game-stats" style="
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            color: rgba(255, 255, 255, 0.9);
-                            font-size: 14px;
-                        ">
+                        <div class="game-stats">
                             <div class="score">Parejas: <span id="memory-score">0</span>/8</div>
                             <div class="moves">Movimientos: <span id="memory-moves">0</span></div>
                             <div class="time">Tiempo: <span id="memory-time">60</span>s</div>
