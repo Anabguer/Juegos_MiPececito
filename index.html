@@ -4426,19 +4426,6 @@
             });
             
             
-            document.getElementById('addBubblesBtn').addEventListener('click', () => {
-                if (game) {
-                    game.addCurrency('bubbles', 100);
-                    console.log('💰 +100 burbujas');
-                }
-            });
-            
-            document.getElementById('addStarsBtn').addEventListener('click', () => {
-                if (game) {
-                    game.addCurrency('stars', 10);
-                    console.log('⭐ +10 estrellas');
-                }
-            });
             
             document.getElementById('timeAdvanceBtn').addEventListener('click', () => {
                 if (game) {
@@ -4455,58 +4442,9 @@
                 }
             });
             
-            // 🍎 MÁXIMA COMIDA
-            document.getElementById('maxFoodBtn').addEventListener('click', () => {
-                if (game && game.gameState.needs) {
-                    game.gameState.needs.hunger = 0; // Sin hambre
-                    game.updateCrisisFlags();
-                    game.updateNeedBars();
-                    console.log('🍎 Pez alimentado al MÁXIMO (hambre = 0)');
-                }
-            });
             
-            // 🧹 MÁXIMA LIMPIEZA
-            document.getElementById('maxCleanBtn').addEventListener('click', () => {
-                if (game && game.gameState.needs) {
-                    game.gameState.needs.dirt = 0; // Súper limpio
-                    game.updateCrisisFlags();
-                    game.updateNeedBars();
-                    console.log('🧹 Pecera SÚPER LIMPIA (suciedad = 0)');
-                }
-            });
             
-            // 🦠 MÁXIMA SUCIEDAD
-            document.getElementById('maxDirtBtn').addEventListener('click', () => {
-                if (game && game.gameState.needs) {
-                    game.gameState.needs.dirt = 100; // Súper sucio
-                    game.updateCrisisFlags();
-                    game.updateNeedBars();
-                    console.log('🦠 Pecera SÚPER SUCIA (suciedad = 100) - Debería verse efecto visual');
-                }
-            });
             
-            // 😢 MÍNIMA DIVERSIÓN
-            document.getElementById('minFunBtn').addEventListener('click', () => {
-                if (game && game.gameState.needs) {
-                    game.gameState.needs.fun = 0; // Súper aburrido
-                    game.updateCrisisFlags();
-                    game.updateNeedBars();
-                    console.log('😢 Pez SÚPER ABURRIDO (diversión = 0)');
-                }
-            });
-            
-            // 🎮 SIMULAR JUEGO
-            document.getElementById('simulatePlayBtn').addEventListener('click', () => {
-                if (game && game.gameState.needs) {
-                    game.gameState.needs.fun = Math.min(100, game.gameState.needs.fun + 30); // +30 diversión
-                    game.updateCrisisFlags();
-                    game.updateNeedBars();
-                    // Sin recompensas automáticas - solo por jugar realmente
-                    // game.addCurrency('bubbles', 5);
-                    // game.addCurrency('stars', 1);
-                    console.log('🎮 SIMULADO: Pez ha jugado (+30 diversión, +5 burbujas, +1 estrella)');
-                }
-            });
         }
         
         // 🎯 Manejar errores globales
