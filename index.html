@@ -4427,20 +4427,6 @@
             
             
             
-            document.getElementById('timeAdvanceBtn').addEventListener('click', () => {
-                if (game) {
-                    // Simular el paso de 1 hora (3600 segundos) de necesidades
-                    const oneHourInSeconds = 3600;
-                    game.updateAutoNeeds(oneHourInSeconds);
-                    game.updateCrisisFlags();
-                    game.updateNeedBars();
-                    console.log('⏰ Simulado +1 hora de necesidades');
-                    console.log('📊 Nuevos valores:', 
-                        'Hambre:', game.gameState.needs.hunger.toFixed(1),
-                        'Suciedad:', game.gameState.needs.dirt.toFixed(1), 
-                        'Diversión:', game.gameState.needs.fun.toFixed(1));
-                }
-            });
             
             
             
