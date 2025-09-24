@@ -14280,6 +14280,7 @@ Comida premium y de cumpleaños
             
             // Crear overlay del juego (igual que los otros)
             const gameOverlay = document.createElement('div');
+            gameOverlay.id = 'memoryGameOverlay';
             gameOverlay.className = 'game-modal-overlay';
             gameOverlay.style.cssText = `
                 position: fixed;
@@ -14445,6 +14446,7 @@ Comida premium y de cumpleaños
             `;
             
             document.body.appendChild(gameOverlay);
+            console.log('🧠 PezFlip overlay creado y añadido al DOM');
             
             // Variables del juego
             let cards = [];
@@ -14789,7 +14791,9 @@ Comida premium y de cumpleaños
             
             // Inicializar juego
             createCards();
-            console.log('🧠 PezFlip iniciado');
+            console.log('🧠 PezFlip iniciado correctamente');
+            console.log('🧠 Overlay visible:', gameOverlay.style.display);
+            console.log('🧠 Overlay en DOM:', document.body.contains(gameOverlay));
         }
         
         // 🎵 JUEGO DE SIMÓN MARINO - INTEGRADO COMPLETO
