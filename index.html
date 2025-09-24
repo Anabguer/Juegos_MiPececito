@@ -11394,7 +11394,8 @@ Comida premium y de cumpleaños
                     hatch: './sound/eclosionar.mp3',
                     clean: './sound/limpiar.mp3',
                     fail: './sound/fallo.mp3',
-                    levelComplete: './sound/nivelcompletado.mp3'
+                    levelComplete: './sound/nivelcompletado.mp3',
+                    jugar: './sound/jugar.mp3'
                 };
                 
                 for (const [name, url] of Object.entries(soundFiles)) {
@@ -12545,16 +12546,16 @@ Comida premium y de cumpleaños
                 `;
             }
             
-            // 🏆 CREAR HEADER UNIFICADO PARA TODOS LOS JUEGOS (excepto Conecta 3)
-            if (gameName !== 'bloques') {
+            // 🏆 CREAR HEADER UNIFICADO PARA TODOS LOS JUEGOS (excepto Conecta 3 y Burbujas)
+            if (gameName !== 'bloques' && gameName !== 'bubble') {
                 const existingHeader = gameOverlay.querySelector(`.${gameName}-header, .${gameName}-game-header`);
                 if (existingHeader) {
                     existingHeader.remove();
                 }
             }
             
-            // Crear header unificado (solo para juegos que no sean Conecta 3)
-            if (gameName !== 'bloques') {
+            // Crear header unificado (solo para juegos que no sean Conecta 3 ni Burbujas)
+            if (gameName !== 'bloques' && gameName !== 'bubble') {
                 const unifiedHeader = document.createElement('div');
                 unifiedHeader.className = `${gameName}-unified-header`;
                 unifiedHeader.innerHTML = `
