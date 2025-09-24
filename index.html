@@ -13441,13 +13441,13 @@ Comida premium y de cumpleaños
                 position: relative;
                 width: calc(6 * 48px + 5 * 2px);
                 height: calc(9 * 48px + 8 * 2px);
-                background: linear-gradient(135deg, #2c3e50, #34495e);
+                background: linear-gradient(135deg, #1e3c72, #2a5298);
                 padding: 8px;
                 border-radius: 20px;
                 box-shadow: 0 20px 50px rgba(0,0,0,.45) inset, 0 8px 30px rgba(0,0,0,.4);
-                border: 1px solid #34495e;
+                border: 1px solid #2a5298;
                 overflow: hidden;
-                margin: 10px auto;
+                margin: 20px auto;
             `;
             
             // Aplicar estilos específicos del footer
@@ -13761,6 +13761,32 @@ Comida premium y de cumpleaños
                     }
                 }, 1000);
             }
+
+            function shuffleEffect() {
+                console.log('🎲 Iniciando efecto de barajado...');
+                
+                // Obtener todas las cartas existentes
+                const cells = board.querySelectorAll('.bloques-cell');
+                
+                cells.forEach((cell, index) => {
+                    // Efecto de rotación y movimiento loco
+                    const randomX = (Math.random() - 0.5) * 200;
+                    const randomY = (Math.random() - 0.5) * 200;
+                    const randomRotate = Math.random() * 720; // 2 vueltas completas
+                    const randomScale = 0.5 + Math.random() * 0.5;
+                    
+                    cell.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    cell.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotate}deg) scale(${randomScale})`;
+                    cell.style.opacity = '0.7';
+                    
+                    // Efecto de rebote al final
+                    setTimeout(() => {
+                        cell.style.transition = 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                        cell.style.transform = 'translate(0px, 0px) rotate(0deg) scale(1)';
+                        cell.style.opacity = '1';
+                    }, 800 + (index * 20)); // Efecto escalonado
+                });
+            }
             
             // Event listeners
             closeBtn.addEventListener('click', () => {
@@ -13771,9 +13797,15 @@ Comida premium y de cumpleaños
             restartBtn.addEventListener('click', () => {
                 console.log('🎮 ¡CLICK EN JUGAR DETECTADO!');
                 if(timerId) clearInterval(timerId);
-                init(true);
-                startTimer();
-                console.log('🎮 ¡Juego iniciado!');
+                
+                // Efecto de barajado chulo
+                shuffleEffect();
+                
+                setTimeout(() => {
+                    init(true);
+                    startTimer();
+                    console.log('🎮 ¡Juego iniciado!');
+                }, 1500); // Esperar a que termine el efecto
             });
             
             document.body.appendChild(gameOverlay);
