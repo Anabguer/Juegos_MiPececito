@@ -2898,9 +2898,9 @@
         /* 🌊 Conecta 3 - Estilos del juego (basado en prototipo funcional) */
         .bloques-cell {
             position: absolute;
-            width: 64px;
-            height: 64px;
-            border-radius: 14px;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             display: grid;
             place-items: center;
             font-weight: 900;
@@ -2910,12 +2910,13 @@
             touch-action: none;
             cursor: grab;
             transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .18s ease;
-            background: #0e1a3a;
-            box-shadow: inset 0 8px 14px rgba(255,255,255,.08), inset 0 -10px 18px rgba(0,0,0,.35), 0 6px 12px rgba(0,0,0,.25);
+            background: linear-gradient(135deg, #ff6b35, #ff8e53);
+            box-shadow: inset 0 6px 10px rgba(255,255,255,.15), inset 0 -8px 14px rgba(0,0,0,.3), 0 4px 8px rgba(0,0,0,.2);
+            border: 2px solid #ff8c00;
         }
 
         .bloques-cell span {
-            font-size: 36px;
+            font-size: 28px;
             line-height: 1;
             pointer-events: none;
         }
@@ -2949,12 +2950,83 @@
         }
 
         /* Pistas sutiles por tipo (bordecito) */
-        .bloques-cell.t0 { outline: 2px solid #4ac1ff22; }
-        .bloques-cell.t1 { outline: 2px solid #7aff7a22; }
-        .bloques-cell.t2 { outline: 2px solid #ffd84a22; }
-        .bloques-cell.t3 { outline: 2px solid #ff7adf22; }
-        .bloques-cell.t4 { outline: 2px solid #a88bff22; }
-        .bloques-cell.t5 { outline: 2px solid #ff9a4a22; }
+        .bloques-cell.t0 { outline: 2px solid #4ac1ff66; }
+        .bloques-cell.t1 { outline: 2px solid #7aff7a66; }
+        .bloques-cell.t2 { outline: 2px solid #ffd84a66; }
+        .bloques-cell.t3 { outline: 2px solid #ff7adf66; }
+        .bloques-cell.t4 { outline: 2px solid #a88bff66; }
+        .bloques-cell.t5 { outline: 2px solid #ff9a4a66; }
+
+        /* 🌊 Conecta 3 - Estilos de la cabecera (igual que burbujas) */
+        .bloques-game-header {
+            background: linear-gradient(135deg, 
+                rgba(79, 195, 247, 0.3) 0%, 
+                rgba(129, 212, 250, 0.2) 100%);
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+            gap: 8px;
+        }
+
+        .bloques-game-header .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bloques-game-header .header-bottom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bloques-game-header .game-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .bloques-game-header .game-title {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .bloques-game-header .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bloques-game-header .best-score-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .bloques-game-header .best-label {
+            opacity: 0.8;
+            font-size: 11px;
+        }
+
+        .bloques-game-header .best-value {
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -13314,13 +13386,30 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'bloquesGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="bloques-game-container">
-                    <div class="bloques-header">
-                        <h2>🌊 Conecta 3</h2>
-                        <div class="bloques-stats">
-                            <span>⭐ <span id="bloques-score">0</span></span>
-                            <span>⏰ <span id="bloques-time">60</span>s</span>
+                    <div class="bloques-game-header">
+                        <!-- PRIMERA LÍNEA: TÍTULO + ALTAVOZ + X -->
+                        <div class="header-top">
+                            <div class="game-title">🌊 Conecta 3</div>
+                            <div class="header-controls">
+                                <button id="bloques-sound-toggle" class="sound-btn">🔊</button>
+                                <button class="bloques-close-btn">✕</button>
+                            </div>
                         </div>
-                        <button class="bloques-close-btn">✕</button>
+                        
+                        <!-- SEGUNDA LÍNEA: NIVEL + PERLAS + MEJOR -->
+                        <div class="header-bottom">
+                            <div class="game-stats">
+                                <span class="level">NIVEL 1</span>
+                                <span class="perlas">
+                                    <img src="images/ui/perlas.png" style="width: 28px; height: 28px; margin-bottom: 2px; vertical-align: middle;">
+                                    <span class="score" id="bloques-score">0</span>
+                                </span>
+                                <span class="best-score-display">
+                                    <span class="best-label">Mejor:</span>
+                                    <span class="best-value" id="bloques-best-display">0</span>
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <div class="bloques-timer-bar">
                         <div class="bloques-timer-fill" id="bloques-timer-fill"></div>
@@ -13349,8 +13438,8 @@ Comida premium y de cumpleaños
             // Aplicar estilos específicos del tablero (basado en prototipo funcional)
             board.style.cssText = `
                 position: relative;
-                width: calc(6 * 64px + 5 * 6px);
-                height: calc(9 * 64px + 8 * 6px);
+                width: calc(6 * 48px + 5 * 4px);
+                height: calc(9 * 48px + 8 * 4px);
                 background: radial-gradient(120% 100% at 50% 0%, #0b1227 0%, #0b1227 50%, #0a1021 100%);
                 padding: 0;
                 border-radius: 20px;
@@ -13421,7 +13510,7 @@ Comida premium y de cumpleaños
 
             // === CÓDIGO EXACTO DEL HTML QUE FUNCIONA ===
             const COLS = 6, ROWS = 9, TYPES = 6;
-            const CELL = 64, GAP = 6;
+            const CELL = 48, GAP = 4; // Reducido para que quepa 6x9
             const ICONS = ['🐚','🐟','🐙','🐠','🦀','🐬']; // tema marino
 
             let grid = [...Array(ROWS)].map(()=>Array(COLS).fill(null));
