@@ -11368,7 +11368,7 @@ Comida premium y de cumpleaños
                 this.audioContext = null;
                 this.sounds = {};
                 this.backgroundMusic = null;
-                this.isMuted = localStorage.getItem('miPececito_muted') === 'true';
+                this.isMuted = localStorage.getItem('miPececito_muted') === 'true' || false;
                 this.volume = parseFloat(localStorage.getItem('miPececito_volume')) || 0.7;
                 this.musicVolume = 0.55; // Música de fondo bien audible
                 this.effectsVolume = 0.4; // Efectos a volumen medio
@@ -11395,7 +11395,7 @@ Comida premium y de cumpleaños
                     clean: './sound/limpiar.mp3',
                     fail: './sound/fallo.mp3',
                     levelComplete: './sound/nivelcompletado.mp3',
-                    jugar: './sound/jugar.mp3'
+                    jugar: './sound/acierto.mp3'
                 };
                 
                 for (const [name, url] of Object.entries(soundFiles)) {
@@ -12207,6 +12207,16 @@ Comida premium y de cumpleaños
                 justify-content: space-between;
                 align-items: center;
             `;
+            
+            // Controles de la cabecera (altavoz y cerrar)
+            const headerControls = gameModal.querySelector('.header-controls');
+            if (headerControls) {
+                headerControls.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                `;
+            }
             
             // Segunda línea: Nivel + Perlas
             const headerBottom = gameModal.querySelector('.header-bottom');
@@ -13482,6 +13492,12 @@ Comida premium y de cumpleaños
             // Botón de sonido del juego de burbujas
             const soundBtn = gameModal.querySelector('#bubble-sound-toggle');
             if (soundBtn) {
+                // Inicializar estado del botón
+                const img = soundBtn.querySelector('img');
+                if (img && window.audioManager) {
+                    img.src = window.audioManager.isMuted ? 'images/ui/sonidoOff.png' : 'images/ui/sonidoOn.png';
+                }
+                
                 soundBtn.addEventListener('click', () => {
                     if (window.audioManager) {
                         window.audioManager.toggleMute();
@@ -13683,7 +13699,7 @@ Comida premium y de cumpleaños
             const ICONS = ['🐚','🐟','🐙','🐠','🦀','🐬']; // tema marino
 
             let grid = [...Array(ROWS)].map(()=>Array(COLS).fill(null));
-            let score = 0, moves = 0;
+            let score = 0, moves = 0, level = 1;
             let drag = null; // {r,c, el}
 
             // --- UTILS
@@ -13878,7 +13894,21 @@ Comida premium y de cumpleaños
 
             // --- ELIMINACIÓN, GRAVEDAD Y RELLENO
             function removeMatches(matches){
-                score += matches.length * 10;
+                // Menos puntos por match (antes era 10, ahora 2)
+                score += matches.length * 2;
+                
+                // Sistema de niveles: cada 200 perlas sube de nivel
+                const newLevel = Math.floor(score / 200) + 1;
+                if (newLevel > level) {
+                    level = newLevel;
+                    // Actualizar nivel en la UI
+                    const levelEl = gameOverlay.querySelector('.level');
+                    if (levelEl) {
+                        levelEl.textContent = `NIVEL ${level}`;
+                    }
+                    console.log(`🎉 ¡Subiste al nivel ${level}!`);
+                }
+                
                 updateUI();
 
                 // Sonido de acierto
@@ -14103,6 +14133,12 @@ Comida premium y de cumpleaños
             // Botón de sonido
             const soundBtn = gameOverlay.querySelector('#bloques-sound-toggle');
             if (soundBtn) {
+                // Inicializar estado del botón
+                const img = soundBtn.querySelector('img');
+                if (img && window.audioManager) {
+                    img.src = window.audioManager.isMuted ? 'images/ui/sonidoOff.png' : 'images/ui/sonidoOn.png';
+                }
+                
                 soundBtn.addEventListener('click', () => {
                     if (window.audioManager) {
                         // Usar el método correcto del AudioManager
