@@ -13461,8 +13461,6 @@ Comida premium y de cumpleaños
 
                 el.addEventListener('pointerdown', onPointerDown);
                 el.addEventListener('pointerenter', onPointerEnter);
-                el.addEventListener('pointerup', onPointerUp);
-                el.addEventListener('pointercancel', onPointerUp);
 
                 return el;
             }
@@ -13503,10 +13501,15 @@ Comida premium y de cumpleaños
             // --- INPUT (drag por celdas adyacentes)
             function onPointerDown(e){
                 console.log('🎯 onPointerDown disparado!');
+                e.preventDefault(); // Prevenir comportamiento por defecto
                 const el = e.currentTarget;
                 drag = { r: +el.dataset.r, c: +el.dataset.c, el };
                 el.classList.add('ghost');
                 console.log('✅ Drag iniciado:', drag);
+                
+                // Agregar event listeners globales para el drag
+                document.addEventListener('pointermove', onPointerMove);
+                document.addEventListener('pointerup', onPointerUp);
             }
             function onPointerEnter(e){
                 console.log('🎯 onPointerEnter disparado!', {drag: drag});
@@ -13533,9 +13536,23 @@ Comida premium y de cumpleaños
                     console.log('❌ No son adyacentes');
                 }
             }
+            function onPointerMove(e){
+                if(!drag) return;
+                // Encontrar el elemento bajo el cursor
+                const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+                if(elementBelow && elementBelow.classList.contains('bloques-cell')){
+                    onPointerEnter({currentTarget: elementBelow});
+                }
+            }
+            
             function onPointerUp(){ 
                 console.log('🎯 onPointerUp disparado!', {drag: drag});
-                if(drag) endDrag(); 
+                if(drag) {
+                    // Remover event listeners globales
+                    document.removeEventListener('pointermove', onPointerMove);
+                    document.removeEventListener('pointerup', onPointerUp);
+                    endDrag(); 
+                }
             }
             function endDrag(){ 
                 console.log('🛑 endDrag llamado', {drag: drag});
