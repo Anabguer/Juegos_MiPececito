@@ -2910,9 +2910,10 @@
             touch-action: none;
             cursor: grab;
             transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .18s ease;
-            background: linear-gradient(135deg, #ff6b35, #ff8e53);
+            background: rgba(255, 255, 255, 0.1);
             box-shadow: inset 0 6px 10px rgba(255,255,255,.15), inset 0 -8px 14px rgba(0,0,0,.3), 0 4px 8px rgba(0,0,0,.2);
-            border: 2px solid #ff8c00;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
         }
 
         .bloques-cell span {
