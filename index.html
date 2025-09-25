@@ -1216,11 +1216,6 @@
             background: linear-gradient(90deg, #f44336, #ff9800, #4caf50); /* ROJO→NARANJA→VERDE */
         }
         
-        /* 🎮 CANVAS CON FONDO COMPLETO (SIN ESPACIO AZUL) */
-        #gameCanvas {
-            background: radial-gradient(ellipse at center, #1e3a5f 0%, #0f2a44 100%) !important;
-            z-index: 1;
-        }
         
         /* 📊 BARRAS FLOTANTES COMPACTAS (OCULTAS) */
         .needs-overlay {
@@ -1693,6 +1688,7 @@
             bottom: 60px; /* Espacio para barra inferior */
             touch-action: none;
             background: var(--bg-primary);
+            z-index: 10;
         }
         
         
