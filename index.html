@@ -3088,6 +3088,51 @@
             font-size: 14px;
         }
 
+        /* 🎵 Simón - Estilos del contenedor */
+        .simon-game-container {
+            background: linear-gradient(135deg, 
+                rgba(30, 60, 114, 0.95) 0%, 
+                rgba(42, 82, 152, 0.9) 100%);
+            border-radius: 20px;
+            padding: 0;
+            max-width: 95vw;
+            max-height: calc(100vh - 60px);
+            width: 90vw;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0,0,0,.6);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+            z-index: 100;
+        }
+
+        /* 🎵 Simón - Estilos de la cabecera */
+        .simon-header {
+            background: linear-gradient(135deg, 
+                rgba(79, 195, 247, 0.3) 0%, 
+                rgba(129, 212, 250, 0.2) 100%);
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+            gap: 8px;
+        }
+
+        .simon-header .game-title {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .simon-header .game-stats-simple {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+
         /* 🌊 Conecta 3 - Estilos del contenedor */
         .bloques-game-container {
             background: linear-gradient(135deg, 
