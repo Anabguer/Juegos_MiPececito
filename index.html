@@ -15816,9 +15816,11 @@ Comida premium y de cumpleaños
                 gameActive = false;
                 isPlayerTurn = false;
                 
-                if (score > best) {
-                    best = score;
+                // Guardar el nivel más alto alcanzado (no las perlas)
+                if (round > best) {
+                    best = round;
                     localStorage.setItem('simon-best', best.toString());
+                    console.log('🎵 Simon: Nuevo récord de nivel:', best);
                 }
                 
                 // Dar recompensas basadas en el score (perlas ganadas)
