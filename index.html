@@ -15652,7 +15652,12 @@ Comida premium y de cumpleaños
             
             // Cargar progreso guardado
             const savedBest = localStorage.getItem('simon-best');
-            if (savedBest) best = parseInt(savedBest);
+            if (savedBest) {
+                best = parseInt(savedBest);
+                console.log('🎵 Simon: Mejor récord cargado:', best);
+            } else {
+                console.log('🎵 Simon: No hay récord guardado, empezando con 0');
+            }
             
             // Función para calcular velocidad basada en el nivel
             function updateSpeed() {
@@ -15673,7 +15678,7 @@ Comida premium y de cumpleaños
                 
                 sequence = [];
                 playerSequence = [];
-                round = 0;
+                round = 1; // 🔧 ARREGLO: Empezar en nivel 1
                 score = 0; // 🔧 ARREGLO: Resetear perlas de la partida
                 speed = 600; // Resetear velocidad inicial
                 isShowing = false;
