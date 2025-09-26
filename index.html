@@ -14221,6 +14221,12 @@ Comida premium y de cumpleaños
             let grid = [...Array(ROWS)].map(()=>Array(COLS).fill(null));
             let score = 0, moves = 0, level = 1;
             let drag = null; // {r,c, el}
+            
+            // 💾 CARGAR PROGRESO GUARDADO
+            const savedLevel = localStorage.getItem('bloques-level');
+            const savedScore = localStorage.getItem('bloques-score');
+            if (savedLevel) level = parseInt(savedLevel);
+            if (savedScore) score = parseInt(savedScore);
 
             // --- UTILS
             const posToXY = (r,c) => ({
@@ -14231,6 +14237,7 @@ Comida premium y de cumpleaños
                 const scoreEl = gameOverlay.querySelector('#bloques-score');
                 const timeEl = gameOverlay.querySelector('#bloques-time');
                 const timerFill = gameOverlay.querySelector('#bloques-timer-fill');
+                const levelEl = gameOverlay.querySelector('.level');
                 
                 if (scoreEl) scoreEl.textContent = score;
                 if (timeEl) timeEl.textContent = timeLeft;
@@ -14238,6 +14245,7 @@ Comida premium y de cumpleaños
                     const percentage = (timeLeft / 60) * 100;
                     timerFill.style.width = percentage + '%';
                 }
+                if (levelEl) levelEl.textContent = `NIVEL ${level}`;
             }
 
             function makeCell(r,c,t){
@@ -14432,6 +14440,10 @@ Comida premium y de cumpleaños
                         levelEl.textContent = `NIVEL ${level}`;
                     }
                     console.log(`🎉 ¡Subiste al nivel ${level}!`);
+                    
+                    // 💾 GUARDAR PROGRESO EN LOCALSTORAGE
+                    localStorage.setItem('bloques-level', level.toString());
+                    localStorage.setItem('bloques-score', score.toString());
                     
                     // Sonido especial para subir de nivel
                     if (window.audioManager) {
@@ -14706,6 +14718,9 @@ Comida premium y de cumpleaños
                     }
                 });
             }
+            
+            // Actualizar UI inicial con progreso cargado
+            updateUI();
             
             restartBtn.addEventListener('click', () => {
                 console.log('🎮 ¡CLICK EN JUGAR DETECTADO!');
