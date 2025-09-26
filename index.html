@@ -14726,6 +14726,10 @@ Comida premium y de cumpleaños
                 console.log('🎮 ¡CLICK EN JUGAR DETECTADO!');
                 if(timerId) clearInterval(timerId);
                 
+                // 🔧 ARREGLO: Resetear nivel y score de la partida
+                level = 1;
+                score = 0;
+                
                 // Sonido de inicio
                 if (window.audioManager) {
                     window.audioManager.playSound('jugar');
@@ -15468,6 +15472,9 @@ Comida premium y de cumpleaños
             
             // Función para iniciar juego
             function startGame() {
+                // 🔧 ARREGLO: Resetear nivel y burbujas de la partida
+                level = 1;
+                bubbles = 0;
                 const difficulty = calculateDifficulty(level);
                 timeLeft = difficulty.time; // Tiempo dinámico según nivel
                 lockFlip = false; // Reiniciar bloqueo
@@ -15667,6 +15674,7 @@ Comida premium y de cumpleaños
                 sequence = [];
                 playerSequence = [];
                 round = 0;
+                score = 0; // 🔧 ARREGLO: Resetear perlas de la partida
                 speed = 600; // Resetear velocidad inicial
                 isShowing = false;
                 isPlayerTurn = false;
@@ -15806,16 +15814,14 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas basadas en el score (perlas ganadas)
-                const bubbles = Math.floor(score / 3); // Menos burbujas que el score
-                const stars = Math.floor(score / 8);   // Más estrellas
+                const stars = Math.floor(score / 8);   // Estrellas cada 8 perlas
                 
-                if (window.game && bubbles > 0) {
-                    window.game.gameState.bubbles += bubbles;
+                if (window.game && stars > 0) {
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
                     
                     // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
-                    window.game.createRewardAnimation(stars, bubbles);
+                    window.game.createRewardAnimation(stars, 0);
                 }
                 
                 updateUI();
@@ -15830,7 +15836,6 @@ Comida premium y de cumpleaños
                 // Evitar múltiples modales
                 if (gameOverlay.querySelector('.end-modal')) return;
                 
-                const bubbles = Math.floor(score / 3);
                 const stars = Math.floor(score / 8);
                 
                 const endModal = document.createElement('div');
@@ -15907,7 +15912,6 @@ Comida premium y de cumpleaños
                             <p style="margin: 8px 0;"><strong>Nivel alcanzado:</strong> ${round}</p>
                             <p style="margin: 8px 0;"><strong>Perlas conseguidas:</strong> ${score}</p>
                             <p style="margin: 8px 0;"><strong>Mejor récord:</strong> ${best}</p>
-                            <p style="margin: 8px 0;"><strong>Burbujas ganadas:</strong> +${bubbles}</p>
                             <p style="margin: 8px 0;"><strong>Estrellas ganadas:</strong> +${stars}</p>
                         </div>
                         
