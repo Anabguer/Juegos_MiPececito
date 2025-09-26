@@ -15947,7 +15947,7 @@ Comida premium y de cumpleaños
                 const scoreEl = document.getElementById('simon-score');
                 const bestEl = document.getElementById('simon-best');
                 
-                if (levelEl) levelEl.textContent = round;
+                if (levelEl) levelEl.textContent = round + 1; // Mostrar nivel actual (ronda + 1)
                 if (scoreEl) scoreEl.textContent = score;
                 if (bestEl) bestEl.textContent = best;
             }
