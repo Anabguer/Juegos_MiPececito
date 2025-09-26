@@ -1,0 +1,148 @@
+<!-- 
+🎯 REFERENCIA: MODAL DE FIN DE JUEGO UNIFICADO
+===============================================
+
+Este es el modal de fin de juego que DEBE usar TODOS los juegos.
+Basado en el modal de Burbujas que funciona perfectamente.
+
+CARACTERÍSTICAS:
+- ✅ Botón X en esquina superior derecha (NO botones en la parte inferior)
+- ✅ Fondo con gradiente azul específico
+- ✅ Blur y sombras exactas
+- ✅ Animación bounceIn
+- ✅ Tamaños y colores unificados
+
+ESTILOS EXACTOS:
+- background: linear-gradient(135deg, rgba(33, 150, 243, 0.2) 0%, rgba(25, 118, 210, 0.15) 50%, rgba(21, 101, 192, 0.2) 100%);
+- backdrop-filter: blur(30px);
+- border: 2px solid rgba(33, 150, 243, 0.4);
+- border-radius: 20px;
+- padding: 25px;
+- text-align: center;
+- color: rgb(255, 255, 255);
+- max-width: 400px;
+- width: 70%;
+- box-shadow: rgba(33, 150, 243, 0.4) 0px 20px 60px, rgba(25, 118, 210, 0.3) 0px 0px 40px, rgba(255, 255, 255, 0.2) 0px 2px 0px inset;
+- animation: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0s 1 normal none running bounceIn;
+- position: relative;
+-->
+
+<div class="end-modal" style="
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg,
+        rgba(13, 71, 161, 0.6) 0%,
+        rgba(21, 101, 192, 0.5) 50%,
+        rgba(25, 118, 210, 0.6) 100%);
+    backdrop-filter: blur(15px) saturate(150%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.4s ease;
+">
+    <div style="
+        background: linear-gradient(135deg, 
+            rgba(33, 150, 243, 0.2) 0%, 
+            rgba(25, 118, 210, 0.15) 50%,
+            rgba(21, 101, 192, 0.2) 100%);
+        backdrop-filter: blur(30px);
+        border: 2px solid rgba(33, 150, 243, 0.4);
+        border-radius: 20px;
+        padding: 25px;
+        text-align: center;
+        color: #fff;
+        max-width: 400px;
+        width: 70%;
+        box-shadow: 
+            0 20px 60px rgba(33, 150, 243, 0.4),
+            0 0 40px rgba(25, 118, 210, 0.3),
+            inset 0 2px 0 rgba(255, 255, 255, 0.2);
+        animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        position: relative;
+    ">
+        <!-- BOTÓN X EN ESQUINA SUPERIOR DERECHA -->
+        <button class="close-btn" style="
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 10;
+        ">✕</button>
+        
+        <!-- TÍTULO -->
+        <h2 style="
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            color: #fff;
+        ">🌊 ¡Tiempo Agotado!</h2>
+        
+        <!-- CONTENIDO DEL JUEGO -->
+        <div style="margin: 15px 0; font-size: 16px;">
+            <p style="margin: 8px 0;"><strong>Nivel alcanzado:</strong> 5</p>
+            <p style="margin: 8px 0;"><strong>Puntuación:</strong> 150</p>
+            <p style="margin: 8px 0;"><strong>Mejor récord:</strong> 200</p>
+            <p style="margin: 8px 0;"><strong>Burbujas ganadas:</strong> +15</p>
+            <p style="margin: 8px 0;"><strong>Estrellas ganadas:</strong> +3</p>
+        </div>
+        
+        <!-- BOTÓN JUGAR DE NUEVO (CENTRADO) -->
+        <div style="margin-top: 25px;">
+            <button class="restart-btn" style="
+                background: linear-gradient(135deg, #4CAF50, #45a049);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 25px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            ">JUGAR DE NUEVO</button>
+        </div>
+    </div>
+</div>
+
+<!-- 
+🎯 INSTRUCCIONES DE USO:
+========================
+
+1. Copiar este HTML exactamente
+2. Cambiar el título según el juego (🌊 ¡Tiempo Agotado!, 🎵 ¡Fin del juego!, etc.)
+3. Cambiar el contenido según las estadísticas del juego
+4. Añadir event listeners para:
+   - close-btn: Cerrar modal y volver a juegos
+   - restart-btn: Reiniciar el juego
+
+EVENT LISTENERS REQUERIDOS:
+===========================
+
+closeBtn.addEventListener('click', () => {
+    endModal.remove();
+    document.getElementById('gamesModal').style.display = 'flex';
+});
+
+restartBtn.addEventListener('click', () => {
+    endModal.remove();
+    // Reiniciar el juego específico
+    initGame();
+});
+-->
