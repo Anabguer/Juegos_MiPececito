@@ -15566,13 +15566,18 @@ Comida premium y de cumpleaños
                                 ">✕</button>
                             </div>
                         </div>
-                        <!-- SEGUNDA LÍNEA: ESTADÍSTICAS -->
+                        <!-- SEGUNDA LÍNEA: NIVEL + PERLAS + MEJOR -->
                         <div class="header-bottom">
                             <div class="game-stats">
-                                <div class="best-score-display">
-                                    <span class="best-label">Ronda:</span>
-                                    <span class="best-value" id="simon-round">0</span>
-                                </div>
+                                <span class="level">NIVEL <span id="simon-level">1</span></span>
+                                <span class="perlas">
+                                    <img src="images/ui/perlas.png" style="width: 28px; height: 28px; margin-bottom: 2px; vertical-align: middle;">
+                                    <span class="score" id="simon-score">0</span>
+                                </span>
+                                <span class="best-score-display">
+                                    <span class="best-label">Mejor:</span>
+                                    <span class="best-value" id="simon-best">0</span>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -15619,7 +15624,7 @@ Comida premium y de cumpleaños
             });
             
             // Variables del juego
-            let sequence = [], playerSequence = [], round = 0, best = 0;
+            let sequence = [], playerSequence = [], round = 0, score = 0, best = 0;
             let isShowing = false, isPlayerTurn = false, gameActive = false;
             
             // Funciones del juego
@@ -15652,6 +15657,7 @@ Comida premium y de cumpleaños
                 const nextPad = Math.floor(Math.random() * 4);
                 sequence.push(nextPad);
                 round++;
+                score += 5; // +5 perlas por ronda completada
                 updateUI();
                 showSequence();
             }
@@ -15755,14 +15761,14 @@ Comida premium y de cumpleaños
                 gameActive = false;
                 isPlayerTurn = false;
                 
-                if (round - 1 > best) {
-                    best = round - 1;
+                if (score > best) {
+                    best = score;
                     localStorage.setItem('simon-best', best.toString());
                 }
                 
-                // Dar recompensas
-                const bubbles = (round - 1) * 2;
-                const stars = Math.floor((round - 1) / 5);
+                // Dar recompensas basadas en el score (perlas ganadas)
+                const bubbles = Math.floor(score / 3); // Menos burbujas que el score
+                const stars = Math.floor(score / 8);   // Más estrellas
                 
                 if (window.game && bubbles > 0) {
                     window.game.gameState.bubbles += bubbles;
@@ -15774,17 +15780,20 @@ Comida premium y de cumpleaños
                 }
                 
                 setTimeout(() => {
-                    alert(`🎵 ¡Juego terminado!\\n🌊 Ronda alcanzada: ${round - 1}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
+                    alert(`🎵 ¡Fin del juego!\\n🎵 Nivel: ${round}\\n🫧 Perlas: ${score}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
                 }, 500);
                 
                 updateUI();
             }
             
             function updateUI() {
-                const roundEl = document.getElementById('simon-round');
-                if (roundEl) {
-                    roundEl.textContent = round;
-                }
+                const levelEl = document.getElementById('simon-level');
+                const scoreEl = document.getElementById('simon-score');
+                const bestEl = document.getElementById('simon-best');
+                
+                if (levelEl) levelEl.textContent = round;
+                if (scoreEl) scoreEl.textContent = score;
+                if (bestEl) bestEl.textContent = best;
             }
             
             // Cargar récord
