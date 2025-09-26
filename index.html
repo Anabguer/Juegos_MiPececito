@@ -15626,6 +15626,18 @@ Comida premium y de cumpleaños
             // Variables del juego
             let sequence = [], playerSequence = [], round = 0, score = 0, best = 0;
             let isShowing = false, isPlayerTurn = false, gameActive = false;
+            let speed = 600; // Velocidad inicial (ms entre pads)
+            
+            // Cargar progreso guardado
+            const savedBest = localStorage.getItem('simon-best');
+            if (savedBest) best = parseInt(savedBest);
+            
+            // Función para calcular velocidad basada en el nivel
+            function updateSpeed() {
+                // Cada 3 niveles, la velocidad aumenta (tiempo disminuye)
+                const speedLevel = Math.floor(round / 3);
+                speed = Math.max(300, 600 - (speedLevel * 50)); // Mínimo 300ms, máximo 600ms
+            }
             
             // Funciones del juego
             function initSimonGame() {
@@ -15640,6 +15652,7 @@ Comida premium y de cumpleaños
                 sequence = [];
                 playerSequence = [];
                 round = 0;
+                speed = 600; // Resetear velocidad inicial
                 isShowing = false;
                 isPlayerTurn = false;
                 gameActive = true;
@@ -15658,6 +15671,10 @@ Comida premium y de cumpleaños
                 sequence.push(nextPad);
                 round++;
                 score += 5; // +5 perlas por ronda completada
+                
+                // Actualizar velocidad basada en el nivel
+                updateSpeed();
+                
                 updateUI();
                 
                 // Efecto de perlas volando al contador
@@ -15676,8 +15693,8 @@ Comida premium y de cumpleaños
                         lightUpPad(sequence[i]);
                         setTimeout(() => {
                             i++;
-                            setTimeout(showNext, 200);
-                        }, 600);
+                            setTimeout(showNext, Math.max(150, speed - 200)); // Pausa entre pads
+                        }, Math.max(400, speed - 100)); // Duración del pad encendido
                     } else {
                         isShowing = false;
                         isPlayerTurn = true;
@@ -15783,11 +15800,102 @@ Comida premium y de cumpleaños
                     window.game.createRewardAnimation(stars, bubbles);
                 }
                 
-                setTimeout(() => {
-                    alert(`🎵 ¡Fin del juego!\\n🎵 Nivel: ${round}\\n🫧 Perlas: ${score}\\n🏆 Récord: ${best}\\n🫧 +${bubbles} burbujas\\n⭐ +${stars} estrellas`);
-                }, 500);
-                
                 updateUI();
+                
+                // Mostrar modal de fin de juego unificado
+                setTimeout(() => {
+                    showEndGameModal();
+                }, 500);
+            }
+            
+            function showEndGameModal() {
+                // Evitar múltiples modales
+                if (gameOverlay.querySelector('.end-modal')) return;
+                
+                const bubbles = Math.floor(score / 3);
+                const stars = Math.floor(score / 8);
+                
+                const endModal = document.createElement('div');
+                endModal.className = 'end-modal';
+                endModal.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.8);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                `;
+                
+                const modalContent = document.createElement('div');
+                modalContent.style.cssText = `
+                    background: linear-gradient(135deg, rgba(33, 150, 243, 0.2) 0%, rgba(25, 118, 210, 0.15) 50%, rgba(21, 101, 192, 0.2) 100%);
+                    backdrop-filter: blur(30px);
+                    border: 2px solid rgba(33, 150, 243, 0.4);
+                    border-radius: 20px;
+                    padding: 25px;
+                    text-align: center;
+                    color: rgb(255, 255, 255);
+                    max-width: 400px;
+                    width: 70%;
+                    box-shadow: rgba(33, 150, 243, 0.4) 0px 20px 60px, rgba(25, 118, 210, 0.3) 0px 0px 40px, rgba(255, 255, 255, 0.2) 0px 2px 0px inset;
+                    animation: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0s 1 normal none running bounceIn;
+                    position: relative;
+                `;
+                
+                modalContent.innerHTML = `
+                    <h2 style="margin: 0 0 20px 0; font-size: 28px; color: #fff;">🎵 ¡Fin del juego!</h2>
+                    <div style="margin: 15px 0; font-size: 18px;">
+                        <p style="margin: 8px 0;"><strong>🎵 Nivel alcanzado:</strong> ${round}</p>
+                        <p style="margin: 8px 0;"><strong>🫧 Perlas conseguidas:</strong> ${score}</p>
+                        <p style="margin: 8px 0;"><strong>🏆 Mejor récord:</strong> ${best}</p>
+                        <p style="margin: 8px 0;"><strong>🫧 Burbujas ganadas:</strong> +${bubbles}</p>
+                        <p style="margin: 8px 0;"><strong>⭐ Estrellas ganadas:</strong> +${stars}</p>
+                    </div>
+                    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
+                        <button id="simon-restart" style="
+                            background: linear-gradient(135deg, #4CAF50, #45a049);
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 25px;
+                            font-size: 16px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+                        ">🎵 JUGAR DE NUEVO</button>
+                        <button id="simon-close" style="
+                            background: linear-gradient(135deg, #f44336, #da190b);
+                            color: white;
+                            border: none;
+                            padding: 12px 24px;
+                            border-radius: 25px;
+                            font-size: 16px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+                        ">🚪 SALIR</button>
+                    </div>
+                `;
+                
+                endModal.appendChild(modalContent);
+                gameOverlay.appendChild(endModal);
+                
+                // Event listeners
+                document.getElementById('simon-restart').addEventListener('click', () => {
+                    endModal.remove();
+                    initSimonGame();
+                });
+                
+                document.getElementById('simon-close').addEventListener('click', () => {
+                    gameOverlay.remove();
+                    document.getElementById('gamesModal').style.display = 'flex';
+                });
             }
             
             function updateUI() {
@@ -15859,10 +15967,6 @@ Comida premium y de cumpleaños
                     setTimeout(() => pearl.remove(), 1200);
                 }
             }
-            
-            // Cargar récord
-            const savedBest = localStorage.getItem('simon-best');
-            if (savedBest) best = parseInt(savedBest);
             
             // Event listeners
             const closeBtn = gameOverlay.querySelector('.game-close-btn');
