@@ -15722,7 +15722,11 @@ Comida premium y de cumpleaños
             
             function lightUpPad(padIndex) {
                 const pad = pads[padIndex];
-                const originalStyle = pad.style.cssText;
+                
+                // 🔧 ARREGLO: Guardar solo los estilos que vamos a cambiar
+                const originalFilter = pad.style.filter;
+                const originalTransform = pad.style.transform;
+                
                 pad.style.filter = 'brightness(1.4) contrast(1.1)';
                 pad.style.transform = 'scale(1.05)';
                 
@@ -15730,7 +15734,9 @@ Comida premium y de cumpleaños
                 playSimonSound(padIndex);
                 
                 setTimeout(() => {
-                    pad.style.cssText = originalStyle;
+                    // 🔧 ARREGLO: Restaurar solo los estilos específicos
+                    pad.style.filter = originalFilter;
+                    pad.style.transform = 'scale(1)'; // Siempre volver a escala normal
                 }, 400);
             }
             
