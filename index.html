@@ -3029,22 +3029,18 @@
 
         /* 🧠 Memoria - Estilos del contenedor */
         .memory-game-container {
-            background: linear-gradient(135deg, 
-                rgba(30, 60, 114, 0.95) 0%, 
-                rgba(42, 82, 152, 0.9) 100%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
-            padding: 0;
-            max-width: 95vw;
-            max-height: calc(100vh - 60px);
             width: 90vw;
-            height: 80vh;
+            height: 95vh;
+            max-width: 500px;
+            max-height: 800px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 25px 60px rgba(0,0,0,.6);
-            border: 2px solid rgba(255, 255, 255, 0.2);
             overflow: hidden;
-            position: relative;
-            z-index: 100;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 20px 40px;
         }
 
         /* 🧠 Memoria - Estilos de la cabecera (igual que Conecta 3) */
@@ -3079,36 +3075,94 @@
             gap: 10px;
         }
 
+        .memory-game-header .header-bottom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
         .memory-game-header .game-stats {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
+            gap: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .memory-game-header .best-score-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .memory-game-header .best-label {
+            opacity: 0.8;
+            font-size: 11px;
+        }
+        .memory-game-header .best-value {
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        .memory-btn {
+            background: linear-gradient(135deg, rgb(33, 150, 243), rgb(25, 118, 210)) !important;
+            border: 2px solid rgb(21, 101, 192) !important;
+            border-radius: 20px !important;
+            padding: 12px 30px !important;
+            font-size: 18px !important;
+            font-weight: bold !important;
+            color: white !important;
+            cursor: pointer !important;
+            transition: 0.3s !important;
+            text-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px !important;
+            box-shadow: rgba(33, 150, 243, 0.4) 0px 6px 20px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            width: 80% !important;
+            max-width: 250px !important;
+            margin: 20px auto !important;
+            display: block !important;
         }
 
         /* 🎵 Simón - Estilos del contenedor */
-        .simon-game-container {
-            background: linear-gradient(135deg, 
-                rgba(30, 60, 114, 0.95) 0%, 
-                rgba(42, 82, 152, 0.9) 100%);
+        /* 🎮 CONTENEDOR UNIFICADO PARA TODOS LOS JUEGOS */
+        .unified-game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
-            padding: 0;
-            max-width: 95vw;
-            max-height: calc(100vh - 60px);
             width: 90vw;
-            height: 80vh;
+            height: 95vh;
+            max-width: 500px;
+            max-height: 800px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 25px 60px rgba(0,0,0,.6);
-            border: 2px solid rgba(255, 255, 255, 0.2);
             overflow: hidden;
-            position: relative;
-            z-index: 100;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 20px 40px;
+        }
+        
+        .simon-game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            width: 90vw;
+            height: 95vh;
+            max-width: 500px;
+            max-height: 800px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 20px 40px;
         }
 
-        /* 🎵 Simón - Estilos de la cabecera */
-        .simon-header {
+        /* 🎵 Simón - Estilos de la cabecera (igual que Burbujas) */
+        .simon-game-header {
             background: linear-gradient(135deg, 
                 rgba(79, 195, 247, 0.3) 0%, 
                 rgba(129, 212, 250, 0.2) 100%);
@@ -3118,18 +3172,390 @@
             border-bottom: 2px solid rgba(255, 255, 255, 0.25);
             gap: 8px;
         }
-
-        .simon-header .game-title {
+        .simon-game-header .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .simon-game-header .header-bottom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .simon-game-header .game-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .simon-game-header .game-title {
             color: white;
             font-size: 18px;
             font-weight: bold;
             margin: 0;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
+        .simon-game-header .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .simon-game-header .best-score-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .simon-game-header .best-label {
+            opacity: 0.8;
+            font-size: 11px;
+        }
+        .simon-game-header .best-value {
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        .simon-btn {
+            background: linear-gradient(135deg, rgb(33, 150, 243), rgb(25, 118, 210)) !important;
+            border: 2px solid rgb(21, 101, 192) !important;
+            border-radius: 20px !important;
+            padding: 12px 30px !important;
+            font-size: 18px !important;
+            font-weight: bold !important;
+            color: white !important;
+            cursor: pointer !important;
+            transition: 0.3s !important;
+            text-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px !important;
+            box-shadow: rgba(33, 150, 243, 0.4) 0px 6px 20px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            width: 80% !important;
+            max-width: 250px !important;
+            margin: 20px auto !important;
+            display: block !important;
+        }
 
-        .simon-header .game-stats-simple {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
+        /* 🐬 Carril - Estilos de la cabecera (igual que Burbujas) */
+        .carril-game-header {
+            background: linear-gradient(135deg, 
+                rgba(79, 195, 247, 0.3) 0%, 
+                rgba(129, 212, 250, 0.2) 100%);
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+            gap: 8px;
+        }
+        .carril-game-header .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .carril-game-header .header-bottom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .carril-game-header .game-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .carril-game-header .game-title {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .carril-game-header .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .carril-game-header .best-score-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .carril-game-header .best-label {
+            opacity: 0.8;
+            font-size: 11px;
+        }
+        .carril-game-header .best-value {
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 🐉 Dragón - Estilos de la cabecera (igual que Burbujas) */
+        .correr-game-header {
+            background: linear-gradient(135deg, 
+                rgba(79, 195, 247, 0.3) 0%, 
+                rgba(129, 212, 250, 0.2) 100%);
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+            gap: 8px;
+        }
+        .correr-game-header .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .correr-game-header .header-bottom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .correr-game-header .game-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .correr-game-header .game-title {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .correr-game-header .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .correr-game-header .best-score-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .correr-game-header .best-label {
+            opacity: 0.8;
+            font-size: 11px;
+        }
+        .correr-game-header .best-value {
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 🎯 Caza - Estilos de la cabecera (igual que Burbujas) */
+        .caza-game-header {
+            background: linear-gradient(135deg, 
+                rgba(79, 195, 247, 0.3) 0%, 
+                rgba(129, 212, 250, 0.2) 100%);
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+            gap: 8px;
+        }
+        .caza-game-header .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .caza-game-header .header-bottom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .caza-game-header .game-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .caza-game-header .game-title {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .caza-game-header .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .caza-game-header .best-score-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .caza-game-header .best-label {
+            opacity: 0.8;
+            font-size: 11px;
+        }
+        .caza-game-header .best-value {
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 🌊 Secuencia - Estilos de la cabecera (igual que Burbujas) */
+        .secuencia-game-header {
+            background: linear-gradient(135deg, 
+                rgba(79, 195, 247, 0.3) 0%, 
+                rgba(129, 212, 250, 0.2) 100%);
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+            gap: 8px;
+        }
+        .secuencia-game-header .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .secuencia-game-header .header-bottom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .secuencia-game-header .game-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .secuencia-game-header .game-title {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .secuencia-game-header .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .secuencia-game-header .best-score-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .secuencia-game-header .best-label {
+            opacity: 0.8;
+            font-size: 11px;
+        }
+        .secuencia-game-header .best-value {
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 🏖️ Toca-3 - Estilos de la cabecera (igual que Burbujas) */
+        .toca3-game-header {
+            background: linear-gradient(135deg, 
+                rgba(79, 195, 247, 0.3) 0%, 
+                rgba(129, 212, 250, 0.2) 100%);
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+            gap: 8px;
+        }
+        .toca3-game-header .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toca3-game-header .header-bottom {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .toca3-game-header .game-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .toca3-game-header .game-title {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .toca3-game-header .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toca3-game-header .best-score-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .toca3-game-header .best-label {
+            opacity: 0.8;
+            font-size: 11px;
+        }
+        .toca3-game-header .best-value {
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
 
         /* 🌊 Conecta 3 - Estilos del contenedor */
@@ -11449,7 +11875,8 @@ Comida premium y de cumpleaños
                     clean: './sound/limpiar.mp3',
                     fail: './sound/fallo.mp3',
                     levelComplete: './sound/nivelcompletado.mp3',
-                    jugar: './sound/jugar.mp3'
+                    jugar: './sound/jugar.mp3',
+                    acierto: './sound/comer.mp3'
                 };
                 
                 for (const [name, url] of Object.entries(soundFiles)) {
@@ -12595,6 +13022,7 @@ Comida premium y de cumpleaños
             
             // Contenedor principal - SIMPLE Y FUNCIONAL
             const container = gameOverlay.querySelector(`.${gameName}-game-container, .${gameName}-container`);
+            console.log(`🎨 Buscando contenedor para ${gameName}:`, container);
             if (container) {
                 container.style.cssText = `
                     background: rgba(255, 255, 255, 0.1);
@@ -12612,16 +13040,16 @@ Comida premium y de cumpleaños
                 `;
             }
             
-            // 🏆 CREAR HEADER UNIFICADO PARA TODOS LOS JUEGOS (excepto Conecta 3 y Burbujas)
-            if (gameName !== 'bloques' && gameName !== 'bubble') {
+            // 🏆 CREAR HEADER UNIFICADO PARA TODOS LOS JUEGOS (excepto Conecta 3, Burbujas y Simón)
+            if (gameName !== 'bloques' && gameName !== 'bubble' && gameName !== 'simon') {
                 const existingHeader = gameOverlay.querySelector(`.${gameName}-header, .${gameName}-game-header`);
                 if (existingHeader) {
                     existingHeader.remove();
                 }
             }
             
-            // Crear header unificado (solo para juegos que no sean Conecta 3 ni Burbujas)
-            if (gameName !== 'bloques' && gameName !== 'bubble') {
+            // Crear header unificado (solo para juegos que no sean Conecta 3, Burbujas ni Simón)
+            if (gameName !== 'bloques' && gameName !== 'bubble' && gameName !== 'simon') {
                 const unifiedHeader = document.createElement('div');
                 unifiedHeader.className = `${gameName}-unified-header`;
                 unifiedHeader.innerHTML = `
@@ -12656,8 +13084,8 @@ Comida premium y de cumpleaños
                 }
             }
             
-            // Estilos del header unificado (solo para juegos que no sean Conecta 3)
-            if (gameName !== 'bloques' && typeof unifiedHeader !== 'undefined') {
+            // Estilos del header unificado (solo para juegos que no sean Conecta 3 ni Simón)
+            if (gameName !== 'bloques' && gameName !== 'simon' && typeof unifiedHeader !== 'undefined') {
                 unifiedHeader.style.cssText = `
                     background: linear-gradient(135deg, 
                         rgba(79, 195, 247, 0.3) 0%, 
@@ -12670,8 +13098,8 @@ Comida premium y de cumpleaños
                 `;
             }
             
-            // Estilos del header unificado (solo para juegos que no sean Conecta 3)
-            if (gameName !== 'bloques' && typeof unifiedHeader !== 'undefined') {
+            // Estilos del header unificado (solo para juegos que no sean Conecta 3 ni Simón)
+            if (gameName !== 'bloques' && gameName !== 'simon' && typeof unifiedHeader !== 'undefined') {
                 // Primera línea: Título + Altavoz + X
                 const headerTop = unifiedHeader.querySelector('.header-top');
                 if (headerTop) {
@@ -13359,7 +13787,7 @@ Comida premium y de cumpleaños
                     text-align: center;
                     color: #fff;
                     max-width: 400px;
-                    width: 90%;
+                    width: 70%;
                     box-shadow: 
                         0 20px 60px rgba(33, 150, 243, 0.4),
                         0 0 40px rgba(25, 118, 210, 0.3),
@@ -13883,6 +14311,11 @@ Comida premium y de cumpleaños
                 el.classList.add('ghost');
                 console.log('✅ Drag iniciado:', drag);
                 
+                // Sonido sutil al tocar una celda
+                if (window.audioManager) {
+                    window.audioManager.playSound('clean'); // Sonido suave para feedback táctil
+                }
+                
                 // Agregar event listeners globales para el drag
                 document.addEventListener('pointermove', onPointerMove);
                 document.addEventListener('pointerup', onPointerUp);
@@ -13999,14 +14432,19 @@ Comida premium y de cumpleaños
                         levelEl.textContent = `NIVEL ${level}`;
                     }
                     console.log(`🎉 ¡Subiste al nivel ${level}!`);
+                    
+                    // Sonido especial para subir de nivel
+                    if (window.audioManager) {
+                        window.audioManager.playSound('levelComplete');
+                    }
+                } else {
+                    // Sonido de acierto normal
+                    if (window.audioManager) {
+                        window.audioManager.playSound('acierto');
+                    }
                 }
                 
                 updateUI();
-
-                // Sonido de acierto
-                if (window.audioManager) {
-                    window.audioManager.playSound('acierto');
-                }
 
                 // Efecto de perlas volando al contador desde las posiciones de match
                 createPearlEffectFromMatches(matches);
@@ -14156,34 +14594,60 @@ Comida premium y de cumpleaños
             function showEndGameModal() {
                 console.log('🏁 Mostrando modal de fin de partida...');
                 
-                // Crear modal de fin de partida
+                // Crear modal de fin de partida (igual que Burbujas)
                 const endModal = document.createElement('div');
                 endModal.style.cssText = `
-                    position: fixed;
+                    position: absolute;
                     top: 0;
                     left: 0;
                     width: 100%;
                     height: 100%;
-                    background: rgba(0, 0, 0, 0.5);
+                    background: linear-gradient(135deg,
+                        rgba(13, 71, 161, 0.6) 0%,
+                        rgba(21, 101, 192, 0.5) 50%,
+                        rgba(25, 118, 210, 0.6) 100%);
+                    backdrop-filter: blur(15px) saturate(150%);
                     display: flex;
-                    justify-content: center;
                     align-items: center;
-                    z-index: 20000;
+                    justify-content: center;
+                    z-index: 1000;
+                    animation: fadeIn 0.4s ease;
                 `;
                 
                 endModal.innerHTML = `
                     <div style="
-                        background: linear-gradient(135deg, #1e3c72, #2a5298);
-                        padding: 30px;
+                        background: linear-gradient(135deg, 
+                            rgba(33, 150, 243, 0.2) 0%, 
+                            rgba(25, 118, 210, 0.15) 50%,
+                            rgba(21, 101, 192, 0.2) 100%);
+                        backdrop-filter: blur(30px);
+                        border: 2px solid rgba(33, 150, 243, 0.4);
                         border-radius: 20px;
+                        padding: 25px;
                         text-align: center;
-                        color: white;
-                        box-shadow: 0 20px 50px rgba(0,0,0,.5);
-                        border: 2px solid #34495e;
-                        min-width: 300px;
+                        color: #fff;
+                        max-width: 400px;
+                        width: 70%;
+                        box-shadow: 
+                            0 20px 60px rgba(33, 150, 243, 0.4),
+                            0 0 40px rgba(25, 118, 210, 0.3),
+                            inset 0 2px 0 rgba(255, 255, 255, 0.2);
+                        animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                        position: relative;
                     ">
-                        <h2 style="margin: 0 0 20px; font-size: 24px;">🌊 ¡Tiempo Agotado!</h2>
-                        <p style="margin: 0 0 20px; font-size: 18px;">Puntuación: <strong>${score}</strong></p>
+                        <h2 style="
+                            font-size: 20px;
+                            font-weight: 800;
+                            margin-bottom: 15px;
+                            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                            color: #fff;
+                        ">🌊 ¡Tiempo Agotado!</h2>
+                        <p style="
+                            font-size: 18px;
+                            margin-bottom: 20px;
+                            color: #fff;
+                            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                        ">Puntuación: <strong>${score}</strong></p>
                         <button id="bloques-play-again" style="
                             background: linear-gradient(135deg, rgb(33, 150, 243), rgb(25, 118, 210));
                             border: 2px solid rgb(21, 101, 192);
@@ -14202,7 +14666,7 @@ Comida premium y de cumpleaños
                     </div>
                 `;
                 
-                document.body.appendChild(endModal);
+                gameOverlay.appendChild(endModal);
                 
                 // Event listener para el botón
                 const playAgainBtn = endModal.querySelector('#bloques-play-again');
@@ -14266,9 +14730,9 @@ Comida premium y de cumpleaños
             console.log('💎 Juego Conecta 3 iniciado');
         }
         
-        // 🧠 JUEGO DE MEMORIA - PEZFLIP
+        // 🧠 JUEGO DE MEMORIA - PEZFLIP INFINITO
         function startMemoriaGame() {
-            console.log('🧠 Iniciando PezFlip...');
+            console.log('🧠 Iniciando PezFlip Infinito...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
@@ -14301,11 +14765,11 @@ Comida premium y de cumpleaños
                     <!-- 🧠 CABECERA DEL JUEGO (igual que los otros) -->
                     <div class="memory-game-header">
                         <div class="header-top">
-                            <div class="game-title">🧠 PezFlip</div>
+                            <div class="game-title">🧠 PezFlip Infinito</div>
                             <div class="header-controls">
-                                <button class="game-sound-btn" style="
+                                <button class="sound-btn" style="
                                     background: rgba(255, 255, 255, 0.2);
-                                    border: 2px solid rgba(255, 255, 255, 0.3);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
                                     border-radius: 50%;
                                     width: 40px;
                                     height: 40px;
@@ -14318,8 +14782,8 @@ Comida premium y de cumpleaños
                                     <img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">
                                 </button>
                                 <button class="game-close-btn" style="
-                                    background: rgba(255, 82, 82, 0.8);
-                                    border: 2px solid rgba(255, 255, 255, 0.3);
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
                                     border-radius: 50%;
                                     width: 40px;
                                     height: 40px;
@@ -14328,27 +14792,40 @@ Comida premium y de cumpleaños
                                     justify-content: center;
                                     cursor: pointer;
                                     transition: all 0.3s ease;
-                                    font-size: 18px;
                                     color: white;
-                                ">×</button>
+                                    font-size: 18px;
+                                    font-weight: bold;
+                                ">✕</button>
                             </div>
                         </div>
-                        <div class="game-stats">
-                            <div class="score">Parejas: <span id="memory-score">0</span>/8</div>
-                            <div class="moves">Movimientos: <span id="memory-moves">0</span></div>
-                            <div class="time">Tiempo: <span id="memory-time">60</span>s</div>
+                        <div class="header-bottom">
+                            <div class="game-stats">
+                                <span class="level">NIVEL <span id="memory-level">1</span></span>
+                                <span class="perlas">
+                                    <img src="images/ui/perlas.png" style="width: 28px; height: 28px; margin-bottom: 2px; vertical-align: middle;">
+                                    <span class="score" id="memory-bubbles">0</span>
+                                </span>
+                                <span class="best-score-display">
+                                    <span class="best-label">Mejor:</span>
+                                    <span class="best-value" id="memory-best">0</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- ⏰ BARRA DE TIEMPO -->
                     <div class="memory-timer-bar" style="
-                        height: 6px;
-                        background: rgba(0, 0, 0, 0.3);
-                        margin: 0;
+                        width: 100%;
+                        height: 8px;
+                        background: rgba(255, 255, 255, 0.2);
+                        border-radius: 4px;
+                        overflow: hidden;
+                        margin: 10px 0;
+                        border: 1px solid rgba(255, 255, 255, 0.3);
                     ">
                         <div class="memory-timer-fill" id="memory-timer-fill" style="
                             height: 100%;
-                            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+                            background: linear-gradient(90deg, #29b6f6, #0288d1);
                             width: 100%;
                             transition: width 1s linear;
                         "></div>
@@ -14370,11 +14847,11 @@ Comida premium y de cumpleaños
                     ">
                         <div class="memory-board" id="memory-board" style="
                             display: grid;
-                            grid-template-columns: repeat(4, 1fr);
+                            grid-template-columns: repeat(5, 1fr);
                             grid-template-rows: repeat(4, 1fr);
                             gap: 8px;
-                            width: 280px;
-                            height: 280px;
+                            width: 320px;
+                            height: 256px;
                             background: rgba(255, 255, 255, 0.05);
                             padding: 10px;
                             border-radius: 10px;
@@ -14389,18 +14866,25 @@ Comida premium y de cumpleaños
                         justify-content: center;
                         align-items: center;
                     ">
-                        <button class="memory-btn" id="memory-restart" style="
-                            background: linear-gradient(45deg, #4CAF50, #66BB6A);
-                            color: white;
-                            border: none;
-                            padding: 12px 24px;
-                            border-radius: 25px;
-                            font-size: 16px;
-                            font-weight: bold;
-                            cursor: pointer;
-                            transition: all 0.3s ease;
-                            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-                        ">JUGAR</button>
+                       <button class="memory-btn" id="memory-restart" style="
+                           background: linear-gradient(135deg, rgb(33, 150, 243), rgb(25, 118, 210)) !important;
+                           border: 2px solid rgb(21, 101, 192) !important;
+                           border-radius: 20px !important;
+                           padding: 12px 30px !important;
+                           font-size: 18px !important;
+                           font-weight: bold !important;
+                           color: white !important;
+                           cursor: pointer !important;
+                           transition: 0.3s !important;
+                           text-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px !important;
+                           box-shadow: rgba(33, 150, 243, 0.4) 0px 6px 20px !important;
+                           text-transform: uppercase !important;
+                           letter-spacing: 1px !important;
+                           width: 80% !important;
+                           max-width: 250px !important;
+                           margin: 20px auto !important;
+                           display: block !important;
+                       ">JUGAR</button>
                     </div>
                 </div>
             `;
@@ -14413,22 +14897,105 @@ Comida premium y de cumpleaños
             let flippedCards = [];
             let matchedPairs = 0;
             let moves = 0;
-            let timeLeft = 60;
+            let timeLeft = 120; // 2 minutos para que puedas jugar tranquilo
             let timerId = null;
             let gameActive = false;
+            let bestScore = 0;
+            let lockFlip = false; // Sistema de bloqueo mejorado
+            let level = 1;
+            let totalPairs = 2; // Empezar con 2 pares (4 cartas)
+            let bubbles = 0; // Burbujas ganadas
+            let baseTime = 90; // Tiempo base por nivel
+            let closeDelay = 600; // Tiempo para cerrar cartas
             
-            // Emojis marinos para las cartas
-            const EMOJIS = ['🐚', '🐟', '🐙', '🐠', '🦀', '🐬', '🦑', '🐡'];
+            // Emojis marinos para las cartas (set expandido)
+            const EMOJIS = [
+                '🐟','🐠','🐡','🦈','🐬','🐳','🐋','🦀','🦞','🦑',
+                '🦐','🐙','🐚','🪸','⭐','⚓','🪼','🦭','🐊','🌊'
+            ];
+            
+            // Colores de nivel para los bordes de las cartas
+            const LEVEL_COLORS = [
+                'rgba(33, 150, 243, 0.8)',    // Nivel 1 - Azul
+                'rgba(76, 175, 80, 0.8)',     // Nivel 2 - Verde
+                'rgba(156, 39, 176, 0.8)',    // Nivel 3 - Púrpura
+                'rgba(255, 152, 0, 0.8)',     // Nivel 4 - Naranja
+                'rgba(244, 67, 54, 0.8)',     // Nivel 5 - Rojo
+                'rgba(255, 193, 7, 0.8)',     // Nivel 6 - Amarillo
+                'rgba(0, 188, 212, 0.8)',     // Nivel 7 - Cian
+                'rgba(103, 58, 183, 0.8)',    // Nivel 8 - Índigo
+                'rgba(255, 87, 34, 0.8)',     // Nivel 9 - Naranja oscuro
+                'rgba(233, 30, 99, 0.8)'      // Nivel 10+ - Rosa
+            ];
+            
+            // Función para obtener color del nivel
+            function getLevelColor(level) {
+                return LEVEL_COLORS[Math.min(level - 1, LEVEL_COLORS.length - 1)];
+            }
+            
+            // Función para calcular dificultad según nivel
+            function calculateDifficulty(level) {
+                if (level <= 2) {
+                    return { pairs: 2, time: 90, closeDelay: 600, grid: '2x2' };
+                } else if (level <= 4) {
+                    return { pairs: 4, time: 100, closeDelay: 500, grid: '2x4' };
+                } else if (level <= 6) {
+                    return { pairs: 6, time: 110, closeDelay: 400, grid: '3x4' };
+                } else if (level <= 8) {
+                    return { pairs: 8, time: 120, closeDelay: 350, grid: '4x4' };
+                } else {
+                    return { pairs: 10, time: 130, closeDelay: 300, grid: '4x5' };
+                }
+            }
+            
+            // Función para actualizar el layout del grid
+            function updateGridLayout(gridType) {
+                const board = gameOverlay.querySelector('#memory-board');
+                if (!board) return;
+                
+                switch(gridType) {
+                    case '2x2':
+                        board.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                        board.style.gridTemplateRows = 'repeat(2, 1fr)';
+                        board.style.width = '160px';
+                        board.style.height = '160px';
+                        break;
+                    case '2x4':
+                        board.style.gridTemplateColumns = 'repeat(4, 1fr)';
+                        board.style.gridTemplateRows = 'repeat(2, 1fr)';
+                        board.style.width = '320px';
+                        board.style.height = '160px';
+                        break;
+                    case '3x4':
+                        board.style.gridTemplateColumns = 'repeat(4, 1fr)';
+                        board.style.gridTemplateRows = 'repeat(3, 1fr)';
+                        board.style.width = '320px';
+                        board.style.height = '240px';
+                        break;
+                    case '4x4':
+                        board.style.gridTemplateColumns = 'repeat(4, 1fr)';
+                        board.style.gridTemplateRows = 'repeat(4, 1fr)';
+                        board.style.width = '320px';
+                        board.style.height = '320px';
+                        break;
+                    case '4x5':
+                        board.style.gridTemplateColumns = 'repeat(5, 1fr)';
+                        board.style.gridTemplateRows = 'repeat(4, 1fr)';
+                        board.style.width = '400px';
+                        board.style.height = '320px';
+                        break;
+                }
+            }
             
             // Elementos del DOM
             const board = gameOverlay.querySelector('#memory-board');
-            const scoreEl = gameOverlay.querySelector('#memory-score');
-            const movesEl = gameOverlay.querySelector('#memory-moves');
-            const timeEl = gameOverlay.querySelector('#memory-time');
+            const levelEl = gameOverlay.querySelector('#memory-level');
+            const bubblesEl = gameOverlay.querySelector('#memory-bubbles');
+            const bestEl = gameOverlay.querySelector('#memory-best');
             const timerFill = gameOverlay.querySelector('#memory-timer-fill');
             const restartBtn = gameOverlay.querySelector('#memory-restart');
             const closeBtn = gameOverlay.querySelector('.game-close-btn');
-            const soundBtn = gameOverlay.querySelector('.game-sound-btn');
+            const soundBtn = gameOverlay.querySelector('.sound-btn');
             
             // Función para crear las cartas
             function createCards() {
@@ -14437,10 +15004,21 @@ Comida premium y de cumpleaños
                 flippedCards = [];
                 matchedPairs = 0;
                 moves = 0;
+                lockFlip = false; // Reiniciar bloqueo
                 gameActive = false;
                 
-                // Crear 8 pares (16 cartas)
-                const cardData = [...EMOJIS, ...EMOJIS];
+                // Calcular dificultad según nivel
+                const difficulty = calculateDifficulty(level);
+                totalPairs = difficulty.pairs;
+                timeLeft = difficulty.time;
+                closeDelay = difficulty.closeDelay;
+                
+                // Actualizar grid dinámicamente
+                updateGridLayout(difficulty.grid);
+                
+                // Crear cartas según dificultad
+                const availableEmojis = EMOJIS.slice(0, totalPairs);
+                const cardData = [...availableEmojis, ...availableEmojis];
                 for(let i = cardData.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [cardData[i], cardData[j]] = [cardData[j], cardData[i]];
@@ -14453,7 +15031,7 @@ Comida premium y de cumpleaños
                     card.dataset.index = index;
                     card.style.cssText = `
                         background: rgba(255, 255, 255, 0.1);
-                        border: 2px solid rgba(255, 255, 255, 0.8);
+                        border: 3px solid ${getLevelColor(level)};
                         border-radius: 8px;
                         display: flex;
                         align-items: center;
@@ -14464,6 +15042,7 @@ Comida premium y de cumpleaños
                         backdrop-filter: blur(10px);
                         opacity: 0;
                         transform: scale(0.8);
+                        box-shadow: 0 0 15px ${getLevelColor(level)};
                     `;
                     
                     // Contenido de la carta (inicialmente oculto)
@@ -14500,110 +15079,199 @@ Comida premium y de cumpleaños
                 updateUI();
             }
             
-            // Función para voltear carta
+            // Función para voltear carta (sistema mejorado)
             function flipCard(card) {
-                if (!gameActive || flippedCards.length >= 2 || card.classList.contains('flipped') || card.classList.contains('matched')) {
+                if (lockFlip || !gameActive || card.classList.contains('flipped') || card.classList.contains('matched')) {
                     return;
                 }
                 
+                const open = Array.from(board.querySelectorAll('.memory-card.flipped:not(.matched)'));
+                if (open.length >= 2) return; // Prevenir más de 2 cartas abiertas
+                
                 card.classList.add('flipped');
-                flippedCards.push(card);
                 
-                // Mostrar el emoji
-                const cardBack = card.querySelector('.card-back');
-                const cardFront = card.querySelector('.card-front');
-                cardBack.style.display = 'none';
-                cardFront.style.display = 'flex';
+                // Efecto de giro rápido
+                card.style.transform = 'rotateY(180deg)';
+                card.style.transition = 'transform 0.3s ease-in-out';
                 
-                // Sonido de voltear
+                // Mostrar el emoji después del giro
+                setTimeout(() => {
+                    const cardBack = card.querySelector('.card-back');
+                    const cardFront = card.querySelector('.card-front');
+                    cardBack.style.display = 'none';
+                    cardFront.style.display = 'flex';
+                }, 150);
+                
+                // Sonido de voltear (siempre)
                 if (window.audioManager) {
                     window.audioManager.playSound('acierto');
                 }
                 
-                if (flippedCards.length === 2) {
+                const newlyOpen = [...open, card];
+                if (newlyOpen.length === 2) {
                     moves++;
                     updateUI();
+                    lockFlip = true;
+                    
+                    const [a, b] = newlyOpen;
+                    const isMatch = a.dataset.emoji === b.dataset.emoji;
                     
                     setTimeout(() => {
-                        checkMatch();
-                    }, 500);
+                        if (isMatch) {
+                            a.classList.add('matched');
+                            b.classList.add('matched');
+                            matchedPairs++;
+                            
+                            // Efecto visual verde para aciertos
+                            a.style.background = 'linear-gradient(135deg, #4CAF50, #8BC34A)';
+                            b.style.background = 'linear-gradient(135deg, #4CAF50, #8BC34A)';
+                            a.style.transform = 'scale(1.1)';
+                            b.style.transform = 'scale(1.1)';
+                            
+                            setTimeout(() => {
+                                a.style.transform = 'scale(1)';
+                                b.style.transform = 'scale(1)';
+                            }, 300);
+                            
+                            // Añadir burbujas por acierto
+                            bubbles += 2;
+                            
+                            // Guardar burbujas
+                            localStorage.setItem('memory-bubbles', bubbles.toString());
+                            
+                            // Sonido de acierto
+                            if (window.audioManager) {
+                                window.audioManager.playSound('nivelcompletado');
+                            }
+                            
+                            // Efecto de perlas
+                            createPearlEffect(a);
+                            
+                            if (matchedPairs === totalPairs) {
+                                setTimeout(() => {
+                                    // Sonido de nivel completado
+                                    if (window.audioManager) {
+                                        window.audioManager.playSound('levelComplete');
+                                    }
+                                    
+                                    // Subir nivel
+                                    level++;
+                                    
+                                    // Guardar progreso
+                                    localStorage.setItem('memory-level', level.toString());
+                                    localStorage.setItem('memory-bubbles', bubbles.toString());
+                                    
+                                    // Regenerar tablero (sistema infinito)
+                                    createCards();
+                                    showCardsEffect(); // Mostrar cartas con efecto
+                                    updateUI();
+                                    
+                                    // Reiniciar timer para nueva ronda
+                                    if (timerId) clearInterval(timerId);
+                                    const newDifficulty = calculateDifficulty(level);
+                                    timeLeft = newDifficulty.time; // Tiempo dinámico según nuevo nivel
+                                    gameActive = true; // Reactivar el juego
+                                    lockFlip = false; // Resetear bloqueo
+                                    startTimer(); // Iniciar nuevo timer
+                                }, 600);
+                            }
+                        } else {
+                            // Voltear de vuelta con efecto de giro rápido
+                            setTimeout(() => {
+                                a.style.transform = 'rotateY(0deg)';
+                                b.style.transform = 'rotateY(0deg)';
+                                
+                                setTimeout(() => {
+                                    const cardBack1 = a.querySelector('.card-back');
+                                    const cardFront1 = a.querySelector('.card-front');
+                                    const cardBack2 = b.querySelector('.card-back');
+                                    const cardFront2 = b.querySelector('.card-front');
+                                    
+                                    cardBack1.style.display = 'flex';
+                                    cardFront1.style.display = 'none';
+                                    cardBack2.style.display = 'flex';
+                                    cardFront2.style.display = 'none';
+                                    
+                                    a.classList.remove('flipped');
+                                    b.classList.remove('flipped');
+                                }, 150);
+                            }, 300);
+                        }
+                        lockFlip = false;
+                    }, isMatch ? 250 : closeDelay);
                 }
             }
             
-            // Función para verificar coincidencia
-            function checkMatch() {
-                const [card1, card2] = flippedCards;
-                
-                if (card1.dataset.emoji === card2.dataset.emoji) {
-                    // ¡Coincidencia!
-                    card1.classList.add('matched');
-                    card2.classList.add('matched');
-                    matchedPairs++;
-                    
-                    // Sonido de acierto
-                    if (window.audioManager) {
-                        window.audioManager.playSound('nivelcompletado');
-                    }
-                    
-                    // Efecto de perlas
-                    createPearlEffect(card1);
-                    
-                    if (matchedPairs === 8) {
-                        // ¡Juego completado!
-                        setTimeout(() => {
-                            endGame(true);
-                        }, 500);
-                    }
-                } else {
-                    // No coincide, voltear de vuelta
-                    setTimeout(() => {
-                        const cardBack1 = card1.querySelector('.card-back');
-                        const cardFront1 = card1.querySelector('.card-front');
-                        const cardBack2 = card2.querySelector('.card-back');
-                        const cardFront2 = card2.querySelector('.card-front');
-                        
-                        cardBack1.style.display = 'flex';
-                        cardFront1.style.display = 'none';
-                        cardBack2.style.display = 'flex';
-                        cardFront2.style.display = 'none';
-                        
-                        card1.classList.remove('flipped');
-                        card2.classList.remove('flipped');
-                    }, 1000);
-                }
-                
-                flippedCards = [];
-            }
             
-            // Función para crear efecto de perlas
+            // Función para crear efecto de burbujas volando al contador
             function createPearlEffect(card) {
                 const rect = card.getBoundingClientRect();
-                const pearl = document.createElement('div');
-                pearl.innerHTML = '💎';
-                pearl.style.cssText = `
-                    position: fixed;
-                    left: ${rect.left + rect.width/2}px;
-                    top: ${rect.top + rect.height/2}px;
-                    font-size: 20px;
-                    pointer-events: none;
-                    z-index: 10001;
-                    animation: pearlFly 1s ease-out forwards;
-                `;
                 
-                document.body.appendChild(pearl);
-                setTimeout(() => pearl.remove(), 1000);
+                // Obtener posición del contador de burbujas
+                const bubbleCounter = gameOverlay.querySelector('.perlas');
+                if (!bubbleCounter) return;
+                
+                const counterRect = bubbleCounter.getBoundingClientRect();
+                const targetX = counterRect.left + counterRect.width / 2;
+                const targetY = counterRect.top + counterRect.height / 2;
+                
+                // Crear 3 burbujas que vuelen al contador
+                for (let i = 0; i < 3; i++) {
+                    const pearl = document.createElement('div');
+                    pearl.style.cssText = `
+                        position: fixed;
+                        left: ${rect.left + rect.width/2 + (i - 1) * 10}px;
+                        top: ${rect.top + rect.height/2 + (i - 1) * 5}px;
+                        width: 20px;
+                        height: 20px;
+                        background: url('images/ui/perlas.png') center/contain no-repeat;
+                        pointer-events: none;
+                        z-index: 99999;
+                        animation: bubbleFly 1.2s ease-out forwards;
+                    `;
+                    
+                    // Añadir keyframes para la animación
+                    if (!document.getElementById('bubbleFlyKeyframes')) {
+                        const style = document.createElement('style');
+                        style.id = 'bubbleFlyKeyframes';
+                        style.textContent = `
+                            @keyframes bubbleFly {
+                                0% {
+                                    transform: scale(0.5) rotate(0deg);
+                                    opacity: 1;
+                                }
+                                50% {
+                                    transform: scale(1.2) rotate(180deg);
+                                    opacity: 0.8;
+                                }
+                                100% {
+                                    transform: scale(0.3) rotate(360deg);
+                                    opacity: 0;
+                                    left: ${targetX}px;
+                                    top: ${targetY}px;
+                                }
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                    
+                    document.body.appendChild(pearl);
+                    setTimeout(() => pearl.remove(), 1200);
+                }
             }
             
             // Función para actualizar UI
             function updateUI() {
-                scoreEl.textContent = matchedPairs;
-                movesEl.textContent = moves;
-                timeEl.textContent = timeLeft;
-                timerFill.style.width = `${(timeLeft / 60) * 100}%`;
+                if (levelEl) levelEl.textContent = level; // Nivel por rondas completadas
+                if (bubblesEl) bubblesEl.textContent = bubbles;
+                if (bestEl) bestEl.textContent = bestScore;
+                const difficulty = calculateDifficulty(level);
+                if (timerFill) timerFill.style.width = `${(timeLeft / difficulty.time) * 100}%`;
             }
             
             // Función para iniciar timer
             function startTimer() {
+                if (timerId) clearInterval(timerId); // Limpiar timer anterior
                 timerId = setInterval(() => {
                     timeLeft--;
                     updateUI();
@@ -14628,69 +15296,134 @@ Comida premium y de cumpleaños
             
             // Función para terminar juego
             function endGame(won) {
+                if (!gameActive) return; // Evitar múltiples llamadas
+                
                 gameActive = false;
                 if (timerId) clearInterval(timerId);
+                
+                // Actualizar récord si es mejor
+                if (won && moves < bestScore || bestScore === 0) {
+                    bestScore = moves;
+                    localStorage.setItem('memory-best', bestScore.toString());
+                }
                 
                 // Sonido de fin
                 if (window.audioManager) {
                     window.audioManager.playSound(won ? 'nivelcompletado' : 'fail');
                 }
                 
-                // Mostrar modal de fin
+                // Verificar si ya existe un modal de fin
+                if (gameOverlay.querySelector('.end-modal')) return;
+                
+                // Mostrar modal de fin (igual que Burbujas y Conecta 3)
                 const endModal = document.createElement('div');
+                endModal.className = 'end-modal';
                 endModal.style.cssText = `
-                    position: fixed;
-                    inset: 0;
-                    background: rgba(0, 0, 0, 0.8);
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(135deg,
+                        rgba(13, 71, 161, 0.6) 0%,
+                        rgba(21, 101, 192, 0.5) 50%,
+                        rgba(25, 118, 210, 0.6) 100%);
+                    backdrop-filter: blur(15px) saturate(150%);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    z-index: 16000;
+                    z-index: 1000;
+                    animation: fadeIn 0.4s ease;
                 `;
                 
                 endModal.innerHTML = `
                     <div style="
                         background: linear-gradient(135deg, 
-                            rgba(30, 60, 114, 0.95) 0%, 
-                            rgba(42, 82, 152, 0.9) 100%);
+                            rgba(33, 150, 243, 0.2) 0%, 
+                            rgba(25, 118, 210, 0.15) 50%,
+                            rgba(21, 101, 192, 0.2) 100%);
+                        backdrop-filter: blur(30px);
+                        border: 2px solid rgba(33, 150, 243, 0.4);
                         border-radius: 20px;
-                        padding: 30px;
+                        padding: 25px;
                         text-align: center;
-                        color: white;
-                        border: 2px solid rgba(255, 255, 255, 0.2);
+                        color: #fff;
+                        max-width: 400px;
+                        width: 70%;
+                        box-shadow: 
+                            0 20px 60px rgba(33, 150, 243, 0.4),
+                            0 0 40px rgba(25, 118, 210, 0.3),
+                            inset 0 2px 0 rgba(255, 255, 255, 0.2);
+                        animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                        position: relative;
                     ">
-                        <h2 style="margin: 0 0 20px 0; font-size: 24px;">
-                            ${won ? '🎉 ¡Felicidades!' : '⏰ Tiempo agotado'}
+                        <h2 style="
+                            font-size: 20px;
+                            font-weight: 800;
+                            margin-bottom: 15px;
+                            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                            color: #fff;
+                        ">
+                            ${won ? '🧠 ¡Felicidades!' : '🧠 ¡Inténtalo de nuevo!'}
                         </h2>
-                        <p style="margin: 0 0 20px 0; font-size: 16px;">
-                            ${won ? '¡Completaste todas las parejas!' : 'Se acabó el tiempo'}
+                        <p style="
+                            font-size: 18px;
+                            margin-bottom: 20px;
+                            color: #fff;
+                            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                        ">
+                            ${won ? '¡Completaste todas las parejas!' : 'Sigue practicando'}
                         </p>
-                        <p style="margin: 0 0 20px 0; font-size: 14px; opacity: 0.8;">
-                            Parejas: ${matchedPairs}/8<br>
-                            Movimientos: ${moves}
+                        <p style="
+                            font-size: 16px;
+                            margin-bottom: 20px;
+                            color: #fff;
+                            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                        ">
+                            Nivel alcanzado: <strong>${level}</strong><br>
+                            Burbujas: <strong>${bubbles}</strong><br>
+                            Movimientos: <strong>${moves}</strong>
                         </p>
-                        <div style="display: flex; gap: 10px; justify-content: center;">
-                            <button class="restart-btn" style="
-                                background: linear-gradient(45deg, #4CAF50, #66BB6A);
-                                color: white;
-                                border: none;
-                                padding: 10px 20px;
-                                border-radius: 20px;
-                                cursor: pointer;
-                            ">JUGAR DE NUEVO</button>
-                            <button class="close-btn" style="
-                                background: linear-gradient(45deg, #f44336, #e57373);
-                                color: white;
-                                border: none;
-                                padding: 10px 20px;
-                                border-radius: 20px;
-                                cursor: pointer;
-                            ">CERRAR</button>
-                        </div>
+                       <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                           <button class="restart-btn" style="
+                               background: linear-gradient(135deg, rgb(33, 150, 243), rgb(25, 118, 210));
+                               border: 2px solid rgb(21, 101, 192);
+                               border-radius: 20px;
+                               padding: 12px 30px;
+                               font-size: 18px;
+                               font-weight: bold;
+                               color: white;
+                               cursor: pointer;
+                               transition: 0.3s;
+                               text-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px;
+                               box-shadow: rgba(33, 150, 243, 0.4) 0px 6px 20px;
+                               text-transform: uppercase;
+                               letter-spacing: 1px;
+                               flex: 1;
+                               min-width: 120px;
+                           ">CONTINUAR</button>
+                           <button class="reset-btn" style="
+                               background: linear-gradient(135deg, rgb(244, 67, 54), rgb(211, 47, 47));
+                               border: 2px solid rgb(183, 28, 28);
+                               border-radius: 20px;
+                               padding: 12px 20px;
+                               font-size: 16px;
+                               font-weight: bold;
+                               color: white;
+                               cursor: pointer;
+                               transition: 0.3s;
+                               text-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px;
+                               box-shadow: rgba(244, 67, 54, 0.4) 0px 6px 20px;
+                               text-transform: uppercase;
+                               letter-spacing: 1px;
+                               flex: 1;
+                               min-width: 120px;
+                           ">EMPEZAR DE CERO</button>
+                       </div>
                     </div>
                 `;
                 
-                document.body.appendChild(endModal);
+                gameOverlay.appendChild(endModal);
                 
                 // Event listeners del modal de fin
                 endModal.querySelector('.restart-btn').addEventListener('click', () => {
@@ -14698,16 +15431,31 @@ Comida premium y de cumpleaños
                     startGame();
                 });
                 
-                endModal.querySelector('.close-btn').addEventListener('click', () => {
+                endModal.querySelector('.reset-btn').addEventListener('click', () => {
+                    // Resetear progreso
+                    level = 1;
+                    bubbles = 0;
+                    localStorage.removeItem('memory-level');
+                    localStorage.removeItem('memory-bubbles');
                     endModal.remove();
-                    gameOverlay.remove();
-                    document.getElementById('gamesModal').style.display = 'flex';
+                    startGame();
+                });
+                
+                // Cerrar modal al hacer clic fuera
+                endModal.addEventListener('click', (e) => {
+                    if (e.target === endModal) {
+                        endModal.remove();
+                        gameOverlay.remove();
+                        document.getElementById('gamesModal').style.display = 'flex';
+                    }
                 });
             }
             
             // Función para iniciar juego
             function startGame() {
-                timeLeft = 60;
+                const difficulty = calculateDifficulty(level);
+                timeLeft = difficulty.time; // Tiempo dinámico según nivel
+                lockFlip = false; // Reiniciar bloqueo
                 createCards();
                 showCardsEffect();
                 
@@ -14749,8 +15497,21 @@ Comida premium y de cumpleaños
                 });
             }
             
+            // Cargar récord y progreso
+            const savedBest = localStorage.getItem('memory-best');
+            if (savedBest) bestScore = parseInt(savedBest);
+            
+            // Cargar nivel guardado
+            const savedLevel = localStorage.getItem('memory-level');
+            if (savedLevel) level = parseInt(savedLevel);
+            
+            // Cargar burbujas guardadas
+            const savedBubbles = localStorage.getItem('memory-bubbles');
+            if (savedBubbles) bubbles = parseInt(savedBubbles);
+            
             // Inicializar juego
             createCards();
+            updateUI();
             console.log('🧠 PezFlip iniciado correctamente');
             console.log('🧠 Overlay visible:', gameOverlay.style.display);
             console.log('🧠 Overlay en DOM:', document.body.contains(gameOverlay));
@@ -14762,18 +15523,58 @@ Comida premium y de cumpleaños
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
+            console.log('🎵 Modal de juegos cerrado');
             
             // Crear overlay del juego
             const gameOverlay = document.createElement('div');
             gameOverlay.id = 'simonGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="simon-game-container">
-                    <div class="simon-header">
-                        <div class="game-title">🎵 Simón Marino</div>
-                        <div class="game-stats-simple">
-                            Ronda <span id="simon-round">0</span>
+                    <div class="simon-game-header">
+                        <!-- PRIMERA LÍNEA: TÍTULO + ALTAVOZ + X -->
+                        <div class="header-top">
+                            <div class="game-title">🎵 Simón Marino</div>
+                            <div class="header-controls">
+                                <button class="sound-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                ">
+                                    <img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">
+                                </button>
+                                <button class="game-close-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                    color: white;
+                                    font-size: 18px;
+                                    font-weight: bold;
+                                ">✕</button>
+                            </div>
                         </div>
-                        <button class="game-close-btn">✕</button>
+                        <!-- SEGUNDA LÍNEA: ESTADÍSTICAS -->
+                        <div class="header-bottom">
+                            <div class="game-stats">
+                                <div class="best-score-display">
+                                    <span class="best-label">Ronda:</span>
+                                    <span class="best-value" id="simon-round">0</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="simon-board-wrap">
                         <div class="simon-board" id="simon-board">
@@ -14791,6 +15592,7 @@ Comida premium y de cumpleaños
             
             // Aplicar diseño perfecto unificado (igual que Burbujas)
             applyPerfectBubbleDesign(gameOverlay, 'simon');
+            console.log('🎵 Diseño aplicado');
             
             const boardWrap = gameOverlay.querySelector('.simon-board-wrap');
             boardWrap.style.cssText = `
@@ -14812,6 +15614,7 @@ Comida premium y de cumpleaños
                     color: #062130; cursor: pointer; user-select: none;
                     box-shadow: 0 8px 16px rgba(0,0,0,0.3); transition: all 0.15s ease;
                     aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+                    opacity: 0; transform: scale(0.8);
                 `;
             });
             
@@ -14821,6 +15624,14 @@ Comida premium y de cumpleaños
             
             // Funciones del juego
             function initSimonGame() {
+                // Mostrar las cartas con efecto
+                pads.forEach((pad, index) => {
+                    setTimeout(() => {
+                        pad.style.opacity = '1';
+                        pad.style.transform = 'scale(1)';
+                    }, index * 100);
+                });
+                
                 sequence = [];
                 playerSequence = [];
                 round = 0;
@@ -14828,6 +15639,12 @@ Comida premium y de cumpleaños
                 isPlayerTurn = false;
                 gameActive = true;
                 updateUI();
+                
+                // Sonido de inicio
+                if (window.audioManager) {
+                    window.audioManager.playSound('jugar');
+                }
+                
                 addToSequence();
             }
             
@@ -14876,8 +15693,21 @@ Comida premium y de cumpleaños
             }
             
             function playSimonSound(padIndex) {
-                // Sonidos simples con AudioContext
-                if (!window.audioContext) return;
+                // Usar nuestro sistema de sonidos
+                if (window.audioManager) {
+                    window.audioManager.playSound('acierto');
+                }
+                
+                // También crear AudioContext para sonidos únicos
+                if (!window.audioContext) {
+                    try {
+                        window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch(e) {
+                        console.log('AudioContext no disponible');
+                        return;
+                    }
+                }
+                
                 try {
                     const oscillator = window.audioContext.createOscillator();
                     const gainNode = window.audioContext.createGain();
@@ -14951,8 +15781,10 @@ Comida premium y de cumpleaños
             }
             
             function updateUI() {
-                document.getElementById('simon-round').textContent = round;
-                document.getElementById('simon-best').textContent = best;
+                const roundEl = document.getElementById('simon-round');
+                if (roundEl) {
+                    roundEl.textContent = round;
+                }
             }
             
             // Cargar récord
@@ -14960,14 +15792,27 @@ Comida premium y de cumpleaños
             if (savedBest) best = parseInt(savedBest);
             
             // Event listeners
-            gameOverlay.querySelector('.game-close-btn').addEventListener('click', () => {
-                gameOverlay.remove();
-                console.log('🎵 Juego Simón Marino cerrado');
-            });
+            const closeBtn = gameOverlay.querySelector('.game-close-btn');
+            console.log('🎵 Botón cerrar encontrado:', closeBtn);
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    gameOverlay.remove();
+                    document.getElementById('gamesModal').style.display = 'flex';
+                    console.log('🎵 Juego Simón Marino cerrado');
+                });
+            } else {
+                console.error('🎵 ERROR: No se encontró el botón de cerrar');
+            }
             
-            gameOverlay.querySelector('#simon-start').addEventListener('click', () => {
-                initSimonGame();
-            });
+            const startBtn = gameOverlay.querySelector('#simon-start');
+            console.log('🎵 Botón JUGAR encontrado:', startBtn);
+            if (startBtn) {
+                startBtn.addEventListener('click', () => {
+                    initSimonGame();
+                });
+            } else {
+                console.error('🎵 ERROR: No se encontró el botón JUGAR');
+            }
             
             pads.forEach((pad, index) => {
                 pad.addEventListener('click', () => handlePadClick(index));
@@ -14982,6 +15827,9 @@ Comida premium y de cumpleaños
             document.body.appendChild(gameOverlay);
             updateUI();
             console.log('🎵 Juego Simón Marino iniciado');
+            console.log('🎵 Overlay visible:', gameOverlay.style.display);
+            console.log('🎵 Overlay en DOM:', document.body.contains(gameOverlay));
+            console.log('🎵 Overlay z-index:', gameOverlay.style.zIndex);
         }
         
         // 🐬 JUEGO DEL CARRIL DEL DELFÍN - INTEGRADO COMPLETO
@@ -14990,20 +15838,66 @@ Comida premium y de cumpleaños
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
+            console.log('🐬 Modal de juegos cerrado');
             
             // Crear overlay del juego
             const gameOverlay = document.createElement('div');
             gameOverlay.id = 'carrilGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="carril-game-container">
-                    <div class="carril-header">
-                        <h2>🐬 Carril del Delfín</h2>
-                        <div class="carril-stats">
-                            <span>⏱ <span id="carril-time">60</span>s</span>
-                            <span>Pts <span id="carril-score">0</span></span>
-                            <span>Rec <span id="carril-best">0</span></span>
+                    <div class="carril-game-header">
+                        <!-- PRIMERA LÍNEA: TÍTULO + ALTAVOZ + X -->
+                        <div class="header-top">
+                            <div class="game-title">🐬 Carril del Delfín</div>
+                            <div class="header-controls">
+                                <button class="sound-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                ">
+                                    <img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">
+                                </button>
+                                <button class="carril-close-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                    color: white;
+                                    font-size: 18px;
+                                    font-weight: bold;
+                                ">✕</button>
+                            </div>
                         </div>
-                        <button class="carril-close-btn">✕</button>
+                        <!-- SEGUNDA LÍNEA: ESTADÍSTICAS -->
+                        <div class="header-bottom">
+                            <div class="game-stats">
+                                <div class="best-score-display">
+                                    <span class="best-label">Tiempo:</span>
+                                    <span class="best-value" id="carril-time">60</span>s
+                                </div>
+                                <div class="best-score-display">
+                                    <span class="best-label">Puntos:</span>
+                                    <span class="best-value" id="carril-score">0</span>
+                                </div>
+                                <div class="best-score-display">
+                                    <span class="best-label">Récord:</span>
+                                    <span class="best-value" id="carril-best">0</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="carril-stage" id="carril-stage">
                         <div class="carril-lanes">
@@ -15025,6 +15919,7 @@ Comida premium y de cumpleaños
             
             // Aplicar diseño perfecto unificado (igual que Burbujas)
             applyPerfectBubbleDesign(gameOverlay, 'carril');
+            console.log('🐬 Diseño aplicado');
             
             const stage = gameOverlay.querySelector('.carril-stage');
             stage.style.cssText = `
@@ -15226,16 +16121,28 @@ Comida premium y de cumpleaños
             }
             
             // Event listeners
-            gameOverlay.querySelector('.carril-close-btn').addEventListener('click', () => {
-                gameActive = false;
-                if (gameLoop) clearInterval(gameLoop);
-                gameOverlay.remove();
-                console.log('🐬 Juego Carril del Delfín cerrado');
-            });
+            const closeBtn = gameOverlay.querySelector('.carril-close-btn');
+            console.log('🐬 Botón cerrar encontrado:', closeBtn);
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    gameActive = false;
+                    if (gameLoop) clearInterval(gameLoop);
+                    gameOverlay.remove();
+                    console.log('🐬 Juego Carril del Delfín cerrado');
+                });
+            } else {
+                console.error('🐬 ERROR: No se encontró el botón de cerrar');
+            }
             
-            gameOverlay.querySelector('#carril-start').addEventListener('click', () => {
-                initCarrilGame();
-            });
+            const startBtn = gameOverlay.querySelector('#carril-start');
+            console.log('🐬 Botón JUGAR encontrado:', startBtn);
+            if (startBtn) {
+                startBtn.addEventListener('click', () => {
+                    initCarrilGame();
+                });
+            } else {
+                console.error('🐬 ERROR: No se encontró el botón JUGAR');
+            }
             
             // Controles de movimiento
             gameOverlay.querySelectorAll('.carril-move-btn').forEach(btn => {
@@ -15278,6 +16185,9 @@ Comida premium y de cumpleaños
             document.body.appendChild(gameOverlay);
             updateUI();
             console.log('🐬 Juego Carril del Delfín iniciado');
+            console.log('🐬 Overlay visible:', gameOverlay.style.display);
+            console.log('🐬 Overlay en DOM:', document.body.contains(gameOverlay));
+            console.log('🐬 Overlay z-index:', gameOverlay.style.zIndex);
         }
         
         // 🐉 JUEGO DEL DRAGÓN MARINO - INTEGRADO BÁSICO
@@ -15292,13 +16202,55 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'correrGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="correr-game-container">
-                    <div class="correr-header">
-                        <h2>🐉 Dragón Marino</h2>
-                        <div class="correr-stats">
-                            <span>Pts <span id="correr-score">0</span></span>
-                            <span>Rec <span id="correr-best">0</span></span>
+                    <div class="correr-game-header">
+                        <!-- PRIMERA LÍNEA: TÍTULO + ALTAVOZ + X -->
+                        <div class="header-top">
+                            <div class="game-title">🐉 Dragón Marino</div>
+                            <div class="header-controls">
+                                <button class="sound-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                ">
+                                    <img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">
+                                </button>
+                                <button class="correr-close-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                    color: white;
+                                    font-size: 18px;
+                                    font-weight: bold;
+                                ">✕</button>
+                            </div>
                         </div>
-                        <button class="correr-close-btn">✕</button>
+                        <!-- SEGUNDA LÍNEA: ESTADÍSTICAS -->
+                        <div class="header-bottom">
+                            <div class="game-stats">
+                                <div class="best-score-display">
+                                    <span class="best-label">Puntos:</span>
+                                    <span class="best-value" id="correr-score">0</span>
+                                </div>
+                                <div class="best-score-display">
+                                    <span class="best-label">Récord:</span>
+                                    <span class="best-value" id="correr-best">0</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="correr-stage">
                         <canvas id="correr-canvas" width="400" height="300"></canvas>
@@ -15489,18 +16441,36 @@ Comida premium y de cumpleaños
             }
             
             // Event listeners
-            gameOverlay.querySelector('.correr-close-btn').addEventListener('click', () => {
-                gameActive = false;
-                if (gameLoop) clearInterval(gameLoop);
-                gameOverlay.remove();
-                console.log('🐉 Juego Dragón Marino cerrado');
-            });
+            const closeBtn = gameOverlay.querySelector('.correr-close-btn');
+            console.log('🐉 Botón cerrar encontrado:', closeBtn);
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    gameActive = false;
+                    if (gameLoop) clearInterval(gameLoop);
+                    gameOverlay.remove();
+                    console.log('🐉 Juego Dragón Marino cerrado');
+                });
+            } else {
+                console.error('🐉 ERROR: No se encontró el botón de cerrar');
+            }
             
-            gameOverlay.querySelector('#correr-start').addEventListener('click', () => {
-                initCorrerGame();
-            });
+            const startBtn = gameOverlay.querySelector('#correr-start');
+            console.log('🐉 Botón JUGAR encontrado:', startBtn);
+            if (startBtn) {
+                startBtn.addEventListener('click', () => {
+                    initCorrerGame();
+                });
+            } else {
+                console.error('🐉 ERROR: No se encontró el botón JUGAR');
+            }
             
-            gameOverlay.querySelector('#correr-jump').addEventListener('click', jump);
+            const jumpBtn = gameOverlay.querySelector('#correr-jump');
+            console.log('🐉 Botón SALTAR encontrado:', jumpBtn);
+            if (jumpBtn) {
+                jumpBtn.addEventListener('click', jump);
+            } else {
+                console.error('🐉 ERROR: No se encontró el botón SALTAR');
+            }
             
             // Controles de teclado
             const keyHandler = (e) => {
@@ -15541,14 +16511,59 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'cazaGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="caza-game-container">
-                    <div class="caza-header">
-                        <h2>🎯 Caza de Peces</h2>
-                        <div class="caza-stats">
-                            <span>Pts <span id="caza-score">0</span></span>
-                            <span>Ronda <span id="caza-round">1</span></span>
-                            <span>Rec <span id="caza-best">0</span></span>
+                    <div class="caza-game-header">
+                        <!-- PRIMERA LÍNEA: TÍTULO + ALTAVOZ + X -->
+                        <div class="header-top">
+                            <div class="game-title">🎯 Caza de Peces</div>
+                            <div class="header-controls">
+                                <button class="sound-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                ">
+                                    <img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">
+                                </button>
+                                <button class="caza-close-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                    color: white;
+                                    font-size: 18px;
+                                    font-weight: bold;
+                                ">✕</button>
+                            </div>
                         </div>
-                        <button class="caza-close-btn">✕</button>
+                        <!-- SEGUNDA LÍNEA: ESTADÍSTICAS -->
+                        <div class="header-bottom">
+                            <div class="game-stats">
+                                <div class="best-score-display">
+                                    <span class="best-label">Puntos:</span>
+                                    <span class="best-value" id="caza-score">0</span>
+                                </div>
+                                <div class="best-score-display">
+                                    <span class="best-label">Ronda:</span>
+                                    <span class="best-value" id="caza-round">1</span>
+                                </div>
+                                <div class="best-score-display">
+                                    <span class="best-label">Récord:</span>
+                                    <span class="best-value" id="caza-best">0</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="caza-game-area">
                         <div class="caza-timebar">
@@ -15781,16 +16796,28 @@ Comida premium y de cumpleaños
             }
             
             // Event listeners
-            gameOverlay.querySelector('.caza-close-btn').addEventListener('click', () => {
-                gameActive = false;
-                if (gameTimer) clearInterval(gameTimer);
-                gameOverlay.remove();
-                console.log('🎯 Juego Caza de Peces cerrado');
-            });
+            const closeBtn = gameOverlay.querySelector('.caza-close-btn');
+            console.log('🎯 Botón cerrar encontrado:', closeBtn);
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    gameActive = false;
+                    if (gameTimer) clearInterval(gameTimer);
+                    gameOverlay.remove();
+                    console.log('🎯 Juego Caza de Peces cerrado');
+                });
+            } else {
+                console.error('🎯 ERROR: No se encontró el botón de cerrar');
+            }
             
-            gameOverlay.querySelector('#caza-start').addEventListener('click', () => {
-                initCazaGame();
-            });
+            const startBtn = gameOverlay.querySelector('#caza-start');
+            console.log('🎯 Botón JUGAR encontrado:', startBtn);
+            if (startBtn) {
+                startBtn.addEventListener('click', () => {
+                    initCazaGame();
+                });
+            } else {
+                console.error('🎯 ERROR: No se encontró el botón JUGAR');
+            }
             
             gameOverlay.addEventListener('click', (e) => {
                 if (e.target === gameOverlay) {
@@ -15817,14 +16844,59 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'secuenciaGameOverlay';
             gameOverlay.innerHTML = `
                 <div class="secuencia-game-container">
-                    <div class="secuencia-header">
-                        <h2>🌊 Secuencia de Mareas</h2>
-                        <div class="secuencia-stats">
-                            <span>Ronda <span id="secuencia-round">0</span></span>
-                            <span>Pts <span id="secuencia-score">0</span></span>
-                            <span>Rec <span id="secuencia-best">0</span></span>
+                    <div class="secuencia-game-header">
+                        <!-- PRIMERA LÍNEA: TÍTULO + ALTAVOZ + X -->
+                        <div class="header-top">
+                            <div class="game-title">🌊 Secuencia de Mareas</div>
+                            <div class="header-controls">
+                                <button class="sound-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                ">
+                                    <img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">
+                                </button>
+                                <button class="secuencia-close-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                    color: white;
+                                    font-size: 18px;
+                                    font-weight: bold;
+                                ">✕</button>
+                            </div>
                         </div>
-                        <button class="secuencia-close-btn">✕</button>
+                        <!-- SEGUNDA LÍNEA: ESTADÍSTICAS -->
+                        <div class="header-bottom">
+                            <div class="game-stats">
+                                <div class="best-score-display">
+                                    <span class="best-label">Ronda:</span>
+                                    <span class="best-value" id="secuencia-round">0</span>
+                                </div>
+                                <div class="best-score-display">
+                                    <span class="best-label">Puntos:</span>
+                                    <span class="best-value" id="secuencia-score">0</span>
+                                </div>
+                                <div class="best-score-display">
+                                    <span class="best-label">Récord:</span>
+                                    <span class="best-value" id="secuencia-best">0</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="secuencia-game-area">
                         <div class="secuencia-timebar">
@@ -16008,15 +17080,28 @@ Comida premium y de cumpleaños
             }
             
             // Event listeners
-            gameOverlay.querySelector('.secuencia-close-btn').addEventListener('click', () => {
-                gameActive = false;
-                if (gameTimer) clearInterval(gameTimer);
-                gameOverlay.remove();
-            });
+            const closeBtn = gameOverlay.querySelector('.secuencia-close-btn');
+            console.log('🌊 Botón cerrar encontrado:', closeBtn);
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    gameActive = false;
+                    if (gameTimer) clearInterval(gameTimer);
+                    gameOverlay.remove();
+                    console.log('🌊 Juego Secuencia de Mareas cerrado');
+                });
+            } else {
+                console.error('🌊 ERROR: No se encontró el botón de cerrar');
+            }
             
-            gameOverlay.querySelector('#secuencia-start').addEventListener('click', () => {
-                initSecuenciaGame();
-            });
+            const startBtn = gameOverlay.querySelector('#secuencia-start');
+            console.log('🌊 Botón JUGAR encontrado:', startBtn);
+            if (startBtn) {
+                startBtn.addEventListener('click', () => {
+                    initSecuenciaGame();
+                });
+            } else {
+                console.error('🌊 ERROR: No se encontró el botón JUGAR');
+            }
             
             document.body.appendChild(gameOverlay);
             updateUI();
@@ -16035,13 +17120,55 @@ Comida premium y de cumpleaños
             gameOverlay.id = 'toca3GameOverlay';
             gameOverlay.innerHTML = `
                 <div class="toca3-game-container">
-                    <div class="toca3-header">
-                        <h2>🏖️ Toca-3 Marino</h2>
-                        <div class="toca3-stats">
-                            <span>Pts <span id="toca3-score">0</span></span>
-                            <span>Rec <span id="toca3-best">0</span></span>
+                    <div class="toca3-game-header">
+                        <!-- PRIMERA LÍNEA: TÍTULO + ALTAVOZ + X -->
+                        <div class="header-top">
+                            <div class="game-title">🏖️ Toca-3 Marino</div>
+                            <div class="header-controls">
+                                <button class="sound-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                ">
+                                    <img src="images/ui/sonidoOn.png" style="width: 20px; height: 20px;">
+                                </button>
+                                <button class="toca3-close-btn" style="
+                                    background: rgba(255, 255, 255, 0.2);
+                                    border: 2px solid rgba(255, 255, 255, 0.8);
+                                    border-radius: 50%;
+                                    width: 40px;
+                                    height: 40px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                    color: white;
+                                    font-size: 18px;
+                                    font-weight: bold;
+                                ">✕</button>
+                            </div>
                         </div>
-                        <button class="toca3-close-btn">✕</button>
+                        <!-- SEGUNDA LÍNEA: ESTADÍSTICAS -->
+                        <div class="header-bottom">
+                            <div class="game-stats">
+                                <div class="best-score-display">
+                                    <span class="best-label">Puntos:</span>
+                                    <span class="best-value" id="toca3-score">0</span>
+                                </div>
+                                <div class="best-score-display">
+                                    <span class="best-label">Récord:</span>
+                                    <span class="best-value" id="toca3-best">0</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="toca3-game-area">
                         <div class="toca3-timebar">
@@ -16244,15 +17371,28 @@ Comida premium y de cumpleaños
             }
             
             // Event listeners
-            gameOverlay.querySelector('.toca3-close-btn').addEventListener('click', () => {
-                gameActive = false;
-                if (gameTimer) clearInterval(gameTimer);
-                gameOverlay.remove();
-            });
+            const closeBtn = gameOverlay.querySelector('.toca3-close-btn');
+            console.log('🏖️ Botón cerrar encontrado:', closeBtn);
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    gameActive = false;
+                    if (gameTimer) clearInterval(gameTimer);
+                    gameOverlay.remove();
+                    console.log('🏖️ Juego Toca-3 Marino cerrado');
+                });
+            } else {
+                console.error('🏖️ ERROR: No se encontró el botón de cerrar');
+            }
             
-            gameOverlay.querySelector('#toca3-start').addEventListener('click', () => {
-                initToca3Game();
-            });
+            const startBtn = gameOverlay.querySelector('#toca3-start');
+            console.log('🏖️ Botón JUGAR encontrado:', startBtn);
+            if (startBtn) {
+                startBtn.addEventListener('click', () => {
+                    initToca3Game();
+                });
+            } else {
+                console.error('🏖️ ERROR: No se encontró el botón JUGAR');
+            }
             
             document.body.appendChild(gameOverlay);
             updateUI();
@@ -16359,4 +17499,5 @@ Comida premium y de cumpleaños
     </script>
 </body>
 </html>
+
 
