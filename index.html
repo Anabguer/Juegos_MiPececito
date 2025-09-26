@@ -15700,6 +15700,8 @@ Comida premium y de cumpleaños
                 round++;
                 score += 5; // +5 perlas por ronda completada
                 
+                console.log('🎵 Simon: Nueva ronda! Round:', round, 'Score:', score);
+                
                 // Actualizar velocidad basada en el nivel
                 updateSpeed();
                 
@@ -15802,6 +15804,7 @@ Comida premium y de cumpleaños
                 
                 // Si completó la secuencia
                 if (playerSequence.length === sequence.length) {
+                    console.log('🎵 Simon: ¡Ronda completada! Llamando addToSequence...');
                     isPlayerTurn = false;
                     setTimeout(() => {
                         addToSequence();
@@ -15956,7 +15959,12 @@ Comida premium y de cumpleaños
                 const scoreEl = document.getElementById('simon-score');
                 const bestEl = document.getElementById('simon-best');
                 
-                if (levelEl) levelEl.textContent = round; // Mostrar nivel actual (ronda completada)
+                console.log('🎵 Simon: updateUI - Round:', round, 'Score:', score, 'Best:', best);
+                
+                if (levelEl) {
+                    levelEl.textContent = round; // Mostrar nivel actual (ronda completada)
+                    console.log('🎵 Simon: Nivel actualizado a:', round);
+                }
                 if (scoreEl) scoreEl.textContent = score;
                 if (bestEl) bestEl.textContent = best;
             }
