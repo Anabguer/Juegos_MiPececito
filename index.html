@@ -15741,12 +15741,8 @@ Comida premium y de cumpleaños
             }
             
             function playSimonSound(padIndex) {
-                // Usar nuestro sistema de sonidos
-                if (window.audioManager) {
-                    window.audioManager.playSound('acierto');
-                }
-                
-                // También crear AudioContext para sonidos únicos
+                // 🎵 Simon: Solo sonido musical único, NO sonido de burbujita
+                // Crear AudioContext para sonidos únicos
                 if (!window.audioContext) {
                     try {
                         window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
