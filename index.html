@@ -15659,6 +15659,10 @@ Comida premium y de cumpleaños
                 round++;
                 score += 5; // +5 perlas por ronda completada
                 updateUI();
+                
+                // Efecto de perlas volando al contador
+                createPearlEffect();
+                
                 showSequence();
             }
             
@@ -15794,6 +15798,66 @@ Comida premium y de cumpleaños
                 if (levelEl) levelEl.textContent = round;
                 if (scoreEl) scoreEl.textContent = score;
                 if (bestEl) bestEl.textContent = best;
+            }
+            
+            // Función para crear efecto de perlas volando al contador
+            function createPearlEffect() {
+                // Obtener posición del contador de perlas
+                const pearlCounter = gameOverlay.querySelector('.perlas');
+                if (!pearlCounter) return;
+                
+                const counterRect = pearlCounter.getBoundingClientRect();
+                const targetX = counterRect.left + counterRect.width / 2;
+                const targetY = counterRect.top + counterRect.height / 2;
+                
+                // Crear 3 perlas que vuelen al contador desde el centro del tablero
+                const board = gameOverlay.querySelector('#simon-board');
+                const boardRect = board.getBoundingClientRect();
+                const startX = boardRect.left + boardRect.width / 2;
+                const startY = boardRect.top + boardRect.height / 2;
+                
+                for (let i = 0; i < 3; i++) {
+                    const pearl = document.createElement('div');
+                    pearl.style.cssText = `
+                        position: fixed;
+                        left: ${startX + (i - 1) * 15}px;
+                        top: ${startY + (i - 1) * 10}px;
+                        width: 20px;
+                        height: 20px;
+                        background: url('images/ui/perlas.png') center/contain no-repeat;
+                        pointer-events: none;
+                        z-index: 99999;
+                        animation: bubbleFly 1.2s ease-out forwards;
+                    `;
+                    
+                    // Añadir keyframes para la animación
+                    if (!document.getElementById('bubbleFlyKeyframes')) {
+                        const style = document.createElement('style');
+                        style.id = 'bubbleFlyKeyframes';
+                        style.textContent = `
+                            @keyframes bubbleFly {
+                                0% {
+                                    transform: scale(0.5) rotate(0deg);
+                                    opacity: 1;
+                                }
+                                50% {
+                                    transform: scale(1.2) rotate(180deg);
+                                    opacity: 0.8;
+                                }
+                                100% {
+                                    transform: scale(0.3) rotate(360deg);
+                                    opacity: 0;
+                                    left: ${targetX}px;
+                                    top: ${targetY}px;
+                                }
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                    
+                    document.body.appendChild(pearl);
+                    setTimeout(() => pearl.remove(), 1200);
+                }
             }
             
             // Cargar récord
