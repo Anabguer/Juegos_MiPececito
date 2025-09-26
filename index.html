@@ -15779,6 +15779,7 @@ Comida premium y de cumpleaños
             function handlePadClick(padIndex) {
                 if (!isPlayerTurn || isShowing || !gameActive) return;
                 
+                // 🎵 Simon: Solo efecto visual, no sonido de clic (ya tiene sonido musical)
                 lightUpPad(padIndex);
                 playerSequence.push(padIndex);
                 
@@ -15868,39 +15869,39 @@ Comida premium y de cumpleaños
                 `;
                 
                 modalContent.innerHTML = `
-                    <h2 style="margin: 0 0 20px 0; font-size: 28px; color: #fff;">🎵 ¡Fin del juego!</h2>
-                    <div style="margin: 15px 0; font-size: 18px;">
-                        <p style="margin: 8px 0;"><strong>🎵 Nivel alcanzado:</strong> ${round}</p>
-                        <p style="margin: 8px 0;"><strong>🫧 Perlas conseguidas:</strong> ${score}</p>
-                        <p style="margin: 8px 0;"><strong>🏆 Mejor récord:</strong> ${best}</p>
-                        <p style="margin: 8px 0;"><strong>🫧 Burbujas ganadas:</strong> +${bubbles}</p>
-                        <p style="margin: 8px 0;"><strong>⭐ Estrellas ganadas:</strong> +${stars}</p>
+                    <h2 style="margin: 0 0 20px 0; font-size: 24px; color: #fff;">🎵 ¡Fin del juego!</h2>
+                    <div style="margin: 15px 0; font-size: 16px;">
+                        <p style="margin: 8px 0;"><strong>Nivel alcanzado:</strong> ${round}</p>
+                        <p style="margin: 8px 0;"><strong>Perlas conseguidas:</strong> ${score}</p>
+                        <p style="margin: 8px 0;"><strong>Mejor récord:</strong> ${best}</p>
+                        <p style="margin: 8px 0;"><strong>Burbujas ganadas:</strong> +${bubbles}</p>
+                        <p style="margin: 8px 0;"><strong>Estrellas ganadas:</strong> +${stars}</p>
                     </div>
                     <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
                         <button id="simon-restart" style="
                             background: linear-gradient(135deg, #4CAF50, #45a049);
                             color: white;
                             border: none;
-                            padding: 12px 24px;
-                            border-radius: 25px;
-                            font-size: 16px;
+                            padding: 12px 20px;
+                            border-radius: 20px;
+                            font-size: 14px;
                             font-weight: bold;
                             cursor: pointer;
                             transition: all 0.3s ease;
                             box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-                        ">🎵 JUGAR DE NUEVO</button>
+                        ">JUGAR DE NUEVO</button>
                         <button id="simon-close" style="
                             background: linear-gradient(135deg, #f44336, #da190b);
                             color: white;
                             border: none;
-                            padding: 12px 24px;
-                            border-radius: 25px;
-                            font-size: 16px;
+                            padding: 12px 20px;
+                            border-radius: 20px;
+                            font-size: 14px;
                             font-weight: bold;
                             cursor: pointer;
                             transition: all 0.3s ease;
                             box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
-                        ">🚪 SALIR</button>
+                        ">SALIR</button>
                     </div>
                 `;
                 
