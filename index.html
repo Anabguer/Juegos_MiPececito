@@ -15591,7 +15591,7 @@ Comida premium y de cumpleaños
                         <!-- SEGUNDA LÍNEA: NIVEL + PERLAS + MEJOR -->
                         <div class="header-bottom">
                             <div class="game-stats">
-                                <span class="level">NIVEL <span id="simon-level">1</span></span>
+                                <span class="level">NIVEL <span id="simon-game-level">1</span></span>
                                 <span class="perlas">
                                     <img src="images/ui/perlas.png" style="width: 28px; height: 28px; margin-bottom: 2px; vertical-align: middle;">
                                     <span class="score" id="simon-score">0</span>
@@ -15957,7 +15957,7 @@ Comida premium y de cumpleaños
             }
             
             function updateUI() {
-                const levelEl = document.getElementById('simon-level');
+                const levelEl = document.getElementById('simon-game-level'); // 🔧 ARREGLO: ID correcto
                 const scoreEl = document.getElementById('simon-score');
                 const bestEl = document.getElementById('simon-best');
                 
@@ -15966,6 +15966,8 @@ Comida premium y de cumpleaños
                 if (levelEl) {
                     levelEl.textContent = round; // Mostrar nivel actual (ronda completada)
                     console.log('🎵 Simon: Nivel actualizado a:', round);
+                } else {
+                    console.log('🎵 Simon: ERROR - No se encontró simon-game-level');
                 }
                 if (scoreEl) scoreEl.textContent = score;
                 if (bestEl) bestEl.textContent = best;
