@@ -991,6 +991,27 @@
             transform: scale(0.98);
         }
         
+        .inventory-item-square.selected {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+        
+        .selected-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
         .inventory-item-square.available {
             border-color: #2196f3;
             box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
@@ -3755,9 +3776,9 @@
                 <img src="./images/ui/badge_inventario.png" alt="Inventario" class="menu-icon">
             </div>
         </button>
-        <button class="menu-btn" id="albumButton">
+        <button class="menu-btn" id="createUserButton" title="Crear Usuario">
             <div class="btn-icon">
-                <img src="./images/ui/badge_fotos.png" alt="Álbum" class="menu-icon">
+                <img src="./images/ui/badge_config.png" alt="Crear Usuario" class="menu-icon">
             </div>
         </button>
         <button class="menu-btn" id="resetButton" title="Cuidar otro pececito">
@@ -3765,6 +3786,78 @@
                 <img src="./images/ui/badge_caravera.png" alt="Reset" class="menu-icon">
             </div>
         </button>
+    </div>
+
+    <!-- 👤 MODAL DE CREAR USUARIO -->
+    <div id="createUserModal" class="mobile-modal-overlay" style="display: none;">
+        <div class="mobile-modal-content">
+            <div class="mobile-modal-header">
+                <h2>👤 Crear Usuario</h2>
+                <button class="mobile-close-btn" id="closeCreateUser">×</button>
+            </div>
+            <div class="mobile-modal-body">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <p style="color: var(--text-primary); font-size: 16px; line-height: 1.5;">
+                        <strong>¡No queremos perder a tu pececito!</strong><br>
+                        Crea una cuenta para guardar tu progreso y nunca perder a tu compañero acuático.
+                    </p>
+                </div>
+                
+                <form id="createUserForm" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div>
+                        <label style="color: var(--text-primary); font-weight: 600; display: block; margin-bottom: 5px;">
+                            👤 Nombre completo
+                        </label>
+                        <input type="text" id="userFullName" required 
+                               style="width: 100%; padding: 12px; border: 2px solid rgba(255,255,255,0.3); 
+                                      border-radius: 8px; background: rgba(255,255,255,0.1); 
+                                      color: var(--text-primary); font-size: 14px;"
+                               placeholder="Tu nombre completo">
+                    </div>
+                    
+                    <div>
+                        <label style="color: var(--text-primary); font-weight: 600; display: block; margin-bottom: 5px;">
+                            🏷️ Nombre de usuario
+                        </label>
+                        <input type="text" id="userNickname" required 
+                               style="width: 100%; padding: 12px; border: 2px solid rgba(255,255,255,0.3); 
+                                      border-radius: 8px; background: rgba(255,255,255,0.1); 
+                                      color: var(--text-primary); font-size: 14px;"
+                               placeholder="Tu nombre de usuario">
+                    </div>
+                    
+                    <div>
+                        <label style="color: var(--text-primary); font-weight: 600; display: block; margin-bottom: 5px;">
+                            📧 Correo electrónico
+                        </label>
+                        <input type="email" id="userEmail" required 
+                               style="width: 100%; padding: 12px; border: 2px solid rgba(255,255,255,0.3); 
+                                      border-radius: 8px; background: rgba(255,255,255,0.1); 
+                                      color: var(--text-primary); font-size: 14px;"
+                               placeholder="tu@email.com">
+                    </div>
+                    
+                    <div>
+                        <label style="color: var(--text-primary); font-weight: 600; display: block; margin-bottom: 5px;">
+                            🔒 Contraseña
+                        </label>
+                        <input type="password" id="userPassword" required 
+                               style="width: 100%; padding: 12px; border: 2px solid rgba(255,255,255,0.3); 
+                                      border-radius: 8px; background: rgba(255,255,255,0.1); 
+                                      color: var(--text-primary); font-size: 14px;"
+                               placeholder="Tu contraseña segura">
+                    </div>
+                    
+                    <button type="submit" 
+                            style="background: linear-gradient(135deg, var(--button-primary), var(--button-hover)); 
+                                   color: var(--text-primary); border: none; padding: 15px; 
+                                   border-radius: 12px; font-size: 16px; font-weight: 600; 
+                                   cursor: pointer; transition: all 0.3s ease; margin-top: 10px;">
+                        ¡Crear mi cuenta!
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- 🎮 Canvas principal del juego -->
@@ -4034,38 +4127,7 @@
             </div>
             
             <div class="inventory-grid-simple">
-                <!-- Fondos disponibles -->
-                <div class="inventory-item-square available" data-item="bg-default">
-                    <div class="inventory-square-icon">🌊</div>
-                    <div class="inventory-square-name">Océano</div>
-            </div>
-            
-                <div class="inventory-item-square locked" data-item="bg-coral">
-                    <div class="inventory-square-icon">🪸</div>
-                    <div class="inventory-square-name">Coral</div>
-                    <div class="inventory-lock-overlay">
-                        <div class="lock-icon-small">🔒</div>
-                        <div class="lock-stars">5🫧</div>
-                    </div>
-                </div>
-                
-                <div class="inventory-item-square locked" data-item="bg-deep">
-                    <div class="inventory-square-icon">🌌</div>
-                    <div class="inventory-square-name">Abismo</div>
-                    <div class="inventory-lock-overlay">
-                        <div class="lock-icon-small">🔒</div>
-                        <div class="lock-stars">15🫧</div>
-                    </div>
-                </div>
-                
-                <div class="inventory-item-square locked" data-item="bg-tropical">
-                    <div class="inventory-square-icon">🏝️</div>
-                    <div class="inventory-square-name">Tropical</div>
-                    <div class="inventory-lock-overlay">
-                        <div class="lock-icon-small">🔒</div>
-                        <div class="lock-stars">25🫧</div>
-                    </div>
-                </div>
+                <!-- Los fondos se cargarán dinámicamente -->
                 
                 <div class="inventory-item-square locked" data-item="food-special">
                     <div class="inventory-square-icon">🍎</div>
@@ -4477,10 +4539,51 @@
                 }
             });
             
+            // Botón de crear usuario
+            document.getElementById('createUserButton').addEventListener('click', () => {
+                const modal = document.getElementById('createUserModal');
+                modal.style.display = 'flex';
+                // Trigger animation
+                setTimeout(() => modal.style.opacity = '1', 10);
+                console.log('👤 Modal de crear usuario abierta');
+            });
+            
             
             // Cerrar inventario con animación
             document.getElementById('closeInventory').addEventListener('click', () => {
                 const modal = document.getElementById('inventoryModal');
+                modal.style.opacity = '0';
+                setTimeout(() => modal.style.display = 'none', 300);
+            });
+            
+            // Cerrar modal de crear usuario
+            document.getElementById('closeCreateUser').addEventListener('click', () => {
+                const modal = document.getElementById('createUserModal');
+                modal.style.opacity = '0';
+                setTimeout(() => modal.style.display = 'none', 300);
+            });
+            
+            // Formulario de crear usuario
+            document.getElementById('createUserForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const fullName = document.getElementById('userFullName').value;
+                const nickname = document.getElementById('userNickname').value;
+                const email = document.getElementById('userEmail').value;
+                const password = document.getElementById('userPassword').value;
+                
+                console.log('👤 Datos del usuario:', { fullName, nickname, email, password: '***' });
+                
+                // Aquí iría la lógica para crear el usuario
+                // Por ahora solo mostramos un mensaje de éxito
+                alert('🐠 ¡Usuario creado exitosamente!\n\n' +
+                      `Nombre: ${fullName}\n` +
+                      `Usuario: ${nickname}\n` +
+                      `Email: ${email}\n\n` +
+                      '¡Tu pececito está seguro!');
+                
+                // Cerrar modal
+                const modal = document.getElementById('createUserModal');
                 modal.style.opacity = '0';
                 setTimeout(() => modal.style.display = 'none', 300);
             });
@@ -4555,15 +4658,6 @@
                 });
             });
             
-            // Botón de álbum
-            document.getElementById('albumButton').addEventListener('click', () => {
-                if (window.game) {
-                    window.game.showAlbum();
-                } else {
-                    console.warn('🚨 Game no disponible para álbum');
-                }
-                console.log('📸 Botón de álbum clickeado');
-            });
 
             // Botón de reset (calavera)
             document.getElementById('resetButton').addEventListener('click', () => {
@@ -7825,6 +7919,14 @@
             useInventoryItem(itemId) {
                 console.log(`🎒 Usando item del inventario: ${itemId}`);
                 
+                // Si es un fondo, usar la función existente
+                if (itemId.startsWith('bg-')) {
+                    const bgName = itemId.replace('bg-', '');
+                    console.log(`🎨 Cambiando fondo a: ${bgName}`);
+                    this.selectBackground(bgName);
+                    return;
+                }
+                
                 // Definir costos de items (en burbujas)
                 const itemCosts = {
                     'bg-coral': 5,
@@ -8789,6 +8891,66 @@ Comida premium y de cumpleaños
                         console.log('🎒 Inventario cerrado');
                     }
                 });
+            }
+            
+            // 🎒 ACTUALIZAR DISPONIBILIDAD DEL INVENTARIO
+            updateInventoryAvailability() {
+                console.log('🎒 Actualizando disponibilidad del inventario...');
+                
+                if (!this.availableBackgrounds) {
+                    console.warn('⚠️ availableBackgrounds no está disponible');
+                    return;
+                }
+                
+                const grid = document.querySelector('.inventory-grid-simple');
+                if (!grid) {
+                    console.warn('⚠️ Grid de inventario no encontrado');
+                    return;
+                }
+                
+                // Limpiar grid actual
+                grid.innerHTML = '';
+                
+                // Crear items dinámicamente basados en fondos reales
+                this.availableBackgrounds.forEach((bg, index) => {
+                    const item = document.createElement('div');
+                    const isUnlocked = bg.unlocked !== false; // Por defecto desbloqueado
+                    const isSelected = this.gameState.currentBackground === bg.name;
+                    const cost = bg.cost || 0;
+                    const canAfford = this.gameState.bubbles >= cost;
+                    
+                    item.className = `inventory-item-square ${isUnlocked && canAfford ? 'available' : 'locked'}`;
+                    if (isSelected) item.classList.add('selected');
+                    
+                    item.dataset.item = `bg-${bg.name}`;
+                    
+                    // Icono basado en el nombre del fondo
+                    let icon = '🌊';
+                    switch(bg.name) {
+                        case 'basic': icon = '🌊'; break;
+                        case 'cartoon': icon = '🎨'; break;
+                        case 'coral': icon = '🪸'; break;
+                        case 'mario': icon = '🍄'; break;
+                        case 'minecraft': icon = '🧱'; break;
+                        default: icon = '🌊';
+                    }
+                    
+                    item.innerHTML = `
+                        <div class="inventory-square-icon">${icon}</div>
+                        <div class="inventory-square-name">${bg.name.charAt(0).toUpperCase() + bg.name.slice(1)}</div>
+                        ${!isUnlocked || !canAfford ? `
+                            <div class="inventory-lock-overlay">
+                                <div class="lock-icon-small">🔒</div>
+                                <div class="lock-stars">${cost}🫧</div>
+                            </div>
+                        ` : ''}
+                        ${isSelected ? '<div class="selected-indicator">✓</div>' : ''}
+                    `;
+                    
+                    grid.appendChild(item);
+                });
+                
+                console.log(`🎒 Inventario actualizado con ${this.availableBackgrounds.length} fondos`);
             }
             
             // 📸 FUNCIÓN PLACEHOLDER ELIMINADA - USAR LA FUNCIÓN REAL MÁS ABAJO
