@@ -5126,8 +5126,10 @@
                     this.canvas.style.right = '0';
                     this.canvas.style.bottom = '60px'; // Espacio para botones compactos
                     
-                    // 🧱 CALCULAR Y GUARDAR LÍMITES DINÁMICOS
-                    this.calculateAndSaveBoundaries();
+                    // 🧱 CALCULAR Y GUARDAR LÍMITES DINÁMICOS (con delay para asegurar que el canvas esté listo)
+                    setTimeout(() => {
+                        this.calculateAndSaveBoundaries();
+                    }, 100);
                 };
                 window.addEventListener('resize', resize);
                 resize();
@@ -5144,30 +5146,63 @@
             calculateAndSaveBoundaries() {
                 console.log('🧱 Calculando límites dinámicos del pez...');
                 
+                // Verificar que el canvas esté disponible
+                if (!this.canvas) {
+                    console.warn('⚠️ Canvas no disponible, usando límites por defecto');
+                    return this.getDefaultBoundaries();
+                }
+                
                 // Obtener dimensiones reales del canvas
                 const canvasRect = this.canvas.getBoundingClientRect();
-                const actualWidth = canvasRect.width;
-                const actualHeight = canvasRect.height;
+                const actualWidth = canvasRect.width || this.canvas.width || window.innerWidth;
+                const actualHeight = canvasRect.height || this.canvas.height || window.innerHeight - 130;
+                
+                // Verificar dimensiones válidas
+                if (actualWidth <= 0 || actualHeight <= 0) {
+                    console.warn('⚠️ Dimensiones de canvas inválidas, usando límites por defecto');
+                    return this.getDefaultBoundaries();
+                }
                 
                 // Calcular límites con márgenes seguros
                 const fishSize = 60; // Tamaño aproximado del pez
                 const safeMargin = 30; // Margen de seguridad
                 
+                // Calcular bottom de forma segura
+                let bottomY;
+                try {
+                    bottomY = this.getFloorY ? this.getFloorY() : actualHeight - 60;
+                } catch (e) {
+                    console.warn('⚠️ Error al calcular getFloorY, usando valor por defecto');
+                    bottomY = actualHeight - 60;
+                }
+                
                 const boundaries = {
                     left: safeMargin,
-                    right: actualWidth - safeMargin - fishSize,
+                    right: Math.max(safeMargin + fishSize, actualWidth - safeMargin - fishSize),
                     top: 125, // Debajo del header
-                    bottom: this.getFloorY() - safeMargin - fishSize,
+                    bottom: Math.max(125 + fishSize, bottomY - safeMargin - fishSize),
                     width: actualWidth,
                     height: actualHeight,
                     timestamp: Date.now()
                 };
                 
+                // Verificar que los límites sean válidos
+                if (boundaries.right <= boundaries.left || boundaries.bottom <= boundaries.top) {
+                    console.warn('⚠️ Límites inválidos calculados, usando límites por defecto');
+                    return this.getDefaultBoundaries();
+                }
+                
                 // Guardar en el estado del juego
-                this.gameState.boundaries = boundaries;
+                if (this.gameState) {
+                    this.gameState.boundaries = boundaries;
+                }
                 
                 // Guardar en localStorage para persistencia
-                localStorage.setItem('miPececito_boundaries', JSON.stringify(boundaries));
+                try {
+                    localStorage.setItem('miPececito_boundaries', JSON.stringify(boundaries));
+                } catch (e) {
+                    console.warn('⚠️ Error al guardar límites en localStorage:', e);
+                }
                 
                 console.log('🧱 Límites calculados:', boundaries);
                 console.log(`📱 Canvas: ${actualWidth}x${actualHeight}px`);
@@ -5176,23 +5211,51 @@
                 return boundaries;
             }
             
+            // 🧱 LÍMITES POR DEFECTO COMO FALLBACK
+            getDefaultBoundaries() {
+                const defaultBoundaries = {
+                    left: 30,
+                    right: window.innerWidth - 90,
+                    top: 125,
+                    bottom: window.innerHeight - 200,
+                    width: window.innerWidth,
+                    height: window.innerHeight - 130,
+                    timestamp: Date.now()
+                };
+                
+                console.log('🧱 Usando límites por defecto:', defaultBoundaries);
+                return defaultBoundaries;
+            }
+            
             // 🧱 OBTENER LÍMITES GUARDADOS O CALCULAR NUEVOS
             getBoundaries() {
                 // Intentar cargar límites guardados
-                const saved = localStorage.getItem('miPececito_boundaries');
-                if (saved) {
-                    try {
+                try {
+                    const saved = localStorage.getItem('miPececito_boundaries');
+                    if (saved) {
                         const boundaries = JSON.parse(saved);
-                        const age = Date.now() - boundaries.timestamp;
+                        const age = Date.now() - (boundaries.timestamp || 0);
                         
-                        // Si los límites son recientes (menos de 5 minutos), usarlos
-                        if (age < 5 * 60 * 1000) {
-                            console.log('🧱 Usando límites guardados (edad:', Math.round(age/1000), 's)');
-                            return boundaries;
+                        // Verificar que los límites sean válidos
+                        if (boundaries && 
+                            typeof boundaries.left === 'number' && 
+                            typeof boundaries.right === 'number' &&
+                            typeof boundaries.top === 'number' &&
+                            typeof boundaries.bottom === 'number' &&
+                            boundaries.right > boundaries.left &&
+                            boundaries.bottom > boundaries.top) {
+                            
+                            // Si los límites son recientes (menos de 5 minutos), usarlos
+                            if (age < 5 * 60 * 1000) {
+                                console.log('🧱 Usando límites guardados (edad:', Math.round(age/1000), 's)');
+                                return boundaries;
+                            }
+                        } else {
+                            console.warn('⚠️ Límites guardados inválidos, recalculando...');
                         }
-                    } catch (e) {
-                        console.warn('⚠️ Error al cargar límites guardados:', e);
                     }
+                } catch (e) {
+                    console.warn('⚠️ Error al cargar límites guardados:', e);
                 }
                 
                 // Si no hay límites válidos, calcular nuevos
