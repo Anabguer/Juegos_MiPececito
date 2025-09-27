@@ -4275,6 +4275,9 @@
         <button class="debug-btn primary" id="forceHatchBtn" title="Forzar eclosión">🐣</button>
         <button class="debug-btn success" id="evolveToYoungBtn" title="Evolucionar a Joven">🌱</button>
         <button class="debug-btn info" id="evolveToAdultBtn" title="Evolucionar a Adulto">👑</button>
+        <button class="debug-btn warning" id="moveFishLeftBtn" title="Mover pez a la izquierda">⬅️</button>
+        <button class="debug-btn warning" id="moveFishRightBtn" title="Mover pez a la derecha">➡️</button>
+        <button class="debug-btn info" id="advanceTimeBtn" title="Avanzar tiempo 1 hora">⏰</button>
     </div>
     
     <!-- 🎨 Librería Lottie -->
@@ -4971,6 +4974,41 @@
                     game.startEvolution('adult');
                 } else {
                     console.log('❌ Solo se puede evolucionar desde joven a adulto');
+                }
+            });
+            
+            // ⬅️ BOTÓN MOVER PEZ A LA IZQUIERDA
+            document.getElementById('moveFishLeftBtn').addEventListener('click', () => {
+                if (game && game.fish) {
+                    const padLeft = 60;
+                    game.fish.x = padLeft;
+                    game.fish.vx = 0;
+                    console.log(`⬅️ DEBUG: Pez movido a la izquierda (x: ${padLeft})`);
+                } else {
+                    console.log('❌ No hay pez para mover');
+                }
+            });
+            
+            // ➡️ BOTÓN MOVER PEZ A LA DERECHA
+            document.getElementById('moveFishRightBtn').addEventListener('click', () => {
+                if (game && game.fish) {
+                    const padRight = 30;
+                    const W = game.canvas.width;
+                    game.fish.x = W - padRight;
+                    game.fish.vx = 0;
+                    console.log(`➡️ DEBUG: Pez movido a la derecha (x: ${W - padRight})`);
+                } else {
+                    console.log('❌ No hay pez para mover');
+                }
+            });
+            
+            // ⏰ BOTÓN AVANZAR TIEMPO
+            document.getElementById('advanceTimeBtn').addEventListener('click', () => {
+                if (game) {
+                    game.advanceTime(1);
+                    console.log('⏰ DEBUG: Tiempo avanzado 1 hora');
+                } else {
+                    console.log('❌ No hay juego para avanzar tiempo');
                 }
             });
             
@@ -6654,7 +6692,8 @@
                 }
                 
                 // 🧱 POSICIÓN INICIAL CON LÍMITES FIJOS
-                const padSides = 60;
+                const padLeft = 60;
+                const padRight = 30;
                 const W = this.canvas.width;
                 const H = this.getFloorY();
                 
@@ -7012,12 +7051,13 @@
                 }
                 
                 // 👆 DEDO CON COORDENADAS CSS Y TURBO
-                const padSides = 60;
+                const padLeft = 60;
+                const padRight = 30;
                 const W = this.canvas.width;
                 const H = this.getFloorY();
                 this.fish.desire = {
-                    x: this.clamp(x, padSides, W - padSides),
-                    y: this.clamp(y, 125, H - 20)
+                    x: this.clamp(x, padLeft, W - padRight),
+                    y: this.clamp(y, 125, H - 5)
                 };
                 this.fish.fingerBoostT = 1.6;   // turbo temporal de dedo
                 this.fish.returnToBottom = false; // apagar cualquier regreso al fondo
@@ -7219,14 +7259,15 @@
                     // Se va a una esquina y se queda quieto MÁS TIEMPO
                     if (!this.fish.isInCorner && this.fish.hideTimer > 3) {
                         // Ir a una esquina aleatoria usando límites fijos
-                        const padSides = 60;
+                        const padLeft = 60;
+                        const padRight = 30;
                         const W = this.canvas.width;
                         const H = this.getFloorY();
                         const corners = [
-                            { x: padSides, y: 125 }, // Esquina superior izquierda
-                            { x: W - padSides, y: 125 }, // Superior derecha
-                            { x: padSides, y: H - 20 }, // Inferior izquierda
-                            { x: W - padSides, y: H - 20 } // Inferior derecha
+                            { x: padLeft, y: 125 }, // Esquina superior izquierda
+                            { x: W - padRight, y: 125 }, // Superior derecha
+                            { x: padLeft, y: H - 5 }, // Inferior izquierda
+                            { x: W - padRight, y: H - 5 } // Inferior derecha
                         ];
                         
                         const corner = corners[Math.floor(Math.random() * corners.length)];
@@ -7821,6 +7862,11 @@
                 }
             }
             
+            // ⏰ AVANZAR TIEMPO DEL JUEGO (WRAPPER)
+            advanceTime(hours) {
+                this.advanceGameTime(hours);
+            }
+            
             // ⏰ AVANZAR TIEMPO DEL JUEGO (DEBUG)
             advanceGameTime(hours) {
                 if (!this.fish) return;
@@ -7846,6 +7892,10 @@
                 
                 // Actualizar edad
                 this.updateAgeDisplay();
+                
+                // Forzar actualización de necesidades
+                this.updateNeedBars();
+                this.updateButtonStates();
                 
                 console.log(`⏰ Tiempo del juego avanzado +${hours} hora(s)`);
                 console.log(`🍽️ Última comida: hace ${Math.round((Date.now() - this.fish.lastFeedTime) / (60*60*1000))} horas`);
@@ -8172,32 +8222,55 @@
                     if (isOwned) {
                         // Ya lo tiene, solo cambiar fondo
                         console.log(`🎨 Cambiando fondo a: ${bgName}`);
-                        this.selectBackground(bgName);
+                        this.gameState.currentBackground = bgName;
+                        this.bgImage = bg.image;
                         this.updateInventoryAvailability(); // Actualizar selección
-                    } else if (this.gameState.bubbles >= cost) {
-                        // Comprar fondo
-                        this.gameState.bubbles -= cost;
-                        
-                        // Marcar como desbloqueado
-                        const bg = this.availableBackgrounds.find(b => b.name === bgName);
-                        if (bg) bg.unlocked = true;
-                        
-                        // Aplicar fondo inmediatamente
-                        this.selectBackground(bgName);
-                        
-                        // Actualizar UI
-                        this.updateUI();
-                        this.updateInventoryAvailability();
                         this.saveGame();
                         
-                        // Efecto visual de compra
-                        this.createBubbleEffect(0); // Sin burbujas voladoras, solo actualizar contador
-                        
+                        // Mostrar mensaje de cambio
                         this.showCustomModal({
-                            title: '🎉 ¡Fondo Comprado!',
-                            message: `🐠💭 "¡Gracias por comprarme este hermoso fondo!"\n\n🫧 Costo: ${cost} burbujas\n🫧 Restantes: ${this.gameState.bubbles} burbujas\n\n✨ ¡El fondo está ahora aplicado!`,
+                            title: '🎨 ¡Fondo cambiado!',
+                            message: `🐠💭 "¡Me encanta mi nuevo hogar!"\n\n✨ Fondo aplicado: ${bgName}`,
                             confirmText: '🎮 ¡Genial!',
                             onConfirm: () => {}
+                        });
+                    } else if (this.gameState.bubbles >= cost) {
+                        // Mostrar modal de confirmación de compra
+                        this.showCustomModal({
+                            title: '🛒 ¿Comprar Fondo?',
+                            message: `🐠💭 "¿Quieres comprarme este hermoso fondo?"\n\n🫧 Costo: ${cost} burbujas\n🫧 Tienes: ${this.gameState.bubbles} burbujas\n🫧 Quedarán: ${this.gameState.bubbles - cost} burbujas\n\n✨ ¡El fondo se aplicará inmediatamente!`,
+                            confirmText: '🛒 ¡Comprar!',
+                            cancelText: '❌ Cancelar',
+                            onConfirm: () => {
+                                // Comprar fondo
+                                this.gameState.bubbles -= cost;
+                                
+                                // Marcar como desbloqueado
+                                const bg = this.availableBackgrounds.find(b => b.name === bgName);
+                                if (bg) bg.unlocked = true;
+                                
+                                // Aplicar fondo inmediatamente
+                                this.selectBackground(bgName);
+                                
+                                // Actualizar UI
+                                this.updateUI();
+                                this.updateInventoryAvailability();
+                                this.saveGame();
+                                
+                                // Efecto visual de compra
+                                this.createBubbleEffect(0); // Sin burbujas voladoras, solo actualizar contador
+                                
+                                // Mostrar confirmación de compra exitosa
+                                this.showCustomModal({
+                                    title: '🎉 ¡Fondo Comprado!',
+                                    message: `🐠💭 "¡Gracias por comprarme este hermoso fondo!"\n\n🫧 Costo: ${cost} burbujas\n🫧 Restantes: ${this.gameState.bubbles} burbujas\n\n✨ ¡El fondo está ahora aplicado!`,
+                                    confirmText: '🎮 ¡Genial!',
+                                    onConfirm: () => {}
+                                });
+                            },
+                            onCancel: () => {
+                                console.log('❌ Compra cancelada por el usuario');
+                            }
                         });
                     } else {
                         // No tiene suficientes burbujas
@@ -8270,25 +8343,25 @@
                 const fishName = this.gameState.fishName || 'tu pececito';
                 
                 this.showCustomModal({
-                    title: '🌊 Despedida de tu Pececito',
-                    message: `🐠💭 "${fishName === 'tu pececito' ? 'Hola' : 'Soy ' + fishName}... ¿de verdad me vas a dejar libre?"
+                    title: 'Despedida de tu Pececito',
+                    message: `🐠 "${fishName === 'tu pececito' ? 'Hola' : 'Soy ' + fishName}... ¿de verdad me vas a dejar libre?"
 
-🏠 Volveré al océano infinito y seré feliz
-💕 Siempre recordaré nuestros momentos juntos
-🎮 Podrás cuidar a un nuevo compañero
-📸 Nuestros recuerdos quedarán en mi corazón
+Volveré al océano infinito y seré feliz
+Siempre recordaré nuestros momentos juntos
+Podrás cuidar a un nuevo compañero
+Nuestros recuerdos quedarán en mi corazón
 
 ⚠️ **Se perderá todo el progreso actual**
 🫧 Burbujas: ${this.gameState.bubbles || 0}
 ⭐ Estrellas: ${this.gameState.stars || 0}
 📅 Días juntos: ${this.gameState.ageInDays || 0}`,
-                    confirmText: '🌊 ¡Sé libre y feliz!',
-                    cancelText: '💕 ¡No, te quiero!',
+                    confirmText: '¡Sé libre y feliz!',
+                    cancelText: '¡No, te quiero!',
                     onConfirm: () => {
                         this.showCustomModal({
-                            title: '🌊 ¡Hasta siempre!',
-                            message: `🐠💕 "¡Gracias por todo! ¡Fui muy feliz contigo!"\n\n🌊 *Nada hacia el océano infinito*\n\n✨ Tu nueva aventura comenzará en un momento...`,
-                            confirmText: '👋 ¡Adiós!',
+                            title: '¡Hasta siempre!',
+                            message: `🐠 "¡Gracias por todo! ¡Fui muy feliz contigo!"\n\n*Nada hacia el océano infinito*\n\nTu nueva aventura comenzará en un momento...`,
+                            confirmText: '¡Adiós!',
                             onConfirm: () => {
                                 // Limpiar localStorage y recargar
                                 localStorage.clear();
@@ -9285,6 +9358,34 @@ Comida premium y de cumpleaños
                 `;
                 grid.appendChild(decorationsSection);
                 
+                // Añadir event listeners a los elementos del inventario
+                const inventoryItems = document.querySelectorAll('.inventory-item-square');
+                inventoryItems.forEach(card => {
+                    const itemId = card.dataset.item;
+                    if (!itemId) return;
+                    
+                    card.addEventListener('click', () => {
+                        const isLocked = card.classList.contains('locked');
+                        
+                        if (!isLocked && window.game) {
+                            console.log(`🎒 Usando item: ${itemId}`);
+                            // Cerrar modal primero
+                            const modal = document.getElementById('inventoryModal');
+                            modal.style.opacity = '0';
+                            setTimeout(() => {
+                                modal.style.display = 'none';
+                                // Llamar a la función de usar item
+                                window.game.useInventoryItem?.(itemId);
+                            }, 300);
+                        } else if (isLocked) {
+                            console.log(`🔒 Item bloqueado: ${itemId}`);
+                            // Mostrar mensaje de item bloqueado
+                            const bubblesNeeded = card.querySelector('.lock-stars')?.textContent || '';
+                            window.game?.showItemLocked?.(bubblesNeeded);
+                        }
+                    });
+                });
+                
                 console.log(`🎒 Inventario actualizado con ${this.availableBackgrounds.length} fondos`);
             }
             
@@ -9744,6 +9845,8 @@ Comida premium y de cumpleaños
                 this.gameState.currentBackground = bg.name;
                 this.bgImage = bg.image;
                 
+                console.log(`🎨 Fondo cambiado a: ${bg.name}, imagen: ${bg.image ? 'cargada' : 'no cargada'}`);
+                
                 // Mensaje de éxito
                 if (bg.cost > 0) {
                     const successMessages = {
@@ -9925,6 +10028,14 @@ Comida premium y de cumpleaños
                         if (name && name.trim()) {
                             this.gameState.fishName = name.trim();
                             console.log(`🏷️ Pez nombrado: ${this.gameState.fishName}`);
+                            
+                            // Mostrar mensaje de bienvenida con consejos
+                            this.showCustomModal({
+                                title: '¡Perfecto!',
+                                message: `🐠 "¡Me encanta mi nombre ${this.gameState.fishName}!"\n\n¡Gracias por elegirme!\n\n💡 Consejos para cuidarme:\n🫧 Alimenta cuando tenga hambre → +2 burbujas\n🧹 Límpiame cuando esté sucio → +3 burbujas\n🎮 Juega conmigo → +burbujas y estrellas\n\n¡Con burbujas podrás comprarme fondos bonitos!`,
+                                confirmText: '¡Empecemos juntos!',
+                                onConfirm: () => {}
+                            });
                         } else {
                             this.setRandomName();
                             console.log(`🏷️ Nombre aleatorio elegido: ${this.gameState.fishName}`);
@@ -9940,9 +10051,9 @@ Comida premium y de cumpleaños
                 this.gameState.fishName = randomNames[Math.floor(Math.random() * randomNames.length)];
                 
                 this.showCustomModal({
-                    title: '🎲 ¡Sorpresa!',
-                    message: `🐠💭 "¡Me llamaré ${this.gameState.fishName}!"\n\n¡Espero que te guste mi nombre! 😊`,
-                    confirmText: '💕 ¡Me encanta!',
+                    title: '¡Sorpresa!',
+                    message: `🐠 "¡Me llamaré ${this.gameState.fishName}!"\n\n¡Espero que te guste mi nombre!\n\n💡 Consejos para cuidarme:\n🫧 Alimenta cuando tenga hambre → +2 burbujas\n🧹 Límpiame cuando esté sucio → +3 burbujas\n🎮 Juega conmigo → +burbujas y estrellas\n\n¡Con burbujas podrás comprarme fondos bonitos!`,
+                    confirmText: '¡Empecemos juntos!',
                     onConfirm: () => {}
                 });
             }
@@ -10127,50 +10238,47 @@ Comida premium y de cumpleaños
                 const targetX = counterRect.left + counterRect.width / 2;
                 const targetY = counterRect.top + counterRect.height / 2;
                 
+                // Obtener posición del pez (convertir coordenadas del canvas a coordenadas de pantalla)
+                const canvasRect = this.canvas.getBoundingClientRect();
+                const startX = canvasRect.left + (this.fish ? this.fish.x : this.canvas.width/2);
+                const startY = canvasRect.top + (this.fish ? this.fish.y : this.canvas.height/2);
+                
+                // Calcular distancia y duración de animación
+                const distance = Math.sqrt((targetX - startX) ** 2 + (targetY - startY) ** 2);
+                const duration = Math.max(800, Math.min(2000, distance * 2)); // 800ms mínimo, 2000ms máximo
+                
+                console.log(`🫧 Animación: ${distance.toFixed(0)}px en ${duration}ms`);
+                
                 // Crear burbujas que vuelan desde el pez al contador
                 for (let i = 0; i < amount; i++) {
                     const bubble = document.createElement('div');
                     bubble.innerHTML = '🫧';
                     bubble.style.cssText = `
                         position: fixed;
-                        left: ${this.fish ? this.fish.x : this.canvas.width/2}px;
-                        top: ${this.fish ? this.fish.y : this.canvas.height/2}px;
+                        left: ${startX}px;
+                        top: ${startY}px;
                         font-size: 20px;
                         pointer-events: none;
                         z-index: 10000;
-                        animation: bubbleFlyToCounter 1.5s ease-out forwards;
-                        animation-delay: ${i * 0.1}s;
+                        transition: all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                        transform: translate(0, 0) scale(1);
+                        opacity: 1;
                     `;
                     
-                    // Añadir keyframes CSS si no existen
-                    if (!document.getElementById('bubbleFlyAnimation')) {
-                        const style = document.createElement('style');
-                        style.id = 'bubbleFlyAnimation';
-                        style.textContent = `
-                            @keyframes bubbleFlyToCounter {
-                                0% {
-                                    transform: translate(0, 0) scale(1);
-                                    opacity: 1;
-                                }
-                                50% {
-                                    transform: translate(${targetX - (this.fish ? this.fish.x : this.canvas.width/2)}px, ${targetY - (this.fish ? this.fish.y : this.canvas.height/2)}px) scale(1.2);
-                                    opacity: 0.8;
-                                }
-                                100% {
-                                    transform: translate(${targetX - (this.fish ? this.fish.x : this.canvas.width/2)}px, ${targetY - (this.fish ? this.fish.y : this.canvas.height/2)}px) scale(0.5);
-                                    opacity: 0;
-                                }
-                            }
-                        `;
-                        document.head.appendChild(style);
-                    }
-                    
                     document.body.appendChild(bubble);
+                    
+                    // Animar hacia el contador
+                    setTimeout(() => {
+                        bubble.style.left = `${targetX}px`;
+                        bubble.style.top = `${targetY}px`;
+                        bubble.style.transform = 'translate(-50%, -50%) scale(0.3)';
+                        bubble.style.opacity = '0';
+                    }, 50 + (i * 100)); // Delay escalonado con offset mínimo
                     
                     // Remover después de la animación
                     setTimeout(() => {
                         if (bubble.parentNode) bubble.remove();
-                    }, 1500 + (i * 100));
+                    }, duration + 50 + (i * 100) + 200);
                 }
                 
                 // Actualizar contador con animación
@@ -11958,15 +12066,16 @@ Comida premium y de cumpleaños
                 fish.y += fish.vy * deltaTime;
 
                 // 🧱 LÍMITES FIJOS QUE FUNCIONAN (SISTEMA ORIGINAL)
-                const padSides = 60; // Margen lateral para no salir de pantalla
-                const padBottom = 20; // Margen inferior PEQUEÑO para alcanzar comida
+                const padLeft = 60; // Margen izquierdo para no salir de pantalla
+                const padRight = 30; // Margen derecho más pequeño para llegar al borde
+                const padBottom = 5; // Margen inferior MUY PEQUEÑO para que pueda bajar más
                 const W = this.canvas.width;
                 const H = this.getFloorY();
                 
                 // Debug: mostrar límites cada 3 segundos
                 if (!this.lastBoundaryDebug || Date.now() - this.lastBoundaryDebug > 3000) {
                     console.log('🧱 Límites fijos:');
-                    console.log(`  - left: ${padSides}, right: ${W - padSides}`);
+                    console.log(`  - left: ${padLeft}, right: ${W - padRight}`);
                     console.log(`  - top: 125, bottom: ${H - padBottom}`);
                     console.log(`🐟 Posición pez: (${fish.x.toFixed(1)}, ${fish.y.toFixed(1)})`);
                     console.log(`📱 Canvas: ${W}x${H}`);
@@ -11974,14 +12083,14 @@ Comida premium y de cumpleaños
                 }
                 
                 // Aplicar límites con rebote suave
-                if (fish.x < padSides) { 
-                    console.log(`⚠️ Pez salió por izquierda: ${fish.x.toFixed(1)} < ${padSides}`);
-                    fish.x = padSides; 
+                if (fish.x < padLeft) { 
+                    console.log(`⚠️ Pez salió por izquierda: ${fish.x.toFixed(1)} < ${padLeft}`);
+                    fish.x = padLeft; 
                     if (fish.vx < 0) fish.vx *= -0.5; 
                 }
-                if (fish.x > W - padSides) { 
-                    console.log(`⚠️ Pez salió por derecha: ${fish.x.toFixed(1)} > ${W - padSides}`);
-                    fish.x = W - padSides; 
+                if (fish.x > W - padRight) { 
+                    console.log(`⚠️ Pez salió por derecha: ${fish.x.toFixed(1)} > ${W - padRight}`);
+                    fish.x = W - padRight; 
                     if (fish.vx > 0) fish.vx *= -0.5; 
                 }
                 if (fish.y < 125) { 
