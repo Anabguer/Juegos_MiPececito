@@ -5157,6 +5157,12 @@
                 const actualWidth = canvasRect.width || this.canvas.width || window.innerWidth;
                 const actualHeight = canvasRect.height || this.canvas.height || window.innerHeight - 130;
                 
+                console.log('🧱 Debug cálculo límites:');
+                console.log(`  - canvasRect: ${canvasRect.width}x${canvasRect.height}`);
+                console.log(`  - canvas.width/height: ${this.canvas.width}x${this.canvas.height}`);
+                console.log(`  - window.inner: ${window.innerWidth}x${window.innerHeight}`);
+                console.log(`  - actualWidth/Height: ${actualWidth}x${actualHeight}`);
+                
                 // Verificar dimensiones válidas
                 if (actualWidth <= 0 || actualHeight <= 0) {
                     console.warn('⚠️ Dimensiones de canvas inválidas, usando límites por defecto');
@@ -11932,12 +11938,22 @@ Comida premium y de cumpleaños
                 // 🧱 LÍMITES DINÁMICOS CON REBOTE SUAVE
                 const boundaries = this.getBoundaries();
                 
+                // Debug: mostrar límites cada 3 segundos
+                if (!this.lastBoundaryDebug || Date.now() - this.lastBoundaryDebug > 3000) {
+                    console.log('🧱 Límites actuales:', boundaries);
+                    console.log(`🐟 Posición pez: (${fish.x.toFixed(1)}, ${fish.y.toFixed(1)})`);
+                    console.log(`📱 Canvas: ${this.canvas.width}x${this.canvas.height}`);
+                    this.lastBoundaryDebug = Date.now();
+                }
+                
                 // Aplicar límites con rebote suave
                 if (fish.x < boundaries.left) { 
+                    console.log(`⚠️ Pez salió por izquierda: ${fish.x.toFixed(1)} < ${boundaries.left}`);
                     fish.x = boundaries.left; 
                     if (fish.vx < 0) fish.vx *= -0.5; 
                 }
                 if (fish.x > boundaries.right) { 
+                    console.log(`⚠️ Pez salió por derecha: ${fish.x.toFixed(1)} > ${boundaries.right}`);
                     fish.x = boundaries.right; 
                     if (fish.vx > 0) fish.vx *= -0.5; 
                 }
