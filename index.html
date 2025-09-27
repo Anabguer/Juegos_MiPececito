@@ -780,9 +780,44 @@
             border-radius: 20px;
             width: 95%;
             max-width: 400px;
+            max-height: 90vh;
             overflow: hidden;
             box-shadow: 0 15px 40px rgba(38, 198, 218, 0.4);
             animation: modalPop 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .mobile-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .inventory-grid-simple {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+        
+        .inventory-grid-simple::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .inventory-grid-simple::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .inventory-grid-simple::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        
+        .inventory-grid-simple::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
         }
         
         .mobile-modal-header {
@@ -958,11 +993,46 @@
         
         /* 🎒 INVENTARIO SIMPLE */
         .inventory-grid-simple {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
             padding: 20px;
             background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .inventory-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .inventory-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .inventory-section-header h3 {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .inventory-section-subtitle {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .inventory-section-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
         }
         
         .inventory-item-square {
@@ -1015,6 +1085,34 @@
         .inventory-item-square.available {
             border-color: #2196f3;
             box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+        }
+        
+        .inventory-item-square.owned {
+            border-color: #4CAF50;
+            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        }
+        
+        .inventory-square-price {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+        
+        .owned-indicator {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
         }
         
         .inventory-item-square.available:hover {
@@ -4126,25 +4224,9 @@
                 <button id="closeInventory" class="mobile-close-btn">×</button>
             </div>
             
-            <div class="inventory-grid-simple">
-                <!-- Los fondos se cargarán dinámicamente -->
-                
-                <div class="inventory-item-square locked" data-item="food-special">
-                    <div class="inventory-square-icon">🍎</div>
-                    <div class="inventory-square-name">Comida</div>
-                    <div class="inventory-lock-overlay">
-                        <div class="lock-icon-small">🔒</div>
-                        <div class="lock-stars">30🫧</div>
-                    </div>
-                </div>
-                
-                <div class="inventory-item-square locked" data-item="decoration">
-                    <div class="inventory-square-icon">🏺</div>
-                    <div class="inventory-square-name">Deco</div>
-                    <div class="inventory-lock-overlay">
-                        <div class="lock-icon-small">🔒</div>
-                        <div class="lock-stars">40🫧</div>
-                    </div>
+            <div class="mobile-modal-body">
+                <div class="inventory-grid-simple">
+                    <!-- Los fondos se cargarán dinámicamente -->
                 </div>
             </div>
         </div>
@@ -7919,19 +8001,52 @@
             useInventoryItem(itemId) {
                 console.log(`🎒 Usando item del inventario: ${itemId}`);
                 
-                // Si es un fondo, usar la función existente
+                // Si es un fondo, manejar compra o selección
                 if (itemId.startsWith('bg-')) {
                     const bgName = itemId.replace('bg-', '');
-                    console.log(`🎨 Cambiando fondo a: ${bgName}`);
-                    this.selectBackground(bgName);
+                    const item = document.querySelector(`[data-item="${itemId}"]`);
+                    const isOwned = item?.dataset.owned === 'true';
+                    const cost = parseInt(item?.dataset.cost || '0');
+                    
+                    if (isOwned) {
+                        // Ya lo tiene, solo cambiar fondo
+                        console.log(`🎨 Cambiando fondo a: ${bgName}`);
+                        this.selectBackground(bgName);
+                        this.updateInventoryAvailability(); // Actualizar selección
+                    } else if (this.gameState.bubbles >= cost) {
+                        // Comprar fondo
+                        this.gameState.bubbles -= cost;
+                        
+                        // Marcar como desbloqueado
+                        const bg = this.availableBackgrounds.find(b => b.name === bgName);
+                        if (bg) bg.unlocked = true;
+                        
+                        // Aplicar fondo inmediatamente
+                        this.selectBackground(bgName);
+                        
+                        // Actualizar UI
+                        this.updateUI();
+                        this.updateInventoryAvailability();
+                        this.saveGame();
+                        
+                        // Efecto visual de compra
+                        this.createBubbleEffect(0); // Sin burbujas voladoras, solo actualizar contador
+                        
+                        this.showCustomModal({
+                            title: '🎉 ¡Fondo Comprado!',
+                            message: `🐠💭 "¡Gracias por comprarme este hermoso fondo!"\n\n🫧 Costo: ${cost} burbujas\n🫧 Restantes: ${this.gameState.bubbles} burbujas\n\n✨ ¡El fondo está ahora aplicado!`,
+                            confirmText: '🎮 ¡Genial!',
+                            onConfirm: () => {}
+                        });
+                    } else {
+                        // No tiene suficientes burbujas
+                        this.showItemLocked(`${cost}🫧`);
+                    }
                     return;
                 }
                 
-                // Definir costos de items (en burbujas)
+                // Otros items (decoraciones, etc.)
                 const itemCosts = {
-                    'bg-coral': 5,
-                    'bg-deep': 15,
-                    'bg-tropical': 25,
                     'food-special': 30,
                     'decoration': 40
                 };
@@ -8911,6 +9026,20 @@ Comida premium y de cumpleaños
                 // Limpiar grid actual
                 grid.innerHTML = '';
                 
+                // 🎨 BLOQUE DE FONDOS
+                const backgroundsSection = document.createElement('div');
+                backgroundsSection.className = 'inventory-section';
+                backgroundsSection.innerHTML = `
+                    <div class="inventory-section-header">
+                        <h3>🌊 Fondos de Pecera</h3>
+                        <span class="inventory-section-subtitle">🫧 Tienes: ${this.gameState.bubbles || 0} burbujas</span>
+                    </div>
+                    <div class="inventory-section-grid"></div>
+                `;
+                grid.appendChild(backgroundsSection);
+                
+                const backgroundsGrid = backgroundsSection.querySelector('.inventory-section-grid');
+                
                 // Crear items dinámicamente basados en fondos reales
                 this.availableBackgrounds.forEach((bg, index) => {
                     const item = document.createElement('div');
@@ -8918,11 +9047,14 @@ Comida premium y de cumpleaños
                     const isSelected = this.gameState.currentBackground === bg.name;
                     const cost = bg.cost || 0;
                     const canAfford = this.gameState.bubbles >= cost;
+                    const isOwned = bg.unlocked === true || bg.name === 'basic'; // Basic es gratis
                     
-                    item.className = `inventory-item-square ${isUnlocked && canAfford ? 'available' : 'locked'}`;
+                    item.className = `inventory-item-square ${isOwned ? 'owned' : (canAfford ? 'available' : 'locked')}`;
                     if (isSelected) item.classList.add('selected');
                     
                     item.dataset.item = `bg-${bg.name}`;
+                    item.dataset.cost = cost;
+                    item.dataset.owned = isOwned;
                     
                     // Icono basado en el nombre del fondo
                     let icon = '🌊';
@@ -8938,17 +9070,59 @@ Comida premium y de cumpleaños
                     item.innerHTML = `
                         <div class="inventory-square-icon">${icon}</div>
                         <div class="inventory-square-name">${bg.name.charAt(0).toUpperCase() + bg.name.slice(1)}</div>
-                        ${!isUnlocked || !canAfford ? `
+                        <div class="inventory-square-price">${cost === 0 ? 'Gratis' : cost + '🫧'}</div>
+                        ${!isOwned && !canAfford ? `
                             <div class="inventory-lock-overlay">
                                 <div class="lock-icon-small">🔒</div>
                                 <div class="lock-stars">${cost}🫧</div>
                             </div>
                         ` : ''}
                         ${isSelected ? '<div class="selected-indicator">✓</div>' : ''}
+                        ${isOwned && !isSelected ? '<div class="owned-indicator">✓</div>' : ''}
                     `;
                     
-                    grid.appendChild(item);
+                    backgroundsGrid.appendChild(item);
                 });
+                
+                // 🎨 BLOQUE DE DECORACIONES (PRÓXIMAMENTE)
+                const decorationsSection = document.createElement('div');
+                decorationsSection.className = 'inventory-section';
+                decorationsSection.innerHTML = `
+                    <div class="inventory-section-header">
+                        <h3>🎨 Decoraciones</h3>
+                        <span class="inventory-section-subtitle">🚧 Próximamente</span>
+                    </div>
+                    <div class="inventory-section-grid">
+                        <div class="inventory-item-square locked">
+                            <div class="inventory-square-icon">🏰</div>
+                            <div class="inventory-square-name">Castillo</div>
+                            <div class="inventory-square-price">50🫧</div>
+                            <div class="inventory-lock-overlay">
+                                <div class="lock-icon-small">🚧</div>
+                                <div class="lock-stars">Próximamente</div>
+                            </div>
+                        </div>
+                        <div class="inventory-item-square locked">
+                            <div class="inventory-square-icon">🌿</div>
+                            <div class="inventory-square-name">Plantas</div>
+                            <div class="inventory-square-price">30🫧</div>
+                            <div class="inventory-lock-overlay">
+                                <div class="lock-icon-small">🚧</div>
+                                <div class="lock-stars">Próximamente</div>
+                            </div>
+                        </div>
+                        <div class="inventory-item-square locked">
+                            <div class="inventory-square-icon">🪨</div>
+                            <div class="inventory-square-name">Rocas</div>
+                            <div class="inventory-square-price">20🫧</div>
+                            <div class="inventory-lock-overlay">
+                                <div class="lock-icon-small">🚧</div>
+                                <div class="lock-stars">Próximamente</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(decorationsSection);
                 
                 console.log(`🎒 Inventario actualizado con ${this.availableBackgrounds.length} fondos`);
             }
@@ -9778,6 +9952,68 @@ Comida premium y de cumpleaños
                 
                 // Verificar logros después de añadir evento
                 this.checkAchievements();
+            }
+            
+            // 🫧 EFECTO VISUAL DE BURBUJAS AL CONTADOR
+            createBubbleEffect(amount) {
+                console.log(`🫧 Creando efecto de ${amount} burbujas al contador`);
+                
+                // Obtener posición del contador de burbujas
+                const bubbleCounter = document.getElementById('bubblesCount');
+                if (!bubbleCounter) return;
+                
+                const counterRect = bubbleCounter.getBoundingClientRect();
+                const targetX = counterRect.left + counterRect.width / 2;
+                const targetY = counterRect.top + counterRect.height / 2;
+                
+                // Crear burbujas que vuelan desde el pez al contador
+                for (let i = 0; i < amount; i++) {
+                    const bubble = document.createElement('div');
+                    bubble.innerHTML = '🫧';
+                    bubble.style.cssText = `
+                        position: fixed;
+                        left: ${this.fish ? this.fish.x : this.canvas.width/2}px;
+                        top: ${this.fish ? this.fish.y : this.canvas.height/2}px;
+                        font-size: 20px;
+                        pointer-events: none;
+                        z-index: 10000;
+                        animation: bubbleFlyToCounter 1.5s ease-out forwards;
+                        animation-delay: ${i * 0.1}s;
+                    `;
+                    
+                    // Añadir keyframes CSS si no existen
+                    if (!document.getElementById('bubbleFlyAnimation')) {
+                        const style = document.createElement('style');
+                        style.id = 'bubbleFlyAnimation';
+                        style.textContent = `
+                            @keyframes bubbleFlyToCounter {
+                                0% {
+                                    transform: translate(0, 0) scale(1);
+                                    opacity: 1;
+                                }
+                                50% {
+                                    transform: translate(${targetX - (this.fish ? this.fish.x : this.canvas.width/2)}px, ${targetY - (this.fish ? this.fish.y : this.canvas.height/2)}px) scale(1.2);
+                                    opacity: 0.8;
+                                }
+                                100% {
+                                    transform: translate(${targetX - (this.fish ? this.fish.x : this.canvas.width/2)}px, ${targetY - (this.fish ? this.fish.y : this.canvas.height/2)}px) scale(0.5);
+                                    opacity: 0;
+                                }
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                    
+                    document.body.appendChild(bubble);
+                    
+                    // Remover después de la animación
+                    setTimeout(() => {
+                        if (bubble.parentNode) bubble.remove();
+                    }, 1500 + (i * 100));
+                }
+                
+                // Actualizar contador con animación
+                this.updateCurrencyDisplay('bubblesCount', this.gameState.bubbles);
             }
             
             // 🎆 ANIMACIONES DINÁMICAS PARA RECOMPENSAS EXTRA
@@ -10867,6 +11103,16 @@ Comida premium y de cumpleaños
             startCleaning() {
                 console.log('🧹 ¡INICIANDO LIMPIEZA SINCRONIZADA!');
                 
+                // 🫧 DAR BURBUJAS SI ESTABA SUCIO
+                const wasReallyDirty = this.gameState.needs.dirt > 15; // Solo si estaba realmente sucio
+                if (wasReallyDirty) {
+                    this.gameState.bubbles += 3;
+                    console.log(`🫧 +3 burbujas por limpiar cuando estaba sucio (suciedad previa: ${this.gameState.needs.dirt.toFixed(1)}%)`);
+                    
+                    // 🎆 EFECTO VISUAL DE BURBUJAS AL CONTADOR
+                    this.createBubbleEffect(3);
+                }
+                
                 // 🎯 INICIALIZAR ESTADO DE LIMPIEZA
                 this.cleaningState = 'burst'; // burst -> fade -> settle
                 this.cleaningTimer = 0;
@@ -11097,8 +11343,18 @@ Comida premium y de cumpleaños
                         
                         // 🍎 COMER CON CONFIG POR ETAPA
                         const cfg = this.getStageCfg(this.gameState);
+                        const hadRealHunger = this.gameState.needs.hunger > 20; // Solo si tenía hambre significativa
                         this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - cfg.eatReduce, 0, 100);
                         this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerPellet, 0, 100);
+                        
+                        // 🫧 DAR BURBUJAS SI TENÍA HAMBRE REAL
+                        if (hadRealHunger) {
+                            this.gameState.bubbles += 2;
+                            console.log(`🫧 +2 burbujas por comer con hambre real (hambre previa: ${this.gameState.needs.hunger + cfg.eatReduce}%)`);
+                            
+                            // 🎆 EFECTO VISUAL DE BURBUJAS AL CONTADOR
+                            this.createBubbleEffect(2);
+                        }
                         
                         console.log(`🍎 ¡PEZ COME! Etapa: ${this.gameState.stage} - Reduce hambre: ${cfg.eatReduce} - Añade suciedad: ${cfg.dirtPerPellet}`);
                         
