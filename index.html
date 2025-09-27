@@ -5182,15 +5182,22 @@
                     bottomY = actualHeight - 60;
                 }
                 
+                // CORREGIR CÁLCULO DE LÍMITES - Usar dimensiones reales del canvas
                 const boundaries = {
                     left: safeMargin,
-                    right: Math.max(safeMargin + fishSize, actualWidth - safeMargin - fishSize),
+                    right: actualWidth - safeMargin, // Sin restar fishSize aquí
                     top: 125, // Debajo del header
-                    bottom: Math.max(125 + fishSize, bottomY - safeMargin - fishSize),
+                    bottom: bottomY - safeMargin, // Sin restar fishSize aquí
                     width: actualWidth,
                     height: actualHeight,
                     timestamp: Date.now()
                 };
+                
+                console.log('🧱 Límites calculados:');
+                console.log(`  - left: ${boundaries.left}`);
+                console.log(`  - right: ${boundaries.right} (ancho: ${actualWidth})`);
+                console.log(`  - top: ${boundaries.top}`);
+                console.log(`  - bottom: ${boundaries.bottom} (alto: ${actualHeight})`);
                 
                 // Verificar que los límites sean válidos
                 if (boundaries.right <= boundaries.left || boundaries.bottom <= boundaries.top) {
@@ -5219,11 +5226,12 @@
             
             // 🧱 LÍMITES POR DEFECTO COMO FALLBACK
             getDefaultBoundaries() {
+                const safeMargin = 30;
                 const defaultBoundaries = {
-                    left: 30,
-                    right: window.innerWidth - 90,
+                    left: safeMargin,
+                    right: window.innerWidth - safeMargin,
                     top: 125,
-                    bottom: window.innerHeight - 200,
+                    bottom: window.innerHeight - 130 - safeMargin,
                     width: window.innerWidth,
                     height: window.innerHeight - 130,
                     timestamp: Date.now()
@@ -5231,6 +5239,13 @@
                 
                 console.log('🧱 Usando límites por defecto:', defaultBoundaries);
                 return defaultBoundaries;
+            }
+            
+            // 🧱 RECALCULAR LÍMITES MANUALMENTE (para debug)
+            recalculateBoundaries() {
+                console.log('🧱 Recalculando límites manualmente...');
+                localStorage.removeItem('miPececito_boundaries'); // Forzar recálculo
+                return this.calculateAndSaveBoundaries();
             }
             
             // 🧱 OBTENER LÍMITES GUARDADOS O CALCULAR NUEVOS
@@ -11943,6 +11958,7 @@ Comida premium y de cumpleaños
                     console.log('🧱 Límites actuales:', boundaries);
                     console.log(`🐟 Posición pez: (${fish.x.toFixed(1)}, ${fish.y.toFixed(1)})`);
                     console.log(`📱 Canvas: ${this.canvas.width}x${this.canvas.height}`);
+                    console.log(`📏 Área de movimiento: ${boundaries.right - boundaries.left}x${boundaries.bottom - boundaries.top}px`);
                     this.lastBoundaryDebug = Date.now();
                 }
                 
