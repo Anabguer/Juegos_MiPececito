@@ -60,8 +60,8 @@
           --rank-diamond: #B9F2FF;
         }
 
-        /* 🔧 REGLA ESPECÍFICA PARA BOTONES CON HOVER */
-        button:hover, .btn:hover, [class*="btn"]:hover, [class*="button"]:hover {
+        /* 🔧 REGLA ESPECÍFICA PARA BOTONES CON HOVER - SOLO BOTONES REALES */
+        button:hover, .debug-btn:hover, .universal-btn:hover, .action-btn:hover, .close-btn:hover, .tab-btn:hover, .item-card:hover, .game-close-btn:hover, .game-tab-btn:hover, .game-item-card:hover, .game-play-btn:hover, .bubble-btn:hover, .mobile-close-btn:hover, .mobile-help-btn:hover, .game-card-square:hover, .inventory-item-square:hover, .custom-btn:hover, .play-btn:hover, .album-action-btn:hover, .album-entry:hover, .currency-float:hover, .menu-btn:hover, .volume-button:hover, .start-button:hover, .reset-button:hover, .retry-button:hover {
             border-radius: inherit !important;
         }
 
@@ -9809,7 +9809,7 @@ Comida premium y de cumpleaños
                     `;
                     
                     card.addEventListener('click', () => {
-                        this.selectBackground(bg.name);
+                        this.useInventoryItem(`bg-${bg.name}`);
                     });
                     
                     grid.appendChild(card);
