@@ -15986,14 +15986,16 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas basadas en el score (perlas ganadas)
-                const stars = Math.floor(score / 8);   // Estrellas cada 8 perlas
+                const bubbles = Math.floor(score / 6);  // Burbujas cada 6 perlas
+                const stars = Math.floor(score / 8);    // Estrellas cada 8 perlas
                 
-                if (window.game && stars > 0) {
+                if (window.game && (bubbles > 0 || stars > 0)) {
+                    window.game.gameState.bubbles += bubbles;
                     window.game.gameState.stars += stars;
                     window.game.saveGame();
                     
                     // 🎆 ANIMACIÓN ESPECIAL SI ES RECOMPENSA EXTRA
-                    window.game.createRewardAnimation(stars, 0);
+                    window.game.createRewardAnimation(stars, bubbles);
                 }
                 
                 updateUI();
@@ -16008,7 +16010,8 @@ Comida premium y de cumpleaños
                 // Evitar múltiples modales
                 if (gameOverlay.querySelector('.end-modal')) return;
                 
-                const stars = Math.floor(score / 8);
+                const bubbles = Math.floor(score / 6);  // Burbujas cada 6 perlas
+                const stars = Math.floor(score / 8);    // Estrellas cada 8 perlas
                 
                 const endModal = document.createElement('div');
                 endModal.className = 'end-modal';
@@ -16084,6 +16087,7 @@ Comida premium y de cumpleaños
                             <p style="margin: 8px 0;"><strong>Nivel alcanzado:</strong> ${round}</p>
                             <p style="margin: 8px 0;"><strong>Perlas conseguidas:</strong> ${score}</p>
                             <p style="margin: 8px 0;"><strong>Mejor récord:</strong> ${best}</p>
+                            <p style="margin: 8px 0;"><strong>Burbujas ganadas:</strong> +${bubbles}</p>
                             <p style="margin: 8px 0;"><strong>Estrellas ganadas:</strong> +${stars}</p>
                         </div>
                         
@@ -16499,7 +16503,7 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas
-                const bubbles = Math.floor(score / 5);  // Menos burbujas
+                const bubbles = Math.floor(score / 3);  // Más burbujas
                 const stars = Math.floor(score / 8);    // Más estrellas
                 
                 if (window.game && bubbles > 0) {
@@ -16820,7 +16824,7 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas
-                const bubbles = Math.floor(score / 10); // Menos burbujas
+                const bubbles = Math.floor(score / 6);  // Más burbujas
                 const stars = Math.floor(score / 12);   // Más estrellas
                 
                 if (window.game && bubbles > 0) {
@@ -17170,7 +17174,7 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas
-                const bubbles = Math.floor(score / 8);  // Menos burbujas
+                const bubbles = Math.floor(score / 5);  // Más burbujas
                 const stars = Math.floor(score / 10);   // Más estrellas
                 
                 if (window.game && bubbles > 0) {
@@ -17458,7 +17462,7 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas
-                const bubbles = Math.floor(score / 6);  // Menos burbujas
+                const bubbles = Math.floor(score / 4);  // Más burbujas
                 const stars = Math.floor(score / 8);    // Más estrellas
                 
                 if (window.game && bubbles > 0) {
@@ -17750,7 +17754,7 @@ Comida premium y de cumpleaños
                 }
                 
                 // Dar recompensas
-                const bubbles = Math.floor(score / 8);  // Menos burbujas
+                const bubbles = Math.floor(score / 5);  // Más burbujas
                 const stars = Math.floor(score / 10);   // Más estrellas
                 
                 if (window.game && bubbles > 0) {
