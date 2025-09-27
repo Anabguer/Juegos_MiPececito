@@ -5182,12 +5182,12 @@
                     bottomY = actualHeight - 60;
                 }
                 
-                // CORREGIR CÁLCULO DE LÍMITES - Usar dimensiones reales del canvas
+                // CORREGIR CÁLCULO DE LÍMITES - Asegurar que el pez esté completamente visible
                 const boundaries = {
-                    left: safeMargin,
-                    right: actualWidth - safeMargin, // Sin restar fishSize aquí
+                    left: fishSize / 2, // Mitad del pez desde el borde izquierdo
+                    right: actualWidth - fishSize / 2, // Mitad del pez desde el borde derecho
                     top: 125, // Debajo del header
-                    bottom: bottomY - safeMargin, // Sin restar fishSize aquí
+                    bottom: bottomY - 10, // Casi hasta el fondo para alcanzar la comida
                     width: actualWidth,
                     height: actualHeight,
                     timestamp: Date.now()
@@ -5226,12 +5226,12 @@
             
             // 🧱 LÍMITES POR DEFECTO COMO FALLBACK
             getDefaultBoundaries() {
-                const safeMargin = 30;
+                const fishSize = 60;
                 const defaultBoundaries = {
-                    left: safeMargin,
-                    right: window.innerWidth - safeMargin,
+                    left: fishSize / 2, // Mitad del pez desde el borde izquierdo
+                    right: window.innerWidth - fishSize / 2, // Mitad del pez desde el borde derecho
                     top: 125,
-                    bottom: window.innerHeight - 130 - safeMargin,
+                    bottom: window.innerHeight - 130 - 10, // Casi hasta el fondo
                     width: window.innerWidth,
                     height: window.innerHeight - 130,
                     timestamp: Date.now()
