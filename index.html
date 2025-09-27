@@ -5125,6 +5125,9 @@
                     this.canvas.style.left = '0';
                     this.canvas.style.right = '0';
                     this.canvas.style.bottom = '60px'; // Espacio para botones compactos
+                    
+                    // 🧱 CALCULAR Y GUARDAR LÍMITES DINÁMICOS
+                    this.calculateAndSaveBoundaries();
                 };
                 window.addEventListener('resize', resize);
                 resize();
@@ -5135,6 +5138,66 @@
                 });
                 
                 console.log('👆 Click en canvas habilitado - El pez vendrá a tu dedo');
+            }
+            
+            // 🧱 CALCULAR Y GUARDAR LÍMITES DINÁMICOS DEL PEZ
+            calculateAndSaveBoundaries() {
+                console.log('🧱 Calculando límites dinámicos del pez...');
+                
+                // Obtener dimensiones reales del canvas
+                const canvasRect = this.canvas.getBoundingClientRect();
+                const actualWidth = canvasRect.width;
+                const actualHeight = canvasRect.height;
+                
+                // Calcular límites con márgenes seguros
+                const fishSize = 60; // Tamaño aproximado del pez
+                const safeMargin = 30; // Margen de seguridad
+                
+                const boundaries = {
+                    left: safeMargin,
+                    right: actualWidth - safeMargin - fishSize,
+                    top: 125, // Debajo del header
+                    bottom: this.getFloorY() - safeMargin - fishSize,
+                    width: actualWidth,
+                    height: actualHeight,
+                    timestamp: Date.now()
+                };
+                
+                // Guardar en el estado del juego
+                this.gameState.boundaries = boundaries;
+                
+                // Guardar en localStorage para persistencia
+                localStorage.setItem('miPececito_boundaries', JSON.stringify(boundaries));
+                
+                console.log('🧱 Límites calculados:', boundaries);
+                console.log(`📱 Canvas: ${actualWidth}x${actualHeight}px`);
+                console.log(`🐟 Área de movimiento: ${boundaries.right - boundaries.left}x${boundaries.bottom - boundaries.top}px`);
+                
+                return boundaries;
+            }
+            
+            // 🧱 OBTENER LÍMITES GUARDADOS O CALCULAR NUEVOS
+            getBoundaries() {
+                // Intentar cargar límites guardados
+                const saved = localStorage.getItem('miPececito_boundaries');
+                if (saved) {
+                    try {
+                        const boundaries = JSON.parse(saved);
+                        const age = Date.now() - boundaries.timestamp;
+                        
+                        // Si los límites son recientes (menos de 5 minutos), usarlos
+                        if (age < 5 * 60 * 1000) {
+                            console.log('🧱 Usando límites guardados (edad:', Math.round(age/1000), 's)');
+                            return boundaries;
+                        }
+                    } catch (e) {
+                        console.warn('⚠️ Error al cargar límites guardados:', e);
+                    }
+                }
+                
+                // Si no hay límites válidos, calcular nuevos
+                console.log('🧱 Calculando nuevos límites...');
+                return this.calculateAndSaveBoundaries();
             }
             
             async loadAssets() {
@@ -6506,9 +6569,12 @@
                     }, 200); // Más rápido para sincronizar mejor
                 }
                 
+                // 🧱 OBTENER LÍMITES PARA POSICIÓN INICIAL
+                const boundaries = this.getBoundaries();
+                
                 this.fish = {
-                    x: this.canvas.width / 2,
-                    y: this.canvas.height * 0.6,
+                    x: boundaries.left + (boundaries.right - boundaries.left) / 2, // Centro del área de movimiento
+                    y: boundaries.top + (boundaries.bottom - boundaries.top) * 0.6, // 60% hacia abajo
                     size: this.getFishSizeForStage('baby'), // Tamaño según etapa
                     birthTime: Date.now(),
                     isLottie: true,
@@ -6685,9 +6751,11 @@
             
             createCanvasFish() {
                 // Fallback al pez Canvas original
+                const boundaries = this.getBoundaries();
+                
                 this.fish = {
-                    x: this.canvas.width / 2,
-                    y: this.canvas.height * 0.6,
+                    x: boundaries.left + (boundaries.right - boundaries.left) / 2, // Centro del área de movimiento
+                    y: boundaries.top + (boundaries.bottom - boundaries.top) * 0.6, // 60% hacia abajo
                     size: 45,
                     birthTime: Date.now(),
                     isLottie: false
@@ -6857,9 +6925,10 @@
                 }
                 
                 // 👆 DEDO CON COORDENADAS CSS Y TURBO
+                const boundaries = this.getBoundaries();
                 this.fish.desire = {
-                    x: this.clamp(x, 24, this.viewW() - 24),
-                    y: this.clamp(y, 24, this.viewH() - 24)
+                    x: this.clamp(x, boundaries.left, boundaries.right),
+                    y: this.clamp(y, boundaries.top, boundaries.bottom)
                 };
                 this.fish.fingerBoostT = 1.6;   // turbo temporal de dedo
                 this.fish.returnToBottom = false; // apagar cualquier regreso al fondo
@@ -7060,12 +7129,13 @@
                     
                     // Se va a una esquina y se queda quieto MÁS TIEMPO
                     if (!this.fish.isInCorner && this.fish.hideTimer > 3) {
-                        // Ir a una esquina aleatoria
+                        // Ir a una esquina aleatoria usando límites dinámicos
+                        const boundaries = this.getBoundaries();
                         const corners = [
-                            { x: 100, y: this.canvas.height * 0.2 }, // Esquina superior izquierda
-                            { x: this.canvas.width - 100, y: this.canvas.height * 0.2 }, // Superior derecha
-                            { x: 100, y: this.canvas.height * 0.8 }, // Inferior izquierda
-                            { x: this.canvas.width - 100, y: this.canvas.height * 0.8 } // Inferior derecha
+                            { x: boundaries.left, y: boundaries.top }, // Esquina superior izquierda
+                            { x: boundaries.right, y: boundaries.top }, // Superior derecha
+                            { x: boundaries.left, y: boundaries.bottom }, // Inferior izquierda
+                            { x: boundaries.right, y: boundaries.bottom } // Inferior derecha
                         ];
                         
                         const corner = corners[Math.floor(Math.random() * corners.length)];
@@ -11796,16 +11866,26 @@ Comida premium y de cumpleaños
                 fish.x += fish.vx * deltaTime;
                 fish.y += fish.vy * deltaTime;
 
-                // 🧱 LÍMITES DE PANTALLA CON REBOTE SUAVE (OPTIMIZADOS)
-                const padSides = 60; // Margen lateral para no salir de pantalla
-                const padBottom = 20; // Margen inferior PEQUEÑO para alcanzar comida
-                const W = this.canvas.width;
-                const H = this.getFloorY();
+                // 🧱 LÍMITES DINÁMICOS CON REBOTE SUAVE
+                const boundaries = this.getBoundaries();
                 
-                if (fish.x < padSides) { fish.x = padSides; if (fish.vx < 0) fish.vx *= -0.5; }
-                if (fish.x > W - padSides) { fish.x = W - padSides; if (fish.vx > 0) fish.vx *= -0.5; }
-                if (fish.y < 125) { fish.y = 125; if (fish.vy < 0) fish.vy *= -0.5; }
-                if (fish.y > H - padBottom) { fish.y = H - padBottom; if (fish.vy > 0) fish.vy *= -0.5; } // MARGEN PEQUEÑO ABAJO
+                // Aplicar límites con rebote suave
+                if (fish.x < boundaries.left) { 
+                    fish.x = boundaries.left; 
+                    if (fish.vx < 0) fish.vx *= -0.5; 
+                }
+                if (fish.x > boundaries.right) { 
+                    fish.x = boundaries.right; 
+                    if (fish.vx > 0) fish.vx *= -0.5; 
+                }
+                if (fish.y < boundaries.top) { 
+                    fish.y = boundaries.top; 
+                    if (fish.vy < 0) fish.vy *= -0.5; 
+                }
+                if (fish.y > boundaries.bottom) { 
+                    fish.y = boundaries.bottom; 
+                    if (fish.vy > 0) fish.vy *= -0.5; 
+                }
 
                 // 🐟 ORIENTACIÓN FLUIDA (mirar hacia donde nada)
                 if (Math.abs(fish.vx) > 2) {
