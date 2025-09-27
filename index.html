@@ -60,6 +60,11 @@
           --rank-diamond: #B9F2FF;
         }
 
+        /* 🔧 REGLA GENERAL PARA MANTENER BORDER-RADIUS EN HOVER */
+        *:hover {
+            border-radius: inherit !important;
+        }
+
         /* 🔘 COMPONENTES UNIVERSALES */
         .universal-btn {
           width: var(--button-size);
@@ -85,6 +90,7 @@
           background: var(--button-hover);
           transform: translateY(-2px);
           box-shadow: var(--shadow-strong);
+          border-radius: var(--button-radius); /* Mantener esquinas redondeadas en hover */
         }
 
         .universal-btn:active {
@@ -207,6 +213,7 @@
             transform: translateY(-2px) scale(1.05);
             box-shadow: 0 5px 12px rgba(38, 198, 218, 0.4);
             border-color: #4fc3f7;
+            border-radius: 12px; /* Mantener esquinas redondeadas en hover */
         }
         
         .action-btn:active {
@@ -271,6 +278,7 @@
         .close-btn:hover {
             transform: scale(1.1);
             box-shadow: 0 5px 12px rgba(255, 82, 82, 0.4);
+            border-radius: 50%; /* Mantener esquinas redondeadas en hover */
         }
         
         .inventory-tabs {
@@ -302,6 +310,7 @@
         .tab-btn:hover {
             background: rgba(255,255,255,0.1);
             transform: translateY(-1px);
+            border-radius: 8px; /* Mantener esquinas redondeadas en hover */
         }
         
         .inventory-content {
@@ -338,6 +347,7 @@
         .item-card:hover {
             background: rgba(255,255,255,0.2);
             border-color: #4fc3f7;
+            border-radius: 12px; /* Mantener esquinas redondeadas en hover */
         }
         
         .item-card.selected {
@@ -481,6 +491,7 @@
         .game-close-btn:hover {
             transform: scale(1.1) rotate(90deg);
             box-shadow: 0 6px 15px rgba(255, 82, 82, 0.5);
+            border-radius: 50%; /* Mantener esquinas redondeadas en hover */
         }
         
         .game-tabs {
@@ -508,6 +519,7 @@
             background: rgba(255, 255, 255, 0.1);
             color: white;
             transform: translateY(-2px);
+            border-radius: 8px; /* Mantener esquinas redondeadas en hover */
         }
         
         .game-tab-btn.active {
@@ -577,6 +589,7 @@
             border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-4px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            border-radius: 12px; /* Mantener esquinas redondeadas en hover */
         }
         
         .game-item-card.available {
@@ -653,6 +666,7 @@
             transform: scale(1.05);
             box-shadow: 0 6px 18px rgba(76, 175, 80, 0.4);
             background: linear-gradient(45deg, #66bb6a, #4caf50);
+            border-radius: 12px; /* Mantener esquinas redondeadas en hover */
         }
         
         .game-play-btn:active {
@@ -691,6 +705,7 @@
         .bubble-btn.primary:hover {
             transform: translateY(-3px) scale(1.08) !important;
             box-shadow: 0 12px 25px rgba(255, 215, 0, 0.7) !important;
+            border-radius: 20px !important; /* Mantener esquinas redondeadas en hover */
         }
         
         /* 🎯 ÁREA DE JUEGO MÁS GRANDE */
@@ -858,6 +873,7 @@
         .mobile-close-btn:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: scale(1.1);
+            border-radius: 50%; /* Mantener esquinas redondeadas en hover */
         }
         
         .mobile-close-btn:active {
@@ -891,6 +907,7 @@
         .mobile-help-btn:hover {
             background: rgba(255, 193, 7, 0.3);
             transform: scale(1.1);
+            border-radius: 50%; /* Mantener esquinas redondeadas en hover */
         }
         
         .mobile-help-btn:active {
@@ -926,6 +943,7 @@
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.6);
             transform: scale(1.05);
+            border-radius: 10px; /* Mantener esquinas redondeadas en hover */
         }
         
         .game-card-square:active {
@@ -940,6 +958,7 @@
         .game-card-square.available:hover {
             border-color: #66bb6a;
             box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            border-radius: 10px; /* Mantener esquinas redondeadas en hover */
         }
         
         .game-card-square.locked {
@@ -1055,6 +1074,7 @@
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.6);
             transform: scale(1.05);
+            border-radius: 12px; /* Mantener esquinas redondeadas en hover */
         }
         
         .inventory-item-square:active {
@@ -1118,6 +1138,7 @@
         .inventory-item-square.available:hover {
             border-color: #42a5f5;
             box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+            border-radius: 12px; /* Mantener esquinas redondeadas en hover */
         }
         
         .inventory-item-square.locked {
@@ -1583,6 +1604,7 @@
         .custom-btn:hover {
             transform: translateY(-2px) scale(1.05);
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border-radius: 15px; /* Mantener esquinas redondeadas en hover */
         }
         
         .custom-btn:active {
@@ -1616,6 +1638,7 @@
             transform: translateY(-5px) scale(1.02);
             border-color: white;
             box-shadow: 0 8px 20px rgba(255,255,255,0.2);
+            border-radius: 15px; /* Mantener esquinas redondeadas en hover */
         }
         
         .game-card.locked {
@@ -1673,6 +1696,7 @@
         .play-btn:hover {
             transform: translateY(-2px) scale(1.05);
             box-shadow: 0 5px 12px rgba(76, 175, 80, 0.4);
+            border-radius: 15px; /* Mantener esquinas redondeadas en hover */
         }
         
         /* 📸 ÁLBUM/DIARIO */
@@ -1707,6 +1731,7 @@
         .album-action-btn:hover {
             transform: scale(1.1);
             box-shadow: 0 5px 12px rgba(79, 195, 247, 0.4);
+            border-radius: 12px; /* Mantener esquinas redondeadas en hover */
         }
         
         .album-content {
@@ -1758,6 +1783,7 @@
             transform: translateY(-2px);
             border-color: white;
             box-shadow: 0 5px 15px rgba(255,255,255,0.1);
+            border-radius: 15px; /* Mantener esquinas redondeadas en hover */
         }
         
         .album-entry-header {
@@ -1850,6 +1876,7 @@
         .currency-float:hover {
             transform: scale(1.05);
             box-shadow: 0 6px 16px rgba(38, 198, 218, 0.4);
+            border-radius: 18px; /* Mantener esquinas redondeadas en hover */
         }
         
         .currency-float .currency-icon {
@@ -2137,6 +2164,7 @@
         
         .retry-button:hover {
             background: var(--button-hover);
+            border-radius: 12px; /* Mantener esquinas redondeadas en hover */
         }
         
         /* 🔧 Barra de Debug (solo en desarrollo) */
@@ -2186,6 +2214,7 @@
         .debug-btn:hover {
             background: rgba(255, 255, 255, 0.1);
             transform: scale(1.1);
+            border-radius: 4px; /* Mantener esquinas redondeadas en hover */
         }
         
         .debug-btn.danger {
@@ -2259,6 +2288,7 @@
             background: linear-gradient(135deg, #29b6f6, #0288d1);
             transform: translateY(-2px); /* EFECTO SUAVE NORMAL */
             box-shadow: 0 4px 12px rgba(79, 195, 247, 0.4); /* SOMBRA SUAVE */
+            border-radius: 13px; /* Mantener esquinas redondeadas en hover */
         }
         
         .menu-btn.disabled {
@@ -2798,6 +2828,7 @@
 
         .volume-button:hover {
             transform: scale(1.1);
+            border-radius: 13px; /* Mantener esquinas redondeadas en hover */
         }
 
         .volume-button:active {
@@ -2836,6 +2867,7 @@
             background: linear-gradient(135deg, #29b6f6, #0288d1);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(79, 195, 247, 0.8);
+            border-radius: 20px; /* Mantener esquinas redondeadas en hover */
         }
         
         /* 🔄 BOTÓN DE RESET BONITO */
@@ -2856,6 +2888,7 @@
             background: rgba(255, 255, 255, 0.2);
             transform: translateY(-1px);
             box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+            border-radius: 20px; /* Mantener esquinas redondeadas en hover */
         }
         
         /* 🎨 LOGO ANIMADO */
@@ -2946,6 +2979,7 @@
             box-shadow: 0 8px 30px rgba(0,150,255,0.25);
             border-color: rgba(0,200,255,0.9);
             background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(230,248,255,0.9) 100%);
+            border-radius: 15px; /* Mantener esquinas redondeadas en hover */
         }
         
         .game-icon {
