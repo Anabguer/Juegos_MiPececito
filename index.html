@@ -4264,10 +4264,10 @@
             </div>
             
             <div class="mobile-modal-body">
-                <div class="inventory-grid-simple">
+            <div class="inventory-grid-simple">
                     <!-- Los fondos se cargarán dinámicamente -->
-                </div>
             </div>
+                    </div>
         </div>
     </div>
 
@@ -4849,12 +4849,7 @@
             
             // 🫧 JUEGO DE BURBUJAS
             document.querySelector('[data-game="bubbles"]').addEventListener('click', () => {
-                // Usar el juego principal en lugar del viejo
-                if (window.game && window.game.startGame) {
-                    window.game.startGame('bubbles');
-                } else {
-                    startBubbleGame(); // Fallback al juego nuevo
-                }
+                startBubbleGame();
             });
             
             // 💎 JUEGO DE BLOQUES (MAR MATCH-3)
@@ -10594,7 +10589,7 @@ Comida premium y de cumpleaños
                         vy: -40, // Más lento
                         color: '#FFFFFF', // Texto blanco
                         size: 18 // Más pequeño
-                    });
+                });
             }
             
             // 📝 ACTUALIZAR MENSAJES FLOTANTES
@@ -12253,8 +12248,8 @@ Comida premium y de cumpleaños
                     const d = this.dist(fish.x, fish.y, f.x, f.y);
                     const s = this.seek(fish.x, fish.y, f.x, f.y, fish.maxSpeed * 0.9);
                     const t = this.clamp(d / 90, 0.35, 1);
-                    targetV = {vx: s.vx * t, vy: s.vy * t};
-                }
+                        targetV = {vx: s.vx * t, vy: s.vy * t};
+                    }
                 // Movimiento natural (igual que el demo perfecto)
                 else {
                     fish.wanderTimer -= deltaTime;
@@ -12526,16 +12521,9 @@ Comida premium y de cumpleaños
                 }
             };
             
-            // Función SÚPER SIMPLE para juego de burbujas (DESACTIVADA - usar el juego nuevo)
+            // Función SÚPER SIMPLE para juego de burbujas
             window.startBubbleGameDirect = function() {
-                console.log('🚫 Juego viejo desactivado - usando el juego nuevo');
-                // Redirigir al juego nuevo
-                if (window.game && window.game.startGame) {
-                    window.game.startGame('bubbles');
-                } else {
-                    console.log('❌ window.game no disponible');
-                }
-                return;
+                console.log('🫧 Iniciando juego SIMPLE');
                 
                 // 🔊 SONIDO DE INICIO DE JUEGO
                 if (window.audioManager) {
@@ -12642,6 +12630,15 @@ Comida premium y de cumpleaños
                         if (isGood) {
                             score += 3;
                             timeLeft += 1;
+                            
+                            // 🎮 DAR DIVERSIÓN INMEDIATA POR CADA BURBUJA BUENA
+                            if (window.game && window.game.gameState) {
+                                const funIncrease = 2; // +2 diversión por cada burbuja buena
+                                window.game.gameState.needs.fun = Math.max(0, window.game.gameState.needs.fun - funIncrease);
+                                window.game.updateCrisisFlags();
+                                window.game.updateNeedBars();
+                                console.log(`🎮 +${funIncrease} diversión por tocar burbuja buena (total: ${score} puntos)`);
+                            }
                         } else {
                             score = Math.max(0, score - 2);
                         }
