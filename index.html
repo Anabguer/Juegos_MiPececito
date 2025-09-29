@@ -12187,12 +12187,30 @@ Comida premium y de cumpleaños
                     speedMul = (fish.spinKind === "clean") ? 1.8 : 1.25;
                     fish.happyBurst = Math.max(0, fish.happyBurst - (fish.spinKind === "clean" ? 0.6 : 1.6) * deltaTime);
                 }
-                // Crisis hambre + comida (SÚPER RÁPIDO)
-                else if (inHunger && this.food?.length) {
+                // 🍎 COMIDA = MÁXIMA PRIORIDAD (SIEMPRE RÁPIDO)
+                if (this.food?.length) {
                     const best = this.nearestFood();
-                    const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.5); // Súper rápido cuando tiene hambre
-                    speedMul = 1.4; // Multiplicador alto para crisis
-                    targetV = {vx: s.vx, vy: s.vy};
+                    if (inHunger) {
+                        // Crisis hambre + comida (SÚPER RÁPIDO)
+                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.5);
+                        speedMul = 1.4;
+                        targetV = {vx: s.vx, vy: s.vy};
+                    } else if (inDirt) {
+                        // Crisis suciedad + comida (RÁPIDO)
+                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.2);
+                        speedMul = 1.1;
+                        targetV = {vx: s.vx, vy: s.vy};
+                    } else if (inBored) {
+                        // Crisis aburrimiento + comida (RÁPIDO)
+                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.3);
+                        speedMul = 1.2;
+                        targetV = {vx: s.vx, vy: s.vy};
+                    } else {
+                        // Comida normal (RÁPIDO)
+                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.2);
+                        speedMul = 1.1;
+                        targetV = {vx: s.vx, vy: s.vy};
+                    }
                 }
                 // Crisis hambre sin comida
                 else if (inHunger) {
@@ -12205,13 +12223,6 @@ Comida premium y de cumpleaños
                         targetV = {vx: Math.sin(fish.swimPhase) * 6, vy: Math.cos(fish.swimPhase * 1.2) * 3};
                     }
                 }
-                // Crisis suciedad + comida
-                else if (inDirt && this.food?.length) {
-                    const best = this.nearestFood();
-                    const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 0.6);
-                    speedMul = 0.85;
-                    targetV = {vx: s.vx, vy: s.vy};
-                }
                 // Crisis suciedad sin comida
                 else if (inDirt) {
                     const home = {x: this.canvas.width - 70, y: this.getFloorY() - 70};
@@ -12223,7 +12234,7 @@ Comida premium y de cumpleaños
                         targetV = {vx: Math.sin(fish.swimPhase) * 5, vy: Math.cos(fish.swimPhase * 1.2) * 2};
                     }
                 }
-                // Crisis aburrimiento
+                // Crisis aburrimiento sin comida
                 else if (inBored) {
                     const home = {x: this.canvas.width * 0.5, y: this.getFloorY() - 70};
                     const s = this.seek(fish.x, fish.y, home.x, home.y, 80);
@@ -12245,15 +12256,7 @@ Comida premium y de cumpleaños
                         this.launchHeartToFun(fish.x, fish.y);
                     }
                 }
-                // Perseguir comida (SIEMPRE RÁPIDO)
-                else if (this.food?.length) {
-                    const f = this.nearestFood();
-                    const d = this.dist(fish.x, fish.y, f.x, f.y);
-                    const s = this.seek(fish.x, fish.y, f.x, f.y, fish.maxSpeed * 1.2); // Más rápido que antes
-                    const t = this.clamp(d / 90, 0.8, 1); // Velocidad mínima más alta
-                    targetV = {vx: s.vx * t, vy: s.vy * t};
-                    speedMul = 1.1; // Multiplicador de velocidad para comida
-                }
+                // ✅ COMIDA YA MANEJADA ARRIBA CON MÁXIMA PRIORIDAD
                 // Movimiento natural (igual que el demo perfecto)
                 else {
                     fish.wanderTimer -= deltaTime;
