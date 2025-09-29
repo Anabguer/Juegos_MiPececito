@@ -1,0 +1,413 @@
+CÓDIGO DEL MOVIMIENTO DEL PEZ - MI PECECITO
+
+==========================================
+FUNCIÓN ACTUAL (updateFishMovement) - LÍNEAS 12138-12418
+==========================================
+
+updateFishMovement(deltaTime) {
+    if (!this.fish) return;
+    console.log('🐟 updateFishMovement() ejecutándose...');
+    const fish = this.fish;
+
+    // Inicializar propiedades de física si no existen
+    if (!fish.maxSpeed) fish.maxSpeed = 800; // Velocidad máxima aumentada
+    if (!fish.maxAccel) fish.maxAccel = 2200; // Aceleración aumentada
+    if (!fish.baseSpeed) fish.baseSpeed = 400; // Velocidad base aumentada
+    if (!fish.facing) fish.facing = 1;
+    if (!fish.wanderTimer) fish.wanderTimer = 0;
+    if (!fish.wanderDir) fish.wanderDir = {x: 1, y: 0};
+    if (fish.desire === undefined) fish.desire = null;
+
+    // 👁️ PARPADEO SIMPLIFICADO (OJO SIEMPRE VISIBLE)
+    fish.eyeOpen = 1; // OJO SIEMPRE ABIERTO (sin parpadeo por ahora)
+    
+    // Burbujas de respiración
+    fish.breathT = (fish.breathT || 2) - deltaTime;
+    if (fish.breathT <= 0 && !this.cleaningState) {
+        this.emitMouthBubbles(3 + Math.floor(Math.random() * 3));
+        fish.breathT = 2 + Math.random() * 3;
+    }
+
+    fish.swimPhase = (fish.swimPhase || 0) + deltaTime * 3.2;
+    let targetV = {vx: 0, vy: 0};
+    let speedMul = 1.0;
+
+    // 🚨 NECESIDADES EXTREMAS - Va a esquina
+    const hasExtremeNeeds = this.gameState.needs.hunger > 85 || 
+                          this.gameState.needs.dirt > 90 || 
+                          this.gameState.needs.fun < 10;
+    
+    // 🍎 SOLTAR COMIDA AUTOMÁTICAMENTE SI EL PEZ TIENE HAMBRE
+    if (this.gameState.needs.hunger > 60 && this.food.length === 0) {
+        this.dropFood();
+        console.log('🍎 Comida automática soltada por hambre del pez');
+    }
+    
+    if (hasExtremeNeeds) {
+        console.log('🚨 ACTIVANDO COMPORTAMIENTO DE NECESIDADES EXTREMAS');
+        // Pez con necesidades extremas - va a esquina
+        const currentStage = this.gameState.stage;
+        fish.baseSpeed = (currentStage === 'baby' ? 120 : 90) * 0.6; // Menos lento
+        fish.isDepressed = true;
+        fish.hideTimer = (fish.hideTimer || 0) + 1/60;
+        
+        // Se va a la esquina inferior izquierda y se queda quieto
+        if (!fish.isInCorner && fish.hideTimer > 2) {
+            // Ir SIEMPRE a la esquina inferior izquierda
+            const padLeft = 60;
+            const H = this.getFloorY();
+            const corner = { x: padLeft + 5, y: H - 5 }; // Esquina inferior izquierda (5px dentro del límite)
+            
+            fish.targetX = corner.x;
+            fish.targetY = corner.y;
+            // Pez con necesidades extremas va LENTO a esquina
+            fish.cornerTargetX = corner.x;
+            fish.cornerTargetY = corner.y;
+            fish.goingToCorner = true;
+            fish.isInCorner = true;
+            fish.cornerTime = 2 + Math.random() * 3; // 2-5 segundos en esquina
+            console.log(`😢 Pez con hambre >70% va a esconderse en esquina inferior izquierda... (${corner.x}, ${corner.y})`);
+        }
+        
+        // Quedarse quieto en la esquina
+        if (fish.isInCorner) {
+            fish.cornerTime -= 1/60;
+            
+            // Movimiento MUY reducido en la esquina
+            if (fish.cornerTime > 0) {
+                fish.vx *= 0.95; // Casi inmóvil
+                fish.vy *= 0.95;
+            } else {
+                fish.isInCorner = false;
+                fish.hideTimer = 0;
+                console.log('🐠 Pez sale de la esquina');
+            }
+        }
+        
+        // 🍎 PERMITIR BÚSQUEDA DE COMIDA INCLUSO CUANDO ESTÁ EN ESQUINA
+        const nearestFood = this.nearestFood();
+        if (nearestFood && this.dist(fish.x, fish.y, nearestFood.x, nearestFood.y) < 120) {
+            console.log('🍎 Pez hambriento detecta comida cerca, va a comer!');
+            fish.desire = {x: nearestFood.x, y: nearestFood.y};
+            fish.targetX = nearestFood.x;
+            fish.targetY = nearestFood.y;
+            fish.isGoingToTarget = true;
+            fish.isInCorner = false; // Salir de la esquina para comer
+            fish.cornerTime = 0;
+            fish.hideTimer = 0; // Resetear timer de esconderse
+        }
+    }
+
+    // 🔥 TURBO DE DEDO (decaimiento)
+    fish.fingerBoostT = Math.max(0, (fish.fingerBoostT || 0) - deltaTime);
+
+    // 🌀 EFECTO GIRATORIO (happyBurst)
+    if (fish.happyBurst && fish.happyBurst > 0) {
+        const w = (fish.spinKind === "clean") ? 13.0 : 6.0;
+        const R = (fish.spinKind === "clean") ? 140 : 55;
+        const a = (this._time || 0) * w;
+        targetV = {vx: Math.cos(a) * R * 0.65, vy: Math.sin(a) * R * 0.65};
+        speedMul = (fish.spinKind === "clean") ? 1.8 : 1.25;
+        fish.happyBurst = Math.max(0, fish.happyBurst - (fish.spinKind === "clean" ? 0.6 : 1.6) * deltaTime);
+    }
+    // 👆 SEGUIR DEDO (PRIORIDAD MÁXIMA) - USANDO fish.desire COMO EL EJEMPLO
+    else if (fish.desire) {
+        const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y, fish.maxSpeed * 0.9);
+        const t = this.clamp(s.dist / 120, 0.25, 1);
+        targetV = {vx: s.vx * t, vy: s.vy * t};
+        speedMul = 1.5;
+        
+        if (s.dist < 40) {
+            // 💖 PEZ LLEGÓ AL DEDO - SOLO LANZAR CORAZÓN SI ESTÁ CONTENTO
+            fish.desire = null;
+            targetV = {vx: 0, vy: 0};
+            
+            // Solo lanzar corazón si el pez NO tiene necesidades extremas
+            const hasExtremeNeeds = this.gameState.needs.hunger > 70 || 
+                                  this.gameState.needs.dirt > 80 || 
+                                  this.gameState.needs.fun < 20;
+            
+            if (!hasExtremeNeeds) {
+                this.launchHeartToFun(fish.x, fish.y);
+                
+                // 🔊 SONIDO DE CORAZÓN/BURBUJA
+                if (window.audioManager) {
+                    window.audioManager.playSound('heart');
+                }
+                
+                console.log('💖 ¡Pez llegó al dedo! Corazón lanzado con sonido');
+            } else {
+                console.log('😢 Pez llegó al dedo pero tiene necesidades extremas - NO corazón');
+            }
+        }
+    }
+    // 🍎 PERSEGUIR COMIDA SIEMPRE (los peces SIEMPRE comen)
+    else if (this.food.length > 0) {
+        const closest = this.nearestFood();
+        if (closest) {
+            const d = this.dist(fish.x, fish.y, closest.x, closest.y);
+            const s = this.seek(fish.x, fish.y, closest.x, closest.y, fish.maxSpeed * 0.9);
+            const t = this.clamp(d / 200, 0.35, 1); // Rango ampliado a 200px
+            targetV = {vx: s.vx * t, vy: s.vy * t};
+            speedMul = 1.3;
+            fish.isChasing = true;
+        }
+    }
+    // 🎯 MOVIMIENTO ALEATORIO FLUIDO (cuando no hay objetivos)
+    else {
+        // Inicializar timer de pausa si no existe
+        if (!fish.pauseTimer) fish.pauseTimer = 0;
+        if (!fish.isPaused) fish.isPaused = false;
+        
+        fish.wanderTimer -= deltaTime;
+        fish.pauseTimer -= deltaTime;
+        
+        // Decidir si pausar o moverse
+        if (fish.pauseTimer <= 0) {
+            if (fish.isPaused) {
+                // Terminar pausa y empezar a moverse
+                fish.isPaused = false;
+                fish.pauseTimer = 2.0 + Math.random() * 3.0; // Tiempo de movimiento
+                console.log('🐠 Pez termina pausa, empieza a moverse');
+            } else {
+                // Terminar movimiento y empezar pausa
+                fish.isPaused = true;
+                fish.pauseTimer = 1.0 + Math.random() * 2.0; // Tiempo de pausa
+                console.log('🐠 Pez hace pausa natural');
+            }
+        }
+        
+        if (!fish.isPaused) {
+            // Moverse normalmente
+            if (fish.wanderTimer <= 0) {
+                const angle = Math.random() * Math.PI * 2;
+                fish.wanderDir.x = Math.cos(angle);
+                fish.wanderDir.y = Math.sin(angle) * 0.7;
+                fish.wanderTimer = 3.0 + Math.random() * 4.0;
+            }
+            const cruise = fish.baseSpeed * 1.0;
+            targetV = {
+                vx: fish.wanderDir.x * cruise + Math.cos(fish.swimPhase) * 20,
+                vy: fish.wanderDir.y * cruise + Math.sin(fish.swimPhase * 1.8) * 20
+            };
+            speedMul = 1.0;
+        } else {
+            // Pausa - movimiento muy lento
+            targetV = {vx: 0, vy: 0};
+            speedMul = 0.1; // Muy lento durante la pausa
+        }
+    }
+
+    // 🏊 FÍSICA AVANZADA: ACELERACIÓN GRADUAL
+    const maxSpeed = fish.maxSpeed * speedMul;
+    const maxAccel = fish.maxAccel * speedMul;
+    
+    fish.vx = fish.vx || 0;
+    fish.vy = fish.vy || 0;
+    
+    const ax = this.clamp(targetV.vx - fish.vx, -maxAccel, maxAccel);
+    const ay = this.clamp(targetV.vy - fish.vy, -maxAccel, maxAccel);
+    
+    fish.vx += ax * deltaTime;
+    fish.vy += ay * deltaTime;
+    
+    // 🚀 GARANTIZAR MOVIMIENTO MÍNIMO - Solo si está completamente quieto por mucho tiempo
+    const currentSpeed = Math.sqrt(fish.vx * fish.vx + fish.vy * fish.vy);
+    if (currentSpeed < 20 && !fish.goingToCorner && Math.random() < 0.01) {
+        // Solo ocasionalmente dar un pequeño impulso si está muy quieto
+        fish.vx += (Math.random() - 0.5) * 50;
+        fish.vy += (Math.random() - 0.5) * 50;
+        console.log('🚀 Aplicando impulso mínimo ocasional al pez');
+    }
+
+    // 🚀 MOVER PEZ
+    fish.x += fish.vx * deltaTime;
+    fish.y += fish.vy * deltaTime;
+
+    // 🧱 LÍMITES FIJOS QUE FUNCIONAN (SISTEMA ORIGINAL)
+    const padLeft = 60; // Margen izquierdo para no salir de pantalla
+    const padRight = 30; // Margen derecho más pequeño para llegar al borde
+    const padBottom = 5; // Margen inferior MUY PEQUEÑO para que pueda bajar más
+    const W = this.canvas.width;
+    const H = this.getFloorY();
+    
+    // Aplicar límites con rebote suave
+    if (fish.x < padLeft) { 
+        fish.x = padLeft; 
+        if (fish.vx < 0) fish.vx *= -0.5; 
+    }
+    if (fish.x > W - padRight) { 
+        fish.x = W - padRight; 
+        if (fish.vx > 0) fish.vx *= -0.5; 
+    }
+    if (fish.y < 125) { 
+        fish.y = 125; 
+        if (fish.vy < 0) fish.vy *= -0.5; 
+    }
+    if (fish.y > H - padBottom) { 
+        fish.y = H - padBottom; 
+        if (fish.vy > 0) fish.vy *= -0.5; 
+    }
+
+    // 🐟 ORIENTACIÓN FLUIDA (mirar hacia donde nada)
+    if (Math.abs(fish.vx) > 2) {
+        fish.facing = fish.vx > 0 ? 1 : -1;
+        fish.facingRight = fish.vx > 0; // Para compatibilidad
+    }
+}
+
+==========================================
+FUNCIÓN ORIGINAL (updateNaturalFishMovement) - LÍNEAS 6934-7073
+==========================================
+
+updateNaturalFishMovement(deltaTime) {
+    const fish = this.fish;
+    const currentStage = this.gameState.stage;
+    
+    // Inicializar pez más rápido y variado
+    if (!fish.direction) fish.direction = 1; // 1 = derecha, -1 = izquierda
+    if (!fish.baseSpeed) fish.baseSpeed = currentStage === 'baby' ? 120 : 90; // Velocidad base aumentada
+    if (!fish.speed) fish.speed = fish.baseSpeed; // Velocidad actual
+    if (!fish.swimPhase) fish.swimPhase = 0;
+    if (!fish.facing) fish.facing = 1;
+    if (!fish.changeTimer) fish.changeTimer = 0;
+    if (!fish.verticalDirection) fish.verticalDirection = 0; // -1 arriba, 0 medio, 1 abajo
+    if (!fish.verticalTimer) fish.verticalTimer = 0;
+    
+    // Fase de natación para ondulación
+    fish.swimPhase += deltaTime * (currentStage === 'baby' ? 2 : 1.2);
+    fish.changeTimer += deltaTime;
+    
+    // CAMBIOS MÁS FRECUENTES para más variedad
+    // Bebé: cada 4-8 segundos, Adulto: cada 6-10 segundos
+    const changeInterval = currentStage === 'baby' ? 4 + Math.random() * 4 : 6 + Math.random() * 4;
+    fish.verticalTimer += deltaTime;
+    
+    if (fish.changeTimer > changeInterval) {
+        // 50% chance de cambiar dirección horizontal
+        if (Math.random() < 0.5) {
+            fish.direction *= -1;
+            console.log(`🐠 Cambio horizontal: ${fish.direction === 1 ? 'DERECHA →' : 'IZQUIERDA ←'}`);
+        }
+        
+        // 60% chance de cambiar dirección vertical
+        if (Math.random() < 0.6) {
+            const options = [-1, 0, 1]; // arriba, medio, abajo
+            fish.verticalDirection = options[Math.floor(Math.random() * options.length)];
+            const verticalNames = ['ARRIBA ↑', 'MEDIO →', 'ABAJO ↓'];
+            console.log(`🐠 Cambio vertical: ${verticalNames[fish.verticalDirection + 1]}`);
+        }
+        
+        fish.changeTimer = 0;
+    }
+    
+    // Cambios verticales independientes (más frecuentes)
+    if (fish.verticalTimer > 3 + Math.random() * 3) {
+        if (Math.random() < 0.4) {
+            const options = [-1, 0, 1];
+            fish.verticalDirection = options[Math.floor(Math.random() * options.length)];
+        }
+        fish.verticalTimer = 0;
+    }
+    
+    if (fish.isChasing) {
+        // 2. PRIORIDAD: Perseguir comida
+        // Durante persecución, usar la velocidad ya calculada en makeFishChaseFood
+        // No sobreescribir fish.vx y fish.vy
+    } else if (fish.isCleaning) {
+        // 3. PRIORIDAD: Movimiento de tirabuzones durante limpieza
+        fish.cleaningTime += deltaTime;
+        
+        // MOVIMIENTO EN TIRABUZONES (COSQUILLAS)
+        const spiralSpeed = fish.baseSpeed * 1.5;
+        const spiralRadius = 40 + Math.sin(fish.cleaningTime * 3) * 20;
+        const spiralAngle = fish.cleaningTime * 4; // 4 vueltas por segundo
+        
+        fish.vx = Math.cos(spiralAngle) * spiralRadius * 0.1 + Math.sin(fish.cleaningTime * 8) * spiralSpeed * 0.3;
+        fish.vy = Math.sin(spiralAngle) * spiralRadius * 0.1 + Math.cos(fish.cleaningTime * 6) * spiralSpeed * 0.2;
+        
+        // Movimiento errático como si tuviera cosquillas
+        fish.vx += (Math.random() - 0.5) * spiralSpeed * 0.4;
+        fish.vy += (Math.random() - 0.5) * spiralSpeed * 0.3;
+        
+        console.log(`🌀 Pez haciendo tirabuzones - tiempo: ${fish.cleaningTime.toFixed(1)}s`);
+    } else if (fish.goingToCorner) {
+        // 4. PRIORIDAD: Pez triste va a esquina (SIN desire)
+        const dx = fish.cornerTargetX - fish.x;
+        const dy = fish.cornerTargetY - fish.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance > 15) {
+            // Movimiento LENTO hacia esquina
+            const slowSpeed = fish.baseSpeed * 0.5; // MUY lento
+            fish.vx = (dx / distance) * slowSpeed;
+            fish.vy = (dy / distance) * slowSpeed;
+            fish.direction = dx > 0 ? 1 : -1;
+        } else {
+            // Llegó a la esquina - quedarse quieto
+            fish.goingToCorner = false;
+            fish.vx = 0;
+            fish.vy = 0;
+            console.log('😢 Pez llegó a esquina - Se queda quieto');
+        }
+    } else {
+        // 5. COMPORTAMIENTO NORMAL: Movimiento libre
+        fish.vx = fish.direction * fish.speed;
+        
+        // Movimiento vertical combinado
+        let baseVerticalMovement = Math.sin(fish.swimPhase) * (currentStage === 'baby' ? 12 : 8); // Ondulación natural
+        let directionalVertical = fish.verticalDirection * (fish.speed * 0.4); // Movimiento direccional vertical
+        
+        fish.vy = baseVerticalMovement + directionalVertical;
+    }
+    
+    // Aplicar movimiento
+    fish.x += fish.vx * deltaTime;
+    fish.y += fish.vy * deltaTime;
+    
+    // GIRO SIMPLE: Solo cuando llega al borde
+    this.handleSimpleFishBoundaries();
+    
+    // Orientación simple
+    this.updateFishOrientation();
+    
+    // Sistema de burbujas con iconos de necesidades
+    this.updateNeedBubbles(deltaTime);
+    
+    // Sistema de necesidades - Solo botones (iconos flotantes eliminados)
+    
+    // Sistema de apatía y tristeza
+    this.updateFishMood();
+    
+    // Actualizar estado de botones
+    this.updateButtonStates();
+}
+
+==========================================
+FUNCIÓN SEEK (LÍNEAS 12421-12430)
+==========================================
+
+seek(fx, fy, tx, ty, maxSpeed) {
+    const dx = tx - fx;
+    const dy = ty - fy;
+    const d = Math.hypot(dx, dy) || 1;
+    return {
+        vx: dx / d * maxSpeed,
+        vy: dy / d * maxSpeed,
+        dist: d
+    };
+}
+
+==========================================
+PROBLEMA ACTUAL:
+==========================================
+
+El pez ahora solo se mueve de arriba a abajo, no va para los lados. El problema parece estar en el sistema de pausas que agregué, que está interfiriendo con el movimiento horizontal natural.
+
+La función original (updateNaturalFishMovement) tenía un sistema más simple:
+- fish.vx = fish.direction * fish.speed; (movimiento horizontal)
+- fish.vy = baseVerticalMovement + directionalVertical; (movimiento vertical)
+
+Mientras que la función actual usa un sistema de vectores más complejo que puede estar causando el problema.
+
+¿Puedes ayudarme a identificar qué está causando que el pez solo se mueva verticalmente?
