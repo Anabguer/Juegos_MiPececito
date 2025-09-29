@@ -12127,6 +12127,12 @@ Comida premium y de cumpleaños
                                       this.gameState.needs.dirt > 80 || 
                                       this.gameState.needs.fun < 20;
                 
+                // 🍎 SOLTAR COMIDA AUTOMÁTICAMENTE SI EL PEZ TIENE HAMBRE
+                if (this.gameState.needs.hunger > 60 && this.food.length === 0) {
+                    this.dropFood();
+                    console.log('🍎 Comida automática soltada por hambre del pez');
+                }
+                
                 // Debug de necesidades extremas
                 if (this.gameState.needs.hunger > 70 || this.gameState.needs.dirt > 80 || this.gameState.needs.fun < 20) {
                     console.log(`🚨 NECESIDADES EXTREMAS: Hambre: ${this.gameState.needs.hunger.toFixed(1)}%, Suciedad: ${this.gameState.needs.dirt.toFixed(1)}%, Diversión: ${this.gameState.needs.fun.toFixed(1)}%`);
@@ -12175,14 +12181,15 @@ Comida premium y de cumpleaños
                     
                     // 🍎 PERMITIR BÚSQUEDA DE COMIDA INCLUSO CUANDO ESTÁ EN ESQUINA
                     const nearestFood = this.nearestFood();
-                    if (nearestFood && this.dist(fish.x, fish.y, nearestFood.x, nearestFood.y) < 80) {
+                    if (nearestFood && this.dist(fish.x, fish.y, nearestFood.x, nearestFood.y) < 120) {
                         console.log('🍎 Pez hambriento detecta comida cerca, va a comer!');
-                        fish.desire = 'food';
+                        fish.desire = {x: nearestFood.x, y: nearestFood.y};
                         fish.targetX = nearestFood.x;
                         fish.targetY = nearestFood.y;
                         fish.isGoingToTarget = true;
                         fish.isInCorner = false; // Salir de la esquina para comer
                         fish.cornerTime = 0;
+                        fish.hideTimer = 0; // Resetear timer de esconderse
                     }
                     
                     // NO salir temprano - permitir que continúe con la lógica de movimiento
@@ -12208,17 +12215,27 @@ Comida premium y de cumpleaños
                     speedMul = 1.5;
                     
                     if (s.dist < 40) {
-                        // 💖 PEZ LLEGÓ AL DEDO - LANZAR CORAZÓN CON SONIDO
+                        // 💖 PEZ LLEGÓ AL DEDO - SOLO LANZAR CORAZÓN SI ESTÁ CONTENTO
                         fish.desire = null;
                         targetV = {vx: 0, vy: 0};
-                        this.launchHeartToFun(fish.x, fish.y);
                         
-                        // 🔊 SONIDO DE CORAZÓN/BURBUJA
-                        if (window.audioManager) {
-                            window.audioManager.playSound('heart');
+                        // Solo lanzar corazón si el pez NO tiene necesidades extremas
+                        const hasExtremeNeeds = this.gameState.needs.hunger > 70 || 
+                                              this.gameState.needs.dirt > 80 || 
+                                              this.gameState.needs.fun < 20;
+                        
+                        if (!hasExtremeNeeds) {
+                            this.launchHeartToFun(fish.x, fish.y);
+                            
+                            // 🔊 SONIDO DE CORAZÓN/BURBUJA
+                            if (window.audioManager) {
+                                window.audioManager.playSound('heart');
+                            }
+                            
+                            console.log('💖 ¡Pez llegó al dedo! Corazón lanzado con sonido');
+                        } else {
+                            console.log('😢 Pez llegó al dedo pero tiene necesidades extremas - NO corazón');
                         }
-                        
-                        console.log('💖 ¡Pez llegó al dedo! Corazón lanzado con sonido');
                     }
                 }
                 // 🍎 PERSEGUIR COMIDA SIEMPRE (los peces SIEMPRE comen)
