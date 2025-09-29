@@ -7324,9 +7324,9 @@
                         const W = this.canvas.width;
                         const H = this.getFloorY();
                         const corners = [
-                            { x: padLeft, y: 125 }, // Esquina superior izquierda
+                            { x: padLeft + 5, y: 125 }, // Esquina superior izquierda (5px dentro del límite)
                             { x: W - padRight, y: 125 }, // Superior derecha
-                            { x: padLeft, y: H - 5 }, // Inferior izquierda
+                            { x: padLeft + 5, y: H - 5 }, // Inferior izquierda (5px dentro del límite)
                             { x: W - padRight, y: H - 5 } // Inferior derecha
                         ];
                         
@@ -12138,7 +12138,7 @@ Comida premium y de cumpleaños
                         // Ir SIEMPRE a la esquina inferior izquierda
                         const padLeft = 60;
                         const H = this.getFloorY();
-                        const corner = { x: padLeft, y: H - 5 }; // Esquina inferior izquierda
+                        const corner = { x: padLeft + 5, y: H - 5 }; // Esquina inferior izquierda (5px dentro del límite)
                         
                         fish.targetX = corner.x;
                         fish.targetY = corner.y;
@@ -12166,8 +12166,19 @@ Comida premium y de cumpleaños
                         }
                     }
                     
-                    // Forzar que se quede en la esquina
-                    return; // Salir temprano para evitar otros comportamientos
+                    // 🍎 PERMITIR BÚSQUEDA DE COMIDA INCLUSO CUANDO ESTÁ EN ESQUINA
+                    const nearestFood = this.nearestFood();
+                    if (nearestFood && this.dist(fish.x, fish.y, nearestFood.x, nearestFood.y) < 80) {
+                        console.log('🍎 Pez hambriento detecta comida cerca, va a comer!');
+                        fish.desire = 'food';
+                        fish.targetX = nearestFood.x;
+                        fish.targetY = nearestFood.y;
+                        fish.isGoingToTarget = true;
+                        fish.isInCorner = false; // Salir de la esquina para comer
+                        fish.cornerTime = 0;
+                    }
+                    
+                    // NO salir temprano - permitir que continúe con la lógica de movimiento
                 }
 
                 // 🔥 TURBO DE DEDO (decaimiento)
