@@ -60,10 +60,6 @@
           --rank-diamond: #B9F2FF;
         }
 
-        /* 🔧 REGLA ESPECÍFICA PARA BOTONES CON HOVER - SOLO BOTONES REALES */
-        button:hover, .debug-btn:hover, .universal-btn:hover, .action-btn:hover, .close-btn:hover, .tab-btn:hover, .item-card:hover, .game-close-btn:hover, .game-tab-btn:hover, .game-item-card:hover, .game-play-btn:hover, .bubble-btn:hover, .mobile-close-btn:hover, .mobile-help-btn:hover, .game-card-square:hover, .inventory-item-square:hover, .custom-btn:hover, .play-btn:hover, .album-action-btn:hover, .album-entry:hover, .currency-float:hover, .menu-btn:hover, .volume-button:hover, .start-button:hover, .reset-button:hover, .retry-button:hover {
-            border-radius: inherit !important;
-        }
 
         /* 🔘 COMPONENTES UNIVERSALES */
         .universal-btn {
@@ -90,7 +86,6 @@
           background: var(--button-hover);
           transform: translateY(-2px);
           box-shadow: var(--shadow-strong);
-          border-radius: var(--button-radius); /* Mantener esquinas redondeadas en hover */
         }
 
         .universal-btn:active {
@@ -1150,6 +1145,17 @@
             font-size: 32px;
             margin-bottom: 6px;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        
+        .inventory-square-preview {
+            width: 60px;
+            height: 45px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
         
         .inventory-square-name {
@@ -2214,7 +2220,6 @@
         .debug-btn:hover {
             background: rgba(255, 255, 255, 0.1);
             transform: scale(1.1);
-            border-radius: 4px; /* Mantener esquinas redondeadas en hover */
         }
         
         .debug-btn.danger {
@@ -4792,7 +4797,7 @@
                     console.log('❌ Botón de comida DESHABILITADO - No hacer nada');
                     return;
                 }
-                if (game && game.fish && !game.fish.isDepressed) {
+                if (game && game.fish) {
                     game.dropFood(); // UNA SOLA BOLITA
                     console.log('🍎 Una bolita pequeña soltada');
                 }
@@ -4805,7 +4810,7 @@
                     console.log('❌ Botón de limpieza DESHABILITADO - No hacer nada');
                     return;
                 }
-                if (game && game.fish && !game.fish.isDepressed) {
+                if (game && game.fish) {
                     game.startCleaning();
                     console.log('🧹 Limpiando la pecera...');
                 }
@@ -5089,7 +5094,7 @@
                     eggStartTime: null, // NO hay tiempo hasta colocar huevo
                     bubbles: 0,   // EMPEZAR SIN BURBUJAS
                     stars: 0,     // Sin estrellas al inicio
-                    currentBackground: 'basic',
+                    currentBackground: 'Mi casa',
                     bubblesCreated: false,
                     
                     // 📊 SISTEMA DE NECESIDADES REALISTA (0-100)
@@ -5143,6 +5148,7 @@
                 this.cleanBubbles = [];   // Burbujas de limpieza  
                 this.tinyBubbles = [];    // Burbujas de respiración
                 this.flyers = [];         // Corazones voladores
+                this.floatingMessages = []; // Mensajes sutiles del pez
                 this.ripples = [];        // Ondas de click
                 this.labels = [];         // Textos flotantes
                 
@@ -5379,14 +5385,14 @@
                 // Cargar fondo
                 try {
                     this.bgImage = new Image();
-                    this.bgImage.src = './images/backgrounds/bg_basic.png';
+                    this.bgImage.src = './images/backgrounds/Mi casa.png';
                     await new Promise((resolve, reject) => {
                         this.bgImage.onload = resolve;
                         this.bgImage.onerror = reject;
                     });
-                    console.log('✅ Fondo cargado: bg_basic.png');
+                    console.log('✅ Fondo cargado: Mi casa.png');
                 } catch (error) {
-                    console.warn('⚠️ No se pudo cargar bg_basic.png');
+                    console.warn('⚠️ No se pudo cargar Mi casa.png');
                 }
             }
             
@@ -6744,9 +6750,9 @@
                     // 🚀 PROPIEDADES DEL SISTEMA REALISTA (EXACTAS DEL CÓDIGO)
                     vx: 0, vy: 0, // Velocidades actuales
                     facing: 1, // Dirección (-1 izquierda, 1 derecha)
-                    baseSpeed: 140, // Velocidad base EXACTA
-                    maxSpeed: 300, // Velocidad máxima EXACTA
-                    maxAccel: 1100, // Aceleración máxima MEJORADA (era 900)
+                    baseSpeed: 280, // Velocidad base EXACTA (duplicada)
+                    maxSpeed: 600, // Velocidad máxima EXACTA (duplicada)
+                    maxAccel: 2200, // Aceleración máxima MEJORADA (duplicada)
                     wanderTimer: 0, // Timer para cambio de dirección
                     wanderDir: {x: 1, y: 0}, // Dirección de vagabundeo
                     swimPhase: 0, // Fase de natación para ondulación
@@ -6931,7 +6937,7 @@
                 
                 // Inicializar pez más rápido y variado
                 if (!fish.direction) fish.direction = 1; // 1 = derecha, -1 = izquierda
-                if (!fish.baseSpeed) fish.baseSpeed = currentStage === 'baby' ? 60 : 45; // Velocidad base
+                if (!fish.baseSpeed) fish.baseSpeed = currentStage === 'baby' ? 120 : 90; // Velocidad base aumentada
                 if (!fish.speed) fish.speed = fish.baseSpeed; // Velocidad actual
                 if (!fish.swimPhase) fish.swimPhase = 0;
                 if (!fish.facing) fish.facing = 1;
@@ -7268,6 +7274,7 @@
             // 😢 SISTEMA DE APATÍA Y TRISTEZA
             updateFishMood() {
                 if (!this.fish) return;
+                console.log('🐠 updateFishMood() ejecutándose...');
                 
                 const currentTime = Date.now();
                 const currentStage = this.gameState.stage;
@@ -7284,9 +7291,28 @@
                                   timeSincePlay > neglectThreshold || 
                                   timeSinceClean > neglectThreshold;
                 
+                // 🐠 COMPORTAMIENTO CUANDO TIENE NECESIDADES
+                const hasNeeds = this.gameState.needs.hunger > 60 || 
+                               this.gameState.needs.dirt > 50 || 
+                               this.gameState.needs.fun < 30;
+                
+                if (hasNeeds) {
+                    // Pez inquieto cuando tiene necesidades moderadas
+                    this.fish.baseSpeed = (currentStage === 'baby' ? 120 : 90) * 1.5; // Más rápido
+                    this.fish.isRestless = true;
+                    
+                    // Cambiar dirección más frecuentemente
+                    if (Math.random() < 0.02) { // 2% de probabilidad por frame
+                        this.fish.direction *= -1;
+                        console.log('🐠 Pez inquieto cambia de dirección');
+                    }
+                } else {
+                    this.fish.isRestless = false;
+                }
+                
                 if (isNeglected) {
                     // PEZ TRISTE Y APÁTICO - LÓGICA MEJORADA
-                    this.fish.baseSpeed = (currentStage === 'baby' ? 60 : 45) * 0.3; // MUY lento
+                    this.fish.baseSpeed = (currentStage === 'baby' ? 120 : 90) * 0.3; // MUY lento
                     this.fish.isDepressed = true;
                     this.fish.hideTimer = (this.fish.hideTimer || 0) + 1/60;
                     
@@ -7341,7 +7367,7 @@
                     
                 } else {
                     // PEZ NORMAL Y FELIZ
-                    this.fish.baseSpeed = currentStage === 'baby' ? 60 : 45; // Velocidad normal
+                    this.fish.baseSpeed = currentStage === 'baby' ? 120 : 90; // Velocidad normal
                     this.fish.isDepressed = false;
                     this.fish.isInCorner = false;
                     this.fish.hideTimer = 0;
@@ -7927,8 +7953,19 @@
                 // Actualizar edad
                 this.updateAgeDisplay();
                 
-                // Forzar actualización de necesidades
-                this.updateAutoNeeds(0); // Recalcular necesidades con el tiempo avanzado
+                // Forzar actualización de necesidades - simular tiempo transcurrido
+                const cfg = this.getStageCfg(this.gameState);
+                const hoursPassed = hours;
+                
+                // Aumentar hambre, suciedad y disminuir diversión
+                const hungerIncrease = (100 / cfg.hungerHours) * hoursPassed;
+                const dirtIncrease = (100 / cfg.dirtHours) * hoursPassed;
+                const funDecrease = (100 / cfg.funHours) * hoursPassed;
+                
+                this.gameState.needs.hunger = Math.min(100, this.gameState.needs.hunger + hungerIncrease);
+                this.gameState.needs.dirt = Math.min(100, this.gameState.needs.dirt + dirtIncrease);
+                this.gameState.needs.fun = Math.max(0, this.gameState.needs.fun - funDecrease);
+                
                 this.updateCrisisFlags();
                 this.updateNeedBars();
                 this.updateButtonStates();
@@ -8259,8 +8296,12 @@
                     if (isOwned) {
                         // Ya lo tiene, solo cambiar fondo
                         console.log(`🎨 Cambiando fondo a: ${bgName}`);
-                        this.gameState.currentBackground = bgName;
-                        this.bgImage = bg.image;
+                        const bg = this.availableBackgrounds.find(b => b.name === bgName);
+                        if (bg) {
+                            this.gameState.currentBackground = bgName;
+                            this.bgImage = bg.image;
+                            console.log(`🎨 Fondo cambiado: ${bgName}, imagen: ${bg.image ? 'cargada' : 'no cargada'}`);
+                        }
                         this.updateInventoryAvailability(); // Actualizar selección
                         this.saveGame();
                         
@@ -8282,12 +8323,14 @@
                                 // Comprar fondo
                                 this.gameState.bubbles -= cost;
                                 
-                                // Marcar como desbloqueado
+                                // Marcar como desbloqueado y aplicar fondo
                                 const bg = this.availableBackgrounds.find(b => b.name === bgName);
-                                if (bg) bg.unlocked = true;
-                                
-                                // Aplicar fondo inmediatamente
-                                this.selectBackground(bgName);
+                                if (bg) {
+                                    bg.unlocked = true;
+                                    this.gameState.currentBackground = bgName;
+                                    this.bgImage = bg.image;
+                                    console.log(`🎨 Fondo comprado y aplicado: ${bgName}`);
+                                }
                                 
                                 // Actualizar UI
                                 this.updateUI();
@@ -9258,7 +9301,7 @@ Nuestros recuerdos quedarán en mi corazón
 
 🌊 **Fondos de Pecera** - DISPONIBLE
 Cambia el fondo de tu acuario
-🖼️ ${this.availableBackgrounds ? this.availableBackgrounds.length : 5} fondos disponibles
+🖼️ ${this.availableBackgrounds ? this.availableBackgrounds.length : 23} fondos disponibles
 
 🎨 **Decoraciones** - PRÓXIMAMENTE
 Rocas, plantas, castillos...
@@ -9318,7 +9361,7 @@ Comida premium y de cumpleaños
                     const isSelected = this.gameState.currentBackground === bg.name;
                     const cost = bg.cost || 0;
                     const canAfford = this.gameState.bubbles >= cost;
-                    const isOwned = bg.unlocked === true || bg.name === 'basic'; // Basic es gratis
+                    const isOwned = bg.unlocked === true || bg.name === 'Mi casa'; // Mi casa es gratis
                     
                     item.className = `inventory-item-square ${isOwned ? 'owned' : (canAfford ? 'available' : 'locked')}`;
                     if (isSelected) item.classList.add('selected');
@@ -9339,7 +9382,7 @@ Comida premium y de cumpleaños
                     }
                     
                     item.innerHTML = `
-                        <div class="inventory-square-icon">${icon}</div>
+                        <div class="inventory-square-preview" style="background-image: url('./images/backgrounds/${bg.file}')${!isOwned && !canAfford ? '; filter: grayscale(100%) brightness(0.5);' : ''}"></div>
                         <div class="inventory-square-name">${bg.name.charAt(0).toUpperCase() + bg.name.slice(1)}</div>
                         <div class="inventory-square-price">${cost === 0 ? 'Gratis' : cost + '🫧'}</div>
                         ${!isOwned && !canAfford ? `
@@ -9748,17 +9791,35 @@ Comida premium y de cumpleaños
             // 🎨 SISTEMA DE FONDOS
             
             async loadAvailableBackgrounds() {
-                // Lista de fondos conocidos (se expandirá automáticamente)
+                // Lista de todos los fondos disponibles
                 const knownBackgrounds = [
-                    'bg_basic.png',
-                    'bg_cartoon.png', 
-                    'bg_coral.png',
-                    'bg_mario.png',
-                    'bg_minecraft.png'
+                    'Mi casa.png',           // Renombrado de basic
+                    'Azulito.png',
+                    'Bajo el mar.png',
+                    'Bolas de dragon.png',
+                    'Cuadrados corales.png',
+                    'Cuadrados de noche.png',
+                    'Cuadrados en el mar.png',
+                    'El cielo.png',
+                    'Entre corales.png',
+                    'Guardianes.png',
+                    'Hielo.png',
+                    'Magico.png',
+                    'Mi paraiso.png',
+                    'Oscuro.png',
+                    'Peppa Fish.png',
+                    'Perretes.png',
+                    'Piratas.png',
+                    'Plastelina Isla.png',
+                    'Plastelina.png',
+                    'Playa.png',
+                    'Slayer.png',
+                    'Tuberias.png',
+                    'Villa Volcan.png'
                 ];
                 
                 for (const bgFile of knownBackgrounds) {
-                    const bgName = bgFile.replace('bg_', '').replace('.png', '');
+                    const bgName = bgFile.replace('.png', ''); // Usar nombre completo sin extensión
                     try {
                         const img = new Image();
                         img.src = `./images/backgrounds/${bgFile}`;
@@ -9772,8 +9833,8 @@ Comida premium y de cumpleaños
                             name: bgName,
                             file: bgFile,
                             image: img,
-                            cost: bgName === 'basic' ? 0 : this.getBackgroundCost(bgName), // Costos progresivos
-                            unlocked: bgName === 'basic' // Solo basic desbloqueado
+                            cost: bgName === 'Mi casa' ? 0 : this.getBackgroundCost(bgName), // Mi casa es gratis
+                            unlocked: bgName === 'Mi casa' // Solo Mi casa desbloqueado
                         });
                         
                         console.log(`✅ Fondo cargado: ${bgName}`);
@@ -10124,7 +10185,7 @@ Comida premium y de cumpleaños
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    z-index: 3000;
+                    z-index: 10000;
                 `;
                 
                 const content = modal.querySelector('.custom-modal-content');
@@ -10456,6 +10517,25 @@ Comida premium y de cumpleaños
                 });
             }
             
+            // 🐠 MENSAJES SUTILES DEL PEZ
+            showFishMessage(message, color = '#FFD700') {
+                if (!this.fish) return;
+                
+                // Mensajes más pequeños y sutiles
+                if (!this.floatingMessages) this.floatingMessages = [];
+                
+                    this.floatingMessages.push({
+                        text: message,
+                        x: this.fish.x,
+                        y: this.fish.y - 20,
+                        life: 3.0,
+                        maxLife: 3.0,
+                        vy: -40, // Más lento
+                        color: '#FFFFFF', // Texto blanco
+                        size: 18 // Más pequeño
+                    });
+            }
+            
             // 📝 ACTUALIZAR MENSAJES FLOTANTES
             updateFloatingMessages(deltaTime) {
                 if (!this.floatingMessages) return;
@@ -10479,13 +10559,16 @@ Comida premium y de cumpleaños
                 for (const msg of this.floatingMessages) {
                     const alpha = Math.max(0, msg.life / msg.maxLife);
                     this.ctx.globalAlpha = alpha;
-                    this.ctx.font = 'bold 24px Arial';
-                    this.ctx.fillStyle = '#FFD700';
-                    this.ctx.strokeStyle = '#000';
-                    this.ctx.lineWidth = 3;
+                    
+                    // Tamaño y color personalizables
+                    const fontSize = msg.size || 24;
+                    const color = msg.color || '#FFD700';
+                    
+                    this.ctx.font = `bold ${fontSize}px Arial`;
+                    this.ctx.fillStyle = color;
                     this.ctx.textAlign = 'center';
                     
-                    this.ctx.strokeText(msg.text, msg.x, msg.y);
+                    // Solo texto sin borde negro
                     this.ctx.fillText(msg.text, msg.x, msg.y);
                 }
                 this.ctx.restore();
@@ -11653,6 +11736,14 @@ Comida premium y de cumpleaños
                         this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - cfg.eatReduce, 0, 100);
                         this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerPellet, 0, 100);
                         
+                        // 🐠 SALIR DEL ESTADO DEPRIMIDO SI COME
+                        if (this.fish.isDepressed && this.gameState.needs.hunger < 70) {
+                            this.fish.isDepressed = false;
+                            this.fish.isInCorner = false;
+                            this.fish.hideTimer = 0;
+                            console.log('🐠 ¡Pez sale del estado deprimido al comer!');
+                        }
+                        
                         // 🫧 DAR BURBUJAS SI TENÍA HAMBRE REAL
                         if (hadRealHunger) {
                             this.gameState.bubbles += 2;
@@ -11987,12 +12078,13 @@ Comida premium y de cumpleaños
             // 🐟 MOVIMIENTO FLUIDO CON FÍSICA AVANZADA (DESDE movimiento_pez_final.html)
             updateFishMovement(deltaTime) {
                 if (!this.fish) return;
+                console.log('🐟 updateFishMovement() ejecutándose...');
                 const fish = this.fish;
 
                 // Inicializar propiedades de física si no existen
-                if (!fish.maxSpeed) fish.maxSpeed = 300;
-                if (!fish.maxAccel) fish.maxAccel = 900;
-                if (!fish.baseSpeed) fish.baseSpeed = 140;
+                if (!fish.maxSpeed) fish.maxSpeed = 600; // Duplicado
+                if (!fish.maxAccel) fish.maxAccel = 1800; // Duplicado
+                if (!fish.baseSpeed) fish.baseSpeed = 280; // Duplicado
                 if (!fish.facing) fish.facing = 1;
                 if (!fish.wanderTimer) fish.wanderTimer = 0;
                 if (!fish.wanderDir) fish.wanderDir = {x: 1, y: 0};
@@ -12022,6 +12114,61 @@ Comida premium y de cumpleaños
                 fish.swimPhase = (fish.swimPhase || 0) + deltaTime * 3.2;
                 let targetV = {vx: 0, vy: 0};
                 let speedMul = 1.0;
+
+                // 🚨 NECESIDADES EXTREMAS - Va a esquina
+                const hasExtremeNeeds = this.gameState.needs.hunger > 70 || 
+                                      this.gameState.needs.dirt > 80 || 
+                                      this.gameState.needs.fun < 20;
+                
+                // Debug de necesidades extremas
+                if (this.gameState.needs.hunger > 70 || this.gameState.needs.dirt > 80 || this.gameState.needs.fun < 20) {
+                    console.log(`🚨 NECESIDADES EXTREMAS: Hambre: ${this.gameState.needs.hunger.toFixed(1)}%, Suciedad: ${this.gameState.needs.dirt.toFixed(1)}%, Diversión: ${this.gameState.needs.fun.toFixed(1)}%`);
+                }
+                
+                if (hasExtremeNeeds) {
+                    console.log('🚨 ACTIVANDO COMPORTAMIENTO DE NECESIDADES EXTREMAS');
+                    // Pez con necesidades extremas - va a esquina
+                    const currentStage = this.gameState.stage;
+                    fish.baseSpeed = (currentStage === 'baby' ? 120 : 90) * 0.3; // MUY lento
+                    fish.isDepressed = true;
+                    fish.hideTimer = (fish.hideTimer || 0) + 1/60;
+                    
+                    // Se va a la esquina inferior izquierda y se queda quieto
+                    if (!fish.isInCorner && fish.hideTimer > 2) {
+                        // Ir SIEMPRE a la esquina inferior izquierda
+                        const padLeft = 60;
+                        const H = this.getFloorY();
+                        const corner = { x: padLeft, y: H - 5 }; // Esquina inferior izquierda
+                        
+                        fish.targetX = corner.x;
+                        fish.targetY = corner.y;
+                        // Pez con necesidades extremas va LENTO a esquina
+                        fish.cornerTargetX = corner.x;
+                        fish.cornerTargetY = corner.y;
+                        fish.goingToCorner = true;
+                        fish.isInCorner = true;
+                        fish.cornerTime = 5 + Math.random() * 8; // 5-13 segundos en esquina
+                        console.log(`😢 Pez con hambre >70% va a esconderse en esquina inferior izquierda... (${corner.x}, ${corner.y})`);
+                    }
+                    
+                    // Quedarse quieto en la esquina
+                    if (fish.isInCorner) {
+                        fish.cornerTime -= 1/60;
+                        
+                        // Movimiento MUY reducido en la esquina
+                        if (fish.cornerTime > 0) {
+                            fish.vx *= 0.95; // Casi inmóvil
+                            fish.vy *= 0.95;
+                        } else {
+                            fish.isInCorner = false;
+                            fish.hideTimer = 0;
+                            console.log('🐠 Pez sale de la esquina');
+                        }
+                    }
+                    
+                    // Forzar que se quede en la esquina
+                    return; // Salir temprano para evitar otros comportamientos
+                }
 
                 // 🔥 TURBO DE DEDO (decaimiento)
                 fish.fingerBoostT = Math.max(0, (fish.fingerBoostT || 0) - deltaTime);
@@ -12199,6 +12346,20 @@ Comida premium y de cumpleaños
                 this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger + hungerInc, 0, 100);
                 this.gameState.needs.dirt   = this.clamp(this.gameState.needs.dirt   + dirtInc,   0, 100);
                 this.gameState.needs.fun    = this.clamp(this.gameState.needs.fun    - funDec,    0, 100);
+                
+                // 🐠 MENSAJES SUTILES DEL PEZ (solo ocasionalmente)
+                if (Math.random() < 0.01) { // 1% de probabilidad por frame
+                    if (this.gameState.needs.hunger > 60) {
+                        const messages = ["Tengo hambre...", "¿Algo de comer?", "Mi barriga ruge"];
+                        this.showFishMessage(messages[Math.floor(Math.random() * messages.length)], '#FF6B6B');
+                    } else if (this.gameState.needs.dirt > 50) {
+                        const messages = ["Me siento sucio", "Necesito un baño", "¡Qué asco!"];
+                        this.showFishMessage(messages[Math.floor(Math.random() * messages.length)], '#8B4513');
+                    } else if (this.gameState.needs.fun < 30) {
+                        const messages = ["Me aburro...", "¿Jugamos?", "Estoy solo"];
+                        this.showFishMessage(messages[Math.floor(Math.random() * messages.length)], '#9370DB');
+                    }
+                }
                 
                 // Actualizar barras visuales
                 this.updateNeedBars();
