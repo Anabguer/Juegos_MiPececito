@@ -4847,9 +4847,9 @@
                 console.log('🎮 Modal de juegos cerrada');
             });
             
-            // 🫧 JUEGO DE BURBUJAS
+            // 🫧 JUEGO DE BURBUJAS (EL BUENO)
             document.querySelector('[data-game="bubbles"]').addEventListener('click', () => {
-                startBubbleGame();
+                window.startBubbleGameDirect();
             });
             
             // 💎 JUEGO DE BLOQUES (MAR MATCH-3)
@@ -8544,10 +8544,12 @@ Nuestros recuerdos quedarán en mi corazón
             // 🫧 JUEGO DE BURBUJAS - DIRECTO
             startBubbleGame() {
                 console.log('🫧 Iniciando juego de burbujas...');
-                // Ir directo al juego sin modal previo
-                this.runBubbleGame();
+                // ✅ LLAMAR AL JUEGO BUENO
+                window.startBubbleGameDirect();
             }
             
+            // ❌ JUEGO MALO ELIMINADO - NO USAR
+            /*
             runBubbleGame() {
                 // Crear overlay del juego completo
                 const gameOverlay = document.createElement('div');
@@ -8842,6 +8844,7 @@ Nuestros recuerdos quedarán en mi corazón
                 setTimeout(() => createBubble(), 800);
                 setTimeout(() => createBubble(), 1200);
             }
+            */
             
             // 🧠 JUEGO DE MEMORIA
             startMemoryGame() {
@@ -12184,11 +12187,11 @@ Comida premium y de cumpleaños
                     speedMul = (fish.spinKind === "clean") ? 1.8 : 1.25;
                     fish.happyBurst = Math.max(0, fish.happyBurst - (fish.spinKind === "clean" ? 0.6 : 1.6) * deltaTime);
                 }
-                // Crisis hambre + comida
+                // Crisis hambre + comida (SÚPER RÁPIDO)
                 else if (inHunger && this.food?.length) {
                     const best = this.nearestFood();
-                    const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.0);
-                    speedMul = 1.25;
+                    const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.5); // Súper rápido cuando tiene hambre
+                    speedMul = 1.4; // Multiplicador alto para crisis
                     targetV = {vx: s.vx, vy: s.vy};
                 }
                 // Crisis hambre sin comida
@@ -12242,14 +12245,15 @@ Comida premium y de cumpleaños
                         this.launchHeartToFun(fish.x, fish.y);
                     }
                 }
-                // Perseguir comida
+                // Perseguir comida (SIEMPRE RÁPIDO)
                 else if (this.food?.length) {
                     const f = this.nearestFood();
                     const d = this.dist(fish.x, fish.y, f.x, f.y);
-                    const s = this.seek(fish.x, fish.y, f.x, f.y, fish.maxSpeed * 0.9);
-                    const t = this.clamp(d / 90, 0.35, 1);
-                        targetV = {vx: s.vx * t, vy: s.vy * t};
-                    }
+                    const s = this.seek(fish.x, fish.y, f.x, f.y, fish.maxSpeed * 1.2); // Más rápido que antes
+                    const t = this.clamp(d / 90, 0.8, 1); // Velocidad mínima más alta
+                    targetV = {vx: s.vx * t, vy: s.vy * t};
+                    speedMul = 1.1; // Multiplicador de velocidad para comida
+                }
                 // Movimiento natural (igual que el demo perfecto)
                 else {
                     fish.wanderTimer -= deltaTime;
@@ -12278,7 +12282,7 @@ Comida premium y de cumpleaños
                 fish.y += fish.vy * deltaTime;
 
                 // Límites ajustados para tu juego (con cabecera)
-                const padLeft = 60, padRight = 30, padTop = 125, padBottom = 6;
+                const padLeft = 60, padRight = 30, padTop = 125, padBottom = 20; // Aumentado para que baje más
                 const W = this.canvas.width;
                 const H = this.getFloorY();
                 if (fish.x < padLeft) { fish.x = padLeft; if (fish.vx < 0) fish.vx *= -0.5; }
@@ -12451,8 +12455,8 @@ Comida premium y de cumpleaños
                     const f = this.flyers[i];
                     if (f.t >= 1) {
                         if (!f.given) {
-                            // SUMAR DIVERSIÓN +0.25
-                            this.gameState.needs.fun = this.clamp(this.gameState.needs.fun + 25, 0, 100); // +25 = +0.25 en escala 0-100
+                            // SUMAR DIVERSIÓN +0.25 (RESTAR para hacer feliz)
+                            this.gameState.needs.fun = this.clamp(this.gameState.needs.fun - 25, 0, 100); // -25 = +0.25 diversión (menos rojo = más feliz)
                             this.updateNeedBars();
                             
                             // Efecto visual en la barra
@@ -12530,11 +12534,8 @@ Comida premium y de cumpleaños
                     window.audioManager.playSound('jugar');
                 }
                 
-                // Si window.game existe, usar su método
-                if (window.game && window.game.runBubbleGame) {
-                    window.game.runBubbleGame();
-                    return;
-                }
+                // ✅ JUEGO BUENO RESTAURADO - NO LLAMAR AL MALO
+                // El juego bueno ya está funcionando, no necesitamos el malo
                 
                 // Pantalla simple
                 document.body.innerHTML += `
