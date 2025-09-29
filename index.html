@@ -12304,19 +12304,47 @@ Comida premium y de cumpleaños
                 }
                 // 🎯 MOVIMIENTO ALEATORIO FLUIDO (cuando no hay objetivos)
                 else {
+                    // Inicializar timer de pausa si no existe
+                    if (!fish.pauseTimer) fish.pauseTimer = 0;
+                    if (!fish.isPaused) fish.isPaused = false;
+                    
                     fish.wanderTimer -= deltaTime;
-                    if (fish.wanderTimer <= 0) {
-                        const angle = Math.random() * Math.PI * 2;
-                        fish.wanderDir.x = Math.cos(angle);
-                        fish.wanderDir.y = Math.sin(angle) * 0.7; // Más movimiento vertical
-                        fish.wanderTimer = 1.5 + Math.random() * 2.0; // Cambios más frecuentes
+                    fish.pauseTimer -= deltaTime;
+                    
+                    // Decidir si pausar o moverse
+                    if (fish.pauseTimer <= 0) {
+                        if (fish.isPaused) {
+                            // Terminar pausa y empezar a moverse
+                            fish.isPaused = false;
+                            fish.pauseTimer = 2.0 + Math.random() * 3.0; // Tiempo de movimiento
+                            console.log('🐠 Pez termina pausa, empieza a moverse');
+                        } else {
+                            // Terminar movimiento y empezar pausa
+                            fish.isPaused = true;
+                            fish.pauseTimer = 1.0 + Math.random() * 2.0; // Tiempo de pausa
+                            console.log('🐠 Pez hace pausa natural');
+                        }
                     }
-                    const cruise = fish.baseSpeed * 1.5; // Velocidad base aumentada
-                    targetV = {
-                        vx: fish.wanderDir.x * cruise + Math.cos(fish.swimPhase) * 20,
-                        vy: fish.wanderDir.y * cruise + Math.sin(fish.swimPhase * 1.8) * 20
-                    };
-                    speedMul = 1.0; // Velocidad normal
+                    
+                    if (!fish.isPaused) {
+                        // Moverse normalmente
+                        if (fish.wanderTimer <= 0) {
+                            const angle = Math.random() * Math.PI * 2;
+                            fish.wanderDir.x = Math.cos(angle);
+                            fish.wanderDir.y = Math.sin(angle) * 0.7;
+                            fish.wanderTimer = 3.0 + Math.random() * 4.0;
+                        }
+                        const cruise = fish.baseSpeed * 1.0;
+                        targetV = {
+                            vx: fish.wanderDir.x * cruise + Math.cos(fish.swimPhase) * 20,
+                            vy: fish.wanderDir.y * cruise + Math.sin(fish.swimPhase * 1.8) * 20
+                        };
+                        speedMul = 1.0;
+                    } else {
+                        // Pausa - movimiento muy lento
+                        targetV = {vx: 0, vy: 0};
+                        speedMul = 0.1; // Muy lento durante la pausa
+                    }
                 }
 
                 // 🏊 FÍSICA AVANZADA: ACELERACIÓN GRADUAL
@@ -12332,13 +12360,13 @@ Comida premium y de cumpleaños
                 fish.vx += ax * deltaTime;
                 fish.vy += ay * deltaTime;
                 
-                // 🚀 GARANTIZAR MOVIMIENTO MÍNIMO - Evitar que el pez esté completamente quieto
+                // 🚀 GARANTIZAR MOVIMIENTO MÍNIMO - Solo si está completamente quieto por mucho tiempo
                 const currentSpeed = Math.sqrt(fish.vx * fish.vx + fish.vy * fish.vy);
-                if (currentSpeed < 50 && !fish.goingToCorner) {
-                    // Si el pez está muy lento, darle un pequeño impulso aleatorio
-                    fish.vx += (Math.random() - 0.5) * 100;
-                    fish.vy += (Math.random() - 0.5) * 100;
-                    console.log('🚀 Aplicando impulso mínimo al pez');
+                if (currentSpeed < 20 && !fish.goingToCorner && Math.random() < 0.01) {
+                    // Solo ocasionalmente dar un pequeño impulso si está muy quieto
+                    fish.vx += (Math.random() - 0.5) * 50;
+                    fish.vy += (Math.random() - 0.5) * 50;
+                    console.log('🚀 Aplicando impulso mínimo ocasional al pez');
                 }
 
                 // 🚀 MOVER PEZ
