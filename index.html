@@ -8395,6 +8395,11 @@
                     window.audioManager.playSound('jugar');
                 }
                 
+                // 🎮 INICIAR TRACKING DE TIEMPO DE JUEGO
+                this.gameStartTime = Date.now();
+                this.currentGameId = gameId;
+                console.log(`🎮 Iniciando juego: ${gameId} - Tiempo: ${this.gameStartTime}`);
+                
                 switch(gameId) {
                     case 'bubbles':
                         this.startBubbleGame();
@@ -8410,6 +8415,49 @@
                             onConfirm: () => {}
                         });
                 }
+            }
+
+            // 🎮 FINALIZAR JUEGO Y CALCULAR DIVERSIÓN
+            endGame(gameWon = true, reason = '') {
+                if (!this.gameStartTime || !this.currentGameId) {
+                    console.log('🎮 No hay juego activo para finalizar');
+                    return;
+                }
+
+                const gameEndTime = Date.now();
+                const playTime = (gameEndTime - this.gameStartTime) / 1000; // Tiempo en segundos
+                
+                console.log(`🎮 Finalizando juego: ${this.currentGameId} - Tiempo jugado: ${playTime.toFixed(1)}s`);
+                
+                // 🎯 CALCULAR DIVERSIÓN BASADA EN TIEMPO DE JUEGO
+                let funIncrease = 0;
+                
+                if (gameWon) {
+                    // Diversión basada en tiempo jugado (máximo 30 segundos = 15 diversión)
+                    funIncrease = Math.min(15, Math.floor(playTime * 0.5)); // 0.5 diversión por segundo
+                } else {
+                    // Si perdió, menos diversión pero algo
+                    funIncrease = Math.min(5, Math.floor(playTime * 0.2)); // 0.2 diversión por segundo
+                }
+                
+                // Aplicar diversión al pez
+                if (funIncrease > 0) {
+                    this.gameState.needs.fun = Math.max(0, this.gameState.needs.fun - funIncrease);
+                    this.updateCrisisFlags();
+                    this.updateNeedBars();
+                    
+                    console.log(`🎮 +${funIncrease} diversión por jugar ${playTime.toFixed(1)}s (${gameWon ? 'ganado' : 'perdido'})`);
+                    
+                    // Actualizar lastPlay
+                    this.gameState.lastPlay = Date.now();
+                    
+                    // Mostrar mensaje de diversión
+                    this.showFishMessage(`¡Me divierto mucho jugando contigo! +${funIncrease} diversión`, '#9370DB');
+                }
+                
+                // Resetear tracking
+                this.gameStartTime = null;
+                this.currentGameId = null;
             }
 
             showGameLocked(starsRequired) {
@@ -14550,6 +14598,11 @@ Comida premium y de cumpleaños
             
             // 🏆 TERMINAR JUEGO
             function endGame(won, reason) {
+                // 🎮 LLAMAR A LA FUNCIÓN DE FINALIZACIÓN DEL JUEGO PRINCIPAL
+                if (window.game && window.game.endGame) {
+                    window.game.endGame(won, reason);
+                }
+                
                 gameState.running = false;
                 if (gameState.rafId) cancelAnimationFrame(gameState.rafId);
                 
@@ -16262,6 +16315,11 @@ Comida premium y de cumpleaños
             // Función para terminar juego
             function endGame(won) {
                 if (!gameActive) return; // Evitar múltiples llamadas
+                
+                // 🎮 LLAMAR A LA FUNCIÓN DE FINALIZACIÓN DEL JUEGO PRINCIPAL
+                if (window.game && window.game.endGame) {
+                    window.game.endGame(won, won ? '¡Memoria perfecta!' : '¡Inténtalo de nuevo!');
+                }
                 
                 gameActive = false;
                 if (timerId) clearInterval(timerId);
