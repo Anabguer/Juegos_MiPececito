@@ -8455,6 +8455,10 @@
                     this.showFishMessage(`¡Me divierto mucho jugando contigo! +${funIncrease} diversión`, '#9370DB');
                 }
                 
+                // 🎮 ACTUALIZAR TIEMPO TOTAL DE JUEGO
+                this.gameState.totalPlayTime = (this.gameState.totalPlayTime || 0) + playTime;
+                console.log(`🎮 Tiempo total jugado: ${(this.gameState.totalPlayTime / 60).toFixed(1)} minutos`);
+                
                 // Resetear tracking
                 this.gameStartTime = null;
                 this.currentGameId = null;

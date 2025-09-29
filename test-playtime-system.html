@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sistema de Diversión por Tiempo de Juego</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .test-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .info { color: #2196F3; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Sistema de Diversión por Tiempo de Juego</h1>
+    
+    <div class="test-container">
+        <h2>📊 Estado del Sistema</h2>
+        <div id="status" class="status info">Iniciando pruebas...</div>
+        <div id="fishState">Cargando estado del pez...</div>
+    </div>
+
+    <div class="test-container">
+        <h2>🎮 Pruebas de Juego</h2>
+        <button class="test-button" onclick="testGameStart()">🎯 Iniciar Juego de Prueba</button>
+        <button class="test-button" onclick="testGameWin()">🏆 Simular Victoria</button>
+        <button class="test-button" onclick="testGameLose()">💔 Simular Derrota</button>
+        <button class="test-button" onclick="testMultipleGames()">🔄 Múltiples Juegos</button>
+        <button class="test-button" onclick="clearLog()">🗑️ Limpiar Log</button>
+    </div>
+
+    <div class="test-container">
+        <h2>📝 Log de Pruebas</h2>
+        <div id="log" class="log">Iniciando sistema de pruebas...\n</div>
+    </div>
+
+    <script>
+        // Simular el sistema de juego del pez
+        class FishGameSystem {
+            constructor() {
+                this.gameState = {
+                    needs: {
+                        fun: 50 // Diversión inicial
+                    },
+                    totalPlayTime: 0,
+                    lastPlay: null
+                };
+                this.gameStartTime = null;
+                this.currentGameId = null;
+                this.testMode = true;
+            }
+
+            log(message) {
+                const logElement = document.getElementById('log');
+                const timestamp = new Date().toLocaleTimeString();
+                logElement.textContent += `[${timestamp}] ${message}\n`;
+                logElement.scrollTop = logElement.scrollHeight;
+                console.log(message);
+            }
+
+            updateStatus() {
+                const statusElement = document.getElementById('status');
+                const fishStateElement = document.getElementById('fishState');
+                
+                const funLevel = this.gameState.needs.fun;
+                const totalMinutes = (this.gameState.totalPlayTime / 60).toFixed(1);
+                
+                statusElement.innerHTML = `🎮 Sistema: <span class="success">Activo</span> | 🎯 Diversión: ${funLevel} | ⏰ Tiempo Total: ${totalMinutes} min`;
+                fishStateElement.innerHTML = `
+                    <strong>Estado del Pez:</strong><br>
+                    🎯 Diversión: ${funLevel}/100<br>
+                    ⏰ Tiempo total jugado: ${totalMinutes} minutos<br>
+                    🎮 Último juego: ${this.gameState.lastPlay ? new Date(this.gameState.lastPlay).toLocaleTimeString() : 'Nunca'}
+                `;
+            }
+
+            startGame(gameId) {
+                this.log(`🎮 Iniciando juego: ${gameId}`);
+                this.gameStartTime = Date.now();
+                this.currentGameId = gameId;
+                this.updateStatus();
+            }
+
+            endGame(gameWon = true, reason = '') {
+                if (!this.gameStartTime || !this.currentGameId) {
+                    this.log('❌ No hay juego activo para finalizar');
+                    return;
+                }
+
+                const gameEndTime = Date.now();
+                const playTime = (gameEndTime - this.gameStartTime) / 1000;
+                
+                this.log(`🎮 Finalizando juego: ${this.currentGameId} - Tiempo jugado: ${playTime.toFixed(1)}s`);
+
+                // Calcular diversión basada en tiempo de juego
+                let funIncrease = 0;
+                
+                if (gameWon) {
+                    funIncrease = Math.min(15, Math.floor(playTime * 0.5));
+                } else {
+                    funIncrease = Math.min(5, Math.floor(playTime * 0.2));
+                }
+
+                // Aplicar diversión al pez
+                if (funIncrease > 0) {
+                    this.gameState.needs.fun = Math.max(0, this.gameState.needs.fun - funIncrease);
+                    this.log(`🎯 +${funIncrease} diversión por jugar ${playTime.toFixed(1)}s (${gameWon ? 'ganado' : 'perdido'})`);
+                    this.gameState.lastPlay = Date.now();
+                }
+
+                // Actualizar tiempo total de juego
+                this.gameState.totalPlayTime = (this.gameState.totalPlayTime || 0) + playTime;
+                this.log(`🎮 Tiempo total jugado: ${(this.gameState.totalPlayTime / 60).toFixed(1)} minutos`);
+
+                // Resetear tracking
+                this.gameStartTime = null;
+                this.currentGameId = null;
+                this.updateStatus();
+            }
+        }
+
+        // Crear instancia del sistema
+        const fishGame = new FishGameSystem();
+
+        // Funciones de prueba
+        function testGameStart() {
+            fishGame.log('🧪 PRUEBA: Iniciando juego de prueba...');
+            fishGame.startGame('test-game');
+        }
+
+        function testGameWin() {
+            fishGame.log('🧪 PRUEBA: Simulando victoria...');
+            fishGame.endGame(true, 'Prueba exitosa');
+        }
+
+        function testGameLose() {
+            fishGame.log('🧪 PRUEBA: Simulando derrota...');
+            fishGame.endGame(false, 'Prueba de derrota');
+        }
+
+        function testMultipleGames() {
+            fishGame.log('🧪 PRUEBA: Ejecutando múltiples juegos...');
+            
+            // Juego 1: Victoria rápida
+            fishGame.startGame('bubbles');
+            setTimeout(() => {
+                fishGame.endGame(true);
+                
+                // Juego 2: Derrota después de más tiempo
+                fishGame.startGame('memory');
+                setTimeout(() => {
+                    fishGame.endGame(false);
+                    
+                    // Juego 3: Victoria larga
+                    fishGame.startGame('bubbles');
+                    setTimeout(() => {
+                        fishGame.endGame(true);
+                        fishGame.log('✅ PRUEBA COMPLETADA: Múltiples juegos ejecutados');
+                    }, 3000);
+                }, 2000);
+            }, 1000);
+        }
+
+        function clearLog() {
+            document.getElementById('log').textContent = 'Log limpiado...\n';
+        }
+
+        // Inicializar
+        fishGame.log('🚀 Sistema de pruebas iniciado');
+        fishGame.updateStatus();
+    </script>
+</body>
+</html>
