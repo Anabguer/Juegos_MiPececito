@@ -8453,8 +8453,7 @@
                     // Actualizar lastPlay
                     this.gameState.lastPlay = Date.now();
                     
-                    // Mostrar mensaje de diversión
-                    this.showFishMessage(`¡Me divierto mucho jugando contigo! +${funIncrease} diversión`, '#9370DB');
+                    // Mensaje de diversión removido (era molesto)
                 }
                 
                 // 🎮 ACTUALIZAR TIEMPO TOTAL DE JUEGO
@@ -14430,6 +14429,15 @@ Comida premium y de cumpleaños
                             gameState.spawnEvery = Math.max(400, gameState.spawnEvery - 50);
                         }
                         
+                        // 🎮 DAR DIVERSIÓN INMEDIATA POR CADA BURBUJA BUENA
+                        if (window.game && window.game.gameState) {
+                            const funIncrease = 2; // +2 diversión por cada burbuja buena
+                            window.game.gameState.needs.fun = Math.max(0, window.game.gameState.needs.fun - funIncrease);
+                            window.game.updateCrisisFlags();
+                            window.game.updateNeedBars();
+                            console.log(`🎮 +${funIncrease} diversión por tocar burbuja buena (total: ${gameState.score} puntos)`);
+                        }
+                        
                         removeBubble(bubble, true);
                         bubbleEl.style.transform += ' scale(1.2)';
                         bubbleEl.style.opacity = '0';
@@ -16069,6 +16077,15 @@ Comida premium y de cumpleaños
                             a.classList.add('matched');
                             b.classList.add('matched');
                             matchedPairs++;
+                            
+                            // 🎮 DAR DIVERSIÓN INMEDIATA POR CADA PAR ACERTADO
+                            if (window.game && window.game.gameState) {
+                                const funIncrease = 2; // +2 diversión por cada par acertado
+                                window.game.gameState.needs.fun = Math.max(0, window.game.gameState.needs.fun - funIncrease);
+                                window.game.updateCrisisFlags();
+                                window.game.updateNeedBars();
+                                console.log(`🎮 +${funIncrease} diversión por acertar par (total: ${matchedPairs} pares)`);
+                            }
                             
                             // Efecto visual verde para aciertos
                             a.style.background = 'linear-gradient(135deg, #4CAF50, #8BC34A)';
@@ -18455,6 +18472,16 @@ Comida premium y de cumpleaños
                 if (allSame) {
                     // Match correcto!
                     score += 15;
+                    
+                    // 🎮 DAR DIVERSIÓN INMEDIATA POR CADA LÍNEA COMPLETADA
+                    if (window.game && window.game.gameState) {
+                        const funIncrease = 2; // +2 diversión por cada línea completada
+                        window.game.gameState.needs.fun = Math.max(0, window.game.gameState.needs.fun - funIncrease);
+                        window.game.updateCrisisFlags();
+                        window.game.updateNeedBars();
+                        console.log(`🎮 +${funIncrease} diversión por completar línea (total: ${score} puntos)`);
+                    }
+                    
                     selectedCells.forEach(cell => {
                         cell.token.style.background = '#1bb37a';
                         cell.token.innerHTML = '✨';
