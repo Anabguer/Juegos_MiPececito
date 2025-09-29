@@ -7106,8 +7106,11 @@
                 console.log(`👆 ¡TURBO AL DEDO! (${x.toFixed(0)}, ${y.toFixed(0)}) - Boost: 1.6s`);
             }
             
-            // 💖 LANZAR CORAZÓN QUE AUMENTA DIVERSIÓN
+            // 💖 LANZAR CORAZÓN QUE AUMENTA DIVERSIÓN (SOLO CUANDO TOCAS AL PEZ)
             launchHeartToFun(x, y) {
+                // IMPORTANTE: Esta función solo debe llamarse cuando el usuario toca al pez
+                // NO cuando el pez come
+                
                 // Si no se pasan coordenadas, usar posición del pez
                 const startX = x !== undefined ? x : this.fish.x;
                 const startY = y !== undefined ? y : this.fish.y;
@@ -7132,7 +7135,7 @@
                 this.updateCrisisFlags();
                 this.updateNeedBars();
                 
-                console.log(`💖 Corazón lanzado! Diversión: ${this.gameState.needs.fun}`);
+                console.log(`💖 Corazón lanzado por tocar al pez! Diversión: ${this.gameState.needs.fun}`);
                 
                 // 📸 EVENTO DE JUEGO OCASIONAL
                 if (Math.random() < 0.08) { // 8% chance
@@ -10886,11 +10889,11 @@ Comida premium y de cumpleaños
                 });
             }
             
-            // ✨ EFECTOS DE PARTÍCULAS AL COMER
+            // ✨ EFECTOS DE PARTÍCULAS AL COMER (SOLO PARTÍCULAS, NO CORAZONES NI PUNTOS)
             createEatingParticles(x, y) {
                 if (!this.eatingParticles) this.eatingParticles = [];
                 
-                // Crear 8-12 partículas brillantes
+                // Crear 8-12 partículas brillantes de comida
                 const particleCount = 8 + Math.floor(Math.random() * 5);
                 
                 for (let i = 0; i < particleCount; i++) {
@@ -10914,6 +10917,7 @@ Comida premium y de cumpleaños
                     this.eatingParticles.push(particle);
                 }
                 
+                // IMPORTANTE: Solo crear partículas, NO corazones ni textos flotantes con puntos
                 console.log(`✨ ${particleCount} partículas de comida creadas en (${x.toFixed(1)}, ${y.toFixed(1)})`);
             }
             
@@ -11779,8 +11783,11 @@ Comida premium y de cumpleaños
                         
                         console.log(`🍎 ¡Ñam completo! Nueva hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
                         
-                        // ✨ EFECTOS DE PARTÍCULAS AL COMER
+                        // ✨ EFECTOS DE PARTÍCULAS AL COMER (SOLO PARTÍCULAS, NO CORAZONES)
                         this.createEatingParticles(f.x, f.y);
+                        
+                        // 📝 CREAR TEXTO FLOTANTE "ÑAM" (NO PUNTOS NI CORAZONES)
+                        this.createFloatingText(f.x, f.y - 20, 'ñam', '#4caf50');
                         
                         // 📸 EVENTO DE ALIMENTACIÓN OCASIONAL
                         if (Math.random() < 0.1) { // 10% chance
@@ -12483,11 +12490,11 @@ Comida premium y de cumpleaños
                 }
             }
             
-            // 💖 DIBUJAR CORAZONES VOLADORES
+            // 💖 DIBUJAR CORAZONES VOLADORES (SOLO CUANDO TOCAS AL PEZ, NO CUANDO COME)
             drawFlyers() {
                 if (!this.flyers) return;
                 
-                // VERSIÓN CHATGPT: Curva de Bezier
+                // VERSIÓN CHATGPT: Curva de Bezier para corazones cuando tocas al pez
                 for (const f of this.flyers) {
                     const t = Math.min(1, f.t), u = 1 - t;
                     // curva de Bezier 2 puntos
