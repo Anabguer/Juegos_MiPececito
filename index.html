@@ -7090,6 +7090,13 @@
                 const y = event.clientY - rect.top;
                 
                 // 🚨 GUARDACOSTAS: Solo ignorar si está en crisis de hambre o suciedad PERO NO aburrido
+                console.log('🔍 DEBUG CRISIS:', {
+                    hunger: this.gameState.crisis.hunger,
+                    dirt: this.gameState.crisis.dirt,
+                    bored: this.gameState.crisis.bored,
+                    fun: this.gameState.needs.fun
+                });
+                
                 if ((this.gameState.crisis.hunger || this.gameState.crisis.dirt) && !this.gameState.crisis.bored) {
                     console.log('😔 Click ignorado - Pez en crisis (hambre o suciedad) pero no aburrido');
                     return;
