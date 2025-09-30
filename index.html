@@ -7089,9 +7089,9 @@
                 const x = event.clientX - rect.left;
                 const y = event.clientY - rect.top;
                 
-                // 🚨 GUARDACOSTAS: Solo ignorar si está en crisis de hambre o suciedad
-                if (this.gameState.crisis.hunger || this.gameState.crisis.dirt) {
-                    console.log('😔 Click ignorado - Pez en crisis (hambre o suciedad)');
+                // 🚨 GUARDACOSTAS: Solo ignorar si está en crisis de hambre o suciedad PERO NO aburrido
+                if ((this.gameState.crisis.hunger || this.gameState.crisis.dirt) && !this.gameState.crisis.bored) {
+                    console.log('😔 Click ignorado - Pez en crisis (hambre o suciedad) pero no aburrido');
                     return;
                 }
                 
