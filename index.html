@@ -10064,6 +10064,26 @@ Comida premium y de cumpleaños
                 }
             }
             
+            updateNeedBars() {
+                // Actualizar las barras visuales (FLOTANTES - OCULTAS)
+                const hungerBar = document.getElementById('hungerBar');
+                const dirtBar = document.getElementById('dirtBar');
+                const funBar = document.getElementById('funBar');
+                
+                if (hungerBar) hungerBar.style.width = this.gameState.needs.hunger + '%';
+                if (dirtBar) dirtBar.style.width = this.gameState.needs.dirt + '%';
+                if (funBar) funBar.style.width = this.gameState.needs.fun + '%';
+                
+                // 📊 ACTUALIZAR BARRAS DEL HEADER (NUEVAS)
+                const hungerBarHeader = document.getElementById('hungerBarHeader');
+                const dirtBarHeader = document.getElementById('dirtBarHeader');
+                const funBarHeader = document.getElementById('funBarHeader');
+                
+                if (hungerBarHeader) hungerBarHeader.style.width = this.gameState.needs.hunger + '%';
+                if (dirtBarHeader) dirtBarHeader.style.width = this.gameState.needs.dirt + '%';
+                if (funBarHeader) funBarHeader.style.width = this.gameState.needs.fun + '%';
+            }
+            
             updateCurrencyDisplay(elementId, newValue) {
                 const element = document.getElementById(elementId);
                 const currentValue = parseInt(element.textContent) || 0;
