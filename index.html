@@ -7143,7 +7143,7 @@
                 this.flyers.push(heart);
                 
                 // 🎉 AUMENTAR DIVERSIÓN
-                this.gameState.needs.fun = Math.max(0, this.gameState.needs.fun - 5); // -5 diversión (menos rojo = más feliz)
+                this.gameState.needs.fun = Math.min(100, this.gameState.needs.fun + 25); // +25 diversión (más feliz)
                 this.updateCrisisFlags();
                 this.updateNeedBars();
                 
@@ -11965,7 +11965,12 @@ Comida premium y de cumpleaños
                     t: 0, dur: 1.8, sx, sy, cx, cy, ex, ey, given: false 
                 });
                 
+                // 💖 ACTUALIZAR DIVERSIÓN (+25)
+                this.gameState.needs.fun = Math.min(100, this.gameState.needs.fun + 25);
+                this.updateUI();
+                
                 console.log('❤️ Corazón lanzado hacia barra de diversión (coords DOM)');
+                console.log('💖 +25 diversión por tocar al pez');
             }
             
             // 🫧 BURBUJAS DE RESPIRACIÓN (desde la boca)
@@ -12246,7 +12251,23 @@ Comida premium y de cumpleaños
                         targetV = {vx: Math.sin(fish.swimPhase) * 5, vy: Math.cos(fish.swimPhase * 1.2) * 2};
                     }
                 }
-                // Crisis aburrimiento sin comida
+                // Seguir dedo (SOLO si está aburrido Y no tiene hambre/suciedad crítica)
+                else if (fish.desire && inBored && !inHunger && !inDirt) {
+                    const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y, fish.maxSpeed * 0.7);
+                    const t = this.clamp(s.dist / 120, 0.25, 1);
+                    targetV = {vx: s.vx * t, vy: s.vy * t};
+                    if (s.dist < 22) {
+                        fish.desire = null;
+                        targetV = {vx: 0, vy: 0};
+                        // 🔊 SONIDO cuando llega al dedo
+                        if (window.audioManager) {
+                            window.audioManager.playSound('dedo');
+                        }
+                        // 💖 ACTUALIZAR DIVERSIÓN cuando llega al dedo
+                        this.launchHeartToFun();
+                    }
+                }
+                // Crisis aburrimiento sin comida (solo si no hay dedo)
                 else if (inBored) {
                     const home = {x: this.canvas.width * 0.5, y: this.getFloorY() - 70};
                     const s = this.seek(fish.x, fish.y, home.x, home.y, 80);
@@ -12255,21 +12276,6 @@ Comida premium y de cumpleaños
                         targetV = {vx: s.vx * 0.6, vy: s.vy * 0.6};
                     } else {
                         targetV = {vx: Math.sin(fish.swimPhase) * 7, vy: Math.cos(fish.swimPhase * 1.5) * 3};
-                    }
-                }
-                // Seguir dedo
-                else if (fish.desire) {
-                    const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y, fish.maxSpeed * 0.7);
-                    const t = this.clamp(s.dist / 120, 0.25, 1);
-                    targetV = {vx: s.vx * t, vy: s.vy * t};
-                    if (s.dist < 22) {
-                        fish.desire = null;
-                        targetV = {vx: 0, vy: 0};
-                        this.launchHeartToFun(fish.x, fish.y);
-                        // 🔊 SONIDO cuando llega al dedo
-                        if (window.audioManager) {
-                            window.audioManager.playSound('dedo');
-                        }
                     }
                 }
                 // ✅ COMIDA YA MANEJADA ARRIBA CON MÁXIMA PRIORIDAD
@@ -12346,15 +12352,15 @@ Comida premium y de cumpleaños
             }
             
             // ——— CONFIG POR ETAPA ———
-            getStageCfg(state) {
-                var STAGE_RATES = {
-                    baby:  { hungerHours: 2, dirtHours: 4, funHours: 3, eatReduce: 30, dirtPerPellet: 3, dirtPerRotten: 6 },
-                    young: { hungerHours: 6, dirtHours: 8, funHours: 4, eatReduce: 25, dirtPerPellet: 2, dirtPerRotten: 5 },
-                    adult: { hungerHours: 8, dirtHours:10, funHours: 5, eatReduce: 20, dirtPerPellet: 1, dirtPerRotten: 4 },
-                };
-                var st = (state && state.stage) || 'baby';
-                return STAGE_RATES[st] || STAGE_RATES.baby;
-            }
+        getStageCfg(state) {
+            var STAGE_RATES = {
+                baby:  { hungerHours: 2, dirtHours: 4, funHours: 6, eatReduce: 30, dirtPerPellet: 3, dirtPerRotten: 6 },
+                young: { hungerHours: 6, dirtHours: 8, funHours: 8, eatReduce: 25, dirtPerPellet: 2, dirtPerRotten: 5 },
+                adult: { hungerHours: 8, dirtHours:10, funHours: 10, eatReduce: 20, dirtPerPellet: 1, dirtPerRotten: 4 },
+            };
+            var st = (state && state.stage) || 'baby';
+            return STAGE_RATES[st] || STAGE_RATES.baby;
+        }
         
         // 🔧 FUNCIONES QUE FALTAN PARA EL SISTEMA REALISTA
         updateAutoNeeds(deltaTime) {
@@ -12421,35 +12427,6 @@ Comida premium y de cumpleaños
                 console.log('🥚 Reset completo para huevo - Todo limpio');
             }
             
-            updateNeedBars() {
-                // Actualizar las barras visuales (FLOTANTES - OCULTAS)
-                const hungerBar = document.getElementById('hungerBar');
-                const dirtBar = document.getElementById('dirtBar');
-                const funBar = document.getElementById('funBar');
-                
-                if (hungerBar) hungerBar.style.width = this.gameState.needs.hunger + '%';
-                if (dirtBar) dirtBar.style.width = this.gameState.needs.dirt + '%';
-                if (funBar) funBar.style.width = this.gameState.needs.fun + '%';
-                
-                // 📊 ACTUALIZAR BARRAS DEL HEADER (NUEVAS)
-                const hungerBarHeader = document.getElementById('hungerBarHeader');
-                const dirtBarHeader = document.getElementById('dirtBarHeader');
-                const funBarHeader = document.getElementById('funBarHeader');
-                
-                if (hungerBarHeader) hungerBarHeader.style.width = this.gameState.needs.hunger + '%';
-                if (dirtBarHeader) dirtBarHeader.style.width = this.gameState.needs.dirt + '%';
-                if (funBarHeader) {
-                    funBarHeader.style.width = this.gameState.needs.fun + '%';
-                    // BORDE ROJO cuando diversión está baja (aburrido)
-                    if (this.gameState.needs.fun <= 25) {
-                        funBarHeader.style.border = '2px solid #ff4444';
-                        funBarHeader.style.boxShadow = '0 0 8px rgba(255, 68, 68, 0.6)';
-                    } else {
-                        funBarHeader.style.border = 'none';
-                        funBarHeader.style.boxShadow = 'none';
-                    }
-                }
-            }
             
             updateCrisisFlags() {
                 const CRISIS_LVL = 75;
@@ -13042,7 +13019,7 @@ Comida premium y de cumpleaños
                         if (soundName === 'eat') {
                             sound.volume = (this.effectsVolume * 0.3) * this.volume; // 30% del volumen normal
                         } else {
-                            sound.volume = this.effectsVolume * this.volume;
+                        sound.volume = this.effectsVolume * this.volume;
                         }
                         
                         sound.play();
