@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>🐠 Mi Pececito - Tamagotchi Virtual</title>
     
+    <!-- 🔤 Google Fonts - Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- 🎨 CSS INTEGRADO PARA EVITAR PROBLEMAS DE CARGA -->
     
     <style>
@@ -132,7 +137,7 @@
         
         html, body {
             height: 100%;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: 'Poppins', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             overflow: hidden;
@@ -2194,7 +2199,7 @@
         
         #debugInfo {
             color: #ccc;
-            font-family: 'Courier New', monospace;
+            font-family: 'Poppins', sans-serif;
             font-size: 7px;
             text-align: center;
             margin-bottom: 4px;
@@ -7084,9 +7089,9 @@
                 const x = event.clientX - rect.left;
                 const y = event.clientY - rect.top;
                 
-                // 🚨 GUARDACOSTAS: Solo ignorar si está MUY aburrido (no por hambre)
-                if (this.gameState.crisis.bored) {
-                    console.log('😔 Click ignorado - Pez muy aburrido (necesita jugar)');
+                // 🚨 GUARDACOSTAS: Solo ignorar si está en crisis de hambre o suciedad
+                if (this.gameState.crisis.hunger || this.gameState.crisis.dirt) {
+                    console.log('😔 Click ignorado - Pez en crisis (hambre o suciedad)');
                     return;
                 }
                 
@@ -8567,7 +8572,7 @@ Nuestros recuerdos quedarán en mi corazón
                     align-items: center;
                     justify-content: flex-start;
                     padding: 20px;
-                    font-family: 'Comic Sans MS', cursive;
+                    font-family: 'Poppins', sans-serif;
                     overflow: hidden;
                 `;
 
@@ -10208,8 +10213,8 @@ Comida premium y de cumpleaños
                 this.gameState.fishName = randomNames[Math.floor(Math.random() * randomNames.length)];
                 
                 this.showCustomModal({
-                    title: '¡Sorpresa!',
-                    message: `🐠 "¡Me llamaré ${this.gameState.fishName}!"\n\n¡Espero que te guste mi nombre!\n\n💡 Consejos para cuidarme:\n🫧 Alimenta cuando tenga hambre → +2 burbujas\n🧹 Límpiame cuando esté sucio → +3 burbujas\n🎮 Juega conmigo → +burbujas y estrellas\n\n¡Con burbujas podrás comprarme fondos bonitos!`,
+                    title: '🌟 ¡Sorpresa!',
+                    message: `"Me llamaré ${this.gameState.fishName}"\n\n¡Espero que te guste mi nombre!\n\n💡 Consejos para cuidarme:\n\nAliméntame cuando tenga hambre → ganarás burbujas.\n\nLímpiame cuando esté sucio → obtendrás más burbujas.\n\nJuega conmigo → conseguirás burbujas y estrellas.\n\n✨ Con las burbujas podrás regalarme fondos bonitos.`,
                     confirmText: '¡Empecemos juntos!',
                     onConfirm: () => {}
                 });
@@ -12191,24 +12196,24 @@ Comida premium y de cumpleaños
                 if (this.food?.length) {
                     const best = this.nearestFood();
                     if (inHunger) {
-                        // Crisis hambre + comida (SÚPER RÁPIDO)
-                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.5);
-                        speedMul = 1.4;
-                        targetV = {vx: s.vx, vy: s.vy};
-                    } else if (inDirt) {
-                        // Crisis suciedad + comida (RÁPIDO)
+                        // Crisis hambre + comida (RÁPIDO)
                         const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.2);
-                        speedMul = 1.1;
-                        targetV = {vx: s.vx, vy: s.vy};
-                    } else if (inBored) {
-                        // Crisis aburrimiento + comida (RÁPIDO)
-                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.3);
                         speedMul = 1.2;
                         targetV = {vx: s.vx, vy: s.vy};
+                    } else if (inDirt) {
+                        // Crisis suciedad + comida (NORMAL-RÁPIDO)
+                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.1);
+                        speedMul = 1.0;
+                        targetV = {vx: s.vx, vy: s.vy};
+                    } else if (inBored) {
+                        // Crisis aburrimiento + comida (NORMAL-RÁPIDO)
+                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.1);
+                        speedMul = 1.0;
+                        targetV = {vx: s.vx, vy: s.vy};
                     } else {
-                        // Comida normal (RÁPIDO)
-                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.2);
-                        speedMul = 1.1;
+                        // Comida normal (NORMAL)
+                        const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.0);
+                        speedMul = 0.9;
                         targetV = {vx: s.vx, vy: s.vy};
                     }
                 }
@@ -12247,13 +12252,17 @@ Comida premium y de cumpleaños
                 }
                 // Seguir dedo
                 else if (fish.desire) {
-                    const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y, fish.maxSpeed * 0.9);
+                    const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y, fish.maxSpeed * 0.7);
                     const t = this.clamp(s.dist / 120, 0.25, 1);
                     targetV = {vx: s.vx * t, vy: s.vy * t};
                     if (s.dist < 22) {
                         fish.desire = null;
                         targetV = {vx: 0, vy: 0};
                         this.launchHeartToFun(fish.x, fish.y);
+                        // 🔊 SONIDO cuando llega al dedo
+                        if (window.audioManager) {
+                            window.audioManager.playSound('dedo');
+                        }
                     }
                 }
                 // ✅ COMIDA YA MANEJADA ARRIBA CON MÁXIMA PRIORIDAD
@@ -12330,15 +12339,15 @@ Comida premium y de cumpleaños
             }
             
             // ——— CONFIG POR ETAPA ———
-        getStageCfg(state) {
-            var STAGE_RATES = {
-                baby:  { hungerHours: 2, dirtHours: 4, funHours: 3, eatReduce: 30, dirtPerPellet: 3, dirtPerRotten: 6 },
-                young: { hungerHours: 6, dirtHours: 8, funHours: 4, eatReduce: 25, dirtPerPellet: 2, dirtPerRotten: 5 },
-                adult: { hungerHours: 8, dirtHours:10, funHours: 5, eatReduce: 20, dirtPerPellet: 1, dirtPerRotten: 4 },
-            };
-            var st = (state && state.stage) || 'baby';
-            return STAGE_RATES[st] || STAGE_RATES.baby;
-        }
+            getStageCfg(state) {
+                var STAGE_RATES = {
+                    baby:  { hungerHours: 2, dirtHours: 4, funHours: 12, eatReduce: 30, dirtPerPellet: 3, dirtPerRotten: 6 },
+                    young: { hungerHours: 6, dirtHours: 8, funHours: 16, eatReduce: 25, dirtPerPellet: 2, dirtPerRotten: 5 },
+                    adult: { hungerHours: 8, dirtHours:10, funHours: 20, eatReduce: 20, dirtPerPellet: 1, dirtPerRotten: 4 },
+                };
+                var st = (state && state.stage) || 'baby';
+                return STAGE_RATES[st] || STAGE_RATES.baby;
+            }
         
         // 🔧 FUNCIONES QUE FALTAN PARA EL SISTEMA REALISTA
         updateAutoNeeds(deltaTime) {
@@ -12349,9 +12358,24 @@ Comida premium y de cumpleaños
                 const dirtInc   = (100 / (cfg.dirtHours   * 3600)) * deltaTime;
                 const funDec    = (100 / (cfg.funHours    * 3600)) * deltaTime;
 
+                const oldHunger = this.gameState.needs.hunger;
+                const oldDirt = this.gameState.needs.dirt;
+                const oldFun = this.gameState.needs.fun;
+
                 this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger + hungerInc, 0, 100);
                 this.gameState.needs.dirt   = this.clamp(this.gameState.needs.dirt   + dirtInc,   0, 100);
                 this.gameState.needs.fun    = this.clamp(this.gameState.needs.fun    - funDec,    0, 100);
+
+                // 📊 LOGS DE CAMBIOS EN NECESIDADES
+                if (Math.abs(this.gameState.needs.hunger - oldHunger) > 0.1) {
+                    console.log(`🍽️ HAMBRE SUBE: ${oldHunger.toFixed(1)}% → ${this.gameState.needs.hunger.toFixed(1)}% (+${(this.gameState.needs.hunger - oldHunger).toFixed(2)}%)`);
+                }
+                if (Math.abs(this.gameState.needs.dirt - oldDirt) > 0.1) {
+                    console.log(`🧹 SUCIEDAD SUBE: ${oldDirt.toFixed(1)}% → ${this.gameState.needs.dirt.toFixed(1)}% (+${(this.gameState.needs.dirt - oldDirt).toFixed(2)}%)`);
+                }
+                if (Math.abs(this.gameState.needs.fun - oldFun) > 0.1) {
+                    console.log(`🎮 DIVERSIÓN BAJA: ${oldFun.toFixed(1)}% → ${this.gameState.needs.fun.toFixed(1)}% (${(this.gameState.needs.fun - oldFun).toFixed(2)}%)`);
+                }
                 
                 // 🐠 MENSAJES SUTILES DEL PEZ (solo ocasionalmente)
                 if (Math.random() < 0.01) { // 1% de probabilidad por frame
@@ -12424,7 +12448,7 @@ Comida premium y de cumpleaños
                 const CRISIS_LVL = 75;
                 this.gameState.crisis.hunger = this.gameState.needs.hunger >= CRISIS_LVL;
                 this.gameState.crisis.dirt = this.gameState.needs.dirt >= CRISIS_LVL;
-                this.gameState.crisis.bored = this.gameState.needs.fun <= 25; // Aburrido cuando diversión < 25%
+                this.gameState.crisis.bored = this.gameState.needs.fun <= 25; // Aburrido cuando diversión <= 25%
             }
             
             updateTinyBubbles(deltaTime) {
@@ -12555,7 +12579,7 @@ Comida premium y de cumpleaños
                         align-items: center;
                         justify-content: flex-start;
                         padding: 20px;
-                        font-family: Comic Sans MS, cursive;
+                        font-family: 'Poppins', sans-serif;
                     ">
                         <div style="
                             color: white;
@@ -12799,7 +12823,8 @@ Comida premium y de cumpleaños
                     fail: './sound/fallo.mp3',
                     levelComplete: './sound/nivelcompletado.mp3',
                     jugar: './sound/jugar.mp3',
-                    acierto: './sound/comer.mp3'
+                    acierto: './sound/comer.mp3',
+                    dedo: './sound/dedo.mp3'
                 };
                 
                 for (const [name, url] of Object.entries(soundFiles)) {
@@ -13005,7 +13030,14 @@ Comida premium y de cumpleaños
                     } else {
                         // Archivo de audio
                         sound.currentTime = 0;
-                        sound.volume = this.effectsVolume * this.volume;
+                        
+                        // 🔊 VOLUMEN ESPECÍFICO PARA COMER (más bajo)
+                        if (soundName === 'eat') {
+                            sound.volume = (this.effectsVolume * 0.3) * this.volume; // 30% del volumen normal
+                        } else {
+                            sound.volume = this.effectsVolume * this.volume;
+                        }
+                        
                         sound.play();
                     }
                     console.log(`🔊 Reproduciendo: ${soundName}`);
