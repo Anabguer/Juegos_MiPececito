@@ -14435,6 +14435,7 @@ Comida premium y de cumpleaños
                     justify-content: center;
                     transform: translate(${x - size/2}px, ${y - size/2}px);
                     transition: transform 0.1s ease;
+                    z-index: 10000;
                 `;
                 
                 bubbleEl.querySelector('.bubble-emoji').style.cssText = `
@@ -14757,7 +14758,7 @@ Comida premium y de cumpleaños
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    z-index: 1000;
+                    z-index: 10001;
                     animation: fadeIn 0.4s ease;
                 `;
                 
