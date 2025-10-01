@@ -108,6 +108,12 @@ class BubblesGame {
 
     startGame() {
         console.log('🫧 Iniciando juego de burbujas...');
+        console.log('🫧 CONFIGURACIÓN:', {
+            bubbleSpeed: this.config.bubbleSpeed,
+            bubbleSpawnRate: this.config.bubbleSpawnRate,
+            bubbleSize: this.config.bubbleSize,
+            levelMultiplier: this.config.levelMultiplier
+        });
         
         this.gameState.isPlaying = true;
         this.gameState.score = 0;
@@ -158,6 +164,15 @@ class BubblesGame {
             element: null
         };
 
+        console.log(`🫧 BURBUJA CREADA:`, {
+            speed: bubble.speed,
+            vy: bubble.vy,
+            vx: bubble.vx,
+            drift: bubble.drift,
+            size: bubble.size,
+            isGood: bubble.isGood
+        });
+
         // Crear elemento visual
         const bubbleEl = document.createElement('div');
         bubbleEl.className = `game-bubble ${isGood ? 'good' : 'bad'}`;
@@ -207,6 +222,18 @@ class BubblesGame {
         if (!bubble.element) return;
 
         const stageRect = this.elements.gameStage.getBoundingClientRect();
+        
+        // Log de movimiento cada 30 frames (aproximadamente cada 0.5 segundos)
+        if (Math.random() < 0.02) {
+            console.log(`🫧 MOVIMIENTO BURBUJA:`, {
+                id: bubble.id,
+                x: bubble.x.toFixed(1),
+                y: bubble.y.toFixed(1),
+                vx: bubble.vx.toFixed(3),
+                vy: bubble.vy.toFixed(3),
+                drift: bubble.drift.toFixed(3)
+            });
+        }
         
         // Actualizar posición
         bubble.x += bubble.vx;
