@@ -14409,7 +14409,7 @@ Comida premium y de cumpleaños
                 const stageRect = elements.stage.getBoundingClientRect();
                 console.log('🫧 Creando burbuja - Stage rect:', stageRect);
                 const x = size + Math.random() * (stageRect.width - size * 2);
-                const y = stageRect.height + size;
+                const y = stageRect.height - size; // EMPEZAR DESDE ABAJO PERO DENTRO DEL STAGE
                 const speed = 80 + Math.random() * 60 + gameState.score * 0.8;
                 const drift = (Math.random() - 0.5) * 40;
                 
