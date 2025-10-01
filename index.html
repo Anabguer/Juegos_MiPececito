@@ -13396,21 +13396,19 @@ Comida premium y de cumpleaños
                 `;
             }
             
-            // 🎯 ARREGLAR EL GRID DEL JUEGO PARA QUE COINCIDA CON SU CONTENEDOR
+            // 🎯 ARREGLAR EL STAGE DEL JUEGO DE BURBUJAS
             const bubbleStage = gameModal.querySelector('#bubbleStage');
             if (bubbleStage) {
                 bubbleStage.style.cssText = `
                     width: 100% !important;
                     height: 100% !important;
                     min-height: 400px !important;
-                    display: grid !important;
-                    grid-template-columns: repeat(4, 1fr) !important;
-                    grid-template-rows: repeat(6, 1fr) !important;
-                    gap: 8px !important;
-                    padding: 10px !important;
-                    background: rgba(255, 255, 255, 0.05) !important;
-                    border-radius: 10px !important;
-                    box-sizing: border-box !important;
+                    position: relative !important;
+                    background: linear-gradient(180deg, #4fc3f7 0%, #29b6f6 30%, #0288d1 70%, #0277bd 100%) !important;
+                    border-radius: 12px !important;
+                    overflow: hidden !important;
+                    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+                    z-index: 1 !important;
                 `;
             }
             
