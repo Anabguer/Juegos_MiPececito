@@ -36,6 +36,14 @@ class BubblesGame {
         this.setupEventListeners();
         this.loadBestScore();
         this.updateUI();
+        
+        // Si estamos en iframe, ocultar el botón de cerrar del juego
+        if (window.parent !== window) {
+            if (this.elements.closeGame) {
+                this.elements.closeGame.style.display = 'none';
+            }
+        }
+        
         console.log('🫧 Juego de burbujas inicializado');
     }
 
@@ -367,10 +375,10 @@ class BubblesGame {
             this.endGame(false, 'Juego cancelado');
         }
         
-        // Si estamos en un iframe, cerrar el overlay padre
+        // Si estamos en un iframe, no hacer nada (el padre se encarga)
         if (window.parent !== window) {
-            // Estamos en un iframe, notificar al padre para que cierre
-            window.parent.postMessage('closeBubblesGame', '*');
+            // Estamos en un iframe, no cerrar nada aquí
+            return;
         } else {
             // Estamos en ventana directa, cerrar normalmente
             this.elements.gameOverlay.style.display = 'none';
