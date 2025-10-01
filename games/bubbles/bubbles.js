@@ -380,8 +380,11 @@ class BubblesGame {
             // Fallback: intentar cerrar directamente después de un delay
             setTimeout(() => {
                 console.log('🔴 FALLBACK: CERRANDO DIRECTAMENTE...');
-                window.parent.document.getElementById('bubblesGameOverlay')?.remove();
-                window.parent.document.getElementById('gamesModal').style.display = 'flex';
+                const overlay = window.parent.document.getElementById('bubblesGameOverlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                    window.parent.document.getElementById('gamesModal').style.display = 'flex';
+                }
             }, 100);
         } else {
             // Si estamos en ventana directa, cerrar normalmente
