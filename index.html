@@ -13851,15 +13851,15 @@ Comida premium y de cumpleaños
             // Stage del juego MÁS LARGO
             const stage = gameModal.querySelector('#bubbleStage');
             stage.style.cssText = `
-                width: 100%;
-                height: 100%;
-                position: relative;
-                background: linear-gradient(180deg, rgba(79, 195, 247, 0.3) 0%, rgba(41, 182, 246, 0.2) 30%, rgba(2, 136, 209, 0.2) 70%, rgba(2, 119, 189, 0.3) 100%);
-                border-radius: 12px;
-                overflow: visible;
-                border: 2px solid rgba(255, 255, 255, 0.3);
-                min-height: 350px; /* CASI EL DOBLE */
-                z-index: 1;
+                width: 100% !important;
+                height: 100% !important;
+                position: relative !important;
+                background: linear-gradient(180deg, rgba(79, 195, 247, 0.3) 0%, rgba(41, 182, 246, 0.2) 30%, rgba(2, 136, 209, 0.2) 70%, rgba(2, 119, 189, 0.3) 100%) !important;
+                border-radius: 12px !important;
+                overflow: visible !important;
+                border: 2px solid rgba(255, 255, 255, 0.3) !important;
+                min-height: 350px !important; /* CASI EL DOBLE */
+                z-index: 1 !important;
             `;
             
             // Items de leyenda ya configurados arriba con bordes de colores
@@ -14776,14 +14776,14 @@ Comida premium y de cumpleaños
                     width: 100% !important;
                     height: 100% !important;
                     background: linear-gradient(135deg,
-                        rgba(13, 71, 161, 0.6) 0%,
-                        rgba(21, 101, 192, 0.5) 50%,
-                        rgba(25, 118, 210, 0.6) 100%) !important;
+                        rgba(13, 71, 161, 0.95) 0%,
+                        rgba(21, 101, 192, 0.9) 50%,
+                        rgba(25, 118, 210, 0.95) 100%) !important;
                     backdrop-filter: blur(15px) saturate(150%) !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
-                    z-index: 10000 !important;
+                    z-index: 9999999 !important;
                     animation: fadeIn 0.4s ease !important;
                     pointer-events: auto !important;
                 `;
