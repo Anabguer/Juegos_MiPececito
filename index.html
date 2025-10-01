@@ -14582,7 +14582,14 @@ Comida premium y de cumpleaños
                     bubble.vx += Math.sin(now / 400 + i) * 50 * deltaTime;
                     
                     const stageRect = elements.stage.getBoundingClientRect();
-                    if (bubble.x - bubble.size/2 < 0 || bubble.x + bubble.size/2 > stageRect.width) {
+                    
+                    // Limitar X para que no se salga de los lados del stage
+                    if (bubble.x - bubble.size/2 < 0) {
+                        bubble.x = bubble.size/2;
+                        bubble.vx *= -0.9;
+                    }
+                    if (bubble.x + bubble.size/2 > stageRect.width) {
+                        bubble.x = stageRect.width - bubble.size/2;
                         bubble.vx *= -0.9;
                     }
                     
