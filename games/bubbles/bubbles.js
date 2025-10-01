@@ -12,18 +12,17 @@ class BubblesGame {
             bestScore: 0,
             stars: 0,
             bubbles: [],
-            gameTime: 0,
-            maxTime: 30000, // 30 segundos por nivel
-            startTime: 0,
+            bubblesCaught: 0, // Contador de burbujas atrapadas
+            bubblesNeeded: 10, // Burbujas necesarias para pasar de nivel
             animationId: null
         };
 
         this.config = {
-            bubbleSpawnRate: 3000, // Cada 3 segundos
-            bubbleSpeed: 30, // Más lento
-            bubbleSize: { min: 40, max: 70 }, // Más grandes
+            bubbleSpawnRate: 2000, // Cada 2 segundos
+            bubbleSpeed: 20, // Mucho más lento
+            bubbleSize: { min: 50, max: 80 }, // Más grandes
             goodBubbleChance: 0.7, // 70% de burbujas buenas
-            levelMultiplier: 1.1, // Menos aceleración
+            levelMultiplier: 1.05, // Muy poca aceleración
             maxLevel: 10
         };
 
@@ -115,8 +114,8 @@ class BubblesGame {
         this.gameState.level = 1;
         this.gameState.stars = 0;
         this.gameState.bubbles = [];
-        this.gameState.startTime = Date.now();
-        this.gameState.gameTime = 0;
+        this.gameState.bubblesCaught = 0;
+        this.gameState.bubblesNeeded = 10;
         
         this.elements.playButton.textContent = 'JUGANDO...';
         this.elements.playButton.disabled = true;
@@ -152,10 +151,10 @@ class BubblesGame {
             y: stageRect.height - size,
             size: size,
             isGood: isGood,
-            speed: this.config.bubbleSpeed + Math.random() * 10, // Menos variación
-            drift: (Math.random() - 0.5) * 15, // Menos deriva
-            vx: (Math.random() - 0.5) * 1, // Menos movimiento horizontal
-            vy: -this.config.bubbleSpeed - Math.random() * 10, // Más lento
+            speed: this.config.bubbleSpeed + Math.random() * 5, // Muy poca variación
+            drift: (Math.random() - 0.5) * 8, // Muy poca deriva
+            vx: (Math.random() - 0.5) * 0.5, // Muy poco movimiento horizontal
+            vy: -this.config.bubbleSpeed - Math.random() * 5, // Mucho más lento
             element: null
         };
 
@@ -190,20 +189,13 @@ class BubblesGame {
     gameLoop() {
         if (!this.gameState.isPlaying) return;
 
-        const now = Date.now();
-        this.gameState.gameTime = now - this.gameState.startTime;
-        
-        // Actualizar progreso
-        const progress = Math.min(this.gameState.gameTime / this.gameState.maxTime, 1);
-        this.elements.progressFill.style.width = `${progress * 100}%`;
-
         // Mover burbujas
         this.gameState.bubbles.forEach(bubble => {
             this.updateBubble(bubble);
         });
 
-        // Verificar fin de nivel
-        if (this.gameState.gameTime >= this.gameState.maxTime) {
+        // Verificar fin de nivel (por burbujas atrapadas)
+        if (this.gameState.bubblesCaught >= this.gameState.bubblesNeeded) {
             this.completeLevel();
             return;
         }
@@ -270,8 +262,9 @@ class BubblesGame {
     clickBubble(bubble) {
         if (bubble.isGood) {
             this.gameState.score += 10 * this.gameState.level;
+            this.gameState.bubblesCaught++;
             this.playSound('acierto');
-            console.log('🫧 Burbuja buena clickeada!');
+            console.log(`🫧 Burbuja buena clickeada! (${this.gameState.bubblesCaught}/${this.gameState.bubblesNeeded})`);
         } else {
             this.endGame(false, '¡Tocaste una mala!');
             return;
@@ -296,12 +289,12 @@ class BubblesGame {
         
         this.gameState.level++;
         this.gameState.stars++;
+        this.gameState.bubblesCaught = 0;
+        this.gameState.bubblesNeeded = 10 + (this.gameState.level * 2); // Más burbujas por nivel
         
         if (this.gameState.level > this.config.maxLevel) {
             this.endGame(true, '¡Has completado todos los niveles!');
         } else {
-            this.gameState.startTime = Date.now();
-            this.gameState.gameTime = 0;
             this.updateUI();
             this.playSound('levelComplete');
         }
