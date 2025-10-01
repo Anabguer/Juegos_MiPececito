@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -12556,8 +12556,8 @@ Comida premium y de cumpleaños
                 }
             };
             
-            // Función SÚPER SIMPLE para juego de burbujas
-            window.startBubbleGameDirect = function() {
+            // Función SÚPER SIMPLE para juego de burbujas - DESHABILITADA (CAUSABA ERRORES)
+            window.startBubbleGameDirect_DISABLED_OLD = function() {
                 console.log('🫧 Iniciando juego SIMPLE');
                 
                 // 🔊 SONIDO DE INICIO DE JUEGO
@@ -12729,6 +12729,17 @@ Comida premium y de cumpleaños
                 // Burbujas iniciales
                 setTimeout(() => createBubble(), 500);
                 setTimeout(() => createBubble(), 1000);
+            };
+            
+            // 🫧 VERSIÓN CORRECTA DEL JUEGO DE BURBUJAS
+            window.startBubbleGameDirect = function() {
+                console.log('🫧 Llamando a la versión correcta del juego de burbujas...');
+                if (typeof startBubbleGame === 'function') {
+                    startBubbleGame();
+                } else {
+                    console.error('❌ startBubbleGame no está definida todavía');
+                    alert('🚧 El juego de burbujas no está disponible en este momento. Por favor, intenta más tarde.');
+                }
             };
             
             // Event listeners de emergencia - ELIMINADO (YA EXISTE ARRIBA)
