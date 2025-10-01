@@ -19,11 +19,11 @@ class BubblesGame {
         };
 
         this.config = {
-            bubbleSpawnRate: 2000, // Cada 2 segundos
-            bubbleSpeed: 60,
-            bubbleSize: { min: 30, max: 60 },
+            bubbleSpawnRate: 3000, // Cada 3 segundos
+            bubbleSpeed: 30, // Más lento
+            bubbleSize: { min: 40, max: 70 }, // Más grandes
             goodBubbleChance: 0.7, // 70% de burbujas buenas
-            levelMultiplier: 1.2,
+            levelMultiplier: 1.1, // Menos aceleración
             maxLevel: 10
         };
 
@@ -152,10 +152,10 @@ class BubblesGame {
             y: stageRect.height - size,
             size: size,
             isGood: isGood,
-            speed: this.config.bubbleSpeed + Math.random() * 20,
-            drift: (Math.random() - 0.5) * 30,
-            vx: (Math.random() - 0.5) * 2,
-            vy: -this.config.bubbleSpeed - Math.random() * 20,
+            speed: this.config.bubbleSpeed + Math.random() * 10, // Menos variación
+            drift: (Math.random() - 0.5) * 15, // Menos deriva
+            vx: (Math.random() - 0.5) * 1, // Menos movimiento horizontal
+            vy: -this.config.bubbleSpeed - Math.random() * 10, // Más lento
             element: null
         };
 
