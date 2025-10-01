@@ -378,7 +378,8 @@ class BubblesGame {
             try {
                 const overlay = window.parent.document.getElementById('bubblesGameOverlay');
                 if (overlay) {
-                    overlay.style.display = 'none';
+                    // Eliminar completamente el overlay
+                    overlay.remove();
                     const gamesModal = window.parent.document.getElementById('gamesModal');
                     if (gamesModal) {
                         gamesModal.style.display = 'flex';
