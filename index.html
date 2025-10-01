@@ -15033,6 +15033,7 @@ Comida premium y de cumpleaños
         // 🫧 JUEGO DE BURBUJAS INTEGRADO (OVERLAY)
         function startBubblesGameIntegrated() {
             console.log('🫧 Iniciando juego de burbujas integrado...');
+            console.log('🫧 Creando iframe para games/bubbles/bubbles.html');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
@@ -15068,6 +15069,15 @@ Comida premium y de cumpleaños
                 border-radius: 20px !important;
                 box-shadow: rgba(0, 0, 0, 0.3) 0px 20px 40px !important;
             `;
+            
+            // Log cuando el iframe se carga
+            gameFrame.onload = () => {
+                console.log('🫧 IFRAME CARGADO: games/bubbles/bubbles.html');
+            };
+            
+            gameFrame.onerror = () => {
+                console.error('❌ ERROR CARGANDO IFRAME: games/bubbles/bubbles.html');
+            };
             
             // Escuchar mensajes del juego para cerrar
             const messageHandler = (event) => {
