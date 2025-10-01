@@ -20,9 +20,9 @@ class BubblesGame {
         };
 
         this.config = {
-            bubbleSpawnRate: 3000, // Cada 3 segundos
-            bubbleSpeed: 5, // MUY lento
-            bubbleSize: { min: 60, max: 90 }, // Más grandes
+            bubbleSpawnRate: 1500, // Cada 1.5 segundos
+            bubbleSpeed: 8, // Un poco más rápido
+            bubbleSize: { min: 30, max: 60 }, // Más pequeñas
             goodBubbleChance: 0.7, // 70% de burbujas buenas
             levelMultiplier: 1.02, // Muy poca aceleración
             maxLevel: 10
