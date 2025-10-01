@@ -372,20 +372,23 @@ class BubblesGame {
             this.endGame(false, 'Juego cancelado');
         }
         
-        // Notificar al padre para cerrar el overlay
+        // Cerrar directamente sin comunicación compleja
         if (window.parent !== window) {
-            console.log('🔴 ENVIANDO MENSAJE AL PADRE...');
-            window.parent.postMessage('closeBubblesGame', '*');
-            
-            // Fallback: intentar cerrar directamente después de un delay
-            setTimeout(() => {
-                console.log('🔴 FALLBACK: CERRANDO DIRECTAMENTE...');
+            console.log('🔴 CERRANDO DIRECTAMENTE...');
+            try {
                 const overlay = window.parent.document.getElementById('bubblesGameOverlay');
                 if (overlay) {
                     overlay.style.display = 'none';
-                    window.parent.document.getElementById('gamesModal').style.display = 'flex';
+                    const gamesModal = window.parent.document.getElementById('gamesModal');
+                    if (gamesModal) {
+                        gamesModal.style.display = 'flex';
+                    }
                 }
-            }, 100);
+            } catch (error) {
+                console.log('🔴 Error al cerrar:', error);
+                // Si falla, intentar con postMessage
+                window.parent.postMessage('closeBubblesGame', '*');
+            }
         } else {
             // Si estamos en ventana directa, cerrar normalmente
             this.elements.gameOverlay.style.display = 'none';
