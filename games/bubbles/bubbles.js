@@ -372,8 +372,9 @@ class BubblesGame {
             this.endGame(false, 'Juego cancelado');
         }
         
-        // Si estamos en overlay, notificar al padre
+        // Notificar al padre para cerrar el overlay
         if (window.parent !== window) {
+            console.log('🔴 ENVIANDO MENSAJE AL PADRE...');
             window.parent.postMessage('closeBubblesGame', '*');
         } else {
             // Si estamos en ventana directa, cerrar normalmente
@@ -382,12 +383,50 @@ class BubblesGame {
     }
 
     toggleSound() {
-        // Implementar lógica de sonido
+        // Conectar con el sistema de audio del juego principal
+        if (window.parent !== window && window.parent.audioManager) {
+            // Estamos en iframe, usar el audio del padre
+            window.parent.audioManager.toggleMute();
+            this.updateSoundButton();
+        } else if (window.audioManager) {
+            // Estamos en ventana directa
+            window.audioManager.toggleMute();
+            this.updateSoundButton();
+        }
         console.log('🔊 Toggle sonido');
     }
 
+    updateSoundButton() {
+        if (this.elements.soundToggle) {
+            const isMuted = window.parent?.audioManager?.isMuted || window.audioManager?.isMuted || false;
+            if (isMuted) {
+                this.elements.soundToggle.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"></polygon>
+                        <line x1="23" y1="9" x2="17" y2="15"></line>
+                        <line x1="17" y1="9" x2="23" y2="15"></line>
+                    </svg>
+                `;
+            } else {
+                this.elements.soundToggle.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                `;
+            }
+        }
+    }
+
     playSound(soundName) {
-        // Implementar reproducción de sonido
+        // Usar el sistema de audio del juego principal
+        if (window.parent !== window && window.parent.audioManager) {
+            // Estamos en iframe, usar el audio del padre
+            window.parent.audioManager.playSound(soundName);
+        } else if (window.audioManager) {
+            // Estamos en ventana directa
+            window.audioManager.playSound(soundName);
+        }
         console.log(`🔊 Reproduciendo: ${soundName}`);
     }
 

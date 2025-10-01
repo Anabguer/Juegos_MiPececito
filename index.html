@@ -15056,42 +15056,32 @@ Comida premium y de cumpleaños
                 opacity: 1 !important;
             `;
             
-            // Cargar el contenido del juego directamente
-            fetch('games/bubbles/bubbles.html')
-                .then(response => response.text())
-                .then(html => {
-                    // Crear un contenedor para el contenido
-                    const gameContainer = document.createElement('div');
-                    gameContainer.innerHTML = html;
-                    gameContainer.style.cssText = `
-                        width: 95% !important;
-                        height: 95vh !important;
-                        max-width: 500px !important;
-                        max-height: 800px !important;
-                        border-radius: 20px !important;
-                        box-shadow: rgba(0, 0, 0, 0.3) 0px 20px 40px !important;
-                        overflow: hidden !important;
-                    `;
-                    
-                    // Escuchar mensajes del juego para cerrar
-                    const messageHandler = (event) => {
-                        if (event.data === 'closeBubblesGame') {
-                            gameOverlay.remove();
-                            document.getElementById('gamesModal').style.display = 'flex';
-                            window.removeEventListener('message', messageHandler);
-                        }
-                    };
-                    window.addEventListener('message', messageHandler);
-                    
-                    gameOverlay.appendChild(gameContainer);
-                    document.body.appendChild(gameOverlay);
-                    
-                    // Ejecutar el JavaScript del juego
-                    const script = gameContainer.querySelector('script');
-                    if (script) {
-                        eval(script.textContent);
-                    }
-                });
+            // Crear iframe para cargar el juego correctamente
+            const gameFrame = document.createElement('iframe');
+            gameFrame.src = 'games/bubbles/bubbles.html';
+            gameFrame.style.cssText = `
+                width: 95% !important;
+                height: 95vh !important;
+                max-width: 500px !important;
+                max-height: 800px !important;
+                border: none !important;
+                border-radius: 20px !important;
+                box-shadow: rgba(0, 0, 0, 0.3) 0px 20px 40px !important;
+            `;
+            
+            // Escuchar mensajes del juego para cerrar
+            const messageHandler = (event) => {
+                if (event.data === 'closeBubblesGame') {
+                    console.log('🔴 RECIBIDO MENSAJE DE CIERRE');
+                    gameOverlay.remove();
+                    document.getElementById('gamesModal').style.display = 'flex';
+                    window.removeEventListener('message', messageHandler);
+                }
+            };
+            window.addEventListener('message', messageHandler);
+            
+            gameOverlay.appendChild(gameFrame);
+            document.body.appendChild(gameOverlay);
         }
 
         // 💎 JUEGO DE BLOQUES (MAR MATCH-3) - CÓDIGO EXACTO DEL HTML QUE FUNCIONA
