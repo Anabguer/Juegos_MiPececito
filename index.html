@@ -15073,33 +15073,6 @@ Comida premium y de cumpleaños
                         overflow: hidden !important;
                     `;
                     
-                    // Botón de cerrar
-                    const closeBtn = document.createElement('button');
-                    closeBtn.innerHTML = '✕';
-                    closeBtn.style.cssText = `
-                        position: absolute !important;
-                        top: 20px !important;
-                        right: 20px !important;
-                        width: 40px !important;
-                        height: 40px !important;
-                        background: rgba(255, 255, 255, 0.2) !important;
-                        border: 2px solid rgba(255, 255, 255, 0.8) !important;
-                        border-radius: 50% !important;
-                        color: white !important;
-                        font-size: 18px !important;
-                        font-weight: bold !important;
-                        cursor: pointer !important;
-                        z-index: 100000 !important;
-                        display: flex !important;
-                        align-items: center !important;
-                        justify-content: center !important;
-                    `;
-                    
-                    closeBtn.addEventListener('click', () => {
-                        gameOverlay.remove();
-                        document.getElementById('gamesModal').style.display = 'flex';
-                    });
-                    
                     // Escuchar mensajes del juego para cerrar
                     const messageHandler = (event) => {
                         if (event.data === 'closeBubblesGame') {
@@ -15111,7 +15084,6 @@ Comida premium y de cumpleaños
                     window.addEventListener('message', messageHandler);
                     
                     gameOverlay.appendChild(gameContainer);
-                    gameOverlay.appendChild(closeBtn);
                     document.body.appendChild(gameOverlay);
                     
                     // Ejecutar el JavaScript del juego
