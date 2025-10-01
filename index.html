@@ -12735,10 +12735,10 @@ Comida premium y de cumpleaños
             // 🫧 VERSIÓN CORRECTA DEL JUEGO DE BURBUJAS
             window.startBubbleGameDirect = function() {
                 console.log('🫧 Llamando a la versión correcta del juego de burbujas...');
-                if (typeof startBubbleGame === 'function') {
-                    startBubbleGame();
+                if (typeof startBubblesGameIntegrated === 'function') {
+                    startBubblesGameIntegrated();
                 } else {
-                    console.error('❌ startBubbleGame no está definida todavía');
+                    console.error('❌ startBubblesGameIntegrated no está definida todavía');
                     alert('🚧 El juego de burbujas no está disponible en este momento. Por favor, intenta más tarde.');
                 }
             };
