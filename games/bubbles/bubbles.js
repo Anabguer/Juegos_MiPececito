@@ -3,6 +3,8 @@
  * Versión modular usando la plantilla base
  */
 
+console.log('🫧 SCRIPT BURBUJAS CARGADO - VERSIÓN CON LOGS');
+
 class BubblesGame {
     constructor() {
         this.gameState = {
