@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plantilla de Juego - Mi Pececito</title>
+    <style>
+        /* 🎮 PLANTILLA BASE PARA TODOS LOS JUEGOS */
+        
+        /* Variables CSS para personalización */
+        :root {
+            --game-primary-color: #2196F3;
+            --game-secondary-color: #1976D2;
+            --game-accent-color: #FFD700;
+            --game-bg-gradient: linear-gradient(135deg, rgba(30, 60, 114, 0.95) 0%, rgba(42, 82, 152, 0.9) 100%);
+            --game-overlay-bg: linear-gradient(135deg, rgba(79, 195, 247, 0.2) 0%, rgba(41, 182, 246, 0.15) 50%, rgba(13, 71, 161, 0.3) 100%);
+        }
+
+        /* Reset y base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--game-overlay-bg);
+            overflow: hidden;
+        }
+
+        /* 🎮 CONTENEDOR PRINCIPAL DEL JUEGO */
+        .game-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--game-overlay-bg);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            width: 95%;
+            height: 95vh;
+            max-width: 500px;
+            max-height: 800px;
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+            box-shadow: rgba(0, 0, 0, 0.3) 0px 20px 40px;
+            position: relative;
+            z-index: 10000;
+        }
+
+        /* 🏆 CABECERA DEL JUEGO */
+        .game-header {
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(79, 195, 247, 0.3) 0%, rgba(129, 212, 250, 0.2) 100%);
+            border-radius: 20px 20px 0 0;
+            color: white;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .sound-btn, .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .sound-btn:hover, .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .header-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .level {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--game-accent-color);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .perlas {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .perlas img {
+            width: 28px;
+            height: 28px;
+            margin-bottom: 2px;
+            vertical-align: middle;
+        }
+
+        .best-score-display {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .best-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .best-value {
+            color: var(--game-accent-color);
+            font-weight: bold;
+        }
+
+        /* 📊 BARRA DE PROGRESO (OPCIONAL) */
+        .game-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .game-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                #4FC3F7 0%, 
+                #29B6F6 25%, 
+                #03A9F4 50%, 
+                #0288D1 75%, 
+                #0277BD 100%);
+            width: 100%;
+            transition: width 1s linear;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+
+        /* 📝 ÁREA DE DESCRIPCIÓN (OPCIONAL) */
+        .game-description {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        /* 🎯 CONTENEDOR DEL JUEGO */
+        .game-stage-container {
+            background: linear-gradient(135deg, rgba(79, 195, 247, 0.1) 0%, rgba(41, 182, 246, 0.05) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            padding: 10px;
+            margin: 10px;
+            flex: 1 1 0%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10001;
+        }
+
+        .game-stage {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: visible;
+        }
+
+        /* 🎮 BOTÓN JUGAR */
+        .game-footer {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: auto;
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 80px;
+            width: 100%;
+            visibility: visible;
+            opacity: 1;
+            overflow: visible;
+            z-index: 100;
+        }
+
+        .game-btn {
+            background: linear-gradient(135deg, var(--game-primary-color), var(--game-secondary-color));
+            border: 2px solid #1565C0;
+            border-radius: 20px;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+            text-shadow: rgba(0, 0, 0, 0.3) 0px 2px 4px;
+            box-shadow: rgba(33, 150, 243, 0.4) 0px 6px 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 80%;
+            max-width: 250px;
+            margin: 15px auto;
+            display: block;
+            position: relative;
+            z-index: 1000;
+            visibility: visible;
+            opacity: 1;
+            height: auto;
+            min-height: 50px;
+            overflow: visible;
+        }
+
+        .game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: rgba(33, 150, 243, 0.6) 0px 8px 25px;
+        }
+
+        /* 🏆 MODAL DE RESULTADOS */
+        .game-results-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2147483647;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            background: linear-gradient(135deg, 
+                rgba(0, 0, 0, 0.8) 0%, 
+                rgba(13, 71, 161, 0.9) 50%, 
+                rgba(25, 118, 210, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .results-content {
+            background: linear-gradient(135deg, 
+                rgba(79, 195, 247, 0.3) 0%, 
+                rgba(129, 212, 250, 0.2) 100%);
+            backdrop-filter: blur(30px);
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            border-radius: 25px;
+            padding: 40px 30px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            color: white;
+            position: relative;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            animation: modalPop 0.5s ease-out;
+        }
+
+        @keyframes modalPop {
+            0% { 
+                opacity: 0; 
+                transform: scale(0.8) translateY(20px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1) translateY(0); 
+            }
+        }
+
+        .close-results-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .close-results-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.1);
+        }
+
+        .results-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: var(--game-accent-color);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .results-title::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--game-accent-color), transparent);
+            border-radius: 2px;
+        }
+
+        .results-title.win {
+            color: #4CAF50;
+        }
+
+        .results-title.lose {
+            color: #F44336;
+        }
+
+        .results-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            color: var(--game-accent-color);
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .motivation-message {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            font-style: italic;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .reward-reasons {
+            background: rgba(33, 150, 243, 0.1);
+            border: 2px solid rgba(33, 150, 243, 0.3);
+            border-radius: 12px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #fff;
+            white-space: pre-line;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-container {
+                width: 98%;
+                height: 98vh;
+                margin: 1vh auto;
+            }
+            
+            .game-title {
+                font-size: 20px;
+            }
+            
+            .game-stats {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🎮 OVERLAY PRINCIPAL DEL JUEGO -->
+    <div class="game-overlay" id="gameOverlay">
+        <div class="game-container" id="gameContainer">
+            
+            <!-- 🏆 CABECERA DEL JUEGO -->
+            <div class="game-header">
+                <!-- PRIMERA LÍNEA: TÍTULO + ALTAVOZ + X -->
+                <div class="header-top">
+                    <div class="game-title" id="gameTitle">🎮 Título del Juego</div>
+                    <div class="header-controls">
+                        <button class="sound-btn" id="soundToggle" title="Activar/Desactivar sonido">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"></polygon>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                        </button>
+                        <button class="close-btn" id="closeGame" title="Cerrar juego">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- SEGUNDA LÍNEA: NIVEL + PERLAS + MEJOR -->
+                <div class="header-bottom">
+                    <div class="game-stats">
+                        <span class="level" id="gameLevel">NIVEL 1</span>
+                        <span class="perlas">
+                            <img src="../../images/ui/perlas.png" alt="Perlas">
+                            <span class="score" id="gameScore">0</span>
+                        </span>
+                        <span class="best-score-display">
+                            <span class="best-label">Mejor:</span>
+                            <span class="best-value" id="bestScore">0</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📊 BARRA DE PROGRESO (OPCIONAL - OCULTAR SI NO SE USA) -->
+            <div class="game-progress-bar" id="progressBar">
+                <div class="game-progress-fill" id="progressFill"></div>
+            </div>
+
+            <!-- 📝 ÁREA DE DESCRIPCIÓN (OPCIONAL - OCULTAR SI NO SE USA) -->
+            <div class="game-description" id="gameDescription" style="display: none;">
+                Descripción del juego...
+            </div>
+
+            <!-- 🎯 CONTENEDOR DEL JUEGO -->
+            <div class="game-stage-container">
+                <div class="game-stage" id="gameStage">
+                    <!-- AQUÍ VA EL CONTENIDO ESPECÍFICO DE CADA JUEGO -->
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: rgba(255,255,255,0.8); font-size: 18px; gap: 20px;">
+                        <div>🎮 Área del juego</div>
+                        <div style="display: flex; gap: 15px;">
+                            <button onclick="simulateWin()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Simular Victoria
+                            </button>
+                            <button onclick="simulateLose()" style="padding: 10px 20px; background: #F44336; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Simular Derrota
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🎮 BOTÓN JUGAR -->
+            <div class="game-footer">
+                <button class="game-btn" id="playButton">JUGAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏆 MODAL DE RESULTADOS -->
+    <div class="game-results-modal" id="resultsModal">
+        <div class="results-content">
+            <button class="close-results-btn" id="closeResults">✕</button>
+            <h2 class="results-title" id="resultsTitle">¡Fin de partida!</h2>
+            <div class="motivation-message" id="motivationMessage">
+                ¡Sigue intentándolo! Cada partida te acerca más a la victoria 🎯
+            </div>
+            <div class="results-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Nivel:</span>
+                    <span class="stat-value" id="finalLevel">1</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Puntos:</span>
+                    <span class="stat-value" id="finalScore">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Mejor:</span>
+                    <span class="stat-value" id="finalBest">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">⭐ Estrellas:</span>
+                    <span class="stat-value" id="finalStars">0</span>
+                </div>
+            </div>
+            <div class="reward-reasons" id="rewardReasons"></div>
+            <button class="game-btn" id="continueButton">Continuar</button>
+        </div>
+    </div>
+
+    <script>
+        // 🎮 PLANTILLA BASE DE JAVASCRIPT PARA TODOS LOS JUEGOS
+        
+        class GameTemplate {
+            constructor(gameConfig) {
+                this.config = gameConfig;
+                this.elements = this.initializeElements();
+                this.gameState = {
+                    level: 1,
+                    score: 0,
+                    bestScore: 0,
+                    stars: 0,
+                    isPlaying: false,
+                    isPaused: false
+                };
+                this.initializeGame();
+            }
+
+            initializeElements() {
+                return {
+                    overlay: document.getElementById('gameOverlay'),
+                    container: document.getElementById('gameContainer'),
+                    title: document.getElementById('gameTitle'),
+                    level: document.getElementById('gameLevel'),
+                    score: document.getElementById('gameScore'),
+                    bestScore: document.getElementById('bestScore'),
+                    soundToggle: document.getElementById('soundToggle'),
+                    closeBtn: document.getElementById('closeGame'),
+                    progressBar: document.getElementById('progressBar'),
+                    progressFill: document.getElementById('progressFill'),
+                    description: document.getElementById('gameDescription'),
+                    stage: document.getElementById('gameStage'),
+                    playButton: document.getElementById('playButton'),
+                    resultsModal: document.getElementById('resultsModal'),
+                    resultsTitle: document.getElementById('resultsTitle'),
+                    motivationMessage: document.getElementById('motivationMessage'),
+                    finalLevel: document.getElementById('finalLevel'),
+                    finalScore: document.getElementById('finalScore'),
+                    finalBest: document.getElementById('finalBest'),
+                    finalStars: document.getElementById('finalStars'),
+                    rewardReasons: document.getElementById('rewardReasons'),
+                    closeResults: document.getElementById('closeResults'),
+                    continueButton: document.getElementById('continueButton')
+                };
+            }
+
+            initializeGame() {
+                this.setupEventListeners();
+                this.loadGameData();
+                this.updateUI();
+            }
+
+            setupEventListeners() {
+                // Botón de sonido
+                this.elements.soundToggle.addEventListener('click', () => {
+                    this.toggleSound();
+                });
+
+                // Botón de cerrar
+                this.elements.closeBtn.addEventListener('click', () => {
+                    this.closeGame();
+                });
+
+                // Botón de jugar
+                this.elements.playButton.addEventListener('click', () => {
+                    this.startGame();
+                });
+
+                // Modal de resultados
+                this.elements.closeResults.addEventListener('click', () => {
+                    this.closeResults();
+                });
+
+                this.elements.continueButton.addEventListener('click', () => {
+                    this.closeResults();
+                });
+            }
+
+            loadGameData() {
+                // Cargar datos del localStorage
+                const savedData = localStorage.getItem(`game_${this.config.id}_data`);
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    this.gameState = { ...this.gameState, ...data };
+                }
+            }
+
+            saveGameData() {
+                localStorage.setItem(`game_${this.config.id}_data`, JSON.stringify(this.gameState));
+            }
+
+            updateUI() {
+                this.elements.title.textContent = this.config.title;
+                this.elements.level.textContent = `NIVEL ${this.gameState.level}`;
+                this.elements.score.textContent = this.gameState.score;
+                this.elements.bestScore.textContent = this.gameState.bestScore;
+            }
+
+            toggleSound() {
+                // Implementar lógica de sonido
+                console.log('🔊 Toggle sound');
+            }
+
+            startGame() {
+                this.gameState.isPlaying = true;
+                this.elements.playButton.textContent = 'JUGANDO...';
+                this.elements.playButton.disabled = true;
+                
+                // Aquí va la lógica específica de cada juego
+                console.log('🎮 Iniciando juego:', this.config.id);
+            }
+
+            endGame(won, reason = '') {
+                this.gameState.isPlaying = false;
+                this.elements.playButton.textContent = 'JUGAR';
+                this.elements.playButton.disabled = false;
+
+                // Actualizar mejor puntuación
+                if (this.gameState.score > this.gameState.bestScore) {
+                    this.gameState.bestScore = this.gameState.score;
+                }
+
+                // Mostrar resultados
+                this.showResults(won, reason);
+                this.saveGameData();
+            }
+
+            showResults(won, reason) {
+                const title = this.elements.resultsTitle;
+                const motivation = this.elements.motivationMessage;
+                
+                if (won) {
+                    title.textContent = '¡Perfecto! 🎉';
+                    title.className = 'results-title win';
+                    motivation.textContent = '¡Increíble! Has dominado este nivel 🌟';
+                } else {
+                    title.textContent = '¡Fin de partida! 💔';
+                    title.className = 'results-title lose';
+                    motivation.textContent = '¡Sigue intentándolo! Cada partida te acerca más a la victoria 🎯';
+                }
+                
+                this.elements.finalLevel.textContent = this.gameState.level;
+                this.elements.finalScore.textContent = this.gameState.score;
+                this.elements.finalBest.textContent = this.gameState.bestScore;
+                this.elements.finalStars.textContent = this.gameState.stars;
+                
+                if (reason) {
+                    this.elements.rewardReasons.textContent = reason;
+                }
+
+                this.elements.resultsModal.style.display = 'flex';
+            }
+
+            closeResults() {
+                this.elements.resultsModal.style.display = 'none';
+            }
+
+            closeGame() {
+                // Limpiar recursos del juego
+                this.gameState.isPlaying = false;
+                
+                // Cerrar overlay
+                this.elements.overlay.style.display = 'none';
+                
+                // Notificar al juego principal
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'closeGame', gameId: this.config.id }, '*');
+                }
+            }
+
+            // Métodos que cada juego debe implementar
+            onGameStart() {
+                // Override en cada juego específico
+            }
+
+            onGameEnd() {
+                // Override en cada juego específico
+            }
+
+            onGamePause() {
+                // Override en cada juego específico
+            }
+
+            onGameResume() {
+                // Override en cada juego específico
+            }
+        }
+
+        // 🎮 CONFIGURACIÓN DEL JUEGO (PERSONALIZAR PARA CADA JUEGO)
+        const gameConfig = {
+            id: 'template',
+            title: '🎮 Plantilla de Juego',
+            description: 'Esta es una plantilla base para crear juegos',
+            hasProgressBar: false,
+            hasDescription: false,
+            // ... más configuraciones específicas
+        };
+
+        // 🚀 INICIALIZAR EL JUEGO
+        document.addEventListener('DOMContentLoaded', () => {
+            window.game = new GameTemplate(gameConfig);
+        });
+
+        // 🎮 FUNCIONES PARA SIMULAR RESULTADOS (SOLO PARA DEMO)
+        function simulateWin() {
+            if (window.game) {
+                window.game.gameState.score = 150;
+                window.game.gameState.level = 3;
+                window.game.gameState.stars = 2;
+                window.game.endGame(true, '¡Has completado el nivel con éxito!');
+            }
+        }
+
+        function simulateLose() {
+            if (window.game) {
+                window.game.gameState.score = 75;
+                window.game.gameState.level = 2;
+                window.game.gameState.stars = 1;
+                window.game.endGame(false, '¡Tiempo agotado! Inténtalo de nuevo.');
+            }
+        }
+    </script>
+</body>
+</html>
