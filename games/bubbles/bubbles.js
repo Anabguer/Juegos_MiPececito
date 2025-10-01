@@ -372,8 +372,13 @@ class BubblesGame {
             this.endGame(false, 'Juego cancelado');
         }
         
-        // Volver al juego principal
-        window.location.href = '../index.html';
+        // Si estamos en overlay, notificar al padre
+        if (window.parent !== window) {
+            window.parent.postMessage('closeBubblesGame', '*');
+        } else {
+            // Si estamos en ventana directa, cerrar normalmente
+            this.elements.gameOverlay.style.display = 'none';
+        }
     }
 
     toggleSound() {

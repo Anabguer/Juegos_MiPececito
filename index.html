@@ -15030,15 +15030,96 @@ Comida premium y de cumpleaños
             console.log('🎮 Juego de burbujas inicializado completamente');
         }
         
-        // 🫧 JUEGO DE BURBUJAS INTEGRADO (SIN IFRAME)
+        // 🫧 JUEGO DE BURBUJAS INTEGRADO (OVERLAY)
         function startBubblesGameIntegrated() {
             console.log('🫧 Iniciando juego de burbujas integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
-            // Redirigir directamente al juego
-            window.location.href = 'games/bubbles/bubbles.html';
+            // Crear overlay del juego encima del pez
+            const gameOverlay = document.createElement('div');
+            gameOverlay.id = 'bubblesGameOverlay';
+            gameOverlay.style.cssText = `
+                position: fixed !important;
+                inset: 0 !important;
+                background: linear-gradient(135deg, 
+                    rgba(79, 195, 247, 0.2) 0%, 
+                    rgba(41, 182, 246, 0.15) 50%, 
+                    rgba(13, 71, 161, 0.3) 100%) !important;
+                backdrop-filter: blur(10px) !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                z-index: 99999 !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            `;
+            
+            // Cargar el contenido del juego directamente
+            fetch('games/bubbles/bubbles.html')
+                .then(response => response.text())
+                .then(html => {
+                    // Crear un contenedor para el contenido
+                    const gameContainer = document.createElement('div');
+                    gameContainer.innerHTML = html;
+                    gameContainer.style.cssText = `
+                        width: 95% !important;
+                        height: 95vh !important;
+                        max-width: 500px !important;
+                        max-height: 800px !important;
+                        border-radius: 20px !important;
+                        box-shadow: rgba(0, 0, 0, 0.3) 0px 20px 40px !important;
+                        overflow: hidden !important;
+                    `;
+                    
+                    // Botón de cerrar
+                    const closeBtn = document.createElement('button');
+                    closeBtn.innerHTML = '✕';
+                    closeBtn.style.cssText = `
+                        position: absolute !important;
+                        top: 20px !important;
+                        right: 20px !important;
+                        width: 40px !important;
+                        height: 40px !important;
+                        background: rgba(255, 255, 255, 0.2) !important;
+                        border: 2px solid rgba(255, 255, 255, 0.8) !important;
+                        border-radius: 50% !important;
+                        color: white !important;
+                        font-size: 18px !important;
+                        font-weight: bold !important;
+                        cursor: pointer !important;
+                        z-index: 100000 !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                    `;
+                    
+                    closeBtn.addEventListener('click', () => {
+                        gameOverlay.remove();
+                        document.getElementById('gamesModal').style.display = 'flex';
+                    });
+                    
+                    // Escuchar mensajes del juego para cerrar
+                    const messageHandler = (event) => {
+                        if (event.data === 'closeBubblesGame') {
+                            gameOverlay.remove();
+                            document.getElementById('gamesModal').style.display = 'flex';
+                            window.removeEventListener('message', messageHandler);
+                        }
+                    };
+                    window.addEventListener('message', messageHandler);
+                    
+                    gameOverlay.appendChild(gameContainer);
+                    gameOverlay.appendChild(closeBtn);
+                    document.body.appendChild(gameOverlay);
+                    
+                    // Ejecutar el JavaScript del juego
+                    const script = gameContainer.querySelector('script');
+                    if (script) {
+                        eval(script.textContent);
+                    }
+                });
         }
 
         // 💎 JUEGO DE BLOQUES (MAR MATCH-3) - CÓDIGO EXACTO DEL HTML QUE FUNCIONA
