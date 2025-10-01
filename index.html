@@ -14422,26 +14422,27 @@ Comida premium y de cumpleaños
                 
                 // Estilo de la burbuja
                 bubbleEl.style.cssText = `
-                    position: absolute;
-                    width: ${size}px;
-                    height: ${size}px;
-                    border-radius: 50%;
+                    position: absolute !important;
+                    width: ${size}px !important;
+                    height: ${size}px !important;
+                    border-radius: 50% !important;
                     background: radial-gradient(120% 100% at 30% 25%, 
                         rgba(255,255,255,0.25), 
                         rgba(255,255,255,0.08) 55%, 
-                        rgba(255,255,255,0.03) 70%);
-                    border: 2px solid ${isGood ? 'rgba(76, 175, 80, 0.4)' : 'rgba(244, 67, 54, 0.4)'};
+                        rgba(255,255,255,0.03) 70%) !important;
+                    border: 2px solid ${isGood ? 'rgba(76, 175, 80, 0.4)' : 'rgba(244, 67, 54, 0.4)'} !important;
                     box-shadow: 
                         0 8px 32px rgba(0, 0, 0, 0.3),
-                        inset 0 2px 0 rgba(255, 255, 255, 0.3);
-                    cursor: pointer;
-                    user-select: none;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transform: translate(${x - size/2}px, ${y - size/2}px);
-                    transition: transform 0.1s ease;
-                    z-index: 100;
+                        inset 0 2px 0 rgba(255, 255, 255, 0.3) !important;
+                    cursor: pointer !important;
+                    user-select: none !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    transform: translate(${x - size/2}px, ${y - size/2}px) !important;
+                    transition: transform 0.1s ease !important;
+                    z-index: 1000 !important;
+                    pointer-events: auto !important;
                 `;
                 
                 bubbleEl.querySelector('.bubble-emoji').style.cssText = `
@@ -14751,21 +14752,22 @@ Comida premium y de cumpleaños
                 // 🎨 MODAL DE FIN DE PARTIDA HERMOSO CON DISEÑO AZUL - FONDO MÁS OSCURO
                 elements.resultsModal.style.display = 'flex';
                 elements.resultsModal.style.cssText = `
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
+                    position: absolute !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
                     background: linear-gradient(135deg,
                         rgba(13, 71, 161, 0.6) 0%,
                         rgba(21, 101, 192, 0.5) 50%,
-                        rgba(25, 118, 210, 0.6) 100%);
-                    backdrop-filter: blur(15px) saturate(150%);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 200;
-                    animation: fadeIn 0.4s ease;
+                        rgba(25, 118, 210, 0.6) 100%) !important;
+                    backdrop-filter: blur(15px) saturate(150%) !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    z-index: 10000 !important;
+                    animation: fadeIn 0.4s ease !important;
+                    pointer-events: auto !important;
                 `;
                 
                 // Estilo del contenido de resultados con tonos azules - MÁS ANCHO
