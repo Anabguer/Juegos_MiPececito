@@ -14452,6 +14452,16 @@ Comida premium y de cumpleaños
                 
                 elements.stage.appendChild(bubbleEl);
                 
+                // 🐛 DEBUG: Verificar que la burbuja se agregó
+                console.log('🫧 Burbuja creada:', {
+                    element: bubbleEl,
+                    parent: elements.stage,
+                    position: bubbleEl.style.position,
+                    zIndex: bubbleEl.style.zIndex,
+                    transform: bubbleEl.style.transform,
+                    inDOM: document.body.contains(bubbleEl)
+                });
+                
                 const bubble = { el: bubbleEl, x, y, size, vy: -speed, vx: drift, isGood };
                 gameState.bubbles.push(bubble);
                 
