@@ -15034,6 +15034,12 @@ Comida premium y de cumpleaños
         function startBloquesGame() {
             console.log('💎 Iniciando juego Conecta 3 integrado...');
             
+            // Verificar si ya existe el juego para evitar duplicados
+            if (document.getElementById('bloquesGameOverlay')) {
+                console.log('⚠️ Juego de bloques ya existe, eliminando duplicado...');
+                document.getElementById('bloquesGameOverlay').remove();
+            }
+            
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
