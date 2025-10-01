@@ -4853,9 +4853,9 @@
                 console.log('🎮 Modal de juegos cerrada');
             });
             
-            // 🫧 JUEGO DE BURBUJAS (MODULAR)
+            // 🫧 JUEGO DE BURBUJAS (INTEGRADO)
             document.querySelector('[data-game="bubbles"]').addEventListener('click', () => {
-                startBubblesGameModular();
+                startBubblesGameIntegrated();
             });
             
             // 💎 JUEGO DE BLOQUES (MAR MATCH-3)
@@ -15030,88 +15030,15 @@ Comida premium y de cumpleaños
             console.log('🎮 Juego de burbujas inicializado completamente');
         }
         
-        // 🫧 JUEGO DE BURBUJAS MODULAR
-        function startBubblesGameModular() {
-            console.log('🫧 Iniciando juego de burbujas modular...');
+        // 🫧 JUEGO DE BURBUJAS INTEGRADO (SIN IFRAME)
+        function startBubblesGameIntegrated() {
+            console.log('🫧 Iniciando juego de burbujas integrado...');
             
             // Cerrar modal de juegos
             document.getElementById('gamesModal').style.display = 'none';
             
-            // Crear overlay con botón de cerrar
-            const gameOverlay = document.createElement('div');
-            gameOverlay.id = 'bubblesGameOverlay';
-            gameOverlay.style.cssText = `
-                position: fixed !important;
-                inset: 0 !important;
-                background: linear-gradient(135deg, 
-                    rgba(79, 195, 247, 0.2) 0%, 
-                    rgba(41, 182, 246, 0.15) 50%, 
-                    rgba(13, 71, 161, 0.3) 100%) !important;
-                backdrop-filter: blur(10px) !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                z-index: 99999 !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-            `;
-            
-            const gameFrame = document.createElement('iframe');
-            gameFrame.src = 'games/bubbles/bubbles.html';
-            gameFrame.style.cssText = `
-                width: 95% !important;
-                height: 95vh !important;
-                max-width: 500px !important;
-                max-height: 800px !important;
-                border: none !important;
-                border-radius: 20px !important;
-                box-shadow: rgba(0, 0, 0, 0.3) 0px 20px 40px !important;
-            `;
-            
-            // Botón de cerrar que SÍ funciona
-            const closeBtn = document.createElement('button');
-            closeBtn.innerHTML = '✕';
-            closeBtn.style.cssText = `
-                position: absolute !important;
-                top: 20px !important;
-                right: 20px !important;
-                width: 40px !important;
-                height: 40px !important;
-                background: rgba(255, 255, 255, 0.2) !important;
-                border: 2px solid rgba(255, 255, 255, 0.8) !important;
-                border-radius: 50% !important;
-                color: white !important;
-                font-size: 18px !important;
-                font-weight: bold !important;
-                cursor: pointer !important;
-                z-index: 100000 !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-            `;
-            
-            closeBtn.addEventListener('click', () => {
-                console.log('🔴 CERRANDO JUEGO DE BURBUJAS...');
-                gameOverlay.remove();
-                document.getElementById('gamesModal').style.display = 'flex';
-            });
-            
-            // Escuchar mensajes del iframe para cerrar
-            const messageHandler = (event) => {
-                if (event.data === 'closeBubblesGame') {
-                    console.log('🔴 CERRANDO DESDE IFRAME...');
-                    gameOverlay.remove();
-                    document.getElementById('gamesModal').style.display = 'flex';
-                    window.removeEventListener('message', messageHandler);
-                }
-            };
-            window.addEventListener('message', messageHandler);
-            
-            gameOverlay.appendChild(gameFrame);
-            gameOverlay.appendChild(closeBtn);
-            document.body.appendChild(gameOverlay);
-            
-            console.log('🫧 Juego de burbujas modular iniciado');
+            // Redirigir directamente al juego
+            window.location.href = 'games/bubbles/bubbles.html';
         }
 
         // 💎 JUEGO DE BLOQUES (MAR MATCH-3) - CÓDIGO EXACTO DEL HTML QUE FUNCIONA

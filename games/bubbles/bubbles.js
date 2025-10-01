@@ -372,16 +372,8 @@ class BubblesGame {
             this.endGame(false, 'Juego cancelado');
         }
         
-        // Si estamos en un iframe, notificar al padre para que cierre
-        if (window.parent !== window) {
-            console.log('🔴 ENVIANDO MENSAJE AL PADRE...');
-            // Estamos en un iframe, notificar al padre
-            window.parent.postMessage('closeBubblesGame', '*');
-        } else {
-            console.log('🔴 CERRANDO VENTANA DIRECTA...');
-            // Estamos en ventana directa, cerrar normalmente
-            this.elements.gameOverlay.style.display = 'none';
-        }
+        // Volver al juego principal
+        window.location.href = '../index.html';
     }
 
     toggleSound() {
