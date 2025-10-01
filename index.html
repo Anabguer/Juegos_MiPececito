@@ -14424,9 +14424,10 @@ Comida premium y de cumpleaños
                     BAD_EMOJIS[Math.floor(Math.random() * BAD_EMOJIS.length)]
                 }</div>`;
                 
-                // Estilo de la burbuja
+                // Estilo de la burbuja - POSICIÓN FIXED PARA QUE ESTÉ POR ENCIMA DE TODO
+                const stageAbsolutePos = elements.stage.getBoundingClientRect();
                 bubbleEl.style.cssText = `
-                    position: absolute !important;
+                    position: fixed !important;
                     width: ${size}px !important;
                     height: ${size}px !important;
                     border-radius: 50% !important;
@@ -14443,8 +14444,9 @@ Comida premium y de cumpleaños
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
-                    transform: translate(${x - size/2}px, ${y - size/2}px) !important;
-                    transition: transform 0.1s ease !important;
+                    left: ${stageAbsolutePos.left + x - size/2}px !important;
+                    top: ${stageAbsolutePos.top + y - size/2}px !important;
+                    transition: all 0.1s ease !important;
                     z-index: 999999 !important;
                     pointer-events: auto !important;
                     opacity: 1 !important;
@@ -14455,7 +14457,7 @@ Comida premium y de cumpleaños
                     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
                 `;
                 
-                elements.stage.appendChild(bubbleEl);
+                document.body.appendChild(bubbleEl); // AGREGAR AL BODY DIRECTAMENTE PARA QUE ESTÉ POR ENCIMA DE TODO
                 
                 // 🐛 DEBUG: Verificar que la burbuja se agregó
                 console.log('🫧 Burbuja creada:', {
@@ -14584,7 +14586,9 @@ Comida premium y de cumpleaños
                         bubble.vx *= -0.9;
                     }
                     
-                    bubble.el.style.transform = `translate(${bubble.x - bubble.size/2}px, ${bubble.y - bubble.size/2}px)`;
+                    // Actualizar posición fija en pantalla
+                    bubble.el.style.left = `${stageRect.left + bubble.x - bubble.size/2}px`;
+                    bubble.el.style.top = `${stageRect.top + bubble.y - bubble.size/2}px`;
                     
                     if (bubble.y + bubble.size/2 < 0) {
                         if (bubble.isGood) {
