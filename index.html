@@ -14426,14 +14426,14 @@ Comida premium y de cumpleaños
                     width: ${size}px !important;
                     height: ${size}px !important;
                     border-radius: 50% !important;
-                    background: radial-gradient(120% 100% at 30% 25%, 
-                        rgba(255,255,255,0.25), 
-                        rgba(255,255,255,0.08) 55%, 
-                        rgba(255,255,255,0.03) 70%) !important;
-                    border: 2px solid ${isGood ? 'rgba(76, 175, 80, 0.4)' : 'rgba(244, 67, 54, 0.4)'} !important;
+                    background: ${isGood ? 
+                        'radial-gradient(circle at 30% 30%, #87CEEB, #4682B4)' : 
+                        'radial-gradient(circle at 30% 30%, #FF6B6B, #D63031)'
+                    } !important;
+                    border: 3px solid ${isGood ? '#4CAF50' : '#F44336'} !important;
                     box-shadow: 
-                        0 8px 32px rgba(0, 0, 0, 0.3),
-                        inset 0 2px 0 rgba(255, 255, 255, 0.3) !important;
+                        0 8px 32px rgba(0, 0, 0, 0.5),
+                        inset 0 2px 0 rgba(255, 255, 255, 0.5) !important;
                     cursor: pointer !important;
                     user-select: none !important;
                     display: flex !important;
@@ -14441,8 +14441,9 @@ Comida premium y de cumpleaños
                     justify-content: center !important;
                     transform: translate(${x - size/2}px, ${y - size/2}px) !important;
                     transition: transform 0.1s ease !important;
-                    z-index: 1000 !important;
+                    z-index: 999999 !important;
                     pointer-events: auto !important;
+                    opacity: 1 !important;
                 `;
                 
                 bubbleEl.querySelector('.bubble-emoji').style.cssText = `
