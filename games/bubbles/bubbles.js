@@ -376,6 +376,13 @@ class BubblesGame {
         if (window.parent !== window) {
             console.log('🔴 ENVIANDO MENSAJE AL PADRE...');
             window.parent.postMessage('closeBubblesGame', '*');
+            
+            // Fallback: intentar cerrar directamente después de un delay
+            setTimeout(() => {
+                console.log('🔴 FALLBACK: CERRANDO DIRECTAMENTE...');
+                window.parent.document.getElementById('bubblesGameOverlay')?.remove();
+                window.parent.document.getElementById('gamesModal').style.display = 'flex';
+            }, 100);
         } else {
             // Si estamos en ventana directa, cerrar normalmente
             this.elements.gameOverlay.style.display = 'none';
