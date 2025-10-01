@@ -366,7 +366,15 @@ class BubblesGame {
         if (this.gameState.isPlaying) {
             this.endGame(false, 'Juego cancelado');
         }
-        this.elements.gameOverlay.style.display = 'none';
+        
+        // Si estamos en un iframe, cerrar el overlay padre
+        if (window.parent !== window) {
+            // Estamos en un iframe, notificar al padre para que cierre
+            window.parent.postMessage('closeBubblesGame', '*');
+        } else {
+            // Estamos en ventana directa, cerrar normalmente
+            this.elements.gameOverlay.style.display = 'none';
+        }
     }
 
     toggleSound() {
