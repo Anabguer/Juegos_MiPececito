@@ -4956,6 +4956,10 @@
                 this.canvas = document.getElementById('gameCanvas');
                 this.ctx = this.canvas.getContext('2d');
                 
+                // 🐠 SISTEMAS REFACTORIZADOS
+                this.fishSystem = new FishSystem(this);
+                this.needsSystem = new NeedsSystem(this);
+                
                 // 🫧 CAPA OFFSCREEN PARA BURBUJAS (FIX DPR)
                 this.bubLayer = null;
                 this.bubCtx = null;
@@ -5089,7 +5093,7 @@
                 
                 // AÑADIR EVENT LISTENER PARA CLICK EN CANVAS
                 this.canvas.addEventListener('click', (event) => {
-                    this.handleCanvasClick(event);
+                    this.fishSystem.handleCanvasClick(event);
                 });
                 
                 console.log('👆 Click en canvas habilitado - El pez vendrá a tu dedo');
@@ -5350,11 +5354,10 @@
                 // Movimiento del pez (todas las etapas)
                 if (this.fish && (this.gameState.stage === 'baby' || this.gameState.stage === 'young' || this.gameState.stage === 'adult')) {
                     // 🚀 SISTEMA REALISTA COMPLETO
-                    this.updateAutoNeeds(deltaTime);      // Necesidades automáticas
-                    this.updateCrisisFlags();             // Flags de crisis
+                    this.needsSystem.updateAllNeeds(deltaTime);      // Necesidades automáticas
                     this.updateFood(deltaTime);           // 🍎 COMIDA DEL DOCUMENTO
                     this.updateCleaning(deltaTime);       // 🧹 LIMPIEZA ESPECTACULAR
-                    this.updateFishMovement(deltaTime);    // Movimiento realista
+                    this.fishSystem.updateFishMovement(deltaTime);    // Movimiento realista
                     this.updateTinyBubbles(deltaTime);     // Burbujas de respiración
                     this.updateFlyers(deltaTime);          // Corazones voladores
                     this.updateLabels(deltaTime);          // 🍎 LABELS ("Ñam")
@@ -5557,7 +5560,7 @@
                 
                 // Pez (solo si no es Lottie)
                 if (this.fish && !this.fish.isLottie) {
-                    this.drawFish();
+                    this.fishSystem.drawFish();
                 }
                 
                 // Actualizar posición del Lottie
@@ -6648,8 +6651,8 @@
                 this.gameState.needs.hunger = 80; // Bebé nace con hambre
                 this.gameState.needs.dirt = 0;    // Limpio al nacer
                 this.gameState.needs.fun = 95;    // Feliz al nacer
-                this.updateCrisisFlags(); // Activar flags
-                this.updateNeedBars(); // Actualizar barras
+                this.needsSystem.updateCrisisFlags(); // Activar flags
+                this.needsSystem.updateNeedBars(); // Actualizar barras
                 
                 console.log('🍎 Bebé nació con hambre - Crisis activada');
                 
@@ -6941,7 +6944,7 @@
                 // this.updateAllNeedBubbles(); // DESHABILITADO - iconos molestos
                 
                 // Sistema de apatía y tristeza
-                this.updateFishMood();
+                this.fishSystem.updateFishMood();
                 
                 // Actualizar estado de botones
                 this.updateButtonStates();
@@ -16654,6 +16657,10 @@ Comida premium y de cumpleaños
             });
         }
     </script>
+    
+    <!-- 🐠 SISTEMAS REFACTORIZADOS -->
+    <script src="fish-system.js"></script>
+    <script src="needs-system.js"></script>
 </body>
 </html>
 
