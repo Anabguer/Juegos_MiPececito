@@ -10972,7 +10972,18 @@ Comida premium y de cumpleaños
             // 🐟 MOVIMIENTO FLUIDO CON FÍSICA AVANZADA (DESDE movimiento_pez_final.html)
             // 🐠 FUNCIÓN updateFishMovement() ELIMINADA - AHORA EN fish-system.js
             
-            // 🎯 FUNCIONES seek(), nearestFood(), getStageCfg(), updateAutoNeeds() ELIMINADAS - AHORA EN fish-system.js y needs-system.js
+            // ——— CONFIG POR ETAPA ———
+            getStageCfg(state) {
+                var STAGE_RATES = {
+                    baby:  { hungerHours: 2, dirtHours: 4, funHours: 6, eatReduce: 30, dirtPerPellet: 3, dirtPerRotten: 6 },
+                    young: { hungerHours: 6, dirtHours: 8, funHours: 8, eatReduce: 25, dirtPerPellet: 2, dirtPerRotten: 5 },
+                    adult: { hungerHours: 8, dirtHours:10, funHours: 10, eatReduce: 20, dirtPerPellet: 1, dirtPerRotten: 4 },
+                };
+                var st = (state && state.stage) || 'baby';
+                return STAGE_RATES[st] || STAGE_RATES.baby;
+            }
+            
+            // 🎯 FUNCIONES seek(), nearestFood(), updateAutoNeeds() ELIMINADAS - AHORA EN fish-system.js y needs-system.js
             
             resetForEgg() {
                 this.food = [];
