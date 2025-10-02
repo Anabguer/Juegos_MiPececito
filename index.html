@@ -6455,8 +6455,8 @@
                 this.gameState.birthDate = Date.now();
                 this.gameState.ageInDays = 0;
                 
-                // 🍎 NACER CON HAMBRE (ES UN BEBÉ)
-                this.gameState.needs.hunger = 80; // Bebé nace con hambre
+                // 🍎 NACER CON HAMBRE MODERADA (ES UN BEBÉ)
+                this.gameState.needs.hunger = 60; // Bebé nace con hambre moderada (no en crisis)
                 this.gameState.needs.dirt = 0;    // Limpio al nacer
                 this.gameState.needs.fun = 95;    // Feliz al nacer
                 this.needsSystem.updateCrisisFlags(); // Activar flags
@@ -7071,13 +7071,23 @@
                     hungerBubble.style.display = 'none';
                 }
                 
+                // 🍎 REDUCIR HAMBRE (USAR SISTEMA DE NECESIDADES)
+                if (this.needsSystem) {
+                    this.needsSystem.feedFish();
+                } else {
+                    // Fallback si no hay sistema de necesidades
+                    this.gameState.needs.hunger = Math.max(0, this.gameState.needs.hunger - 30);
+                    this.needsSystem.updateCrisisFlags();
+                    this.needsSystem.updateNeedBars();
+                }
+                
                 // Efectos de alimentación
                 this.createFeedingEffects();
                 
                 // Aumentar felicidad
                 this.gameState.happiness = Math.min(100, this.gameState.happiness + 20);
                 
-                console.log('🍽️ Pez alimentado - Felicidad:', this.gameState.happiness);
+                console.log('🍽️ Pez alimentado - Hambre:', this.gameState.needs.hunger.toFixed(1), 'Felicidad:', this.gameState.happiness);
             }
             
             createFeedingEffects() {
