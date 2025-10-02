@@ -312,6 +312,13 @@ class NeedsSystem {
         const hungerDecrease = config.hunger.decrease;
         this.game.gameState.needs.hunger = Math.max(0, this.game.gameState.needs.hunger - hungerDecrease);
         
+        // 🦠 ENSUSIAR EL AGUA AL COMER (usando configuración por etapa)
+        const stageConfig = this.getStageCfg(this.game.gameState);
+        const dirtIncrease = stageConfig.dirtPerPellet;
+        this.game.gameState.needs.dirt = Math.min(100, this.game.gameState.needs.dirt + dirtIncrease);
+        
+        console.log(`🦠 Agua ensuciada al comer: +${dirtIncrease}% (total: ${this.game.gameState.needs.dirt.toFixed(1)}%)`);
+        
         // Efectos de alimentación
         this.createFeedingEffects();
         

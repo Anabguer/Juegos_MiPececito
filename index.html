@@ -10481,7 +10481,7 @@ Comida premium y de cumpleaños
                     if (f.bottomT > 0 && f.bottomT > 8) {
                         console.log(`🗑️ Pellet podrido después de ${f.bottomT.toFixed(1)}s en el fondo`);
                         const cfg = this.needsSystem.getStageCfg(this.gameState);
-                        // this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerRotten, 0, 100); // MOVIDO A needs-system.js
+                        this.gameState.needs.dirt = Math.min(100, this.gameState.needs.dirt + cfg.dirtPerRotten);
                         console.log(`🦠 Suciedad por pudrición: +${cfg.dirtPerRotten} (total: ${this.gameState.needs.dirt.toFixed(1)}%)`);
                         this.needsSystem.updateNeedBars();
                         this.food.splice(i, 1);
