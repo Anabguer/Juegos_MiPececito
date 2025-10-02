@@ -8326,7 +8326,7 @@
                 
                 // Aplicar diversión al pez
                 if (funIncrease > 0) {
-                    this.gameState.needs.fun = Math.max(0, this.gameState.needs.fun - funIncrease);
+                    this.gameState.needs.fun = Math.min(100, this.gameState.needs.fun + funIncrease);
                     this.updateCrisisFlags();
                     this.updateNeedBars();
                     
@@ -14033,7 +14033,7 @@ Comida premium y de cumpleaños
                             // 🎮 DAR DIVERSIÓN INMEDIATA POR CADA PAR ACERTADO
                             if (window.game && window.game.gameState) {
                                 const funIncrease = 2; // +2 diversión por cada par acertado
-                                window.game.gameState.needs.fun = Math.max(0, window.game.gameState.needs.fun - funIncrease);
+                                window.game.gameState.needs.fun = Math.min(100, window.game.gameState.needs.fun + funIncrease);
                                 window.game.updateCrisisFlags();
                                 window.game.updateNeedBars();
                                 console.log(`🎮 +${funIncrease} diversión por acertar par (total: ${matchedPairs} pares)`);
@@ -16428,7 +16428,7 @@ Comida premium y de cumpleaños
                     // 🎮 DAR DIVERSIÓN INMEDIATA POR CADA LÍNEA COMPLETADA
                     if (window.game && window.game.gameState) {
                         const funIncrease = 2; // +2 diversión por cada línea completada
-                        window.game.gameState.needs.fun = Math.max(0, window.game.gameState.needs.fun - funIncrease);
+                        window.game.gameState.needs.fun = Math.min(100, window.game.gameState.needs.fun + funIncrease);
                         window.game.updateCrisisFlags();
                         window.game.updateNeedBars();
                         console.log(`🎮 +${funIncrease} diversión por completar línea (total: ${score} puntos)`);
