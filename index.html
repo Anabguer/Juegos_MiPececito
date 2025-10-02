@@ -6424,7 +6424,7 @@
                 this.fish = {
                     x: W / 2, // Centro del canvas
                     y: H * 0.6, // 60% hacia abajo
-                    size: this.getFishSizeForStage('baby'), // Tamaño según etapa
+                    size: this.fishSystem.getFishSizeForStage('baby'), // Tamaño según etapa
                     birthTime: Date.now(),
                     isLottie: true,
                     scale: 0.1, // Empezar muy pequeño
@@ -6785,8 +6785,8 @@
                 
                 // 🎉 AUMENTAR DIVERSIÓN
                 this.gameState.needs.fun = Math.min(100, this.gameState.needs.fun + 25); // +25 diversión (más feliz)
-                this.updateCrisisFlags();
-                this.updateNeedBars();
+                this.needsSystem.updateCrisisFlags();
+                this.needsSystem.updateNeedBars();
                 
                 console.log(`💖 Corazón lanzado por tocar al pez! Diversión: ${this.gameState.needs.fun}`);
                 
@@ -7522,8 +7522,8 @@
                 this.gameState.needs.dirt = Math.min(100, this.gameState.needs.dirt + dirtIncrease);
                 this.gameState.needs.fun = Math.max(0, this.gameState.needs.fun - funDecrease);
                 
-                this.updateCrisisFlags();
-                this.updateNeedBars();
+                this.needsSystem.updateCrisisFlags();
+                this.needsSystem.updateNeedBars();
                 this.updateButtonStates();
                 
                 console.log(`⏰ Tiempo del juego avanzado +${hours} hora(s)`);
@@ -7998,8 +7998,8 @@
                 // Aplicar diversión al pez
                 if (funIncrease > 0) {
                     this.gameState.needs.fun = Math.min(100, this.gameState.needs.fun + funIncrease);
-                    this.updateCrisisFlags();
-                    this.updateNeedBars();
+                    this.needsSystem.updateCrisisFlags();
+                    this.needsSystem.updateNeedBars();
                     
                     console.log(`🎮 +${funIncrease} diversión por jugar ${playTime.toFixed(1)}s (${gameWon ? 'ganado' : 'perdido'})`);
                     
@@ -9283,7 +9283,7 @@ Comida premium y de cumpleaños
                 
                 // 📏 ACTUALIZAR TAMAÑO DEL PEZ (LOTTIE Y CANVAS)
                 if (this.fish) {
-                    this.fish.size = this.getFishSizeForStage(newStage);
+                    this.fish.size = this.fishSystem.getFishSizeForStage(newStage);
                     
                     // ESCALAR LOTTIE SEGÚN ETAPA - MÁS GRANDES
                     const scaleByStage = {
@@ -11199,7 +11199,7 @@ Comida premium y de cumpleaños
                             // FASE 2: Reducir suciedad gradualmente (2s)
                             const progress = Math.min(this.cleaningTimer / 2.0, 1.0);
                     this.gameState.needs.dirt = this.clamp((1 - progress) * this.dirtStart, 0, 100);
-                    this.updateNeedBars();
+                    this.needsSystem.updateNeedBars();
 
                             if (this.cleaningTimer >= 2.0) {
                                 this.cleaningState = 'settle';
@@ -11212,7 +11212,7 @@ Comida premium y de cumpleaños
                             // FASE 3: Finalizar cuando no queden burbujas
                             if (this.cleanBubbles.length === 0 || this.cleaningTimer >= 3.0) {
                                 this.gameState.needs.dirt = 0;
-                                this.updateNeedBars();
+                                this.needsSystem.updateNeedBars();
                                 this.cleaningState = null;
                                 console.log('🧹 LIMPIEZA COMPLETADA');
                                 
@@ -11364,8 +11364,8 @@ Comida premium y de cumpleaños
                             this.fish.spinKind = "eat";
                             
                         // 📊 ACTUALIZAR BARRAS SIEMPRE
-                        this.updateCrisisFlags();
-                        this.updateNeedBars();
+                        this.needsSystem.updateCrisisFlags();
+                        this.needsSystem.updateNeedBars();
                         
                         console.log(`🍎 ¡Ñam completo! Nueva hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
                         
@@ -11393,8 +11393,8 @@ Comida premium y de cumpleaños
                         //     this.gameState.needs.hunger = Math.min(this.gameState.needs.hunger, 60);
                         // }
                         
-                        this.updateCrisisFlags();
-                        this.updateNeedBars();
+                        this.needsSystem.updateCrisisFlags();
+                        this.needsSystem.updateNeedBars();
                         continue; // Importante: saltar al siguiente pellet
                     } 
                     
@@ -11404,7 +11404,7 @@ Comida premium y de cumpleaños
                         const cfg = this.getStageCfg(this.gameState);
                         this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerRotten, 0, 100);
                         console.log(`🦠 Suciedad por pudrición: +${cfg.dirtPerRotten} (total: ${this.gameState.needs.dirt.toFixed(1)}%)`);
-                        this.updateNeedBars();
+                        this.needsSystem.updateNeedBars();
                         this.food.splice(i, 1);
                     }
                 }
@@ -11733,7 +11733,7 @@ Comida premium y de cumpleaños
                         if (!f.given) {
                             // SUMAR DIVERSIÓN +0.25 (RESTAR para hacer feliz)
                             this.gameState.needs.fun = this.clamp(this.gameState.needs.fun - 25, 0, 100); // -25 = +0.25 diversión (menos rojo = más feliz)
-                            this.updateNeedBars();
+                            this.needsSystem.updateNeedBars();
                             
                             // Efecto visual en la barra
                             const barF = document.getElementById('funBarHeader');
@@ -13415,8 +13415,8 @@ Comida premium y de cumpleaños
                             if (window.game && window.game.gameState) {
                                 const funIncrease = 2; // +2 diversión por cada par acertado
                                 window.game.gameState.needs.fun = Math.min(100, window.game.gameState.needs.fun + funIncrease);
-                                window.game.updateCrisisFlags();
-                                window.game.updateNeedBars();
+                                window.game.needsSystem.updateCrisisFlags();
+                                window.game.needsSystem.updateNeedBars();
                                 console.log(`🎮 +${funIncrease} diversión por acertar par (total: ${matchedPairs} pares)`);
                             }
                             
@@ -15810,8 +15810,8 @@ Comida premium y de cumpleaños
                     if (window.game && window.game.gameState) {
                         const funIncrease = 2; // +2 diversión por cada línea completada
                         window.game.gameState.needs.fun = Math.min(100, window.game.gameState.needs.fun + funIncrease);
-                        window.game.updateCrisisFlags();
-                        window.game.updateNeedBars();
+                        window.game.needsSystem.updateCrisisFlags();
+                        window.game.needsSystem.updateNeedBars();
                         console.log(`🎮 +${funIncrease} diversión por completar línea (total: ${score} puntos)`);
                     }
                     
