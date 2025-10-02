@@ -181,12 +181,15 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
       score += CONFIG.scorePerGood;
       scoreEl.textContent = score;
       playSound('acierto');
-      pop(bubble);
       
-      // Verificar si se puede subir de nivel
+      // Verificar si se puede subir de nivel ANTES de hacer pop
+      console.log(`🫧 SCORE: ${score}, PEARLS NEEDED: ${pearlsNeeded}`);
       if (score >= pearlsNeeded) {
+        console.log('🎉 ¡SUBIENDO DE NIVEL!');
         levelUp();
       }
+      
+      pop(bubble);
     }
     });
 
@@ -269,14 +272,17 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
 
   // ---------- NIVELES ----------
   function levelUp() {
+    console.log(`🎉 LEVEL UP! Nivel anterior: ${level}`);
     level++;
     pearlsNeeded = 20 + (level - 1) * 10; // 20, 30, 40, 50...
     levelEl.textContent = `NIVEL ${level}`;
+    console.log(`🎉 NUEVO NIVEL: ${level}, PEARLS NEEDED: ${pearlsNeeded}`);
     
     // Actualizar velocidad del spawner
     if (spawnTimer) {
       clearInterval(spawnTimer);
       const levelSpeed = getLevelSpeed();
+      console.log(`🎉 NUEVA VELOCIDAD: spawnEveryMs=${levelSpeed.spawnEveryMs}, speedMin=${levelSpeed.speedMin}, speedMax=${levelSpeed.speedMax}`);
       spawnTimer = setInterval(spawnBubble, levelSpeed.spawnEveryMs);
     }
     
