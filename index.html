@@ -6400,12 +6400,15 @@
                 console.log(`✨ Efecto suave creado: ${this.explosionBubbles.length} burbujas delicadas (sin rayos amarillos)`);
             }
             
-            // 🐠 CREAR PEZ BEBÉ
-            createFish() {
-                console.log('🐠 Creando pez bebé...');
+            // 🐠 CREAR PEZ BEBÉ LOTTIE
+            async createFish() {
+                console.log('🐠 Creando pez bebé Lottie...');
+                
+                // Crear pez Lottie REAL
+                await this.createLottieFish();
                 
                 const centerX = this.canvas.width / 2;
-                const centerY = this.canvas.height / 2;
+                const centerY = this.canvas.height * 0.6;
                 
                 this.fish = {
                     // Posición
@@ -6413,10 +6416,12 @@
                     y: centerY,
                     baseY: centerY,
                     
-                    // Tamaño y escala
-                    size: 35,
-                    scale: 1.0,
-                    targetScale: 1.0,
+                    // Tamaño y escala (Lottie)
+                    size: 80, // Tamaño del contenedor Lottie
+                    scale: 0.1, // Empezar muy pequeño
+                    targetScale: 1.0, // Crecer hasta tamaño normal
+                    growing: true,
+                    isLottie: true,
                     
                     // Movimiento
                     vx: 0,
@@ -6456,6 +6461,7 @@
                     lastFeedTime: Date.now(),
                     lastPlayTime: 0,
                     lastCleanTime: 0,
+                    birthTime: Date.now(),
                     
                     // Efectos
                     spinKind: null,
@@ -6463,17 +6469,79 @@
                     spinT: 0
                 };
                 
-                console.log('🐠 Pez bebé creado:', {
+                console.log('🐠 Pez bebé Lottie creado:', {
                     x: this.fish.x,
                     y: this.fish.y,
                     size: this.fish.size,
-                    stage: this.fish.stage
+                    stage: this.fish.stage,
+                    isLottie: this.fish.isLottie
                 });
             }
             
-            // createLottieFish() - ELIMINADO (ahora en fish-system.js)
+            // 🎨 CREAR PEZ LOTTIE
+            async createLottieFish() {
+                try {
+                    // Cargar JSON del pez
+                    const response = await fetch('./ejemplos/bebe.json');
+                    const animationData = await response.json();
+                    
+                    const container = document.getElementById('lottieContainer');
+                    container.style.display = 'block';
+                    
+                    // Crear animación Lottie
+                    this.lottieAnimation = lottie.loadAnimation({
+                        container: container,
+                        renderer: 'svg',
+                        loop: true,
+                        autoplay: true,
+                        animationData: animationData
+                    });
+                    
+                    console.log('🎨 Pez Lottie cargado correctamente');
+                    
+                    // Posicionar el contenedor
+                    this.updateLottiePosition();
+                    
+                } catch (error) {
+                    console.error('❌ Error cargando pez Lottie:', error);
+                }
+            }
             
-            // updateLottiePosition() - ELIMINADO (ahora en fish-system.js)
+            // 🎨 ACTUALIZAR POSICIÓN DEL PEZ LOTTIE
+            updateLottiePosition() {
+                if (!this.fish || !this.lottieAnimation) return;
+                
+                const container = document.getElementById('lottieContainer');
+                const rect = this.canvas.getBoundingClientRect();
+                
+                // CRECIMIENTO GRADUAL del pez recién nacido
+                if (this.fish.growing && this.fish.scale < this.fish.targetScale) {
+                    this.fish.scale += 0.02; // Crecimiento visible
+                    
+                    if (this.fish.scale >= this.fish.targetScale) {
+                        this.fish.scale = this.fish.targetScale;
+                        this.fish.growing = false;
+                        console.log('🐠 Pez alcanzó tamaño completo');
+                    }
+                }
+                
+                // Calcular posición en pantalla
+                const screenX = rect.left + this.fish.x - (this.fish.size * this.fish.scale) / 2;
+                const screenY = rect.top + this.fish.y - (this.fish.size * this.fish.scale) / 2;
+                
+                // Aplicar transformaciones
+                container.style.left = screenX + 'px';
+                container.style.top = screenY + 'px';
+                container.style.width = (this.fish.size * this.fish.scale) + 'px';
+                container.style.height = (this.fish.size * this.fish.scale) + 'px';
+                
+                // Voltear horizontalmente si va hacia la izquierda
+                if (this.fish.facing === -1) {
+                    container.style.transform = 'scaleX(-1)';
+                } else {
+                    container.style.transform = 'scaleX(1)';
+                }
+            }
             
             // createCanvasFish() - ELIMINADO (ahora en fish-system.js)
             
