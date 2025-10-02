@@ -6689,94 +6689,9 @@
             
             // drawFoodParticles() - SISTEMA ANTIGUO ELIMINADO
             
-            // 🍖 DIBUJAR Y ACTUALIZAR COMIDA CAYENDO
-            drawFallingFood() {
-                if (!this.fallingFood) return;
-                
-                // Actualizar y dibujar comida cayendo
-                for (let i = this.fallingFood.length - 1; i >= 0; i--) {
-                    const food = this.fallingFood[i];
-                    
-                    if (food.eaten) continue;
-                    
-                    // Actualizar posición
-                    food.y += food.vy * (1/60);
-                    food.life -= 1/60;
-                    
-                    // Eliminar si expiró o salió de pantalla
-                    if (food.life <= 0 || food.y > this.canvas.height + 50) {
-                        this.fallingFood.splice(i, 1);
-                        continue;
-                    }
-                    
-                    // Verificar si el pez la alcanzó
-                    if (this.fish && !food.eaten) {
-                        const distance = Math.sqrt(
-                            Math.pow(this.fish.x - food.x, 2) + 
-                            Math.pow(this.fish.y - food.y, 2)
-                        );
-                        
-                        if (distance < 30) { // Pez alcanzó la comida (área más grande)
-                            food.eaten = true;
-                            this.createEatingEffect(food.x, food.y);
-                            this.createBigEatingEffect(food.x, food.y, food.type);
-                            console.log(`🍽️ ¡Pez comió comida ${food.type}! ¡ÑAM ÑAM!`);
-                            
-                            // ACTUALIZAR TIEMPO DE COMIDA Y ESTADO
-                            this.fish.lastFeedTime = Date.now();
-                            this.fish.excited = true; // ¡FELIZ AL COMER!
-                            console.log('😊 ¡Pez feliz después de comer!');
-                            
-                            // Quitar felicidad después de 3 segundos
-                            setTimeout(() => {
-                                this.fish.excited = false;
-                            }, 3000);
-                            
-                            // Quitar comida después de un momento
-                            setTimeout(() => {
-                                const index = this.fallingFood.indexOf(food);
-                                if (index > -1) this.fallingFood.splice(index, 1);
-                            }, 100);
-                            continue;
-                        }
-                        
-                    }
-                    
-                    // Dibujar comida
-                    this.ctx.save();
-                    
-                    // Color según tipo
-                    const color = food.type === 'premium' ? '#FFD700' : '#D2691E';
-                    const highlightColor = food.type === 'premium' ? '#FFF8DC' : '#F4A460';
-                    
-                    // Sombra
-                    this.ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                    this.ctx.shadowBlur = 3;
-                    this.ctx.shadowOffsetY = 2;
-                    
-                    // Comida principal
-                    this.ctx.fillStyle = color;
-                    this.ctx.beginPath();
-                    this.ctx.arc(food.x, food.y, food.size, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    
-                    // Brillo
-                    this.ctx.fillStyle = highlightColor;
-                    this.ctx.beginPath();
-                    this.ctx.arc(food.x - 2, food.y - 2, food.size * 0.4, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    
-                    this.ctx.restore();
-                }
-                
-                // Si el pez está persiguiendo, encontrar la comida más cercana
-                if (this.fish && this.fish.isChasing && this.fallingFood.length > 0) {
-                    this.findAndChaseClosestFood();
-                }
-            }
+            // drawFallingFood() - SISTEMA ANTIGUO ELIMINADO
             
-            // 🔍 ENCONTRAR Y PERSEGUIR LA COMIDA MÁS CERCANA
-            findAndChaseClosestFood() {
+            // findAndChaseClosestFood() - SISTEMA ANTIGUO ELIMINADO
                 if (!this.fallingFood || this.fallingFood.length === 0) return;
                 
                 const fish = this.fish;
