@@ -23,6 +23,9 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
   const motivationMessage = document.getElementById("motivationMessage");
   const rewardReasons = document.getElementById("rewardReasons");
 
+  // Elementos de sonido
+  const soundToggle = document.getElementById("soundToggle");
+
   // ---------- ESTADO ----------
   let playing = false;
   let spawnTimer = null;
@@ -54,6 +57,55 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
   // ---------- UTILIDADES ----------
   const rand = (a, b) => a + Math.random() * (b - a);
   const choice = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  // ---------- SONIDO ----------
+  function toggleSound() {
+    if (window.parent && window.parent.audioManager) {
+      // Si estamos en iframe, usar el audioManager del padre
+      window.parent.audioManager.toggleMute();
+      updateSoundButton();
+    } else if (window.audioManager) {
+      // Si estamos en la ventana principal
+      window.audioManager.toggleMute();
+      updateSoundButton();
+    }
+  }
+
+  function updateSoundButton() {
+    if (!soundToggle) return;
+    
+    const isMuted = (window.parent && window.parent.audioManager) 
+      ? window.parent.audioManager.isMuted 
+      : (window.audioManager ? window.audioManager.isMuted : false);
+    
+    const svg = soundToggle.querySelector('svg');
+    if (svg) {
+      if (isMuted) {
+        // Icono de sonido silenciado
+        svg.innerHTML = `
+          <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"></polygon>
+          <line x1="23" y1="9" x2="17" y2="15"></line>
+          <line x1="17" y1="9" x2="23" y2="15"></line>
+        `;
+      } else {
+        // Icono de sonido normal
+        svg.innerHTML = `
+          <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        `;
+      }
+    }
+  }
+
+  function playSound(soundName) {
+    if (window.parent && window.parent.audioManager) {
+      // Si estamos en iframe, usar el audioManager del padre
+      window.parent.audioManager.playSound(soundName);
+    } else if (window.audioManager) {
+      // Si estamos en la ventana principal
+      window.audioManager.playSound(soundName);
+    }
+  }
 
   function stageRect() {
     return gameStage.getBoundingClientRect();
@@ -107,15 +159,17 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
       ev.stopPropagation();
       if (!bubble.alive || !playing) return;
 
-      if (bubble.isBad) {
-        // clicaste una mala → pierdes
-        lose("Has tocado una burbuja peligrosa.");
-      } else {
-        // buena → sumas y desaparece
-        score += CONFIG.scorePerGood;
-        scoreEl.textContent = score;
-        pop(bubble);
-      }
+    if (bubble.isBad) {
+      // clicaste una mala → pierdes
+      playSound('fail');
+      lose("Has tocado una burbuja peligrosa.");
+    } else {
+      // buena → sumas y desaparece
+      score += CONFIG.scorePerGood;
+      scoreEl.textContent = score;
+      playSound('acierto');
+      pop(bubble);
+    }
     });
 
     bubbles.push(bubble);
@@ -161,17 +215,18 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
       // aplicar transform
       b.el.style.transform = `translateY(${b.y - (rect.height - b.size - 2)}px)`;
 
-      // ¿se escapó por arriba?
-      if (b.y <= topLimit) {
-        if (!b.isBad) {
-          // se escapó una buena → pierdes
-          lose("¡Se escapó una burbuja buena!");
-          return; // paramos el loop al perder
-        } else {
-          // mala que se va por arriba: simplemente desaparece
-          pop(b);
-        }
+    // ¿se escapó por arriba?
+    if (b.y <= topLimit) {
+      if (!b.isBad) {
+        // se escapó una buena → pierdes
+        playSound('fail');
+        lose("¡Se escapó una burbuja buena!");
+        return; // paramos el loop al perder
+      } else {
+        // mala que se va por arriba: simplemente desaparece
+        pop(b);
       }
+    }
     }
 
     // limpiar muertas del array
@@ -190,6 +245,9 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
     lastTs = 0;
 
     clearBubbles();
+
+    // Reproducir sonido de inicio
+    playSound('jugar');
 
     // Spawner independiente del loop de animación
     spawnBubble();
@@ -264,6 +322,12 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
   gameStage?.addEventListener("click", (e) => {
     e.stopPropagation();
   });
+
+  // Event listener para el botón de sonido
+  soundToggle?.addEventListener("click", toggleSound);
+
+  // Actualizar el botón de sonido al cargar
+  updateSoundButton();
 
   // Opcional: abrir overlay si venías de otro flujo
   gameOverlay.style.display = "flex";
