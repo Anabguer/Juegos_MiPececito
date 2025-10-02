@@ -181,7 +181,8 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
     bubble.alive = false;
     bubble.el.style.transition = "transform 0.2s ease, opacity 0.2s ease";
     bubble.el.style.opacity = "0";
-    bubble.el.style.transform = "scale(1.5)";
+    // Resetear translateY y solo aplicar scale
+    bubble.el.style.transform = "translateY(0) scale(1.5)";
     console.log('💥 ESTILOS APLICADOS:', {
       transition: bubble.el.style.transition,
       opacity: bubble.el.style.opacity,
