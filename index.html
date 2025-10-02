@@ -6267,26 +6267,7 @@
             
             // 🫧 FUNCIÓN createFishBubble() ELIMINADA - AHORA EN fish-system.js
             
-            drawNeedBubbles() {
-                for (const bubble of this.needBubbles) {
-                    this.ctx.save();
-                    this.ctx.globalAlpha = Math.min(bubble.life / 2, 1);
-                    
-                    // Burbuja de fondo
-                    this.ctx.fillStyle = bubble.urgent ? '#ff6b6b' : '#4ecdc4';
-                    this.ctx.beginPath();
-                    this.ctx.arc(bubble.x, bubble.y, 25, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    
-                    // Icono (emoji simple)
-                    this.ctx.fillStyle = '#fff';
-                    this.ctx.font = '20px system-ui';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.fillText(bubble.icon, bubble.x, bubble.y + 7);
-                    
-                    this.ctx.restore();
-                }
-            }
+            // drawNeedBubbles() - ELIMINADO (ahora en needs-system.js)
             
             // 🐣 SISTEMA DE ECLOSIÓN
             
@@ -6809,67 +6790,11 @@
             // YA NO NECESITAMOS CAMBIOS DE COMPORTAMIENTO
             // El pez simplemente NADA en una dirección hasta llegar al borde
             
-            // 🍽️ SISTEMA DE HAMBRE
-            updateHunger() {
-                if (!this.fish || !this.fish.lastFeedTime) return;
-                
-                const currentTime = Date.now();
-                const timeSinceLastFeed = currentTime - this.fish.lastFeedTime;
-                // CONFIGURACIÓN REAL: Bebé tiene hambre cada 4 horas
-                const currentStage = this.gameState.stage;
-                let hungerThreshold;
-                
-                switch(currentStage) {
-                    case 'baby':
-                        hungerThreshold = 4 * 60 * 60 * 1000; // 4 horas
-                        break;
-                    case 'young':
-                        hungerThreshold = 6 * 60 * 60 * 1000; // 6 horas
-                        break;
-                    case 'adult':
-                        hungerThreshold = 8 * 60 * 60 * 1000; // 8 horas
-                        break;
-                    default:
-                        hungerThreshold = 4 * 60 * 60 * 1000; // Default bebé
-                }
-                
-                const hungerBubble = document.getElementById('hungerBubble');
-                if (!hungerBubble) return;
-                
-                if (timeSinceLastFeed > hungerThreshold) {
-                    // Mostrar burbuja de hambre cerca del pez
-                    this.showHungerBubble();
-                } else {
-                    // Ocultar burbuja
-                    hungerBubble.style.display = 'none';
-                }
-            }
+            // 🍽️ SISTEMA DE HAMBRE - ELIMINADO (ahora en needs-system.js)
             
-            showHungerBubble() {
-                this.showNeedBubble('hungerBubble', 'hunger', 15, -45);
-            }
+            // showHungerBubble() - ELIMINADO (ahora en needs-system.js)
             
-            // 🎯 MOSTRAR BURBUJA DE NECESIDAD GENÉRICA
-            showNeedBubble(bubbleId, needType, offsetX, offsetY) {
-                const bubble = document.getElementById(bubbleId);
-                if (!bubble || !this.fish) return;
-                
-                // Posicionar la burbuja cerca del pez
-                bubble.style.display = 'block';
-                bubble.style.left = (this.fish.x + offsetX) + 'px';
-                bubble.style.top = (this.fish.y + offsetY) + 'px';
-                
-                const needNames = {
-                    'hunger': 'COMIDA 🍽️',
-                    'dirty': 'LIMPIEZA 🧽', 
-                    'medicine': 'MEDICINA 💊',
-                    'play': 'JUGAR 🎮'
-                };
-                console.log(`🎯 Pez necesita: ${needNames[needType] || needType}`);
-                
-                // DEBUG: Verificar que se muestra el icono, no texto
-                console.log(`📍 Burbuja ${bubbleId} posicionada en (${this.fish.x + offsetX}, ${this.fish.y + offsetY})`);
-            }
+            // showNeedBubble() - ELIMINADO (ahora en needs-system.js)
             
             // 🎯 MOSTRAR ICONO QUE SE MUEVE (APARECE/DESAPARECE/CAMBIA LUGAR)
             showFixedNeedIcon(bubbleId, needType) {
@@ -6932,73 +6857,7 @@
             // 😢 SISTEMA DE APATÍA Y TRISTEZA
             // 🐠 FUNCIÓN updateFishMood() ELIMINADA - AHORA EN fish-system.js
             
-            // 🎮 ACTUALIZAR TODAS LAS BURBUJAS DE NECESIDADES
-            updateAllNeedBubbles() {
-                if (!this.fish) return;
-                
-                const currentTime = Date.now();
-                const currentStage = this.gameState.stage;
-                
-                // Configurar umbrales (mismos que en updateButtonStates)
-                let hungerThreshold, cleanThreshold, medicineThreshold, playThreshold;
-                
-                switch(currentStage) {
-                    case 'baby':
-                        hungerThreshold = 4 * 60 * 60 * 1000; // 4 horas
-                        cleanThreshold = 24 * 60 * 60 * 1000; // 1 día
-                        medicineThreshold = 8 * 60 * 60 * 1000; // 8 horas
-                        playThreshold = 5 * 60 * 60 * 1000; // 5 horas
-                        break;
-                    case 'young':
-                        hungerThreshold = 6 * 60 * 60 * 1000;
-                        cleanThreshold = 2 * 24 * 60 * 60 * 1000;
-                        medicineThreshold = 14 * 60 * 60 * 1000;
-                        playThreshold = 8 * 60 * 60 * 1000;
-                        break;
-                    case 'adult':
-                        hungerThreshold = 8 * 60 * 60 * 1000;
-                        cleanThreshold = 3 * 24 * 60 * 60 * 1000;
-                        medicineThreshold = 26 * 60 * 60 * 1000;
-                        playThreshold = 10 * 60 * 60 * 1000;
-                        break;
-                    default:
-                        hungerThreshold = 4 * 60 * 60 * 1000;
-                        cleanThreshold = 24 * 60 * 60 * 1000;
-                        medicineThreshold = 8 * 60 * 60 * 1000;
-                        playThreshold = 5 * 60 * 60 * 1000;
-                }
-                
-                // Verificar y mostrar/ocultar burbujas
-                const needsFood = this.fish.lastFeedTime && (currentTime - this.fish.lastFeedTime) > hungerThreshold;
-                const needsCleaning = this.gameState.lastClean && (currentTime - this.gameState.lastClean) > cleanThreshold;
-                const needsMedicine = this.gameState.lastMedicine && (currentTime - this.gameState.lastMedicine) > medicineThreshold;
-                const needsPlay = this.gameState.lastPlay && (currentTime - this.gameState.lastPlay) > playThreshold;
-                
-                // ICONOS APARECEN/DESAPARECEN en posiciones fijas
-                if (needsFood) {
-                    this.showFixedNeedIcon('hungerBubble', 'hunger');
-                } else {
-                    document.getElementById('hungerBubble').style.display = 'none';
-                }
-                
-                if (needsCleaning) {
-                    this.showFixedNeedIcon('dirtyBubble', 'dirty');
-                } else {
-                    document.getElementById('dirtyBubble').style.display = 'none';
-                }
-                
-                if (needsMedicine) {
-                    this.showFixedNeedIcon('medicineBubble', 'medicine');
-                } else {
-                    document.getElementById('medicineBubble').style.display = 'none';
-                }
-                
-                if (needsPlay) {
-                    this.showFixedNeedIcon('playBubble', 'play');
-                } else {
-                    document.getElementById('playBubble').style.display = 'none';
-                }
-            }
+            // updateAllNeedBubbles() - ELIMINADO (ahora en needs-system.js)
             
             // 📍 ACTUALIZAR POSICIONES DE BURBUJAS QUE SIGUEN AL PEZ
             updateVisibleBubblesPositions() {
@@ -7670,48 +7529,7 @@
                 }
             }
             
-            drawNeedBubbles() {
-                if (!this.needBubbles || this.needBubbles.length === 0) return;
-                
-                this.ctx.save();
-                
-                for (const bubble of this.needBubbles) {
-                    this.ctx.globalAlpha = bubble.alpha * 0.7; // MÁS TRANSLÚCIDA
-                    
-                    // Dibujar burbuja base (más translúcida)
-                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                    this.ctx.strokeStyle = bubble.color;
-                    this.ctx.lineWidth = 2;
-                    this.ctx.shadowBlur = 8;
-                    this.ctx.shadowColor = bubble.color;
-                    this.ctx.beginPath();
-                    this.ctx.arc(bubble.x, bubble.y, bubble.size, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    this.ctx.stroke();
-                    
-                    // Cargar y dibujar icono PNG
-                    if (!bubble.iconImage) {
-                        bubble.iconImage = new Image();
-                        bubble.iconImage.src = bubble.iconPath;
-                    }
-                    
-                    if (bubble.iconImage && bubble.iconImage.complete) {
-                        this.ctx.globalAlpha = bubble.alpha;
-                        const iconSize = bubble.size * 0.7;
-                        this.ctx.drawImage(
-                            bubble.iconImage,
-                            bubble.x - iconSize/2,
-                            bubble.y - iconSize/2,
-                            iconSize,
-                            iconSize
-                        );
-                    }
-                    
-                    this.ctx.shadowBlur = 0; // Limpiar sombra
-                }
-                
-                this.ctx.restore();
-            }
+            // drawNeedBubbles() - ELIMINADO (ahora en needs-system.js)
             
             // ✨ DIBUJAR BURBUJAS DE LIMPIEZA
             drawCleaningBubbles() {
@@ -11140,106 +10958,9 @@ Comida premium y de cumpleaños
                 }
             }
             
-            updateCleaning(deltaTime) {
-                this._time = (this._time || 0) + deltaTime;
-
-                // 🎯 MÁQUINA DE ESTADOS DE LIMPIEZA
-                if (this.cleaningState) {
-                    this.cleaningTimer += deltaTime;
-                    
-                    switch (this.cleaningState) {
-                        case 'burst':
-                            // FASE 1: Ráfaga inicial (0.5s)
-                            if (this.cleaningTimer >= 0.5) {
-                                this.cleaningState = 'fade';
-                                this.cleaningTimer = 0;
-                                console.log('🧹 FASE: burst → fade');
-                            }
-                            break;
-                            
-                        case 'fade':
-                            // FASE 2: Reducir suciedad gradualmente (2s)
-                            const progress = Math.min(this.cleaningTimer / 2.0, 1.0);
-                    this.gameState.needs.dirt = this.clamp((1 - progress) * this.dirtStart, 0, 100);
-                    this.needsSystem.updateNeedBars();
-
-                            if (this.cleaningTimer >= 2.0) {
-                                this.cleaningState = 'settle';
-                                this.cleaningTimer = 0;
-                                console.log('🧹 FASE: fade → settle');
-                            }
-                            break;
-                            
-                        case 'settle':
-                            // FASE 3: Finalizar cuando no queden burbujas
-                            if (this.cleanBubbles.length === 0 || this.cleaningTimer >= 3.0) {
-                                this.gameState.needs.dirt = 0;
-                                this.needsSystem.updateNeedBars();
-                                this.cleaningState = null;
-                                console.log('🧹 LIMPIEZA COMPLETADA');
-                                
-                                // 📸 EVENTO DE LIMPIEZA OCASIONAL
-                                if (Math.random() < 0.15) { // 15% chance
-                                    const cleaningMessages = [
-                                        '¡Ahh! ¡Qué limpia está mi pecera! Me siento renovado.',
-                                        'Gracias por limpiar mi hogar. Ahora puedo nadar mejor.',
-                                        '¡Qué bien! El agua cristalina me hace muy feliz.',
-                                        'Una pecera limpia es un pez feliz. ¡Gracias!',
-                                        'Me encanta cuando mi hogar está así de limpio y brillante.'
-                                    ];
-                                    const msg = cleaningMessages[Math.floor(Math.random() * cleaningMessages.length)];
-                                    this.addAlbumEvent('cleaning', '🧹 Pecera limpia', msg);
-                                }
-                            }
-                            break;
-                    }
-                }
-
-                // 🫧 ACTUALIZAR MOVIMIENTO DE BURBUJAS
-                const H = this.viewH();
-                for (const b of this.cleanBubbles) {
-                    b.t += deltaTime;
-                    const p = Math.min(1, b.t / (b.dur || 1));
-                    b.y = b.y0 - p * (H + 24);
-                    b.x = b.x0 + Math.sin(this._time * b.wobSpd + b.wobble) * b.wobAmp;
-                }
-
-                // 🗑️ ELIMINAR BURBUJAS QUE SALIERON DE PANTALLA
-                for (let i = this.cleanBubbles.length - 1; i >= 0; i--) {
-                    const b = this.cleanBubbles[i];
-                    if (b.t >= (b.dur || 1) || b.y < -12) {
-                        this.cleanBubbles.splice(i, 1);
-                    }
-                }
-            }
+            // updateCleaning() - ELIMINADO (ahora en needs-system.js)
             
-            drawCleanBubbles() {
-                if (!this.cleanBubbles || this.cleanBubbles.length === 0) {
-                    return;
-                }
-                const ctx = this.ctx;
-                
-                // 🎯 ESCALAR CONTEXTO SOLO PARA BURBUJAS (sistema híbrido)
-                ctx.save();
-                const r = this.getDPR();
-                ctx.setTransform(r, 0, 0, r, 0, 0);
-                ctx.globalCompositeOperation = 'source-over';
-
-                for (const b of this.cleanBubbles) {
-                    ctx.globalAlpha = 0.9;
-                    ctx.beginPath();
-                    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-                    ctx.fillStyle = '#dff7ff';
-                    ctx.fill();
-                    ctx.lineWidth = 0.9;
-                    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
-                    ctx.stroke();
-                }
-                
-                // 🔄 RESTAURAR CONTEXTO NORMAL
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
-                ctx.restore();
-            }
+            // drawCleanBubbles() - ELIMINADO (ahora en needs-system.js)
             
             updateFood(deltaTime) {
                 if (!this.food) {
