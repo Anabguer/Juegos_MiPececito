@@ -6680,98 +6680,12 @@
             }
             
             // 🍽️ ALIMENTAR DESDE BOTÓN (SISTEMA ANTIGUO - DESACTIVADO)
-            startFeeding() {
-                console.log('🍽️ startFeeding() DESACTIVADO - Usar dropFood() en su lugar');
-                return;
-                
-                // Crear 3 bolitas con MEJOR ESPACIADO
-                setTimeout(() => {
-                    this.createFallingFood(1); // Primera comida
-                }, 0);
-                
-                setTimeout(() => {
-                    this.createFallingFood(2); // Segunda comida
-                }, 800); // Después de 800ms
-                
-                setTimeout(() => {
-                    this.createFallingFood(3); // Tercera comida
-                }, 1600); // Después de 1.6s
-                
-                // Activar modo persecución del pez (velocidad más suave)
-                this.fish.isChasing = true;
-                this.fish.chaseSpeed = this.fish.speed * 1.5; // Solo 50% más rápido
-                
-                // Desactivar persecución después de 15 segundos
-                setTimeout(() => {
-                    if (this.fish) {
-                        this.fish.isChasing = false;
-                        console.log('🐠 Pez dejó de perseguir comida - Volviendo a comportamiento normal');
-                    }
-                }, 15000);
-                
-                // Actualizar tiempo de alimentación
-                this.fish.lastFeedTime = Date.now();
-                this.gameState.happiness = Math.min(100, this.gameState.happiness + 20);
-                
-                console.log('🏃 ¡Pez activado en modo persecución! Velocidad x1.5 (más natural)');
-            }
+            // startFeeding() - MOVIDO A needs-system.js
             
-            // 🍽️ ALIMENTAR DESDE BURBUJA (MODO ORIGINAL)
-            feedFish() {
-                if (this.needsSystem) {
-                    this.needsSystem.feedFish();
-                }
-            }
+            // feedFish() - MOVIDO A needs-system.js
             
             
-            // 🍖 CREAR COMIDA CON POSICIONES ESTRATÉGICAS
-            createFallingFood(foodNumber) {
-                // SISTEMA ANTIGUO - DESACTIVADO
-                return;
-                
-                let startX;
-                if (this.fish) {
-                    const fishX = this.fish.x;
-                    const canvasWidth = this.canvas.width;
-                    
-                    // POSICIONES ESTRATÉGICAS para cada comida
-                    switch(foodNumber) {
-                        case 1:
-                            // Primera: A la izquierda del pez
-                            startX = Math.max(80, fishX - 80 - Math.random() * 60);
-                            break;
-                        case 2:
-                            // Segunda: A la derecha del pez
-                            startX = Math.min(canvasWidth - 80, fishX + 80 + Math.random() * 60);
-                            break;
-                        case 3:
-                            // Tercera: Cerca del pez (arriba o centro)
-                            startX = fishX + (Math.random() - 0.5) * 100;
-                            startX = Math.max(80, Math.min(canvasWidth - 80, startX));
-                            break;
-                        default:
-                            startX = 100 + Math.random() * (canvasWidth - 200);
-                    }
-                } else {
-                    // Si no hay pez, usar posición aleatoria
-                    startX = 100 + Math.random() * (this.canvas.width - 200);
-                }
-                
-                const food = {
-                    x: startX,
-                    y: this.canvas.height * 0.25, // Un poco más abajo
-                    vy: 18 + Math.random() * 8, // Velocidad más lenta para dar tiempo
-                    size: 9 + Math.random() * 3, // Tamaño más visible
-                    life: 18, // Más tiempo para comer
-                    maxLife: 18,
-                    eaten: false,
-                    type: Math.random() > 0.8 ? 'premium' : 'normal',
-                    number: foodNumber
-                };
-                
-                this.fallingFood.push(food);
-                console.log(`🍖 Comida #${foodNumber} creada en x:${startX.toFixed(0)} (${foodNumber === 1 ? 'IZQUIERDA' : foodNumber === 2 ? 'DERECHA' : 'CENTRO'})`);
-            }
+            // createFallingFood() - SISTEMA ANTIGUO ELIMINADO
             
             drawFoodParticles() {
                 if (!this.foodParticles) return;
