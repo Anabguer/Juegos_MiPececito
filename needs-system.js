@@ -400,12 +400,13 @@ class NeedsSystem {
             this.game.fish.spinKind = "clean"; 
         }
         
-        // 🫧 CREAR BURBUJAS DE LIMPIEZA
-        this.createCleaningBubbles();
+        // 🫧 CREAR BURBUJAS INMEDIATAMENTE (RÁFAGA INICIAL)
+        this.emitCleanBubblesBurst();
+        console.log(`🫧 RÁFAGA INICIAL: ${this.game.cleanBubbles.length} burbujas creadas`);
         
-        // 🔊 SONIDO DE LIMPIEZA
+        // 🔊 SONIDO SINCRONIZADO
         if (this.game.audioManager) {
-            this.game.audioManager.playSound('limpiar');
+            this.game.audioManager.playSound('clean');
         }
         
         // Mostrar mensaje
@@ -425,6 +426,40 @@ class NeedsSystem {
         });
     }
     
+    /**
+     * 🫧 RÁFAGA INTENSA DE BURBUJAS PARA SINCRONIZACIÓN
+     */
+    emitCleanBubblesBurst() {
+        const W = this.game.canvas.width;
+        const H = this.game.canvas.height;
+        
+        // Inicializar array si no existe
+        if (!this.game.cleanBubbles) {
+            this.game.cleanBubbles = [];
+        }
+        
+        // 🎯 CREAR MUCHAS BURBUJAS DE UNA VEZ (RÁFAGA)
+        for (let wave = 0; wave < 3; wave++) {
+            for (let i = 0; i < 25; i++) {
+                const b = {
+                    x0: 30 + Math.random() * (W - 60),
+                    y0: H * 0.8 + Math.random() * (H * 0.15),
+                    t: wave * 0.1, // Escalonar ligeramente las ondas
+                    dur: 2.0 + Math.random() * 0.8,
+                    wobble: Math.random() * Math.PI * 2,
+                    wobSpd: 1.5 + Math.random() * 2,
+                    wobAmp: 8 + Math.random() * 12,
+                    r: 4 + Math.random() * 6
+                };
+                b.x = b.x0;
+                b.y = b.y0;
+                this.game.cleanBubbles.push(b);
+            }
+        }
+        
+        console.log(`🫧 Ráfaga creada: ${this.game.cleanBubbles.length} burbujas totales`);
+    }
+
     /**
      * 🫧 CREAR BURBUJAS DE LIMPIEZA
      */
@@ -478,19 +513,31 @@ class NeedsSystem {
      * 🫧 DIBUJAR BURBUJAS DE LIMPIEZA
      */
     drawCleaningBubbles() {
-        if (!this.game.cleanBubbles || !this.game.ctx) return;
+        if (!this.game.cleanBubbles || this.game.cleanBubbles.length === 0) {
+            return;
+        }
+        const ctx = this.game.ctx;
         
-        this.game.ctx.save();
-        
-        for (const bubble of this.game.cleanBubbles) {
-            this.game.ctx.globalAlpha = bubble.alpha * bubble.life;
-            this.game.ctx.fillStyle = `hsl(${180 + Math.random() * 40}, 70%, 80%)`;
-            this.game.ctx.beginPath();
-            this.game.ctx.arc(bubble.x, bubble.y, bubble.size, 0, Math.PI * 2);
-            this.game.ctx.fill();
+        // 🎯 ESCALAR CONTEXTO SOLO PARA BURBUJAS (sistema híbrido)
+        ctx.save();
+        const r = this.game.getDPR ? this.game.getDPR() : 1;
+        ctx.setTransform(r, 0, 0, r, 0, 0);
+        ctx.globalCompositeOperation = 'source-over';
+
+        for (const b of this.game.cleanBubbles) {
+            ctx.globalAlpha = 0.9;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+            ctx.fillStyle = '#dff7ff';
+            ctx.fill();
+            ctx.lineWidth = 0.9;
+            ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+            ctx.stroke();
         }
         
-        this.game.ctx.restore();
+        // 🔄 RESTAURAR CONTEXTO NORMAL
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.restore();
     }
     
     /**
