@@ -6555,6 +6555,13 @@
                 } else {
                     container.style.transform = 'scaleX(1)';
                 }
+                
+                // DEBUG: Mostrar orientación
+                console.log('🐠 Orientación pez:', {
+                    facing: this.fish.facing,
+                    vx: this.fish.vx,
+                    transform: container.style.transform
+                });
             }
             
             // 🐠 SISTEMA DE NOMBRE
