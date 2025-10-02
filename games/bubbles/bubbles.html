@@ -250,7 +250,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.1s ease;
+            /* Sin transition para evitar efectos visuales al hacer clic */
             z-index: 999999;
             pointer-events: auto;
             opacity: 1;
@@ -267,7 +267,15 @@
         }
 
         .game-bubble:hover {
-            transform: scale(1.1);
+            /* Sin efectos de hover para evitar el cuadrado al hacer clic */
+        }
+
+        .game-bubble:focus {
+            outline: none;
+        }
+
+        .game-bubble:active {
+            outline: none;
         }
 
         .bubble-emoji {
@@ -615,6 +623,6 @@
         </div>
     </div>
 
-    <script src="bubbles.js?v=20250127q"></script>
+    <script src="bubbles.js?v=20250127r"></script>
 </body>
 </html>
