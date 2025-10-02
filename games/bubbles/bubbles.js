@@ -1,4 +1,5 @@
-console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
+console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA CON NIVELES');
+console.log('🫧 TIMESTAMP: v=20250127v');
 
 (function () {
   // ---------- ELEMENTOS ----------
