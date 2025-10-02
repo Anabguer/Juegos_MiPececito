@@ -606,6 +606,40 @@ class NeedsSystem {
     }
 
     /**
+     * ❤️ LANZAR CORAZÓN A DIVERSIÓN
+     */
+    launchHeartToFun() {
+        // VERSIÓN CHATGPT: Convertir coords DOM de la barra a coords canvas
+        const barF = document.getElementById('funBarHeader'); // Barra de diversión del header
+        if (!barF) {
+            console.log('❌ No se encontró barra de diversión');
+            return;
+        }
+        
+        const crect = this.game.canvas.getBoundingClientRect();
+        const frect = barF.getBoundingClientRect();
+        
+        const sx = this.game.fish.x, sy = this.game.fish.y; // origen corazón (pez)
+        const ex = frect.left + frect.width * 0.9 - crect.left; // destino barra
+        const ey = frect.top + frect.height * 0.5 - crect.top;
+        
+        // control point para Bezier (curvita agradable)
+        const cx = (sx + ex) / 2;
+        const cy = Math.min(sy, ey) - 100;
+        
+        this.game.flyers.push({ 
+            t: 0, dur: 1.8, sx, sy, cx, cy, ex, ey, given: false 
+        });
+        
+        // 💖 ACTUALIZAR DIVERSIÓN (+25)
+        this.game.gameState.needs.fun = Math.min(100, this.game.gameState.needs.fun + 25);
+        this.updateNeedBars();
+        
+        console.log('❤️ Corazón lanzado hacia barra de diversión (coords DOM)');
+        console.log('💖 +25 diversión por tocar al pez');
+    }
+
+    /**
      * 🎮 DIVERTIR PEZ
      */
     entertainFish(amount = null) {

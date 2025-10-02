@@ -741,5 +741,102 @@ class FishSystem {
     }
 }
 
+    /**
+     * 🐠 CREAR PEZ
+     */
+    async createFish() {
+        console.log('🐠 Creando pez bebé Lottie...');
+        
+        // Crear pez Lottie REAL (bebé)
+        await this.game.createLottieFish('baby');
+        
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height * 0.6;
+        
+        this.game.fish = {
+            // Posición
+            x: centerX,
+            y: centerY,
+            baseY: centerY,
+            
+            // Tamaño y escala (Lottie)
+            size: 80, // Tamaño del contenedor Lottie
+            scale: 0.1, // Empezar muy pequeño
+            targetScale: 1.0, // Crecer hasta tamaño normal
+            growing: true,
+            isLottie: true,
+            
+            // Movimiento
+            vx: 0,
+            vy: 0,
+            maxSpeed: 100,
+            speed: 50,
+            
+            // Dirección y orientación
+            direction: 1, // 1 = derecha, -1 = izquierda
+            facing: 1,
+            facingLeft: false,
+            verticalDirection: 0, // -1 = arriba, 0 = medio, 1 = abajo
+            
+            // Estados
+            stage: 'baby',
+            excited: false,
+            depressed: false,
+            depressedTint: 0,
+            isChasing: false,
+            chaseSpeed: 0,
+            
+            // Animaciones
+            blinkT: 0,
+            nextBlink: 2,
+            eyeOpen: 1,
+            breathT: 0,
+            swimPhase: 0,
+            floatTime: 0,
+            bubbleTime: 0,
+            
+            // Comportamiento
+            desire: null,
+            wanderTimer: 0,
+            wanderDir: { x: 0, y: 0 },
+            
+            // Tiempos
+            lastFeedTime: Date.now(),
+            lastPlayTime: 0,
+            lastCleanTime: 0,
+            birthTime: Date.now(),
+            
+            // Efectos
+            spinKind: null,
+            happyBurst: 0,
+            spinT: 0
+        };
+        
+        console.log('🐠 Pez bebé Lottie creado:', {
+            x: this.game.fish.x,
+            y: this.game.fish.y,
+            size: this.game.fish.size,
+            stage: this.game.fish.stage,
+            isLottie: this.game.fish.isLottie
+        });
+        
+        // MOSTRAR BARRAS DE NECESIDADES CUANDO NACE EL PEZ
+        const needsBar = document.getElementById('needsHeaderBar');
+        if (needsBar) {
+            needsBar.style.display = 'flex';
+            console.log('📊 Barras de necesidades mostradas con el pez');
+        }
+        
+        // HABILITAR BOTONES CUANDO NACE EL PEZ
+        this.game.updateButtonStates();
+        console.log('🔘 Botones actualizados con el pez nacido');
+        
+        // PEDIR NOMBRE DESPUÉS DE NACER
+        setTimeout(() => {
+            this.game.askForFishName();
+        }, 2000); // Esperar 2 segundos después del nacimiento
+    }
+}
+
 // Exportar para uso global
 window.FishSystem = FishSystem;

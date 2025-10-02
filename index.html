@@ -6201,7 +6201,7 @@
                 }
                 
                 // CREAR PEZ INMEDIATAMENTE (simultáneo con burbujas)
-                this.createFish();
+                this.fishSystem.createFish();
                 this.gameState.stage = 'baby';
                 
                 // Burbujas de eclosión al mismo tiempo
@@ -6307,98 +6307,7 @@
             }
             
             // 🐠 CREAR PEZ BEBÉ LOTTIE
-            async createFish() {
-                console.log('🐠 Creando pez bebé Lottie...');
-                
-                // Crear pez Lottie REAL (bebé)
-                await this.createLottieFish('baby');
-                
-                const centerX = this.canvas.width / 2;
-                const centerY = this.canvas.height * 0.6;
-                
-                this.fish = {
-                    // Posición
-                    x: centerX,
-                    y: centerY,
-                    baseY: centerY,
-                    
-                    // Tamaño y escala (Lottie)
-                    size: 80, // Tamaño del contenedor Lottie
-                    scale: 0.1, // Empezar muy pequeño
-                    targetScale: 1.0, // Crecer hasta tamaño normal
-                    growing: true,
-                    isLottie: true,
-                    
-                    // Movimiento
-                    vx: 0,
-                    vy: 0,
-                    maxSpeed: 100,
-                    speed: 50,
-                    
-                    // Dirección y orientación
-                    direction: 1, // 1 = derecha, -1 = izquierda
-                    facing: 1,
-                    facingLeft: false,
-                    verticalDirection: 0, // -1 = arriba, 0 = medio, 1 = abajo
-                    
-                    // Estados
-                    stage: 'baby',
-                    excited: false,
-                    depressed: false,
-                    depressedTint: 0,
-                    isChasing: false,
-                    chaseSpeed: 0,
-                    
-                    // Animaciones
-                    blinkT: 0,
-                    nextBlink: 2,
-                    eyeOpen: 1,
-                    breathT: 0,
-                    swimPhase: 0,
-                    floatTime: 0,
-                    bubbleTime: 0,
-                    
-                    // Comportamiento
-                    desire: null,
-                    wanderTimer: 0,
-                    wanderDir: { x: 0, y: 0 },
-                    
-                    // Tiempos
-                    lastFeedTime: Date.now(),
-                    lastPlayTime: 0,
-                    lastCleanTime: 0,
-                    birthTime: Date.now(),
-                    
-                    // Efectos
-                    spinKind: null,
-                    happyBurst: 0,
-                    spinT: 0
-                };
-                
-                console.log('🐠 Pez bebé Lottie creado:', {
-                    x: this.fish.x,
-                    y: this.fish.y,
-                    size: this.fish.size,
-                    stage: this.fish.stage,
-                    isLottie: this.fish.isLottie
-                });
-                
-                // MOSTRAR BARRAS DE NECESIDADES CUANDO NACE EL PEZ
-                const needsBar = document.getElementById('needsHeaderBar');
-                if (needsBar) {
-                    needsBar.style.display = 'flex';
-                    console.log('📊 Barras de necesidades mostradas con el pez');
-                }
-                
-                // HABILITAR BOTONES CUANDO NACE EL PEZ
-                this.updateButtonStates();
-                console.log('🔘 Botones actualizados con el pez nacido');
-                
-                // PEDIR NOMBRE DESPUÉS DE NACER
-                setTimeout(() => {
-                    this.askForFishName();
-                }, 2000); // Esperar 2 segundos después del nacimiento
-            }
+            // createFish() - MOVIDO A fish-system.js
             
             // 🎨 CREAR PEZ LOTTIE
             async createLottieFish(stage = 'baby') {
@@ -10332,36 +10241,7 @@ Comida premium y de cumpleaños
             }
             
             // ❤️ CORAZÓN VOLADOR (cuando tocas el pez)
-            launchHeartToFun() {
-                // VERSIÓN CHATGPT: Convertir coords DOM de la barra a coords canvas
-                const barF = document.getElementById('funBarHeader'); // Barra de diversión del header
-                if (!barF) {
-                    console.log('❌ No se encontró barra de diversión');
-                    return;
-                }
-                
-                const crect = this.canvas.getBoundingClientRect();
-                const frect = barF.getBoundingClientRect();
-                
-                const sx = this.fish.x, sy = this.fish.y; // origen corazón (pez)
-                const ex = frect.left + frect.width * 0.9 - crect.left; // destino barra
-                const ey = frect.top + frect.height * 0.5 - crect.top;
-                
-                // control point para Bezier (curvita agradable)
-                const cx = (sx + ex) / 2;
-                const cy = Math.min(sy, ey) - 100;
-                
-                this.flyers.push({ 
-                    t: 0, dur: 1.8, sx, sy, cx, cy, ex, ey, given: false 
-                });
-                
-                // 💖 ACTUALIZAR DIVERSIÓN (+25)
-                this.gameState.needs.fun = Math.min(100, this.gameState.needs.fun + 25);
-                this.updateUI();
-                
-                console.log('❤️ Corazón lanzado hacia barra de diversión (coords DOM)');
-                console.log('💖 +25 diversión por tocar al pez');
-            }
+            // launchHeartToFun() - MOVIDO A needs-system.js
             
             // 🫧 BURBUJAS DE RESPIRACIÓN (desde la boca)
             emitMouthBubbles(n = 4, x0, y0) {
