@@ -9926,16 +9926,7 @@ Comida premium y de cumpleaños
                 ctx.setTransform(r,0,0,r,0,0);
             }
             
-            seek(fx, fy, tx, ty, maxSpeed) {
-                const dx = tx - fx;
-                const dy = ty - fy;
-                const d = Math.hypot(dx, dy) || 1;
-                return {
-                    vx: dx / d * maxSpeed,
-                    vy: dy / d * maxSpeed,
-                    dist: d
-                };
-            }
+            // seek() - MOVIDO A fish-system.js
             
             vary(val, amt, min, max) {
                 const v = val + (Math.random() * 2 - 1) * amt;
@@ -10169,17 +10160,7 @@ Comida premium y de cumpleaños
             }
             
             // 🍎 FUNCIONES DE COMIDA
-            nearestFood() {
-                let best = null, bestD = 1e9;
-                for (const f of this.food) {
-                    const d = this.dist(this.fish.x, this.fish.y, f.x, f.y);
-                    if (d < bestD) {
-                        bestD = d;
-                        best = f;
-                    }
-                }
-                return best || null;
-            }
+            // nearestFood() - MOVIDO A fish-system.js
             
             // ❤️ CORAZÓN VOLADOR (cuando tocas el pez)
             // launchHeartToFun() - MOVIDO A needs-system.js

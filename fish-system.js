@@ -360,26 +360,41 @@ class FishSystem {
         // 🍎 COMIDA = MÁXIMA PRIORIDAD (SIEMPRE RÁPIDO)
         else if (this.game.food?.length) {
             const best = this.nearestFood();
+            const distancia = Math.hypot(best.x - fish.x, best.y - fish.y);
+            
+            console.log(`🍎 PEZ BUSCANDO COMIDA:`, {
+                pez: {x: fish.x.toFixed(1), y: fish.y.toFixed(1)},
+                comida: {x: best.x.toFixed(1), y: best.y.toFixed(1)},
+                distancia: distancia.toFixed(1),
+                crisis: {hambre: inHunger, suciedad: inDirt, aburrimiento: inBored},
+                maxSpeed: fish.maxSpeed,
+                foodArray: this.game.food.length
+            });
+            
             if (inHunger) {
                 // Crisis hambre + comida (RÁPIDO)
                 const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.2);
                 speedMul = 1.2;
                 targetV = {vx: s.vx, vy: s.vy};
+                console.log(`🚨 CRISIS HAMBRE + COMIDA: velocidad=${(fish.maxSpeed * 1.2).toFixed(1)}, targetV=${targetV.vx.toFixed(1)},${targetV.vy.toFixed(1)}`);
             } else if (inDirt) {
                 // Crisis suciedad + comida (NORMAL-RÁPIDO)
                 const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.1);
                 speedMul = 1.0;
                 targetV = {vx: s.vx, vy: s.vy};
+                console.log(`🧹 CRISIS SUCIEDAD + COMIDA: velocidad=${(fish.maxSpeed * 1.1).toFixed(1)}, targetV=${targetV.vx.toFixed(1)},${targetV.vy.toFixed(1)}`);
             } else if (inBored) {
                 // Crisis aburrimiento + comida (NORMAL-RÁPIDO)
                 const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.1);
                 speedMul = 1.0;
                 targetV = {vx: s.vx, vy: s.vy};
+                console.log(`😴 CRISIS ABURRIMIENTO + COMIDA: velocidad=${(fish.maxSpeed * 1.1).toFixed(1)}, targetV=${targetV.vx.toFixed(1)},${targetV.vy.toFixed(1)}`);
             } else {
                 // Comida normal (NORMAL)
                 const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.0);
                 speedMul = 0.9;
                 targetV = {vx: s.vx, vy: s.vy};
+                console.log(`🍎 COMIDA NORMAL: velocidad=${fish.maxSpeed.toFixed(1)}, targetV=${targetV.vx.toFixed(1)},${targetV.vy.toFixed(1)}`);
             }
         }
         // Crisis hambre sin comida
