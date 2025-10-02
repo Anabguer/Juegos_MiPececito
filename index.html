@@ -5100,8 +5100,8 @@
                 
                 // AÑADIR EVENT LISTENER PARA CLICK EN CANVAS
                 this.canvas.addEventListener('click', (event) => {
-                    console.log('👆 Click detectado - usando FishSystem...');
-                    this.fishSystem.handleCanvasClick(event);
+                    console.log('👆 Click detectado - usando handleCanvasClick...');
+                    this.handleCanvasClick(event);
                 });
                 
                 console.log('👆 Click en canvas habilitado - El pez vendrá a tu dedo');
@@ -6476,6 +6476,11 @@
                     stage: this.fish.stage,
                     isLottie: this.fish.isLottie
                 });
+                
+                // PEDIR NOMBRE DESPUÉS DE NACER
+                setTimeout(() => {
+                    this.askForFishName();
+                }, 2000); // Esperar 2 segundos después del nacimiento
             }
             
             // 🎨 CREAR PEZ LOTTIE
@@ -6543,12 +6548,109 @@
                 }
             }
             
+            // 🐠 SISTEMA DE NOMBRE
+            askForFishName() {
+                if (this.gameState.hasAskedForName || this.gameState.fishName) return;
+                
+                this.gameState.hasAskedForName = true;
+                
+                // Mostrar burbuja de nombre
+                this.showNameBubble();
+            }
+            
+            showNameBubble() {
+                if (!this.fish) return;
+                
+                // Crear modal bonito para el nombre
+                this.showCustomModal({
+                    title: '🐠 ¡Hola! ¿Cómo me llamo?',
+                    message: '🐠💭 "¡He nacido! ¡Soy tu nuevo compañero!"\n\n¿Cómo quieres que me llame?',
+                    input: true,
+                    inputPlaceholder: 'Escribe mi nombre...',
+                    confirmText: '✨ ¡Ese nombre me gusta!',
+                    cancelText: '🎲 Sorpréndeme',
+                    onConfirm: (name) => {
+                        if (name && name.trim()) {
+                            this.gameState.fishName = name.trim();
+                            console.log(`🏷️ Pez nombrado: ${this.gameState.fishName}`);
+                            
+                            this.showCustomModal({
+                                title: '🎉 ¡Perfecto!',
+                                message: `🐠💭 "¡Me encanta mi nombre: ${this.gameState.fishName}!"\n\n¡Ahora somos mejores amigos! 💕`,
+                                confirmText: '🥰 ¡Me alegra!',
+                                onConfirm: () => {}
+                            });
+                        } else {
+                            this.setRandomName();
+                        }
+                        this.updateUI();
+                        this.saveGame();
+                    },
+                    onCancel: () => {
+                        this.setRandomName();
+                    }
+                });
+            }
+            
+            setRandomName() {
+                const randomNames = ['Burbujín', 'Nadador', 'Azulito', 'Brillante', 'Saltarín', 'Coralito'];
+                this.gameState.fishName = randomNames[Math.floor(Math.random() * randomNames.length)];
+                
+                this.showCustomModal({
+                    title: '🎲 ¡Sorpresa!',
+                    message: `🐠💭 "¡Me llamaré ${this.gameState.fishName}!"\n\n¡Espero que te guste mi nombre! 😊`,
+                    confirmText: '💕 ¡Me encanta!',
+                    onConfirm: () => {}
+                });
+            }
+            
             // createCanvasFish() - ELIMINADO (ahora en fish-system.js)
             
             
             // updateNaturalFishMovement() - ELIMINADO (ahora en fish-system.js)
             
             // 👆 CLICK EN PANTALLA - PEZ VIENE AL DEDO (SISTEMA DEL DEMO)
+            handleCanvasClick(event) {
+                if (!this.fish || this.gameState.stage === 'egg' || this.fish.isDepressed) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const clickX = event.clientX - rect.left;
+                const clickY = event.clientY - rect.top;
+                
+                // SISTEMA DEL DEMO: fish.desire con límites
+                this.fish.desire = { 
+                    x: Math.max(30, Math.min(this.canvas.width - 30, clickX)), 
+                    y: Math.max(30, Math.min(this.canvas.height - 30, clickY)) 
+                };
+                
+                this.fish.excited = true;
+                
+                // 💖 SISTEMA DE CORAZONES - AUMENTA DIVERSIÓN
+                this.launchHeartToFun(clickX, clickY);
+                
+                console.log(`👆 Click en (${clickX.toFixed(0)}, ${clickY.toFixed(0)}) - Pez viene hacia ti!`);
+            }
+            
+            // 💖 LANZAR CORAZÓN A DIVERSIÓN
+            launchHeartToFun(x, y) {
+                if (!this.hearts) {
+                    this.hearts = [];
+                }
+                
+                this.hearts.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: -2 - Math.random() * 2,
+                    life: 1.0,
+                    scale: 0.5 + Math.random() * 0.5
+                });
+                
+                // Aumentar diversión
+                if (this.needsSystem) {
+                    this.needsSystem.entertainFish(15);
+                }
+            }
             // 👆 FUNCIÓN handleCanvasClick() ELIMINADA - AHORA EN fish-system.js
             
             // launchHeartToFun() - ELIMINADO (ahora en needs-system.js)
