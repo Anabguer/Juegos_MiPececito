@@ -362,24 +362,48 @@ class NeedsSystem {
     }
 
     /**
-     * 🧹 LIMPIAR PEZ
+     * 🧹 LIMPIAR PEZ - SISTEMA COMPLETO
      */
     cleanFish() {
         if (this.game.gameState.stage === 'egg') return;
         
+        console.log('🧹 ¡INICIANDO LIMPIEZA COMPLETA!');
+        
         const config = this.getNeedsConfig();
         const dirtDecrease = config.dirt.decrease;
+        const wasReallyDirty = this.game.gameState.needs.dirt > 15;
         
+        // 🫧 DAR BURBUJAS SI ESTABA SUCIO
+        if (wasReallyDirty) {
+            this.game.gameState.bubbles += 3;
+            console.log(`🫧 +3 burbujas por limpiar cuando estaba sucio (suciedad previa: ${this.game.gameState.needs.dirt.toFixed(1)}%)`);
+            
+            // 🎆 EFECTO VISUAL DE BURBUJAS AL CONTADOR
+            if (this.game.createBubbleEffect) {
+                this.game.createBubbleEffect(3);
+            }
+        }
+        
+        // 🎯 REDUCIR SUCIEDAD
         this.game.gameState.needs.dirt = Math.max(0, this.game.gameState.needs.dirt - dirtDecrease);
+        
+        // 🐟 EFECTO EN EL PEZ
+        if (this.game.fish) { 
+            this.game.fish.happyBurst = 3.2; 
+            this.game.fish.spinKind = "clean"; 
+        }
+        
+        // 🫧 CREAR BURBUJAS DE LIMPIEZA
+        this.createCleaningBubbles();
+        
+        // 🔊 SONIDO DE LIMPIEZA
+        if (this.game.audioManager) {
+            this.game.audioManager.playSound('limpiar');
+        }
         
         // Mostrar mensaje
         if (this.game.showFishMessage) {
             this.game.showFishMessage('¡Me siento más limpio!', '#44ff44');
-        }
-        
-        // Reproducir sonido
-        if (this.game.audioManager) {
-            this.game.audioManager.playSound('limpiar');
         }
         
         // Actualizar UI
@@ -389,8 +413,77 @@ class NeedsSystem {
         console.log('🧹 PEZ LIMPIADO:', {
             stage: this.game.gameState.stage,
             dirtDecrease: dirtDecrease,
-            newDirt: this.game.gameState.needs.dirt.toFixed(1)
+            newDirt: this.game.gameState.needs.dirt.toFixed(1),
+            wasReallyDirty: wasReallyDirty
         });
+    }
+    
+    /**
+     * 🫧 CREAR BURBUJAS DE LIMPIEZA
+     */
+    createCleaningBubbles() {
+        // Inicializar array si no existe
+        if (!this.game.cleanBubbles) {
+            this.game.cleanBubbles = [];
+        }
+        
+        const W = this.game.canvas.width;
+        const H = this.game.canvas.height;
+        
+        // Crear ráfaga de burbujas
+        for (let i = 0; i < 50; i++) {
+            this.game.cleanBubbles.push({
+                x: 30 + Math.random() * (W - 60),
+                y: H * 0.8 + Math.random() * (H * 0.15),
+                vx: (Math.random() - 0.5) * 20,
+                vy: -Math.random() * 100 - 50,
+                life: 2.0 + Math.random() * 1.0,
+                size: 3 + Math.random() * 5,
+                alpha: 0.8 + Math.random() * 0.2
+            });
+        }
+        
+        console.log(`🫧 ${this.game.cleanBubbles.length} burbujas de limpieza creadas`);
+    }
+    
+    /**
+     * 🫧 ACTUALIZAR BURBUJAS DE LIMPIEZA
+     */
+    updateCleaningBubbles(deltaTime) {
+        if (!this.game.cleanBubbles) return;
+        
+        for (let i = this.game.cleanBubbles.length - 1; i >= 0; i--) {
+            const bubble = this.game.cleanBubbles[i];
+            
+            // Actualizar posición
+            bubble.x += bubble.vx * deltaTime;
+            bubble.y += bubble.vy * deltaTime;
+            bubble.life -= deltaTime;
+            
+            // Eliminar burbujas muertas
+            if (bubble.life <= 0) {
+                this.game.cleanBubbles.splice(i, 1);
+            }
+        }
+    }
+    
+    /**
+     * 🫧 DIBUJAR BURBUJAS DE LIMPIEZA
+     */
+    drawCleaningBubbles() {
+        if (!this.game.cleanBubbles || !this.game.ctx) return;
+        
+        this.game.ctx.save();
+        
+        for (const bubble of this.game.cleanBubbles) {
+            this.game.ctx.globalAlpha = bubble.alpha * bubble.life;
+            this.game.ctx.fillStyle = `hsl(${180 + Math.random() * 40}, 70%, 80%)`;
+            this.game.ctx.beginPath();
+            this.game.ctx.arc(bubble.x, bubble.y, bubble.size, 0, Math.PI * 2);
+            this.game.ctx.fill();
+        }
+        
+        this.game.ctx.restore();
     }
 
     /**
@@ -431,6 +524,7 @@ class NeedsSystem {
     updateAllNeeds(deltaTime) {
         this.updateHunger(deltaTime);
         this.updateCleaning(deltaTime);
+        this.updateCleaningBubbles(deltaTime);
         this.updateFun(deltaTime);
         this.updateCrisisFlags();
         this.updateNeedBars();
