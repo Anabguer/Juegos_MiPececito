@@ -293,15 +293,30 @@ class NeedsSystem {
     }
 
     /**
-     * 🍎 ALIMENTAR PEZ
+     * 🍎 ALIMENTAR PEZ - FUNCIÓN COMPLETA
      */
     feedFish() {
-        if (this.game.gameState.stage === 'egg') return;
+        if (!this.game.fish || this.game.gameState.stage === 'egg') return;
         
+        // Actualizar tiempo de última comida
+        this.game.fish.lastFeedTime = Date.now();
+        
+        // Ocultar burbuja de hambre
+        const hungerBubble = document.getElementById('hungerBubble');
+        if (hungerBubble) {
+            hungerBubble.style.display = 'none';
+        }
+        
+        // Reducir hambre usando configuración por etapa
         const config = this.getNeedsConfig();
         const hungerDecrease = config.hunger.decrease;
-        
         this.game.gameState.needs.hunger = Math.max(0, this.game.gameState.needs.hunger - hungerDecrease);
+        
+        // Efectos de alimentación
+        this.createFeedingEffects();
+        
+        // Aumentar felicidad
+        this.game.gameState.happiness = Math.min(100, this.game.gameState.happiness + 20);
         
         // Mostrar mensaje
         if (this.game.showFishMessage) {
@@ -320,8 +335,30 @@ class NeedsSystem {
         console.log('🍎 PEZ ALIMENTADO:', {
             stage: this.game.gameState.stage,
             hungerDecrease: hungerDecrease,
-            newHunger: this.game.gameState.needs.hunger.toFixed(1)
+            newHunger: this.game.gameState.needs.hunger.toFixed(1),
+            happiness: this.game.gameState.happiness
         });
+    }
+    
+    /**
+     * ✨ CREAR EFECTOS DE ALIMENTACIÓN
+     */
+    createFeedingEffects() {
+        // Crear partículas de comida cayendo
+        for (let i = 0; i < 8; i++) {
+            setTimeout(() => {
+                if (this.game.labels) {
+                    this.game.labels.push({
+                        x: this.game.fish.x + (Math.random() - 0.5) * 40,
+                        y: this.game.fish.y - 20,
+                        text: "¡Ñam!",
+                        a: 1,
+                        vy: -30,
+                        life: 1.5
+                    });
+                }
+            }, i * 100);
+        }
     }
 
     /**

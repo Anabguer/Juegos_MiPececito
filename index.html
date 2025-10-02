@@ -6455,8 +6455,8 @@
                 this.gameState.birthDate = Date.now();
                 this.gameState.ageInDays = 0;
                 
-                // 🍎 NACER CON HAMBRE MODERADA (ES UN BEBÉ)
-                this.gameState.needs.hunger = 60; // Bebé nace con hambre moderada (no en crisis)
+                // 🍎 NACER CON HAMBRE (ES UN BEBÉ)
+                this.gameState.needs.hunger = 80; // Bebé nace con hambre
                 this.gameState.needs.dirt = 0;    // Limpio al nacer
                 this.gameState.needs.fun = 95;    // Feliz al nacer
                 this.needsSystem.updateCrisisFlags(); // Activar flags
@@ -7060,61 +7060,11 @@
             
             // 🍽️ ALIMENTAR DESDE BURBUJA (MODO ORIGINAL)
             feedFish() {
-                if (!this.fish) return;
-                
-                // Actualizar tiempo de última comida
-                this.fish.lastFeedTime = Date.now();
-                
-                // Ocultar burbuja
-                const hungerBubble = document.getElementById('hungerBubble');
-                if (hungerBubble) {
-                    hungerBubble.style.display = 'none';
-                }
-                
-                // 🍎 REDUCIR HAMBRE (USAR SISTEMA DE NECESIDADES)
                 if (this.needsSystem) {
                     this.needsSystem.feedFish();
-                } else {
-                    // Fallback si no hay sistema de necesidades
-                    this.gameState.needs.hunger = Math.max(0, this.gameState.needs.hunger - 30);
-                    this.needsSystem.updateCrisisFlags();
-                    this.needsSystem.updateNeedBars();
-                }
-                
-                // Efectos de alimentación
-                this.createFeedingEffects();
-                
-                // Aumentar felicidad
-                this.gameState.happiness = Math.min(100, this.gameState.happiness + 20);
-                
-                console.log('🍽️ Pez alimentado - Hambre:', this.gameState.needs.hunger.toFixed(1), 'Felicidad:', this.gameState.happiness);
-            }
-            
-            createFeedingEffects() {
-                // Crear partículas de comida cayendo
-                for (let i = 0; i < 8; i++) {
-                    setTimeout(() => {
-                        this.createFoodParticle();
-                    }, i * 100);
                 }
             }
             
-            createFoodParticle() {
-                if (!this.fish) return;
-                
-                const particle = {
-                    x: this.fish.x + (Math.random() - 0.5) * 40,
-                    y: this.fish.y - 50,
-                    vy: 30 + Math.random() * 20,
-                    life: 2,
-                    maxLife: 2,
-                    size: 3 + Math.random() * 3
-                };
-                
-                // Añadir a array de partículas (DESACTIVADO - SISTEMA ANTIGUO)
-                // if (!this.foodParticles) this.foodParticles = [];
-                // this.foodParticles.push(particle);
-            }
             
             // 🍖 CREAR COMIDA CON POSICIONES ESTRATÉGICAS
             createFallingFood(foodNumber) {
