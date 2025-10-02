@@ -177,13 +177,20 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
 
   function pop(bubble) {
     if (!bubble.alive) return;
+    console.log('💥 EXPLOTANDO BURBUJA:', bubble);
     bubble.alive = false;
     bubble.el.style.transition = "transform 0.2s ease, opacity 0.2s ease";
     bubble.el.style.opacity = "0";
     bubble.el.style.transform = "scale(1.5)";
+    console.log('💥 ESTILOS APLICADOS:', {
+      transition: bubble.el.style.transition,
+      opacity: bubble.el.style.opacity,
+      transform: bubble.el.style.transform
+    });
     setTimeout(() => {
       if (bubble.el && bubble.el.parentNode) {
         bubble.el.parentNode.removeChild(bubble.el);
+        console.log('💥 BURBUJA ELIMINADA');
       }
     }, 200);
   }
