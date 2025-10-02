@@ -6687,43 +6687,7 @@
             
             // createFallingFood() - SISTEMA ANTIGUO ELIMINADO
             
-            drawFoodParticles() {
-                if (!this.foodParticles) return;
-                
-                // Actualizar y dibujar partículas
-                for (let i = this.foodParticles.length - 1; i >= 0; i--) {
-                    const particle = this.foodParticles[i];
-                    
-                    // Actualizar posición
-                    particle.y += particle.vy * (1/60); // Asumiendo 60fps
-                    particle.life -= 1/60;
-                    
-                    // Eliminar si expiró
-                    if (particle.life <= 0) {
-                        this.foodParticles.splice(i, 1);
-                        continue;
-                    }
-                    
-                    // Dibujar partícula de comida
-                    const alpha = particle.life / particle.maxLife;
-                    this.ctx.save();
-                    this.ctx.globalAlpha = alpha;
-                    
-                    // Color marrón/dorado para la comida
-                    this.ctx.fillStyle = '#D2691E';
-                    this.ctx.beginPath();
-                    this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    
-                    // Pequeño brillo
-                    this.ctx.fillStyle = '#F4A460';
-                    this.ctx.beginPath();
-                    this.ctx.arc(particle.x - 1, particle.y - 1, particle.size * 0.5, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    
-                    this.ctx.restore();
-                }
-            }
+            // drawFoodParticles() - SISTEMA ANTIGUO ELIMINADO
             
             // 🍖 DIBUJAR Y ACTUALIZAR COMIDA CAYENDO
             drawFallingFood() {
