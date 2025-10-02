@@ -338,6 +338,9 @@ console.log('🫧 SISTEMA DE NIVELES ACTIVADO: 20 perlas → nivel 2, 30 perlas 
       localStorage.setItem("bubbles_best", String(best));
     }
 
+    // 🎉 ACTUALIZAR DIVERSIÓN DEL PEZ PRINCIPAL
+    updateFishFun(score, level);
+
     // Modal de resultados
     resultsTitle.textContent = "¡Fin de partida!";
     resultsTitle.classList.remove("win");
@@ -394,5 +397,64 @@ console.log('🫧 SISTEMA DE NIVELES ACTIVADO: 20 perlas → nivel 2, 30 perlas 
   updateSoundButton();
 
   // Opcional: abrir overlay si venías de otro flujo
+  // 🎉 FUNCIÓN PARA ACTUALIZAR DIVERSIÓN DEL PEZ PRINCIPAL
+  function updateFishFun(score, level) {
+    try {
+      // Calcular diversión basada en puntuación y nivel
+      // Fórmula: 1 punto de diversión por cada 2 puntos de score + bonus por nivel
+      let funIncrease = Math.floor(score / 2);
+      
+      // Bonus por nivel alcanzado
+      const levelBonus = (level - 1) * 5; // +5 diversión por cada nivel extra
+      funIncrease += levelBonus;
+      
+      // Mínimo de diversión (aunque pierdas)
+      funIncrease = Math.max(3, funIncrease);
+      
+      // Máximo de diversión por partida
+      funIncrease = Math.min(30, funIncrease);
+      
+      console.log(`🎉 ACTUALIZANDO DIVERSIÓN DEL PEZ:`, {
+        score: score,
+        level: level,
+        funIncrease: funIncrease,
+        levelBonus: levelBonus
+      });
+      
+      // Intentar acceder al juego principal
+      if (window.parent && window.parent.game) {
+        const parentGame = window.parent.game;
+        
+        // Aumentar diversión del pez
+        const oldFun = parentGame.gameState.needs.fun;
+        parentGame.gameState.needs.fun = Math.min(100, parentGame.gameState.needs.fun + funIncrease);
+        
+        // Actualizar UI
+        parentGame.updateCrisisFlags();
+        parentGame.updateNeedBars();
+        parentGame.saveGame();
+        
+        console.log(`🎉 DIVERSIÓN ACTUALIZADA: ${oldFun}% → ${parentGame.gameState.needs.fun}% (+${funIncrease})`);
+        
+        // Mostrar mensaje de diversión
+        const messages = [
+          `¡Me divertí mucho! +${funIncrease} diversión`,
+          `¡Qué juego tan divertido! +${funIncrease} diversión`,
+          `¡Me encanta jugar contigo! +${funIncrease} diversión`,
+          `¡Eso fue genial! +${funIncrease} diversión`
+        ];
+        
+        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+        parentGame.showFishMessage(randomMessage, '#4CAF50');
+        
+      } else {
+        console.warn('⚠️ No se pudo acceder al juego principal para actualizar diversión');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error actualizando diversión del pez:', error);
+    }
+  }
+
   gameOverlay.style.display = "flex";
 })();
