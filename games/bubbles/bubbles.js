@@ -179,14 +179,20 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
     if (!bubble.alive) return;
     console.log('💥 EXPLOTANDO BURBUJA:', bubble);
     bubble.alive = false;
+    
+    // Capturar el translateY actual para mantener la posición
+    const rect = stageRect();
+    const currentTranslateY = bubble.y - (rect.height - bubble.size - 2);
+    
     bubble.el.style.transition = "transform 0.2s ease, opacity 0.2s ease";
     bubble.el.style.opacity = "0";
-    // Resetear translateY y solo aplicar scale
-    bubble.el.style.transform = "translateY(0) scale(1.5)";
+    // Mantener el translateY actual y aplicar scale
+    bubble.el.style.transform = `translateY(${currentTranslateY}px) scale(1.5)`;
     console.log('💥 ESTILOS APLICADOS:', {
       transition: bubble.el.style.transition,
       opacity: bubble.el.style.opacity,
-      transform: bubble.el.style.transform
+      transform: bubble.el.style.transform,
+      currentTranslateY: currentTranslateY
     });
     setTimeout(() => {
       if (bubble.el && bubble.el.parentNode) {
