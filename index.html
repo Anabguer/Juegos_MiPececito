@@ -681,44 +681,6 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
         
-        /* 🎮 ESTILOS ESPECÍFICOS PARA JUEGO BURBUJAS */
-        .bubble-btn.primary {
-            background: linear-gradient(135deg, #FFD700, #FFA500) !important;
-            border: 2px solid #FF8C00 !important;
-            border-radius: 20px !important;
-            padding: 10px 25px !important;
-            font-size: 18px !important;
-            font-weight: bold !important;
-            color: #8B4513 !important;
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
-            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
-            cursor: pointer !important;
-            transition: all 0.3s ease !important;
-            text-transform: uppercase !important;
-            letter-spacing: 1px !important;
-            width: 60% !important;
-            max-width: 200px !important;
-            margin: 0 auto !important;
-            display: block !important;
-        }
-        
-        .bubble-btn.primary:hover {
-            transform: translateY(-3px) scale(1.08) !important;
-            box-shadow: 0 12px 25px rgba(255, 215, 0, 0.7) !important;
-            border-radius: 20px !important; /* Mantener esquinas redondeadas en hover */
-        }
-        
-        /* 🎯 ÁREA DE JUEGO MÁS GRANDE */
-        #bubbleStage {
-            width: 100% !important;
-            height: 300px !important;
-            position: relative !important;
-            overflow: hidden !important;
-            background: linear-gradient(180deg, #4fc3f7 0%, #29b6f6 30%, #0288d1 70%, #0277bd 100%) !important;
-            border-radius: 15px !important;
-            border: 2px solid rgba(255, 255, 255, 0.3) !important;
-            z-index: 1 !important;
-        }
         
         .game-locked-overlay {
             position: absolute;
@@ -3744,100 +3706,7 @@
             margin-bottom: 30px;
         }
 
-        /* 🫧 Burbujas - Estilos del contenedor */
-        .bubble-game-container {
-            background: linear-gradient(180deg, 
-                rgba(129, 212, 250, 0.25) 0%,
-                rgba(79, 195, 247, 0.2) 30%,
-                rgba(41, 182, 246, 0.15) 70%,
-                rgba(13, 71, 161, 0.2) 100%);
-            backdrop-filter: blur(30px) saturate(200%);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 28px;
-            width: 95vw;
-            max-width: 500px;
-            max-height: calc(100vh - 80px);
-            height: 80vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 25px 60px rgba(0,0,0,.6);
-            overflow: hidden;
-            position: relative;
-            z-index: 1;
-            margin-top: 30px;
-            margin-bottom: 30px;
-        }
 
-        /* 🫧 Burbujas - Estilos de la cabecera (igual que Conecta 3) */
-        .bubble-game-header {
-            background: linear-gradient(135deg, 
-                rgba(79, 195, 247, 0.3) 0%, 
-                rgba(129, 212, 250, 0.2) 100%);
-            padding: 15px 20px;
-            display: flex;
-            flex-direction: column;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.25);
-            gap: 8px;
-        }
-
-        .bubble-game-header .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .bubble-game-header .header-bottom {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .bubble-game-header .game-stats {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .bubble-game-header .game-title {
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .bubble-game-header .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .bubble-game-header .best-score-display {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 4px 8px;
-            font-size: 12px;
-            color: #fff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        .bubble-game-header .best-label {
-            opacity: 0.8;
-            font-size: 11px;
-        }
-
-        .bubble-game-header .best-value {
-            font-weight: bold;
-            color: #FFD700;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        }
     </style>
 </head>
 <body>
@@ -10519,14 +10388,8 @@ Comida premium y de cumpleaños
                         window.audioManager.playSound('achievement');
                     }
                     
-                    // Mensaje flotante - CENTRADO EN EL JUEGO DE BURBUJAS
-                    const gameModal = document.querySelector('.bubble-game-container');
-                    if (gameModal) {
-                        const gameRect = gameModal.getBoundingClientRect();
-                        const gameCenterX = gameRect.left + gameRect.width / 2;
-                        const gameCenterY = gameRect.top + gameRect.height / 2;
-                        // Solo mostrar efecto de estrellas, sin mensaje
-                    }
+                    // Mensaje flotante - CENTRADO EN EL CANVAS (ya no hay juego de burbujas integrado)
+                    // Los efectos de recompensa se muestran en el centro del canvas principal
                 }
             }
             
