@@ -1,5 +1,6 @@
 console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA CON NIVELES');
-console.log('🫧 TIMESTAMP: v=20250127v');
+console.log('🫧 TIMESTAMP: v=20250127v - FORZANDO RECARGA');
+console.log('🫧 SISTEMA DE NIVELES ACTIVADO: 20 perlas → nivel 2, 30 perlas → nivel 3');
 
 (function () {
   // ---------- ELEMENTOS ----------
