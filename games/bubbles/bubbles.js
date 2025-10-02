@@ -178,14 +178,14 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
   function pop(bubble) {
     if (!bubble.alive) return;
     bubble.alive = false;
-    bubble.el.style.transition = "transform 0.15s ease, opacity 0.15s ease";
+    bubble.el.style.transition = "transform 0.2s ease, opacity 0.2s ease";
     bubble.el.style.opacity = "0";
-    bubble.el.style.transform = "scale(1.25) translateY(-6px)";
+    bubble.el.style.transform = "scale(1.5)";
     setTimeout(() => {
       if (bubble.el && bubble.el.parentNode) {
         bubble.el.parentNode.removeChild(bubble.el);
       }
-    }, 160);
+    }, 200);
   }
 
   function clearBubbles() {
