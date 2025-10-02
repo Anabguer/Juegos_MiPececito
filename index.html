@@ -6959,7 +6959,7 @@
                 const x = event.clientX - rect.left;
                 const y = event.clientY - rect.top;
                 
-                // 🚨 GUARDACOSTAS: Solo ignorar si está en crisis de suciedad PERO NO hambre ni aburrimiento
+                // 🚨 GUARDACOSTAS: ELIMINADO - El pez SIEMPRE viene al dedo
                 console.log('🔍 DEBUG CRISIS:', {
                     hunger: this.gameState.crisis.hunger,
                     dirt: this.gameState.crisis.dirt,
@@ -6967,11 +6967,8 @@
                     fun: this.gameState.needs.fun
                 });
                 
-                // Solo ignorar si está sucio PERO no tiene hambre ni aburrimiento
-                if (this.gameState.crisis.dirt && !this.gameState.crisis.hunger && !this.gameState.crisis.bored) {
-                    console.log('😔 Click ignorado - Pez solo sucio (sin hambre ni aburrimiento)');
-                    return;
-                }
+                // ✅ SIMPLIFICADO: El pez siempre viene al dedo, sin importar su estado
+                console.log('🐠 Pez viene al dedo - Sin restricciones de crisis');
                 
                 // 👆 DEDO CON COORDENADAS CSS Y TURBO
                 const padLeft = 60;
