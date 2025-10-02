@@ -739,7 +739,6 @@ class FishSystem {
             this.game.ctx.restore();
         }
     }
-}
 
     /**
      * 🐠 CREAR PEZ

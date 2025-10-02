@@ -6601,67 +6601,8 @@
             // drawFallingFood() - SISTEMA ANTIGUO ELIMINADO
             
             // findAndChaseClosestFood() - SISTEMA ANTIGUO ELIMINADO
-                if (!this.fallingFood || this.fallingFood.length === 0) return;
-                
-                const fish = this.fish;
-                let closestFood = null;
-                let closestDistance = Infinity;
-                
-                // Encontrar la comida más cercana
-                for (const food of this.fallingFood) {
-                    if (food.eaten) continue;
-                    
-                    const distance = Math.sqrt(
-                        Math.pow(fish.x - food.x, 2) + 
-                        Math.pow(fish.y - food.y, 2)
-                    );
-                    
-                    if (distance < closestDistance) {
-                        closestDistance = distance;
-                        closestFood = food;
-                    }
-                }
-                
-                // Si encontramos comida, perseguirla
-                if (closestFood) {
-                    this.makeFishChaseFood(closestFood);
-                }
-            }
             
-            // 🏃 HACER QUE EL PEZ PERSIGA LA COMIDA (SIN GIROS LOCOS)
-            makeFishChaseFood(food) {
-                const fish = this.fish;
-                
-                // Calcular dirección hacia la comida
-                const dx = food.x - fish.x;
-                const dy = food.y - fish.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance > 0) {
-                    // Velocidad de persecución más natural
-                    const chaseSpeed = fish.chaseSpeed || (fish.speed * 1.5); // 50% más rápido
-                    
-                    // Normalizar y aplicar velocidad
-                    fish.vx = (dx / distance) * chaseSpeed;
-                    fish.vy = (dy / distance) * chaseSpeed;
-                    
-                    // SOLO cambiar orientación si hay un cambio SIGNIFICATIVO
-                    const significantChange = Math.abs(dx) > 20; // Solo si está a más de 20px
-                    if (significantChange) {
-                        const newDirection = dx > 0 ? 1 : -1;
-                        // Solo cambiar si es realmente diferente
-                        if (newDirection !== fish.direction) {
-                            fish.direction = newDirection;
-                            console.log(`🔄 Pez cambió orientación: ${fish.direction === 1 ? 'DERECHA' : 'IZQUIERDA'}`);
-                        }
-                    }
-                    
-                    // Log menos spam
-                    if (Math.random() < 0.1) { // Solo 10% de las veces
-                        console.log(`🏃 Persiguiendo comida: ${distance.toFixed(0)}px`);
-                    }
-                }
-            }
+            // makeFishChaseFood() - SISTEMA ANTIGUO ELIMINADO
             
             // ✨ EFECTO AL COMER
             createEatingEffect(x, y) {
