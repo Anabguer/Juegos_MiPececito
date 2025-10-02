@@ -400,9 +400,9 @@ class NeedsSystem {
             this.game.fish.spinKind = "clean"; 
         }
         
-        // 🫧 CREAR BURBUJAS INMEDIATAMENTE (RÁFAGA INICIAL)
-        this.emitCleanBubblesBurst();
-        console.log(`🫧 RÁFAGA INICIAL: ${this.game.cleanBubbles.length} burbujas creadas`);
+        // 🫧 CREAR BURBUJAS QUE SUBEN DESDE ABAJO
+        this.emitCleanBubbles();
+        console.log(`🫧 BURBUJAS DE LIMPIEZA: ${this.game.cleanBubbles.length} burbujas creadas`);
         
         // 🔊 SONIDO SINCRONIZADO
         if (this.game.audioManager) {
@@ -461,6 +461,50 @@ class NeedsSystem {
     }
 
     /**
+     * 🔧 FUNCIÓN HELPER PARA LIMITAR VALORES
+     */
+    clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    /**
+     * 🫧 CREAR BURBUJAS QUE SUBEN DESDE ABAJO
+     */
+    emitCleanBubbles() {
+        const W = this.game.canvas.width;
+        const H = this.game.canvas.height;
+        const vents = Math.max(16, Math.floor(W / 24));
+        const perVent = 2;
+
+        for (let i = 0; i < vents; i++) {
+            const baseX = (i + 0.5) * (W / vents) + (Math.random() - 0.5) * 8;
+
+            for (let k = 0; k < perVent; k++) {
+                const vy = 260 + Math.random() * 120;     // velocidad vertical (CSS px/s)
+                const y0 = H - 1 + Math.random() * 0.5;   // nacen pegadas al fondo
+                const dur = (H + 24) / vy;                 // tiempo exacto hasta salir por arriba
+                const x0 = this.clamp(baseX + (Math.random() - 0.5) * 6, 2, W - 2);
+
+                this.game.cleanBubbles.push({
+                    // guardo origen (x0,y0) y movimiento paramétrico por tiempo
+                    x: x0, y: y0,
+                    x0, y0, dur, t: 0,
+                    r: 1.5 + Math.random() * 2.8,
+                    wobble: Math.random() * Math.PI * 2,
+                    wobSpd: 1.5 + Math.random() * 1.2,
+                    wobAmp: 6 + Math.random() * 10,
+                    from: 'clean'
+                });
+            }
+        }
+
+        // Límite de memoria
+        if (this.game.cleanBubbles.length > 1400) {
+            this.game.cleanBubbles.splice(0, this.game.cleanBubbles.length - 1400);
+        }
+    }
+
+    /**
      * 🫧 CREAR BURBUJAS DE LIMPIEZA
      */
     createCleaningBubbles() {
@@ -497,13 +541,16 @@ class NeedsSystem {
         for (let i = this.game.cleanBubbles.length - 1; i >= 0; i--) {
             const bubble = this.game.cleanBubbles[i];
             
-            // Actualizar posición
-            bubble.x += bubble.vx * deltaTime;
-            bubble.y += bubble.vy * deltaTime;
-            bubble.life -= deltaTime;
+            // Actualizar tiempo
+            bubble.t += deltaTime;
             
-            // Eliminar burbujas muertas
-            if (bubble.life <= 0) {
+            // Calcular posición basada en tiempo
+            const progress = bubble.t / bubble.dur;
+            bubble.x = bubble.x0 + Math.sin(bubble.wobble + bubble.t * bubble.wobSpd) * bubble.wobAmp;
+            bubble.y = bubble.y0 - (bubble.y0 + 24) * progress;
+            
+            // Eliminar si salió por arriba
+            if (bubble.y < -24) {
                 this.game.cleanBubbles.splice(i, 1);
             }
         }
