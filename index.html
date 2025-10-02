@@ -12133,8 +12133,8 @@ Comida premium y de cumpleaños
                         targetV = {vx: Math.sin(fish.swimPhase) * 5, vy: Math.cos(fish.swimPhase * 1.2) * 2};
                     }
                 }
-                // Seguir dedo (SOLO si está aburrido Y no tiene hambre/suciedad crítica)
-                else if (fish.desire && inBored && !inHunger && !inDirt) {
+                // Seguir dedo (SIEMPRE que haya dedo, sin restricciones)
+                else if (fish.desire) {
                     const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y, fish.maxSpeed * 0.7);
                     const t = this.clamp(s.dist / 120, 0.25, 1);
                     targetV = {vx: s.vx * t, vy: s.vy * t};
