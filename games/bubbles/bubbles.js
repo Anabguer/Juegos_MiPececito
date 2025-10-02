@@ -1,480 +1,266 @@
-/**
- * 🫧 JUEGO DE BURBUJAS - Mi Pececito
- * Versión modular usando la plantilla base
- */
+(function () {
+  // ---------- ELEMENTOS ----------
+  const playBtn = document.getElementById("playButton");
+  const gameStage = document.getElementById("gameStage");
+  const gameOverlay = document.getElementById("gameOverlay");
+  const closeGame = document.getElementById("closeGame");
 
-console.log('🫧 SCRIPT BURBUJAS CARGADO - VERSIÓN CON LOGS');
+  const scoreEl = document.getElementById("gameScore");
+  const bestEl = document.getElementById("bestScore");
+  const levelEl = document.getElementById("gameLevel");
 
-class BubblesGame {
-    constructor() {
-        this.gameState = {
-            isPlaying: false,
-            score: 0,
-            level: 1,
-            bestScore: 0,
-            stars: 0,
-            bubbles: [],
-            bubblesCaught: 0, // Contador de burbujas atrapadas
-            bubblesNeeded: 10, // Burbujas necesarias para pasar de nivel
-            animationId: null
-        };
+  const resultsModal = document.getElementById("resultsModal");
+  const closeResults = document.getElementById("closeResults");
+  const continueButton = document.getElementById("continueButton");
 
-        this.config = {
-            bubbleSpawnRate: 1500, // Cada 1.5 segundos
-            bubbleSpeed: 8, // Un poco más rápido
-            bubbleSize: { min: 30, max: 60 }, // Más pequeñas
-            goodBubbleChance: 0.7, // 70% de burbujas buenas
-            levelMultiplier: 1.02, // Muy poca aceleración
-            maxLevel: 10
-        };
+  const resultsTitle = document.getElementById("resultsTitle");
+  const finalLevel = document.getElementById("finalLevel");
+  const finalScore = document.getElementById("finalScore");
+  const finalBest = document.getElementById("finalBest");
+  const finalStars = document.getElementById("finalStars");
+  const motivationMessage = document.getElementById("motivationMessage");
+  const rewardReasons = document.getElementById("rewardReasons");
 
-        this.elements = {};
-        this.init();
+  // ---------- ESTADO ----------
+  let playing = false;
+  let spawnTimer = null;
+  let rafId = null;
+  let bubbles = [];
+  let score = 0;
+  let best = Number(localStorage.getItem("bubbles_best") || "0");
+  let level = 1;
+
+  bestEl.textContent = best;
+
+  // Emojis: buenas (clicar) / malas (no tocar)
+  const GOOD_EMOJIS = ["🐟", "🐠", "🐚", "🪸", "⭐"];
+  const BAD_EMOJIS  = ["💀", "🦈", "⚠️", "🧨", "🪝"];
+
+  // Config básica (ajusta a gusto)
+  const CONFIG = {
+    spawnEveryMs: 650,        // cada ~0.65s aparece una nueva
+    speedMin: 90,             // px/s
+    speedMax: 180,            // px/s
+    sizeMin: 38,              // px
+    sizeMax: 64,              // px
+    badProb: 0.25,            // 25% malas
+    scorePerGood: 1,          // +1 por buena
+  };
+
+  // ---------- UTILIDADES ----------
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const choice = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  function stageRect() {
+    return gameStage.getBoundingClientRect();
+  }
+
+  // ---------- BUBBLES ----------
+  function spawnBubble() {
+    if (!playing) return;
+
+    const rect = stageRect();
+    if (!rect || rect.height < 10) {
+      // Si el stage no tiene altura aún, reintenta en breve
+      setTimeout(spawnBubble, 100);
+      return;
     }
 
-    init() {
-        this.getElements();
-        this.setupEventListeners();
-        this.loadBestScore();
-        this.updateUI();
-        
-        // El botón de cerrar siempre visible y funcional
-        
-        console.log('🫧 Juego de burbujas inicializado');
-    }
+    const isBad = Math.random() < CONFIG.badProb;
+    const size = rand(CONFIG.sizeMin, CONFIG.sizeMax);
+    const x = rand(0, Math.max(0, rect.width - size));
+    const y = rect.height - size - 2; // un pelín por encima del borde
+    const speed = rand(CONFIG.speedMin, CONFIG.speedMax); // px/s
 
-    getElements() {
-        this.elements = {
-            // Contenedores
-            gameOverlay: document.getElementById('gameOverlay'),
-            gameContainer: document.getElementById('gameContainer'),
-            gameStage: document.getElementById('gameStage'),
-            
-            // UI
-            gameTitle: document.getElementById('gameTitle'),
-            gameLevel: document.getElementById('gameLevel'),
-            gameScore: document.getElementById('gameScore'),
-            bestScore: document.getElementById('bestScore'),
-            progressFill: document.getElementById('progressFill'),
-            playButton: document.getElementById('playButton'),
-            
-            // Controles
-            soundToggle: document.getElementById('soundToggle'),
-            closeGame: document.getElementById('closeGame'),
-            
-            // Modal de resultados
-            resultsModal: document.getElementById('resultsModal'),
-            closeResults: document.getElementById('closeResults'),
-            resultsTitle: document.getElementById('resultsTitle'),
-            motivationMessage: document.getElementById('motivationMessage'),
-            finalLevel: document.getElementById('finalLevel'),
-            finalScore: document.getElementById('finalScore'),
-            finalBest: document.getElementById('finalBest'),
-            finalStars: document.getElementById('finalStars'),
-            rewardReasons: document.getElementById('rewardReasons'),
-            continueButton: document.getElementById('continueButton')
-        };
-    }
+    // DOM
+    const el = document.createElement("div");
+    el.className = `game-bubble ${isBad ? "bad" : "good"}`;
+    el.style.width = `${size}px`;
+    el.style.height = `${size}px`;
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    el.style.willChange = "transform";
 
-    setupEventListeners() {
-        // Botón jugar
-        this.elements.playButton.addEventListener('click', () => this.startGame());
-        
-        // Botón cerrar juego
-        this.elements.closeGame.addEventListener('click', () => this.closeGame());
-        
-        // Botón sonido
-        this.elements.soundToggle.addEventListener('click', () => this.toggleSound());
-        
-        // Modal de resultados
-        this.elements.closeResults.addEventListener('click', () => this.closeResults());
-        this.elements.continueButton.addEventListener('click', () => this.closeResults());
-        
-        // Click en burbujas
-        this.elements.gameStage.addEventListener('click', (e) => this.handleBubbleClick(e));
-    }
+    const emoji = document.createElement("div");
+    emoji.className = "bubble-emoji";
+    emoji.textContent = isBad ? choice(BAD_EMOJIS) : choice(GOOD_EMOJIS);
+    el.appendChild(emoji);
 
-    loadBestScore() {
-        const saved = localStorage.getItem('bubblesBestScore');
-        if (saved) {
-            this.gameState.bestScore = parseInt(saved);
-        }
-    }
+    gameStage.appendChild(el);
 
-    saveBestScore() {
-        if (this.gameState.score > this.gameState.bestScore) {
-            this.gameState.bestScore = this.gameState.score;
-            localStorage.setItem('bubblesBestScore', this.gameState.bestScore.toString());
-        }
-    }
+    const bubble = {
+      el,
+      isBad,
+      x,
+      y,
+      size,
+      speed,   // px/s hacia arriba
+      alive: true,
+    };
 
-    startGame() {
-        console.log('🫧 Iniciando juego de burbujas...');
-        console.log('🫧 CONFIGURACIÓN:', {
-            bubbleSpeed: this.config.bubbleSpeed,
-            bubbleSpawnRate: this.config.bubbleSpawnRate,
-            bubbleSize: this.config.bubbleSize,
-            levelMultiplier: this.config.levelMultiplier
-        });
-        
-        this.gameState.isPlaying = true;
-        this.gameState.score = 0;
-        this.gameState.level = 1;
-        this.gameState.stars = 0;
-        this.gameState.bubbles = [];
-        this.gameState.bubblesCaught = 0;
-        this.gameState.bubblesNeeded = 10;
-        
-        this.elements.playButton.textContent = 'JUGANDO...';
-        this.elements.playButton.disabled = true;
-        
-        this.updateUI();
-        this.startBubbleSpawn();
-        this.gameLoop();
-        
-        // Reproducir sonido de inicio
-        this.playSound('jugar');
-    }
+    // Click handler
+    el.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      if (!bubble.alive || !playing) return;
 
-    startBubbleSpawn() {
-        const spawnBubble = () => {
-            if (this.gameState.isPlaying) {
-                this.createBubble();
-                const nextSpawn = this.config.bubbleSpawnRate / (this.gameState.level * this.config.levelMultiplier);
-                setTimeout(spawnBubble, Math.max(500, nextSpawn));
-            }
-        };
-        
-        spawnBubble();
-    }
+      if (bubble.isBad) {
+        // clicaste una mala → pierdes
+        lose("Has tocado una burbuja peligrosa.");
+      } else {
+        // buena → sumas y desaparece
+        score += CONFIG.scorePerGood;
+        scoreEl.textContent = score;
+        pop(bubble);
+      }
+    });
 
-    createBubble() {
-        const stageRect = this.elements.gameStage.getBoundingClientRect();
-        const isGood = Math.random() < this.config.goodBubbleChance;
-        const size = this.config.bubbleSize.min + Math.random() * (this.config.bubbleSize.max - this.config.bubbleSize.min);
-        
-        const bubble = {
-            id: Date.now() + Math.random(),
-            x: Math.random() * (stageRect.width - size),
-            y: stageRect.height - size,
-            size: size,
-            isGood: isGood,
-            speed: this.config.bubbleSpeed + Math.random() * 2, // Muy poca variación
-            drift: (Math.random() - 0.5) * 3, // Muy poca deriva
-            vx: (Math.random() - 0.5) * 0.2, // Muy poco movimiento horizontal
-            vy: -this.config.bubbleSpeed - Math.random() * 2, // MUY lento
-            element: null
-        };
+    bubbles.push(bubble);
+  }
 
-        console.log(`🫧 BURBUJA CREADA:`, {
-            speed: bubble.speed,
-            vy: bubble.vy,
-            vx: bubble.vx,
-            drift: bubble.drift,
-            size: bubble.size,
-            isGood: bubble.isGood
-        });
+  function pop(bubble) {
+    if (!bubble.alive) return;
+    bubble.alive = false;
+    bubble.el.style.transition = "transform 0.15s ease, opacity 0.15s ease";
+    bubble.el.style.opacity = "0";
+    bubble.el.style.transform = "scale(1.25) translateY(-6px)";
+    setTimeout(() => {
+      if (bubble.el && bubble.el.parentNode) {
+        bubble.el.parentNode.removeChild(bubble.el);
+      }
+    }, 160);
+  }
 
-        // Crear elemento visual
-        const bubbleEl = document.createElement('div');
-        bubbleEl.className = `game-bubble ${isGood ? 'good' : 'bad'}`;
-        bubbleEl.style.cssText = `
-            width: ${size}px;
-            height: ${size}px;
-            left: ${bubble.x}px;
-            top: ${bubble.y}px;
-            z-index: 999999;
-            pointer-events: auto;
-            opacity: 1;
-        `;
+  function clearBubbles() {
+    bubbles.forEach(b => {
+      if (b.el && b.el.parentNode) b.el.parentNode.removeChild(b.el);
+    });
+    bubbles = [];
+  }
 
-        // Emoji de la burbuja
-        const emoji = document.createElement('div');
-        emoji.className = 'bubble-emoji';
-        emoji.textContent = isGood ? 
-            ['🐟', '🐠', '🐚', '🪸', '⭐'][Math.floor(Math.random() * 5)] :
-            ['💀', '🦈', '⚠️', '🧨', '🪝'][Math.floor(Math.random() * 5)];
-        
-        bubbleEl.appendChild(emoji);
-        bubble.element = bubbleEl;
-        this.elements.gameStage.appendChild(bubbleEl);
-        this.gameState.bubbles.push(bubble);
+  // ---------- GAME LOOP ----------
+  let lastTs = 0;
+  function loop(ts) {
+    if (!playing) return;
+    if (!lastTs) lastTs = ts;
+    const dt = (ts - lastTs) / 1000; // segundos
+    lastTs = ts;
 
-        console.log(`🫧 Burbuja creada: ${isGood ? 'buena' : 'mala'}, tamaño: ${size}px`);
-    }
+    const rect = stageRect();
+    const topLimit = -80; // cuando y < esto, consideramos "salió por arriba"
 
-    gameLoop() {
-        if (!this.gameState.isPlaying) return;
+    // mover
+    for (let i = 0; i < bubbles.length; i++) {
+      const b = bubbles[i];
+      if (!b.alive) continue;
+      b.y -= b.speed * dt; // subir
 
-        // Mover burbujas
-        this.gameState.bubbles.forEach(bubble => {
-            this.updateBubble(bubble);
-        });
+      // aplicar transform
+      b.el.style.transform = `translateY(${b.y - (rect.height - b.size - 2)}px)`;
 
-        // Verificar fin de nivel (por burbujas atrapadas)
-        if (this.gameState.bubblesCaught >= this.gameState.bubblesNeeded) {
-            this.completeLevel();
-            return;
-        }
-
-        this.gameState.animationId = requestAnimationFrame(() => this.gameLoop());
-    }
-
-    updateBubble(bubble) {
-        if (!bubble.element) return;
-
-        const stageRect = this.elements.gameStage.getBoundingClientRect();
-        
-        // Log de movimiento cada 30 frames (aproximadamente cada 0.5 segundos)
-        if (Math.random() < 0.02) {
-            console.log(`🫧 MOVIMIENTO BURBUJA:`, {
-                id: bubble.id,
-                x: bubble.x.toFixed(1),
-                y: bubble.y.toFixed(1),
-                vx: bubble.vx.toFixed(3),
-                vy: bubble.vy.toFixed(3),
-                drift: bubble.drift.toFixed(3)
-            });
-        }
-        
-        // Actualizar posición
-        bubble.x += bubble.vx;
-        bubble.y += bubble.vy;
-        
-        // Aplicar deriva
-        bubble.x += bubble.drift * 0.01;
-        
-        // Limitar X para que no se salga de los lados
-        if (bubble.x < 0) {
-            bubble.x = 0;
-            bubble.vx *= -0.9;
-        }
-        if (bubble.x + bubble.size > stageRect.width) {
-            bubble.x = stageRect.width - bubble.size;
-            bubble.vx *= -0.9;
-        }
-        
-        // Limitar Y - Solo por abajo (rebotar), arriba = perder si es buena
-        if (bubble.y + bubble.size > stageRect.height) {
-            bubble.y = stageRect.height - bubble.size;
-            bubble.vy *= -0.9;
-        }
-        
-        // Si llega arriba, perder si es buena
-        if (bubble.y < 0) {
-            if (bubble.isGood) {
-                this.endGame(false, '¡Dejaste escapar una buena!');
-                return;
-            } else {
-                this.removeBubble(bubble);
-                return;
-            }
-        }
-        
-        // Actualizar posición visual
-        bubble.element.style.left = `${bubble.x}px`;
-        bubble.element.style.top = `${bubble.y}px`;
-    }
-
-    handleBubbleClick(e) {
-        if (!this.gameState.isPlaying) return;
-
-        const bubble = this.gameState.bubbles.find(b => 
-            b.element && b.element.contains(e.target)
-        );
-
-        if (bubble) {
-            this.clickBubble(bubble);
-        }
-    }
-
-    clickBubble(bubble) {
-        if (bubble.isGood) {
-            this.gameState.score += 10 * this.gameState.level;
-            this.gameState.bubblesCaught++;
-            this.playSound('acierto');
-            console.log(`🫧 Burbuja buena clickeada! (${this.gameState.bubblesCaught}/${this.gameState.bubblesNeeded})`);
+      // ¿se escapó por arriba?
+      if (b.y <= topLimit) {
+        if (!b.isBad) {
+          // se escapó una buena → pierdes
+          lose("¡Se escapó una burbuja buena!");
+          return; // paramos el loop al perder
         } else {
-            this.endGame(false, '¡Tocaste una mala!');
-            return;
+          // mala que se va por arriba: simplemente desaparece
+          pop(b);
         }
-
-        this.removeBubble(bubble);
-        this.updateUI();
+      }
     }
 
-    removeBubble(bubble) {
-        if (bubble.element) {
-            bubble.element.remove();
-        }
-        const index = this.gameState.bubbles.indexOf(bubble);
-        if (index > -1) {
-            this.gameState.bubbles.splice(index, 1);
-        }
+    // limpiar muertas del array
+    bubbles = bubbles.filter(b => b.alive);
+
+    rafId = requestAnimationFrame(loop);
+  }
+
+  // ---------- CONTROL ----------
+  function startGame() {
+    if (playing) return; // evitar dobles inicios
+    playing = true;
+    score = 0;
+    scoreEl.textContent = score;
+    levelEl.textContent = `NIVEL ${level}`;
+    lastTs = 0;
+
+    clearBubbles();
+
+    // Spawner independiente del loop de animación
+    spawnBubble();
+    spawnTimer = setInterval(spawnBubble, CONFIG.spawnEveryMs);
+
+    // Animación
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function stopGame() {
+    playing = false;
+    if (spawnTimer) {
+      clearInterval(spawnTimer);
+      spawnTimer = null;
+    }
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  }
+
+  function lose(reason) {
+    stopGame();
+
+    // actualizar récord
+    if (score > best) {
+      best = score;
+      localStorage.setItem("bubbles_best", String(best));
     }
 
-    completeLevel() {
-        console.log('🫧 Nivel completado!');
-        
-        this.gameState.level++;
-        this.gameState.stars++;
-        this.gameState.bubblesCaught = 0;
-        this.gameState.bubblesNeeded = 10 + (this.gameState.level * 2); // Más burbujas por nivel
-        
-        if (this.gameState.level > this.config.maxLevel) {
-            this.endGame(true, '¡Has completado todos los niveles!');
-        } else {
-            this.updateUI();
-            this.playSound('levelComplete');
-        }
-    }
+    // Modal de resultados
+    resultsTitle.textContent = "¡Fin de partida!";
+    resultsTitle.classList.remove("win");
+    resultsTitle.classList.add("lose");
+    finalLevel.textContent = String(level);
+    finalScore.textContent = String(score);
+    finalBest.textContent = String(best);
+    finalStars.textContent = String(Math.max(0, Math.floor(score / 5)));
+    motivationMessage.textContent = "¡Sigue intentándolo! Cada partida te acerca más a la victoria 🎯";
+    rewardReasons.textContent = `Motivo: ${reason}`;
 
-    endGame(won, reason) {
-        console.log(`🫧 Fin del juego: ${won ? 'Victoria' : 'Derrota'} - ${reason}`);
-        
-        this.gameState.isPlaying = false;
-        
-        if (this.gameState.animationId) {
-            cancelAnimationFrame(this.gameState.animationId);
-        }
-        
-        // Limpiar burbujas
-        this.gameState.bubbles.forEach(bubble => this.removeBubble(bubble));
-        
-        // Guardar mejor puntuación
-        this.saveBestScore();
-        
-        // Calcular estrellas ganadas
-        const starsWon = won ? this.gameState.stars : Math.floor(this.gameState.stars / 2);
-        
-        // Mostrar resultados
-        this.showResults(won, reason, starsWon);
-        
-        // Reproducir sonido
-        this.playSound(won ? 'levelComplete' : 'fail');
-    }
+    bestEl.textContent = best;
 
-    showResults(won, reason, starsWon) {
-        const title = this.elements.resultsTitle;
-        const motivation = this.elements.motivationMessage;
-        
-        if (won) {
-            title.textContent = '¡Perfecto! 🎉';
-            title.className = 'results-title win';
-            motivation.textContent = '¡Increíble! Has dominado este nivel 🌟';
-        } else {
-            title.textContent = '¡Fin de partida! 💔';
-            title.className = 'results-title lose';
-            motivation.textContent = '¡Sigue intentándolo! Cada partida te acerca más a la victoria 🎯';
-        }
-        
-        this.elements.finalLevel.textContent = this.gameState.level;
-        this.elements.finalScore.textContent = this.gameState.score;
-        this.elements.finalBest.textContent = this.gameState.bestScore;
-        this.elements.finalStars.textContent = starsWon;
-        
-        if (reason) {
-            this.elements.rewardReasons.textContent = reason;
-        }
+    resultsModal.style.display = "flex";
+  }
 
-        this.elements.resultsModal.style.display = 'flex';
-    }
+  function closeResultsModal() {
+    resultsModal.style.display = "none";
+    // Limpieza visual de burbujas por si quedó alguna
+    clearBubbles();
+  }
 
-    closeResults() {
-        this.elements.resultsModal.style.display = 'none';
-        this.elements.playButton.textContent = 'JUGAR';
-        this.elements.playButton.disabled = false;
-        this.updateUI();
-    }
+  // ---------- EVENTOS UI ----------
+  playBtn?.addEventListener("click", () => {
+    closeResultsModal();
+    startGame();
+  });
 
-    closeGame() {
-        console.log('🔴 BOTÓN X DEL JUEGO CLICKEADO');
-        
-        if (this.gameState.isPlaying) {
-            this.endGame(false, 'Juego cancelado');
-        }
-        
-        // Cerrar directamente sin comunicación compleja
-        if (window.parent !== window) {
-            console.log('🔴 CERRANDO DIRECTAMENTE...');
-            try {
-                const overlay = window.parent.document.getElementById('bubblesGameOverlay');
-                if (overlay) {
-                    // Eliminar completamente el overlay
-                    overlay.remove();
-                    const gamesModal = window.parent.document.getElementById('gamesModal');
-                    if (gamesModal) {
-                        gamesModal.style.display = 'flex';
-                    }
-                }
-            } catch (error) {
-                console.log('🔴 Error al cerrar:', error);
-                // Si falla, intentar con postMessage
-                window.parent.postMessage('closeBubblesGame', '*');
-            }
-        } else {
-            // Si estamos en ventana directa, cerrar normalmente
-            this.elements.gameOverlay.style.display = 'none';
-        }
-    }
+  closeGame?.addEventListener("click", () => {
+    stopGame();
+    clearBubbles();
+    gameOverlay.style.display = "none";
+  });
 
-    toggleSound() {
-        // Conectar con el sistema de audio del juego principal
-        if (window.parent !== window && window.parent.audioManager) {
-            // Estamos en iframe, usar el audio del padre
-            window.parent.audioManager.toggleMute();
-            this.updateSoundButton();
-        } else if (window.audioManager) {
-            // Estamos en ventana directa
-            window.audioManager.toggleMute();
-            this.updateSoundButton();
-        }
-        console.log('🔊 Toggle sonido');
-    }
+  closeResults?.addEventListener("click", closeResultsModal);
+  continueButton?.addEventListener("click", () => {
+    closeResultsModal();
+    startGame();
+  });
 
-    updateSoundButton() {
-        if (this.elements.soundToggle) {
-            const isMuted = window.parent?.audioManager?.isMuted || window.audioManager?.isMuted || false;
-            if (isMuted) {
-                this.elements.soundToggle.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"></polygon>
-                        <line x1="23" y1="9" x2="17" y2="15"></line>
-                        <line x1="17" y1="9" x2="23" y2="15"></line>
-                    </svg>
-                `;
-            } else {
-                this.elements.soundToggle.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"></polygon>
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                    </svg>
-                `;
-            }
-        }
-    }
+  // Clic vacío en el stage: no hace nada, pero evitamos bubbling raro
+  gameStage?.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
 
-    playSound(soundName) {
-        // Usar el sistema de audio del juego principal
-        if (window.parent !== window && window.parent.audioManager) {
-            // Estamos en iframe, usar el audio del padre
-            window.parent.audioManager.playSound(soundName);
-        } else if (window.audioManager) {
-            // Estamos en ventana directa
-            window.audioManager.playSound(soundName);
-        }
-        console.log(`🔊 Reproduciendo: ${soundName}`);
-    }
-
-    updateUI() {
-        this.elements.gameLevel.textContent = `NIVEL ${this.gameState.level}`;
-        this.elements.gameScore.textContent = this.gameState.score;
-        this.elements.bestScore.textContent = this.gameState.bestScore;
-    }
-}
-
-// 🚀 INICIALIZAR EL JUEGO
-document.addEventListener('DOMContentLoaded', () => {
-    window.bubblesGame = new BubblesGame();
-    console.log('🫧 Juego de burbujas cargado');
-});
+  // Opcional: abrir overlay si venías de otro flujo
+  gameOverlay.style.display = "flex";
+})();
