@@ -34,6 +34,7 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
   let score = 0;
   let best = Number(localStorage.getItem("bubbles_best") || "0");
   let level = 1;
+  let pearlsNeeded = 20; // Perlas necesarias para el siguiente nivel
 
   bestEl.textContent = best;
 
@@ -50,7 +51,18 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
     sizeMax: 70,              // px
     badProb: 0.25,            // 25% malas
     scorePerGood: 1,          // +1 por buena
+    levelSpeedMultiplier: 1.1, // 10% más rápido por nivel
   };
+
+  // Función para calcular velocidad basada en nivel
+  function getLevelSpeed() {
+    const multiplier = Math.pow(CONFIG.levelSpeedMultiplier, level - 1);
+    return {
+      spawnEveryMs: Math.max(200, CONFIG.spawnEveryMs / multiplier), // Mínimo 200ms
+      speedMin: CONFIG.speedMin * multiplier,
+      speedMax: CONFIG.speedMax * multiplier,
+    };
+  }
 
   console.log('🫧 CONFIGURACIÓN CARGADA:', CONFIG);
 
@@ -122,11 +134,12 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
       return;
     }
 
+    const levelSpeed = getLevelSpeed();
     const isBad = Math.random() < CONFIG.badProb;
     const size = rand(CONFIG.sizeMin, CONFIG.sizeMax);
     const x = rand(0, Math.max(0, rect.width - size));
     const y = rect.height - size - 2; // un pelín por encima del borde
-    const speed = rand(CONFIG.speedMin, CONFIG.speedMax); // px/s
+    const speed = rand(levelSpeed.speedMin, levelSpeed.speedMax); // px/s
 
     // DOM
     const el = document.createElement("div");
@@ -169,6 +182,11 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
       scoreEl.textContent = score;
       playSound('acierto');
       pop(bubble);
+      
+      // Verificar si se puede subir de nivel
+      if (score >= pearlsNeeded) {
+        levelUp();
+      }
     }
     });
 
@@ -249,11 +267,30 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
     rafId = requestAnimationFrame(loop);
   }
 
+  // ---------- NIVELES ----------
+  function levelUp() {
+    level++;
+    pearlsNeeded = 20 + (level - 1) * 10; // 20, 30, 40, 50...
+    levelEl.textContent = `NIVEL ${level}`;
+    
+    // Actualizar velocidad del spawner
+    if (spawnTimer) {
+      clearInterval(spawnTimer);
+      const levelSpeed = getLevelSpeed();
+      spawnTimer = setInterval(spawnBubble, levelSpeed.spawnEveryMs);
+    }
+    
+    playSound('levelComplete');
+    console.log(`🎉 ¡NIVEL ${level}! Necesitas ${pearlsNeeded} perlas para el siguiente nivel`);
+  }
+
   // ---------- CONTROL ----------
   function startGame() {
     if (playing) return; // evitar dobles inicios
     playing = true;
     score = 0;
+    level = 1;
+    pearlsNeeded = 20; // Reiniciar perlas necesarias
     scoreEl.textContent = score;
     levelEl.textContent = `NIVEL ${level}`;
     lastTs = 0;
@@ -264,8 +301,9 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
     playSound('jugar');
 
     // Spawner independiente del loop de animación
+    const levelSpeed = getLevelSpeed();
     spawnBubble();
-    spawnTimer = setInterval(spawnBubble, CONFIG.spawnEveryMs);
+    spawnTimer = setInterval(spawnBubble, levelSpeed.spawnEveryMs);
 
     // Animación
     rafId = requestAnimationFrame(loop);
