@@ -1,3 +1,5 @@
+console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
+
 (function () {
   // ---------- ELEMENTOS ----------
   const playBtn = document.getElementById("playButton");
@@ -38,14 +40,16 @@
 
   // Config básica (ajusta a gusto)
   const CONFIG = {
-    spawnEveryMs: 650,        // cada ~0.65s aparece una nueva
+    spawnEveryMs: 650,        // cada 0.65s una nueva
     speedMin: 90,             // px/s
     speedMax: 180,            // px/s
-    sizeMin: 38,              // px
-    sizeMax: 64,              // px
+    sizeMin: 40,              // px
+    sizeMax: 70,              // px
     badProb: 0.25,            // 25% malas
     scorePerGood: 1,          // +1 por buena
   };
+
+  console.log('🫧 CONFIGURACIÓN CARGADA:', CONFIG);
 
   // ---------- UTILIDADES ----------
   const rand = (a, b) => a + Math.random() * (b - a);
