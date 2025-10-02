@@ -4342,13 +4342,24 @@
                 // Marcar como jugado
                 localStorage.setItem('miPececito_hasPlayed', 'true');
                 
+                // DEBUG: Verificar que game existe
+                console.log('🔍 Game existe:', !!game);
+                console.log('🔍 GameState:', game ? game.gameState : 'NO GAME');
+                
                 // Mostrar modal de tutorial (flujo original)
                 if (game) {
+                    console.log('🎓 Llamando showTutorialModal...');
                     game.showTutorialModal();
                 } else {
+                    console.log('❌ Game no existe, esperando...');
                     // Fallback si game no está listo
                     setTimeout(() => {
-                        if (game) game.showTutorialModal();
+                        if (game) {
+                            console.log('🎓 Llamando showTutorialModal (retry)...');
+                            game.showTutorialModal();
+                        } else {
+                            console.log('❌ Game sigue sin existir');
+                        }
                     }, 500);
                 }
             });
@@ -7715,19 +7726,26 @@ Nuestros recuerdos quedarán en mi corazón
 
             // 🎓 MODAL DE TUTORIAL BONITO
             showTutorialModal() {
+                console.log('🎓 showTutorialModal llamado');
+                console.log('🎓 GameState actual:', this.gameState);
+                
                 this.showCustomModal({
                     title: 'Tu Primera Aventura Marina',
                     message: `"¡Hola! Soy tu nuevo compañero virtual."\n\n🥚 Primero apareceré como un huevito\n⏰ En 24 horas eclosionaré y nadaré contigo\n🎮 Mientras tanto, puedes jugar minijuegos\n\n¡Clica aquí y aparecerá tu huevito de pez!`,
                     confirmText: '¡Colocar mi huevo!',
                     onConfirm: () => {
+                        console.log('🥚 Botón "Colocar mi huevo" clickeado');
+                        
                         // CERRAR MODAL PRIMERO para ver el efecto
                         const customModal = document.querySelector('.custom-modal');
                         if (customModal) {
                             customModal.remove();
+                            console.log('🚪 Modal cerrado');
                         }
                         
                         // Pequeño delay para que se vea el cierre
                         setTimeout(() => {
+                            console.log('🚀 Llamando startEggPlacement...');
                             this.startEggPlacement();
                         }, 300);
                     }
