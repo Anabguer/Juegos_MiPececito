@@ -406,7 +406,7 @@ class NeedsSystem {
         
         // 🔊 SONIDO SINCRONIZADO
         if (this.game.audioManager) {
-            this.game.audioManager.playSound('limpiar');
+            this.game.audioManager.playSound('clean');
         }
         
         // Mostrar mensaje
@@ -473,14 +473,16 @@ class NeedsSystem {
     emitCleanBubbles() {
         const W = this.game.canvas.width;
         const H = this.game.canvas.height;
-        const vents = Math.max(16, Math.floor(W / 24));
-        const perVent = 2;
+        const vents = Math.max(32, Math.floor(W / 12)); // MÁS VENTILADORES
+        const perVent = 8; // MUCHÍSIMAS MÁS BURBUJAS POR VENTILADOR
+
+        console.log(`🫧 Creando ${vents} ventiladores con ${perVent} burbujas cada uno = ${vents * perVent} burbujas totales`);
 
         for (let i = 0; i < vents; i++) {
             const baseX = (i + 0.5) * (W / vents) + (Math.random() - 0.5) * 8;
 
             for (let k = 0; k < perVent; k++) {
-                const vy = 260 + Math.random() * 120;     // velocidad vertical (CSS px/s)
+                const vy = 200 + Math.random() * 100;     // velocidad más lenta para más efecto
                 const y0 = H - 1 + Math.random() * 0.5;   // nacen pegadas al fondo
                 const dur = (H + 24) / vy;                 // tiempo exacto hasta salir por arriba
                 const x0 = this.clamp(baseX + (Math.random() - 0.5) * 6, 2, W - 2);
@@ -489,19 +491,21 @@ class NeedsSystem {
                     // guardo origen (x0,y0) y movimiento paramétrico por tiempo
                     x: x0, y: y0,
                     x0, y0, dur, t: 0,
-                    r: 1.5 + Math.random() * 2.8,
+                    r: 2 + Math.random() * 4, // BURBUJAS MÁS GRANDES
                     wobble: Math.random() * Math.PI * 2,
                     wobSpd: 1.5 + Math.random() * 1.2,
-                    wobAmp: 6 + Math.random() * 10,
+                    wobAmp: 8 + Math.random() * 15, // MÁS MOVIMIENTO ONDULANTE
                     from: 'clean'
                 });
             }
         }
 
-        // Límite de memoria
-        if (this.game.cleanBubbles.length > 1400) {
-            this.game.cleanBubbles.splice(0, this.game.cleanBubbles.length - 1400);
+        // Límite de memoria más alto para más burbujas
+        if (this.game.cleanBubbles.length > 3000) {
+            this.game.cleanBubbles.splice(0, this.game.cleanBubbles.length - 3000);
         }
+
+        console.log(`🫧 TOTAL BURBUJAS CREADAS: ${this.game.cleanBubbles.length}`);
     }
 
     /**
