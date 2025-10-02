@@ -309,7 +309,24 @@ console.log('🫧 BURBUJAS JS CARGADO - VERSIÓN OPTIMIZADA');
   closeGame?.addEventListener("click", () => {
     stopGame();
     clearBubbles();
-    gameOverlay.style.display = "none";
+    
+    // Cerrar el iframe del padre
+    try {
+      // Intentar acceso directo al DOM del padre
+      const parentOverlay = window.parent.document.getElementById('bubblesGameOverlay');
+      if (parentOverlay) {
+        parentOverlay.remove(); // Eliminar completamente el overlay
+        // Mostrar el modal de juegos
+        const gamesModal = window.parent.document.getElementById('gamesModal');
+        if (gamesModal) {
+          gamesModal.style.display = 'flex';
+        }
+      }
+    } catch (error) {
+      // Fallback: usar postMessage
+      console.log('🫧 Usando postMessage para cerrar...');
+      window.parent.postMessage('closeBubblesGame', '*');
+    }
   });
 
   closeResults?.addEventListener("click", closeResultsModal);
