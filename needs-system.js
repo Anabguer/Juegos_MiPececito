@@ -406,7 +406,7 @@ class NeedsSystem {
         
         // 🔊 SONIDO SINCRONIZADO
         if (this.game.audioManager) {
-            this.game.audioManager.playSound('clean');
+            this.game.audioManager.playSound('limpiar');
         }
         
         // Mostrar mensaje
