@@ -7130,18 +7130,10 @@
                 this.updateAgeDisplay();
                 
                 // Forzar actualización de necesidades - simular tiempo transcurrido
-                const cfg = this.getStageCfg(this.gameState);
+                const cfg = this.needsSystem.getStageCfg(this.gameState);
                 const hoursPassed = hours;
                 
-                // Aumentar hambre, suciedad y disminuir diversión
-                const hungerIncrease = (100 / cfg.hungerHours) * hoursPassed;
-                const dirtIncrease = (100 / cfg.dirtHours) * hoursPassed;
-                const funDecrease = (100 / cfg.funHours) * hoursPassed;
-                
-                this.gameState.needs.hunger = Math.min(100, this.gameState.needs.hunger + hungerIncrease);
-                this.gameState.needs.dirt = Math.min(100, this.gameState.needs.dirt + dirtIncrease);
-                this.gameState.needs.fun = Math.max(0, this.gameState.needs.fun - funDecrease);
-                
+                // Aumentar hambre, suciedad y disminuir diversión - MOVIDO A needs-system.js
                 this.needsSystem.updateCrisisFlags();
                 this.needsSystem.updateNeedBars();
                 this.updateButtonStates();
@@ -10408,10 +10400,10 @@ Comida premium y de cumpleaños
                         this.food.splice(i, 1);
                         
                         // 🍎 COMER CON CONFIG POR ETAPA
-                        const cfg = this.getStageCfg(this.gameState);
+                        const cfg = this.needsSystem.getStageCfg(this.gameState);
                         const hadRealHunger = this.gameState.needs.hunger > 20; // Solo si tenía hambre significativa
                         this.gameState.needs.hunger = this.clamp(this.gameState.needs.hunger - cfg.eatReduce, 0, 100);
-                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerPellet, 0, 100);
+                        // this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerPellet, 0, 100); // MOVIDO A needs-system.js
                         
                         // 🐠 SALIR DEL ESTADO DEPRIMIDO SI COME
                         if (this.fish.isDepressed && this.gameState.needs.hunger < 70) {
@@ -10488,8 +10480,8 @@ Comida premium y de cumpleaños
                     // 🗑️ PUDRIR COMIDA VIEJA (después de 8 segundos en el fondo)
                     if (f.bottomT > 0 && f.bottomT > 8) {
                         console.log(`🗑️ Pellet podrido después de ${f.bottomT.toFixed(1)}s en el fondo`);
-                        const cfg = this.getStageCfg(this.gameState);
-                        this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerRotten, 0, 100);
+                        const cfg = this.needsSystem.getStageCfg(this.gameState);
+                        // this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerRotten, 0, 100); // MOVIDO A needs-system.js
                         console.log(`🦠 Suciedad por pudrición: +${cfg.dirtPerRotten} (total: ${this.gameState.needs.dirt.toFixed(1)}%)`);
                         this.needsSystem.updateNeedBars();
                         this.food.splice(i, 1);
@@ -10764,15 +10756,7 @@ Comida premium y de cumpleaños
             // 🐠 FUNCIÓN updateFishMovement() ELIMINADA - AHORA EN fish-system.js
             
             // ——— CONFIG POR ETAPA ———
-            getStageCfg(state) {
-                var STAGE_RATES = {
-                    baby:  { hungerHours: 2, dirtHours: 4, funHours: 6, eatReduce: 30, dirtPerPellet: 3, dirtPerRotten: 6 },
-                    young: { hungerHours: 6, dirtHours: 8, funHours: 8, eatReduce: 25, dirtPerPellet: 2, dirtPerRotten: 5 },
-                    adult: { hungerHours: 8, dirtHours:10, funHours: 10, eatReduce: 20, dirtPerPellet: 1, dirtPerRotten: 4 },
-                };
-                var st = (state && state.stage) || 'baby';
-                return STAGE_RATES[st] || STAGE_RATES.baby;
-            }
+            // getStageCfg() - MOVIDO A needs-system.js
             
             // 🎯 FUNCIONES seek(), nearestFood(), updateAutoNeeds() ELIMINADAS - AHORA EN fish-system.js y needs-system.js
             
@@ -10785,7 +10769,7 @@ Comida premium y de cumpleaños
                 this.cleaning = null;
 
                 this.gameState.needs = { hunger: 15, dirt: 0, fun: 95 };
-                this.updateNeedBars?.();
+                // this.updateNeedBars?.(); // MOVIDO A needs-system.js
                 this.gameState.stage = 'egg';
 
                 // Si tienes contadores de monedas/estrellas, pon sus valores de inicio acordados

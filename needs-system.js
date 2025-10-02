@@ -586,6 +586,19 @@ class NeedsSystem {
     }
 
     /**
+     * ⚙️ OBTENER CONFIGURACIÓN POR ETAPA
+     */
+    getStageCfg(state) {
+        const STAGE_RATES = {
+            baby:  { hungerHours: 2, dirtHours: 4, funHours: 6, eatReduce: 30, dirtPerPellet: 3, dirtPerRotten: 6 },
+            young: { hungerHours: 6, dirtHours: 8, funHours: 8, eatReduce: 25, dirtPerPellet: 2, dirtPerRotten: 5 },
+            adult: { hungerHours: 8, dirtHours:10, funHours: 10, eatReduce: 20, dirtPerPellet: 1, dirtPerRotten: 4 },
+        };
+        const st = (state && state.stage) || 'baby';
+        return STAGE_RATES[st] || STAGE_RATES.baby;
+    }
+
+    /**
      * 🎮 DIVERTIR PEZ
      */
     entertainFish(amount = null) {
