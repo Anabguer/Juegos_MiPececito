@@ -6404,8 +6404,8 @@
             async createFish() {
                 console.log('🐠 Creando pez bebé Lottie...');
                 
-                // Crear pez Lottie REAL
-                await this.createLottieFish();
+                // Crear pez Lottie REAL (bebé)
+                await this.createLottieFish('baby');
                 
                 const centerX = this.canvas.width / 2;
                 const centerY = this.canvas.height * 0.6;
@@ -6484,10 +6484,17 @@
             }
             
             // 🎨 CREAR PEZ LOTTIE
-            async createLottieFish() {
+            async createLottieFish(stage = 'baby') {
                 try {
-                    // Cargar JSON del pez
-                    const response = await fetch('./ejemplos/bebe.json');
+                    // Cargar JSON del pez según la etapa
+                    const stageFiles = {
+                        'baby': 'bebe.json',
+                        'young': 'joven.json', 
+                        'adult': 'adulto.json'
+                    };
+                    
+                    const fileName = stageFiles[stage] || 'bebe.json';
+                    const response = await fetch(`./ejemplos/${fileName}`);
                     const animationData = await response.json();
                     
                     const container = document.getElementById('lottieContainer');
@@ -8724,8 +8731,8 @@ Comida premium y de cumpleaños
                         this.lottieAnimation = null;
                     }
                     
-                    // Cargar nueva animación
-                    await this.createLottieFish();
+                    // Cargar nueva animación con la etapa correcta
+                    await this.createLottieFish(newStage);
                     
                     // RESTAURAR ESCALA Y POSICIÓN
                     if (this.fish) {
