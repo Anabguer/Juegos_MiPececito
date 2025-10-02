@@ -485,6 +485,105 @@ class NeedsSystem {
         
         this.game.ctx.restore();
     }
+    
+    /**
+     * 🦠 DIBUJAR EFECTO DE SUCIEDAD
+     */
+    drawDirtyEffect() {
+        if (!this.game.ctx) return;
+        
+        const dirtValue = this.game.gameState.needs.dirt; // 0-100
+        
+        if (dirtValue > 15) { // Efecto visual más temprano
+            // Calcular nivel de suciedad (0 a 1)
+            const dirtLevel = Math.min((dirtValue - 15) / 85, 1); // Escala desde 15-100
+            
+            // Crear overlay de suciedad MÁS SUTIL
+            this.game.ctx.save();
+            this.game.ctx.globalAlpha = dirtLevel * 0.15; // Máximo 15% opacidad (más sutil)
+            this.game.ctx.globalCompositeOperation = 'multiply';
+            
+            // Gradiente de suciedad
+            const gradient = this.game.ctx.createRadialGradient(
+                this.game.canvas.width / 2, this.game.canvas.height / 2, 0,
+                this.game.canvas.width / 2, this.game.canvas.height / 2, this.game.canvas.width
+            );
+            gradient.addColorStop(0, 'rgba(139, 115, 85, 0.2)'); // Marrón claro centro
+            gradient.addColorStop(0.7, 'rgba(101, 67, 33, 0.4)'); // Marrón medio
+            gradient.addColorStop(1, 'rgba(62, 39, 35, 0.6)'); // Marrón oscuro bordes
+            
+            this.game.ctx.fillStyle = gradient;
+            this.game.ctx.fillRect(0, 0, this.game.canvas.width, this.game.canvas.height);
+            
+            // Partículas de suciedad flotando
+            if (!this.game.dirtParticles) this.game.dirtParticles = [];
+            
+            // Crear partículas ocasionalmente
+            if (Math.random() < 0.02 * dirtLevel) {
+                this.game.dirtParticles.push({
+                    x: Math.random() * this.game.canvas.width,
+                    y: Math.random() * this.game.canvas.height,
+                    size: 1 + Math.random() * 3,
+                    life: 5 + Math.random() * 5,
+                    maxLife: 5 + Math.random() * 5,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10
+                });
+            }
+            
+            // Dibujar partículas de suciedad
+            this.game.ctx.globalCompositeOperation = 'source-over';
+            this.game.ctx.globalAlpha = Math.min(0.9, dirtLevel * 2.0); // MUCHO MÁS OPACO
+            
+            for (let i = this.game.dirtParticles.length - 1; i >= 0; i--) {
+                const particle = this.game.dirtParticles[i];
+                
+                // Actualizar partícula
+                particle.x += particle.vx * (1/60);
+                particle.y += particle.vy * (1/60);
+                particle.life -= 1/60;
+                
+                // Eliminar si expiró
+                if (particle.life <= 0) {
+                    this.game.dirtParticles.splice(i, 1);
+                    continue;
+                }
+                
+                // Dibujar partícula sucia
+                const alpha = particle.life / particle.maxLife;
+                this.game.ctx.globalAlpha = alpha * dirtLevel * 1.5; // MUCHO MÁS DENSA
+                this.game.ctx.fillStyle = '#8b7355';
+                this.game.ctx.beginPath();
+                this.game.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                this.game.ctx.fill();
+            }
+            
+            this.game.ctx.restore();
+            
+            // OVERLAY GENERAL DE SUCIEDAD (agua SUPER turbia como algas)
+            this.game.ctx.globalAlpha = Math.min(0.8, dirtLevel * 1.5); // MUCHO más denso
+            
+            // Gradiente marrón-verde como algas
+            const dirtGradient = this.game.ctx.createLinearGradient(0, 0, 0, this.game.canvas.height);
+            dirtGradient.addColorStop(0, 'rgba(139, 115, 85, 0.6)'); // Marrón arriba
+            dirtGradient.addColorStop(0.5, 'rgba(101, 67, 33, 0.8)'); // Marrón oscuro medio
+            dirtGradient.addColorStop(1, 'rgba(46, 125, 50, 0.7)'); // Verde algas abajo
+            
+            this.game.ctx.fillStyle = dirtGradient;
+            this.game.ctx.fillRect(0, 0, this.game.canvas.width, this.game.canvas.height);
+            this.game.ctx.globalAlpha = 1;
+            
+            // Log ocasional
+            if (Math.random() < 0.005) {
+                console.log(`🦠 Pecera sucia - Nivel: ${dirtValue.toFixed(1)}% (sistema unificado)`);
+            }
+        } else {
+            // Limpiar partículas cuando no está sucio
+            if (this.game.dirtParticles) {
+                this.game.dirtParticles = [];
+            }
+        }
+    }
 
     /**
      * 🎮 DIVERTIR PEZ

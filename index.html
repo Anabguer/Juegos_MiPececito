@@ -5554,8 +5554,7 @@
                 // Haces de luz ocasionales durante el juego
                 this.drawOccasionalLightRays();
                 
-                // Efecto de suciedad en toda la pecera
-                this.drawDirtyEffect();
+                // Efecto de suciedad - MOVIDO A needs-system.js
                 
                 // Huevo (solo si está en stage 'egg')
                 if (this.gameState.stage === 'egg') {
@@ -5583,6 +5582,11 @@
                 // Dibujar burbujas de limpieza
                 if (this.needsSystem) {
                     this.needsSystem.drawCleaningBubbles();
+                }
+                
+                // Dibujar efecto de suciedad
+                if (this.needsSystem) {
+                    this.needsSystem.drawDirtyEffect();
                 }
                 
                 // Partículas de comida (DESACTIVADO - CONFLICTO)
@@ -6140,101 +6144,7 @@
                 console.log(`☀️ Reflejos del sol creados (${numRays} rayos desde arriba)`);
             }
             
-            // 🦠 EFECTO DE SUCIEDAD UNIFICADO (BASADO EN BARRAS)
-            drawDirtyEffect() {
-                // USAR EL MISMO SISTEMA QUE LAS BARRAS
-                const dirtValue = this.gameState.needs.dirt; // 0-100
-                
-                if (dirtValue > 15) { // Efecto visual más temprano (era 30)
-                    // Calcular nivel de suciedad (0 a 1)
-                    const dirtLevel = Math.min((dirtValue - 15) / 85, 1); // Escala desde 15-100
-                    
-                    // Crear overlay de suciedad MÁS SUTIL
-                    this.ctx.save();
-                    this.ctx.globalAlpha = dirtLevel * 0.15; // Máximo 15% opacidad (más sutil)
-                    this.ctx.globalCompositeOperation = 'multiply';
-                    
-                    // Gradiente de suciedad
-                    const gradient = this.ctx.createRadialGradient(
-                        this.canvas.width / 2, this.canvas.height / 2, 0,
-                        this.canvas.width / 2, this.canvas.height / 2, this.canvas.width
-                    );
-                    gradient.addColorStop(0, 'rgba(139, 115, 85, 0.2)'); // Marrón claro centro
-                    gradient.addColorStop(0.7, 'rgba(101, 67, 33, 0.4)'); // Marrón medio
-                    gradient.addColorStop(1, 'rgba(62, 39, 35, 0.6)'); // Marrón oscuro bordes
-                    
-                    this.ctx.fillStyle = gradient;
-                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                    
-                    // Partículas de suciedad flotando
-                    if (!this.dirtParticles) this.dirtParticles = [];
-                    
-                    // Crear partículas ocasionalmente
-                    if (Math.random() < 0.02 * dirtLevel) {
-                        this.dirtParticles.push({
-                            x: Math.random() * this.canvas.width,
-                            y: Math.random() * this.canvas.height,
-                            size: 1 + Math.random() * 3,
-                            life: 5 + Math.random() * 5,
-                            maxLife: 5 + Math.random() * 5,
-                            vx: (Math.random() - 0.5) * 10,
-                            vy: (Math.random() - 0.5) * 10
-                        });
-                    }
-                    
-                    // Dibujar partículas de suciedad
-                    this.ctx.globalCompositeOperation = 'source-over';
-                    this.ctx.globalAlpha = Math.min(0.9, dirtLevel * 2.0); // MUCHO MÁS OPACO
-                    
-                    for (let i = this.dirtParticles.length - 1; i >= 0; i--) {
-                        const particle = this.dirtParticles[i];
-                        
-                        // Actualizar partícula
-                        particle.x += particle.vx * (1/60);
-                        particle.y += particle.vy * (1/60);
-                        particle.life -= 1/60;
-                        
-                        // Eliminar si expiró
-                        if (particle.life <= 0) {
-                            this.dirtParticles.splice(i, 1);
-                            continue;
-                        }
-                        
-                        // Dibujar partícula sucia
-                        const alpha = particle.life / particle.maxLife;
-                        this.ctx.globalAlpha = alpha * dirtLevel * 1.5; // MUCHO MÁS DENSA
-                        this.ctx.fillStyle = '#8b7355';
-                        this.ctx.beginPath();
-                        this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-                        this.ctx.fill();
-                    }
-                    
-                    this.ctx.restore();
-                    
-                    // OVERLAY GENERAL DE SUCIEDAD (agua SUPER turbia como algas)
-                    this.ctx.globalAlpha = Math.min(0.8, dirtLevel * 1.5); // MUCHO más denso
-                    
-                    // Gradiente marrón-verde como algas
-                    const dirtGradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-                    dirtGradient.addColorStop(0, 'rgba(139, 115, 85, 0.6)'); // Marrón arriba
-                    dirtGradient.addColorStop(0.5, 'rgba(101, 67, 33, 0.8)'); // Marrón oscuro medio
-                    dirtGradient.addColorStop(1, 'rgba(46, 125, 50, 0.7)'); // Verde algas abajo
-                    
-                    this.ctx.fillStyle = dirtGradient;
-                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                    this.ctx.globalAlpha = 1;
-                    
-                    // Log ocasional
-                    if (Math.random() < 0.005) {
-                        console.log(`🦠 Pecera sucia - Nivel: ${dirtValue.toFixed(1)}% (barra unificada)`);
-                    }
-                } else {
-                    // Limpiar partículas cuando no está sucio
-                    if (this.dirtParticles) {
-                        this.dirtParticles = [];
-                    }
-                }
-            }
+            // drawDirtyEffect() - MOVIDO A needs-system.js
             
             drawExplosionBubbles() {
                 for (const bubble of this.explosionBubbles) {
@@ -7233,7 +7143,7 @@
                 this.gameState.needs.fun = Math.max(0, this.gameState.needs.fun - funDecrease);
                 
                 this.needsSystem.updateCrisisFlags();
-                this.updateNeedBars();
+                this.needsSystem.updateNeedBars();
                 this.updateButtonStates();
                 
                 console.log(`⏰ Tiempo del juego avanzado +${hours} hora(s)`);
@@ -8960,44 +8870,7 @@ Comida premium y de cumpleaños
             }
             
             // 📊 ACTUALIZAR BARRAS DE NECESIDADES
-            updateNeedBars() {
-                // Actualizar las barras visuales (FLOTANTES - OCULTAS)
-                const hungerBar = document.getElementById('hungerBar');
-                const dirtBar = document.getElementById('dirtBar');
-                const funBar = document.getElementById('funBar');
-                
-                if (hungerBar) hungerBar.style.width = this.gameState.needs.hunger + '%';
-                if (dirtBar) dirtBar.style.width = this.gameState.needs.dirt + '%';
-                if (funBar) funBar.style.width = this.gameState.needs.fun + '%';
-                
-                // 📊 ACTUALIZAR BARRAS DEL HEADER (NUEVAS)
-                const hungerBarHeader = document.getElementById('hungerBarHeader');
-                const dirtBarHeader = document.getElementById('dirtBarHeader');
-                const funBarHeader = document.getElementById('funBarHeader');
-                
-                if (hungerBarHeader) hungerBarHeader.style.width = this.gameState.needs.hunger + '%';
-                if (dirtBarHeader) dirtBarHeader.style.width = this.gameState.needs.dirt + '%';
-                if (funBarHeader) funBarHeader.style.width = this.gameState.needs.fun + '%';
-                
-                // 🚨 COLORES DE CRISIS
-                if (this.gameState.crisis?.hunger) {
-                    if (hungerBarHeader) hungerBarHeader.style.background = '#ff4444';
-                } else {
-                    if (hungerBarHeader) hungerBarHeader.style.background = '#4CAF50';
-                }
-                
-                if (this.gameState.crisis?.dirt) {
-                    if (dirtBarHeader) dirtBarHeader.style.background = '#ff4444';
-                } else {
-                    if (dirtBarHeader) dirtBarHeader.style.background = '#2196F3';
-                }
-                
-                if (this.gameState.crisis?.bored) {
-                    if (funBarHeader) funBarHeader.style.background = '#ff4444';
-                } else {
-                    if (funBarHeader) funBarHeader.style.background = '#FF9800';
-                }
-            }
+            // updateNeedBars() - MOVIDO A needs-system.js
             
             updateCurrencyDisplay(elementId, newValue) {
                 const element = document.getElementById(elementId);
@@ -10579,7 +10452,7 @@ Comida premium y de cumpleaños
                             
                         // 📊 ACTUALIZAR BARRAS SIEMPRE
                         this.needsSystem.updateCrisisFlags();
-                        this.updateNeedBars();
+                        this.needsSystem.updateNeedBars();
                         
                         console.log(`🍎 ¡Ñam completo! Nueva hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
                         
@@ -10608,7 +10481,7 @@ Comida premium y de cumpleaños
                         // }
                         
                         this.needsSystem.updateCrisisFlags();
-                        this.updateNeedBars();
+                        this.needsSystem.updateNeedBars();
                         continue; // Importante: saltar al siguiente pellet
                     } 
                     
@@ -10618,7 +10491,7 @@ Comida premium y de cumpleaños
                         const cfg = this.getStageCfg(this.gameState);
                         this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerRotten, 0, 100);
                         console.log(`🦠 Suciedad por pudrición: +${cfg.dirtPerRotten} (total: ${this.gameState.needs.dirt.toFixed(1)}%)`);
-                        this.updateNeedBars();
+                        this.needsSystem.updateNeedBars();
                         this.food.splice(i, 1);
                     }
                 }
@@ -10958,7 +10831,7 @@ Comida premium y de cumpleaños
                         if (!f.given) {
                             // SUMAR DIVERSIÓN +0.25 (RESTAR para hacer feliz)
                             this.gameState.needs.fun = this.clamp(this.gameState.needs.fun - 25, 0, 100); // -25 = +0.25 diversión (menos rojo = más feliz)
-                            this.updateNeedBars();
+                            this.needsSystem.updateNeedBars();
                             
                             // Efecto visual en la barra
                             const barF = document.getElementById('funBarHeader');
@@ -15303,7 +15176,7 @@ Comida premium y de cumpleaños
                         if (!f.given) {
                             // SUMAR DIVERSIÓN +25
                             this.gameState.needs.fun = Math.min(100, this.gameState.needs.fun + 25);
-                            this.updateNeedBars();
+                            this.needsSystem.updateNeedBars();
                             f.given = true;
                         }
                         this.flyers.splice(i, 1);
