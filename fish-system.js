@@ -651,6 +651,7 @@ class FishSystem {
         // Inicializar array de burbujas si no existe
         if (!this.game.bubbles) {
             this.game.bubbles = [];
+            console.log('🫧 Array de burbujas inicializado en FishSystem');
         }
         
         // Posición de la boca del pez
@@ -699,6 +700,43 @@ class FishSystem {
         // Actualizar diversión
         if (this.game.needsSystem) {
             this.game.needsSystem.entertainFish(15);
+        }
+    }
+
+    // Función updateBubbles (del código original)
+    updateBubbles(deltaTime) {
+        if (!this.game.bubbles) return;
+        
+        // Actualizar burbujas de la boca
+        for (let i = this.game.bubbles.length - 1; i >= 0; i--) {
+            const bubble = this.game.bubbles[i];
+            bubble.x += bubble.vx * deltaTime;
+            bubble.y += bubble.vy * deltaTime;
+            bubble.life -= deltaTime;
+            
+            if (bubble.life <= 0) {
+                this.game.bubbles.splice(i, 1);
+            }
+        }
+    }
+
+    // Función drawBubbles (del código original)
+    drawBubbles() {
+        if (!this.game.bubbles) return;
+        
+        for (const bubble of this.game.bubbles) {
+            this.game.ctx.save();
+            
+            const alpha = bubble.life;
+            this.game.ctx.globalAlpha = alpha;
+            
+            // Burbujas de la boca
+            this.game.ctx.fillStyle = `hsl(${200 + Math.random() * 60}, 70%, 80%)`;
+            this.game.ctx.beginPath();
+            this.game.ctx.arc(bubble.x, bubble.y, bubble.size, 0, Math.PI * 2);
+            this.game.ctx.fill();
+            
+            this.game.ctx.restore();
         }
     }
 }

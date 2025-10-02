@@ -5366,6 +5366,7 @@
                     this.updateCleaning(deltaTime);       // 🧹 LIMPIEZA ESPECTACULAR
                     console.log('🐠 Actualizando movimiento con FishSystem...');
                     this.fishSystem.updateFishMovement(deltaTime);    // Movimiento realista
+                    this.fishSystem.updateBubbles(deltaTime);         // Burbujas de la boca
                     this.updateTinyBubbles(deltaTime);     // Burbujas de respiración
                     this.updateFlyers(deltaTime);          // Corazones voladores
                     this.updateLabels(deltaTime);          // 🍎 LABELS ("Ñam")
@@ -5570,6 +5571,7 @@
                 if (this.fish && !this.fish.isLottie) {
                     console.log('🎨 Dibujando pez con FishSystem...');
                     this.fishSystem.drawFish();
+                    this.fishSystem.drawBubbles();
                 }
                 
                 // Actualizar posición del Lottie
