@@ -17,6 +17,7 @@
  */
 
 console.log('🐠 Fish System cargado');
+console.log('🐠 CONFIGURACIÓN DE MOVIMIENTO:', FISH_MOVEMENT_CONFIG);
 
 // 📊 CONFIGURACIÓN DE MOVIMIENTO DEL PEZ
 const FISH_MOVEMENT_CONFIG = {

@@ -37,6 +37,7 @@
  */
 
 console.log('🎯 Needs System cargado');
+console.log('🎯 CONFIGURACIÓN DE NECESIDADES:', NEEDS_CONFIG);
 
 // 📊 CONFIGURACIÓN DE NECESIDADES POR ETAPA
 const NEEDS_CONFIG = {

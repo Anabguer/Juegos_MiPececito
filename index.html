@@ -4957,8 +4957,13 @@
                 this.ctx = this.canvas.getContext('2d');
                 
                 // 🐠 SISTEMAS REFACTORIZADOS
+                console.log('🔧 Inicializando FishSystem...');
                 this.fishSystem = new FishSystem(this);
+                console.log('✅ FishSystem inicializado:', !!this.fishSystem);
+                
+                console.log('🔧 Inicializando NeedsSystem...');
                 this.needsSystem = new NeedsSystem(this);
+                console.log('✅ NeedsSystem inicializado:', !!this.needsSystem);
                 
                 // 🫧 CAPA OFFSCREEN PARA BURBUJAS (FIX DPR)
                 this.bubLayer = null;
@@ -5093,6 +5098,7 @@
                 
                 // AÑADIR EVENT LISTENER PARA CLICK EN CANVAS
                 this.canvas.addEventListener('click', (event) => {
+                    console.log('👆 Click detectado - usando FishSystem...');
                     this.fishSystem.handleCanvasClick(event);
                 });
                 
@@ -5354,9 +5360,11 @@
                 // Movimiento del pez (todas las etapas)
                 if (this.fish && (this.gameState.stage === 'baby' || this.gameState.stage === 'young' || this.gameState.stage === 'adult')) {
                     // 🚀 SISTEMA REALISTA COMPLETO
+                    console.log('🎯 Actualizando necesidades con NeedsSystem...');
                     this.needsSystem.updateAllNeeds(deltaTime);      // Necesidades automáticas
                     this.updateFood(deltaTime);           // 🍎 COMIDA DEL DOCUMENTO
                     this.updateCleaning(deltaTime);       // 🧹 LIMPIEZA ESPECTACULAR
+                    console.log('🐠 Actualizando movimiento con FishSystem...');
                     this.fishSystem.updateFishMovement(deltaTime);    // Movimiento realista
                     this.updateTinyBubbles(deltaTime);     // Burbujas de respiración
                     this.updateFlyers(deltaTime);          // Corazones voladores
@@ -5560,6 +5568,7 @@
                 
                 // Pez (solo si no es Lottie)
                 if (this.fish && !this.fish.isLottie) {
+                    console.log('🎨 Dibujando pez con FishSystem...');
                     this.fishSystem.drawFish();
                 }
                 
