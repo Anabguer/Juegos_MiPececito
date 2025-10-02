@@ -4250,7 +4250,7 @@
                 
                 // IR DIRECTO (sin pantalla de carga)
                 
-                // LÓGICA CORRECTA: Solo bienvenida si NO hay pez
+                // LÓGICA ORIGINAL: Mostrar bienvenida primero
                 if (isFirstTime) {
                     // Primera vez: mostrar bienvenida
                     console.log('🪟 Mostrando bienvenida (primera vez)...');
@@ -4332,35 +4332,22 @@
         // 🎉 Configurar flujo de bienvenida
         function setupWelcomeFlow() {
             const welcomeScreen = document.getElementById('welcomeScreen');
-            const tutorialScreen = document.getElementById('tutorialScreen');
             const startGameBtn = document.getElementById('startGameBtn');
             
-            // Botón "Empezar Aventura"
+            // Botón "Empezar Aventura" - va directo al huevo
             startGameBtn.addEventListener('click', () => {
-                console.log('🚀 Empezar aventura clickeado - OCULTANDO MODAL');
+                console.log('🚀 Empezar aventura clickeado');
                 welcomeScreen.style.display = 'none';
-                
-                // 🎵 INICIAR MÚSICA DE FONDO INMEDIATAMENTE
-                if (audioManager && !audioManager.isMuted) {
-                    audioManager.startBackgroundMusic();
-                    console.log('🎵 Música de fondo iniciada al empezar el juego');
-                }
                 
                 // Marcar como jugado
                 localStorage.setItem('miPececito_hasPlayed', 'true');
                 
-                // IR DIRECTO A COLOCAR HUEVO (sin modal intermedia)
-                if (game && game.startEggPlacement) {
-                    game.startEggPlacement();
-                } else {
-                    // Fallback si game no está listo
-                    setTimeout(() => {
-                        if (game && game.startEggPlacement) {
-                            game.startEggPlacement();
-                        }
-                    }, 500);
-                }
+                // Ir directo al huevo (sin modal de tutorial)
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                game.placeFirstEgg(centerX, centerY);
             });
+        }
             
             // 🥚 EVENT LISTENER ELIMINADO - YA NO SE NECESITA
             
@@ -4393,7 +4380,6 @@
                 });
             }
             */
-        }
         
         // 🎓 Configurar handler del tutorial
         function setupTutorialHandler() {
@@ -5402,6 +5388,10 @@
                 // Fondo (coordenadas físicas normales)
                 if (this.bgImage && this.bgImage.complete) {
                     this.ctx.drawImage(this.bgImage, 0, 0, this.canvas.width, this.canvas.height);
+                    // Debug ocasional
+                    if (Math.random() < 0.01) {
+                        console.log('🎨 Dibujando fondo:', this.bgImage.src, this.canvas.width, this.canvas.height);
+                    }
                 } else {
                     // Fondo degradado como fallback
                     const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
@@ -5409,6 +5399,10 @@
                     gradient.addColorStop(1, '#133754');
                     this.ctx.fillStyle = gradient;
                     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    // Debug ocasional
+                    if (Math.random() < 0.01) {
+                        console.log('🎨 Usando fondo degradado - bgImage:', this.bgImage ? 'existe' : 'no existe', this.bgImage?.complete ? 'completa' : 'no completa');
+                    }
                 }
                 
                 // ✨ EFECTOS MÁGICOS: MUCHAS BURBUJITAS QUE TAPAN EL HUEVO
@@ -5585,8 +5579,7 @@
                 // Comida cayendo (DESACTIVADO - CONFLICTO)  
                 // this.drawFallingFood();
                 
-                // Burbujas de limpieza
-                this.drawCleaningBubbles();
+                // Burbujas de limpieza - ELIMINADO (ahora en needs-system.js)
                 
                 // Burbujas de necesidades (DESACTIVADAS)
                 // this.drawNeedBubbles();
@@ -5600,8 +5593,7 @@
                 // Burbujas de necesidades (DESACTIVADAS)  
                 // this.drawNeedBubbles();
                 
-                // 🧹 DIBUJAR BURBUJAS SIMPLE (REVERTIR A VERSIÓN QUE FUNCIONABA)
-                this.drawCleanBubbles();
+                // 🧹 DIBUJAR BURBUJAS SIMPLE - ELIMINADO (ahora en needs-system.js)
                 
                 // 💖 DIBUJAR CORAZONES VOLADORES
                 this.drawFlyers();
@@ -5626,6 +5618,11 @@
             drawBackgroundBubbles() {
                 // SISTEMA SIMPLE Y FUNCIONAL
                 this.ctx.save();
+                
+                // Debug ocasional
+                if (Math.random() < 0.01) {
+                    console.log('🫧 Dibujando burbujas de fondo:', this.bgBubbles.length, 'burbujas');
+                }
                 
                 for (let i = this.bgBubbles.length - 1; i >= 0; i--) {
                     const bubble = this.bgBubbles[i];
@@ -6387,7 +6384,76 @@
                 console.log(`✨ Efecto suave creado: ${this.explosionBubbles.length} burbujas delicadas (sin rayos amarillos)`);
             }
             
-            // createFish() - ELIMINADO (ahora en fish-system.js)
+            // 🐠 CREAR PEZ BEBÉ
+            createFish() {
+                console.log('🐠 Creando pez bebé...');
+                
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                
+                this.fish = {
+                    // Posición
+                    x: centerX,
+                    y: centerY,
+                    baseY: centerY,
+                    
+                    // Tamaño y escala
+                    size: 35,
+                    scale: 1.0,
+                    targetScale: 1.0,
+                    
+                    // Movimiento
+                    vx: 0,
+                    vy: 0,
+                    maxSpeed: 100,
+                    speed: 50,
+                    
+                    // Dirección y orientación
+                    direction: 1, // 1 = derecha, -1 = izquierda
+                    facing: 1,
+                    facingLeft: false,
+                    verticalDirection: 0, // -1 = arriba, 0 = medio, 1 = abajo
+                    
+                    // Estados
+                    stage: 'baby',
+                    excited: false,
+                    depressed: false,
+                    depressedTint: 0,
+                    isChasing: false,
+                    chaseSpeed: 0,
+                    
+                    // Animaciones
+                    blinkT: 0,
+                    nextBlink: 2,
+                    eyeOpen: 1,
+                    breathT: 0,
+                    swimPhase: 0,
+                    floatTime: 0,
+                    bubbleTime: 0,
+                    
+                    // Comportamiento
+                    desire: null,
+                    wanderTimer: 0,
+                    wanderDir: { x: 0, y: 0 },
+                    
+                    // Tiempos
+                    lastFeedTime: Date.now(),
+                    lastPlayTime: 0,
+                    lastCleanTime: 0,
+                    
+                    // Efectos
+                    spinKind: null,
+                    happyBurst: 0,
+                    spinT: 0
+                };
+                
+                console.log('🐠 Pez bebé creado:', {
+                    x: this.fish.x,
+                    y: this.fish.y,
+                    size: this.fish.size,
+                    stage: this.fish.stage
+                });
+            }
             
             // createLottieFish() - ELIMINADO (ahora en fish-system.js)
             
@@ -7565,6 +7631,81 @@ Nuestros recuerdos quedarán en mi corazón
                         explosion.remove();
                     }
                 }, 800);
+            }
+
+            // 🎨 MODAL PERSONALIZADO BONITO
+            showCustomModal(options) {
+                // Crear modal dinámicamente
+                const modal = document.createElement('div');
+                modal.className = 'custom-modal';
+                modal.innerHTML = `
+                    <div class="custom-modal-content">
+                        <div class="custom-modal-header">
+                            <h2>${options.title}</h2>
+                        </div>
+                        <div class="custom-modal-body">
+                            <p>${options.message.replace(/\n/g, '<br>')}</p>
+                            ${options.input ? `<input type="text" class="custom-input" placeholder="${options.inputPlaceholder}" maxlength="15">` : ''}
+                        </div>
+                        <div class="custom-modal-buttons">
+                            <button class="custom-btn confirm-btn">${options.confirmText}</button>
+                            ${options.cancelText ? `<button class="custom-btn cancel-btn">${options.cancelText}</button>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                // Añadir estilos inline para que funcione inmediatamente
+                modal.style.cssText = `
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0,0,0,0.8);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 3000;
+                `;
+                
+                const content = modal.querySelector('.custom-modal-content');
+                content.style.cssText = `
+                    background: linear-gradient(135deg, #26c6da 0%, #4fc3f7 50%, #81d4fa 100%);
+                    border: 4px solid #ffffff;
+                    border-radius: 25px;
+                    padding: 25px;
+                    max-width: 350px;
+                    width: 90%;
+                    text-align: center;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                    animation: modalPop 0.3s ease-out;
+                `;
+                
+                // Event listeners
+                const confirmBtn = modal.querySelector('.confirm-btn');
+                const cancelBtn = modal.querySelector('.cancel-btn');
+                const input = modal.querySelector('.custom-input');
+                
+                confirmBtn.addEventListener('click', () => {
+                    const value = input ? input.value : null;
+                    document.body.removeChild(modal);
+                    options.onConfirm(value);
+                });
+                
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', () => {
+                        document.body.removeChild(modal);
+                        options.onCancel();
+                    });
+                }
+                
+                // Focus en input si existe
+                document.body.appendChild(modal);
+                if (input) {
+                    input.focus();
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            confirmBtn.click();
+                        }
+                    });
+                }
             }
 
             // 🎓 MODAL DE TUTORIAL BONITO
