@@ -4334,7 +4334,7 @@
             const welcomeScreen = document.getElementById('welcomeScreen');
             const startGameBtn = document.getElementById('startGameBtn');
             
-            // Botón "Empezar Aventura" - va directo al huevo
+            // Botón "Empezar Aventura" - mostrar tutorial primero
             startGameBtn.addEventListener('click', () => {
                 console.log('🚀 Empezar aventura clickeado');
                 welcomeScreen.style.display = 'none';
@@ -4342,10 +4342,15 @@
                 // Marcar como jugado
                 localStorage.setItem('miPececito_hasPlayed', 'true');
                 
-                // Ir directo al huevo (sin modal de tutorial)
-                const centerX = window.innerWidth / 2;
-                const centerY = window.innerHeight / 2;
-                game.placeFirstEgg(centerX, centerY);
+                // Mostrar modal de tutorial (flujo original)
+                if (game) {
+                    game.showTutorialModal();
+                } else {
+                    // Fallback si game no está listo
+                    setTimeout(() => {
+                        if (game) game.showTutorialModal();
+                    }, 500);
+                }
             });
         }
             
