@@ -11807,7 +11807,7 @@ Comida premium y de cumpleaños
                 console.log('🫧 Llamando a la versión correcta del juego de burbujas...');
                 if (typeof startBubblesGameIntegrated === 'function') {
                     startBubblesGameIntegrated();
-                } else {
+                        } else {
                     console.error('❌ startBubblesGameIntegrated no está definida todavía');
                     alert('🚧 El juego de burbujas no está disponible en este momento. Por favor, intenta más tarde.');
                 }
@@ -12251,9 +12251,9 @@ Comida premium y de cumpleaños
                 if (event.data === 'closeBubblesGame') {
                     console.log('🔴 RECIBIDO MENSAJE DE CIERRE - ELIMINANDO OVERLAY');
                     console.log('🔍 Overlay antes:', gameOverlay);
-                    gameOverlay.remove();
+                        gameOverlay.remove();
                     console.log('🔍 Overlay después:', gameOverlay);
-                    document.getElementById('gamesModal').style.display = 'flex';
+                        document.getElementById('gamesModal').style.display = 'flex';
                     console.log('🔍 Modal de juegos mostrado');
                     window.removeEventListener('message', messageHandler);
                     console.log('🔍 Event listener removido');
@@ -12264,7 +12264,7 @@ Comida premium y de cumpleaños
             gameOverlay.appendChild(gameFrame);
             document.body.appendChild(gameOverlay);
         }
-
+        
         // 💎 JUEGO DE BLOQUES (MAR MATCH-3) - CÓDIGO EXACTO DEL HTML QUE FUNCIONA
         function startBloquesGame() {
             console.log('💎 Iniciando juego Conecta 3 integrado...');
@@ -16041,6 +16041,52 @@ Comida premium y de cumpleaños
     <!-- 🐠 SISTEMAS REFACTORIZADOS -->
     <script src="fish-system.js"></script>
     <script src="needs-system.js"></script>
+    
+    <script>
+        // 🫧 FUNCIONES DE BURBUJAS Y CORAZONES
+        if (window.CompleteGame) {
+            CompleteGame.prototype.updateTinyBubbles = function(deltaTime) {
+                // Actualizar burbujas de respiración
+                for (const b of this.tinyBubbles) {
+                    b.y -= b.vy * deltaTime;
+                    b.x += Math.sin((this.state?.time || Date.now() * 0.001) * b.wobSpd + b.wob) * b.wobAmp * deltaTime;
+                    b.life -= deltaTime;
+                    b.a = Math.max(0, b.life / 1.2);
+                }
+                
+                // Eliminar burbujas muertas
+                for (let i = this.tinyBubbles.length - 1; i >= 0; i--) {
+                    const b = this.tinyBubbles[i];
+                    if (b.life <= 0 || b.y < -12) {
+                        this.tinyBubbles.splice(i, 1);
+                    }
+                }
+            };
+            
+            CompleteGame.prototype.updateFlyers = function(deltaTime) {
+                if (!this.flyers) this.flyers = [];
+                
+                // Actualizar progreso de corazones
+                for (const f of this.flyers) {
+                    f.t += deltaTime / f.dur;
+                }
+                
+                // Purgar completados y dar diversión
+                for (let i = this.flyers.length - 1; i >= 0; i--) {
+                    const f = this.flyers[i];
+                    if (f.t >= 1) {
+                        if (!f.given) {
+                            // SUMAR DIVERSIÓN +25
+                            this.gameState.needs.fun = Math.min(100, this.gameState.needs.fun + 25);
+                            this.needsSystem.updateNeedBars();
+                            f.given = true;
+                        }
+                        this.flyers.splice(i, 1);
+                    }
+                }
+            };
+        }
+    </script>
 </body>
 </html>
 

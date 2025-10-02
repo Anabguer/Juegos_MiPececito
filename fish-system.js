@@ -586,6 +586,19 @@ class FishSystem {
     }
 
     /**
+     * 📏 OBTENER TAMAÑO DEL PEZ SEGÚN SU ETAPA
+     */
+    getFishSizeForStage(stage) {
+        const sizes = {
+            egg: 0,
+            baby: 35,
+            young: 50,
+            adult: 65
+        };
+        return sizes[stage] || sizes.baby;
+    }
+
+    /**
      * 🎯 FUNCIONES AUXILIARES - COPIADAS DEL CÓDIGO ORIGINAL
      */
     
@@ -635,6 +648,11 @@ class FishSystem {
         const fish = this.game.fish;
         if (!fish) return;
         
+        // Inicializar array de burbujas si no existe
+        if (!this.game.bubbles) {
+            this.game.bubbles = [];
+        }
+        
         // Posición de la boca del pez
         const bodyW = fish.size * 0.4;
         const bodyH = fish.size * 0.24;
@@ -658,6 +676,11 @@ class FishSystem {
     launchHeartToFun(x, y) {
         // IMPORTANTE: Esta función solo debe llamarse cuando el usuario toca al pez
         // NO cuando el pez come
+        
+        // Inicializar array de corazones si no existe
+        if (!this.game.hearts) {
+            this.game.hearts = [];
+        }
         
         // Si no se pasan coordenadas, usar posición del pez
         const startX = x !== undefined ? x : this.game.fish.x;
