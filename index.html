@@ -6465,6 +6465,13 @@
                     isLottie: this.fish.isLottie
                 });
                 
+                // MOSTRAR BARRAS DE NECESIDADES CUANDO NACE EL PEZ
+                const needsBar = document.getElementById('needsHeaderBar');
+                if (needsBar) {
+                    needsBar.style.display = 'flex';
+                    console.log('📊 Barras de necesidades mostradas con el pez');
+                }
+                
                 // PEDIR NOMBRE DESPUÉS DE NACER
                 setTimeout(() => {
                     this.askForFishName();
@@ -7207,7 +7214,7 @@
                 this.gameState.needs.fun = Math.max(0, this.gameState.needs.fun - funDecrease);
                 
                 this.needsSystem.updateCrisisFlags();
-                this.needsSystem.updateNeedBars();
+                this.updateNeedBars();
                 this.updateButtonStates();
                 
                 console.log(`⏰ Tiempo del juego avanzado +${hours} hora(s)`);
@@ -8933,7 +8940,45 @@ Comida premium y de cumpleaños
                 }
             }
             
-            // 📊 FUNCIÓN updateNeedBars() ELIMINADA - AHORA EN needs-system.js
+            // 📊 ACTUALIZAR BARRAS DE NECESIDADES
+            updateNeedBars() {
+                // Actualizar las barras visuales (FLOTANTES - OCULTAS)
+                const hungerBar = document.getElementById('hungerBar');
+                const dirtBar = document.getElementById('dirtBar');
+                const funBar = document.getElementById('funBar');
+                
+                if (hungerBar) hungerBar.style.width = this.gameState.needs.hunger + '%';
+                if (dirtBar) dirtBar.style.width = this.gameState.needs.dirt + '%';
+                if (funBar) funBar.style.width = this.gameState.needs.fun + '%';
+                
+                // 📊 ACTUALIZAR BARRAS DEL HEADER (NUEVAS)
+                const hungerBarHeader = document.getElementById('hungerBarHeader');
+                const dirtBarHeader = document.getElementById('dirtBarHeader');
+                const funBarHeader = document.getElementById('funBarHeader');
+                
+                if (hungerBarHeader) hungerBarHeader.style.width = this.gameState.needs.hunger + '%';
+                if (dirtBarHeader) dirtBarHeader.style.width = this.gameState.needs.dirt + '%';
+                if (funBarHeader) funBarHeader.style.width = this.gameState.needs.fun + '%';
+                
+                // 🚨 COLORES DE CRISIS
+                if (this.gameState.crisis?.hunger) {
+                    if (hungerBarHeader) hungerBarHeader.style.background = '#ff4444';
+                } else {
+                    if (hungerBarHeader) hungerBarHeader.style.background = '#4CAF50';
+                }
+                
+                if (this.gameState.crisis?.dirt) {
+                    if (dirtBarHeader) dirtBarHeader.style.background = '#ff4444';
+                } else {
+                    if (dirtBarHeader) dirtBarHeader.style.background = '#2196F3';
+                }
+                
+                if (this.gameState.crisis?.bored) {
+                    if (funBarHeader) funBarHeader.style.background = '#ff4444';
+                } else {
+                    if (funBarHeader) funBarHeader.style.background = '#FF9800';
+                }
+            }
             
             updateCurrencyDisplay(elementId, newValue) {
                 const element = document.getElementById(elementId);
@@ -8971,12 +9016,6 @@ Comida premium y de cumpleaños
                     this.gameState.ageInDays = ageInDays;
                     
                     // Mostrar etapa y edad
-                    const stageEmojis = {
-                        'baby': '🍼',
-                        'young': '🌱', 
-                        'adult': '👑'
-                    };
-                    
                     const stageNames = {
                         'baby': 'Bebé',
                         'young': 'Joven',
@@ -8994,7 +9033,7 @@ Comida premium y de cumpleaños
                         fishName.textContent = 'Mi Pececito';
                     }
                 } else {
-                    fishAge.textContent = '🍼 Bebé';
+                    fishAge.textContent = 'Bebé - 0 días';
                     if (this.gameState.fishName) {
                         fishName.textContent = `Mi Pececito ${this.gameState.fishName}`;
                     } else {
@@ -10615,7 +10654,7 @@ Comida premium y de cumpleaños
                             
                         // 📊 ACTUALIZAR BARRAS SIEMPRE
                         this.needsSystem.updateCrisisFlags();
-                        this.needsSystem.updateNeedBars();
+                        this.updateNeedBars();
                         
                         console.log(`🍎 ¡Ñam completo! Nueva hambre: ${this.gameState.needs.hunger.toFixed(1)}%`);
                         
@@ -10644,7 +10683,7 @@ Comida premium y de cumpleaños
                         // }
                         
                         this.needsSystem.updateCrisisFlags();
-                        this.needsSystem.updateNeedBars();
+                        this.updateNeedBars();
                         continue; // Importante: saltar al siguiente pellet
                     } 
                     
@@ -10654,7 +10693,7 @@ Comida premium y de cumpleaños
                         const cfg = this.getStageCfg(this.gameState);
                         this.gameState.needs.dirt = this.clamp(this.gameState.needs.dirt + cfg.dirtPerRotten, 0, 100);
                         console.log(`🦠 Suciedad por pudrición: +${cfg.dirtPerRotten} (total: ${this.gameState.needs.dirt.toFixed(1)}%)`);
-                        this.needsSystem.updateNeedBars();
+                        this.updateNeedBars();
                         this.food.splice(i, 1);
                     }
                 }
@@ -10983,7 +11022,7 @@ Comida premium y de cumpleaños
                         if (!f.given) {
                             // SUMAR DIVERSIÓN +0.25 (RESTAR para hacer feliz)
                             this.gameState.needs.fun = this.clamp(this.gameState.needs.fun - 25, 0, 100); // -25 = +0.25 diversión (menos rojo = más feliz)
-                            this.needsSystem.updateNeedBars();
+                            this.updateNeedBars();
                             
                             // Efecto visual en la barra
                             const barF = document.getElementById('funBarHeader');
@@ -15328,7 +15367,7 @@ Comida premium y de cumpleaños
                         if (!f.given) {
                             // SUMAR DIVERSIÓN +25
                             this.gameState.needs.fun = Math.min(100, this.gameState.needs.fun + 25);
-                            this.needsSystem.updateNeedBars();
+                            this.updateNeedBars();
                             f.given = true;
                         }
                         this.flyers.splice(i, 1);
