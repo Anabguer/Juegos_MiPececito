@@ -16,9 +16,6 @@
  * - Tiempo de boost del dedo: 1.6s
  */
 
-console.log('🐠 Fish System cargado');
-console.log('🐠 CONFIGURACIÓN DE MOVIMIENTO:', FISH_MOVEMENT_CONFIG);
-
 // 📊 CONFIGURACIÓN DE MOVIMIENTO DEL PEZ
 const FISH_MOVEMENT_CONFIG = {
     // Velocidades base (px/s)
@@ -51,6 +48,9 @@ const FISH_MOVEMENT_CONFIG = {
     // Frecuencia de respiración (ciclos por segundo)
     breatheFrequency: 0.5
 };
+
+console.log('🐠 Fish System cargado');
+console.log('🐠 CONFIGURACIÓN DE MOVIMIENTO:', FISH_MOVEMENT_CONFIG);
 
 class FishSystem {
     constructor(game) {

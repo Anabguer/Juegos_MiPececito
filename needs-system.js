@@ -36,9 +36,6 @@
  * - Diversión: <25% = crisis (aburrido)
  */
 
-console.log('🎯 Needs System cargado');
-console.log('🎯 CONFIGURACIÓN DE NECESIDADES:', NEEDS_CONFIG);
-
 // 📊 CONFIGURACIÓN DE NECESIDADES POR ETAPA
 const NEEDS_CONFIG = {
     // 🥚 HUEVO (0-2 horas)
@@ -117,6 +114,9 @@ const NEEDS_CONFIG = {
         }
     }
 };
+
+console.log('🎯 Needs System cargado');
+console.log('🎯 CONFIGURACIÓN DE NECESIDADES:', NEEDS_CONFIG);
 
 class NeedsSystem {
     constructor(game) {
