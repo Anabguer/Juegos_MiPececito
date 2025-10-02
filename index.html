@@ -5362,6 +5362,9 @@
                     this.updateLabels(deltaTime);          // 🍎 LABELS ("Ñam")
                     this.updateEatingParticles(deltaTime); // ✨ PARTÍCULAS DE COMIDA
                     this.updateRewardParticles(deltaTime); // 🎆 PARTÍCULAS DE RECOMPENSA
+                    
+                    // ACTUALIZAR BOTONES CADA FRAME
+                    this.updateButtonStates();
                     this.updateFloatingMessages(deltaTime); // 💬 MENSAJES FLOTANTES
                     
                     // Actualizar UI cada pocos segundos
@@ -6471,6 +6474,10 @@
                     needsBar.style.display = 'flex';
                     console.log('📊 Barras de necesidades mostradas con el pez');
                 }
+                
+                // HABILITAR BOTONES CUANDO NACE EL PEZ
+                this.updateButtonStates();
+                console.log('🔘 Botones actualizados con el pez nacido');
                 
                 // PEDIR NOMBRE DESPUÉS DE NACER
                 setTimeout(() => {
