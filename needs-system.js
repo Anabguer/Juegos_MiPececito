@@ -215,7 +215,7 @@ class NeedsSystem {
         
         // Si está muy hambriento, mostrar alerta
         if (this.game.gameState.needs.hunger > config.hunger.crisis) {
-            this.showNeedAlert('hunger', '¡Tengo mucha hambre!');
+            this.showNeedAlert('hunger', '¡Hambre!');
         }
         
         // Debug de hambre (cada 5 segundos)
@@ -242,7 +242,7 @@ class NeedsSystem {
         
         // Si está muy sucio, mostrar alerta
         if (this.game.gameState.needs.dirt > config.dirt.crisis) {
-            this.showNeedAlert('dirt', '¡Estoy muy sucio!');
+            this.showNeedAlert('dirt', '¡Sucio!');
         }
         
         // Debug de limpieza (cada 5 segundos)
@@ -269,7 +269,7 @@ class NeedsSystem {
         
         // Si está muy aburrido, mostrar alerta
         if (this.game.gameState.needs.fun < config.fun.crisis) {
-            this.showNeedAlert('fun', '¡Estoy muy aburrido!');
+            this.showNeedAlert('fun', '¡Aburrido!');
         }
         
         // Debug de diversión (cada 5 segundos)

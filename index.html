@@ -8928,15 +8928,22 @@ Comida premium y de cumpleaños
                 // Mensajes más pequeños y sutiles
                 if (!this.floatingMessages) this.floatingMessages = [];
                 
-                    this.floatingMessages.push({
-                        text: message,
-                        x: this.fish.x,
-                        y: this.fish.y - 20,
-                        life: 3.0,
-                        maxLife: 3.0,
-                        vy: -40, // Más lento
-                        color: '#FFFFFF', // Texto blanco
-                        size: 18 // Más pequeño
+                // Calcular posición centrada en pantalla para evitar que se salga
+                const canvasWidth = this.canvas.width;
+                const canvasHeight = this.canvas.height;
+                const messageX = Math.max(50, Math.min(canvasWidth - 50, this.fish.x)); // Limitar entre 50px y ancho-50px
+                const messageY = Math.max(50, Math.min(canvasHeight - 100, this.fish.y - 20)); // Limitar entre 50px y alto-100px
+                
+                this.floatingMessages.push({
+                    text: message,
+                    x: messageX,
+                    y: messageY,
+                    life: 3.0,
+                    maxLife: 3.0,
+                    vy: -40, // Más lento
+                    color: '#FFFFFF', // Texto blanco
+                    size: 16, // Más pequeño
+                    centered: true // Centrar el texto
                 });
             }
             
