@@ -366,6 +366,7 @@ class FishSystem {
                 pez: {x: fish.x.toFixed(1), y: fish.y.toFixed(1)},
                 comida: {x: best.x.toFixed(1), y: best.y.toFixed(1)},
                 distancia: distancia.toFixed(1),
+                direccion: {dx: (best.x - fish.x).toFixed(1), dy: (best.y - fish.y).toFixed(1)},
                 crisis: {hambre: inHunger, suciedad: inDirt, aburrimiento: inBored},
                 maxSpeed: fish.maxSpeed,
                 foodArray: this.game.food.length
@@ -477,9 +478,10 @@ class FishSystem {
         if (fish.y < padTop) { fish.y = padTop; if (fish.vy < 0) fish.vy *= -0.5; }
         if (fish.y > H - padBottom) { fish.y = H - padBottom; if (fish.vy > 0) fish.vy *= -0.5; }
 
-        // Orientación
+        // Orientación (CORREGIDA - el pez debe mirar hacia donde va)
         if (Math.abs(fish.vx) > 2) {
-            fish.facing = fish.vx > 0 ? 1 : -1;
+            fish.facing = fish.vx > 0 ? -1 : 1; // INVERTIDO: cuando va a la derecha, facing=-1
+            console.log(`🔄 ORIENTACIÓN: vx=${fish.vx.toFixed(2)}, facing=${fish.facing}`);
         }
         
         // Ondulación de aletas
@@ -775,10 +777,10 @@ class FishSystem {
             console.log('🫧 Array de burbujas inicializado en FishSystem');
         }
         
-        // Posición de la boca del pez
+        // Posición de la boca del pez (CORREGIDA - invertida)
         const bodyW = fish.size * 0.4;
         const bodyH = fish.size * 0.24;
-        const mx = fish.x + (fish.facing > 0 ? 1 : -1) * (bodyW * 0.42);
+        const mx = fish.x + (fish.facing > 0 ? -1 : 1) * (bodyW * 0.42); // INVERTIDO
         const my = fish.y - bodyH * 0.12;
         
         for (let i = 0; i < n; i++) {
