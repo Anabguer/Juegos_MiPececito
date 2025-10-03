@@ -44,8 +44,8 @@
           --star-color: #FFD700;
           --coin-color: #FF8C42;
           --fish-baby-size: 56px;
-          --fish-young-size: 64px;
-          --fish-adult-size: 72px;
+          --fish-young-size: 60px;
+          --fish-adult-size: 64px;
             --egg-size: 130px; /* Tamaño ajustado para móvil */
           --pellet-size: 16px;
           --star-size: 32px;
@@ -3900,8 +3900,8 @@
     <!-- 🐠 CONTENEDOR LOTTIE PARA EL PEZ -->
     <div id="lottieContainer" style="
         position: absolute;
-        width: 72px;
-        height: 72px;
+        width: 64px;
+        height: 64px;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -5123,7 +5123,7 @@
                 }
                 
                 // Calcular límites con márgenes seguros
-                const fishSize = 72; // Tamaño aproximado del pez
+                const fishSize = 64; // Tamaño aproximado del pez
                 const safeMargin = 30; // Margen de seguridad
                 
                 // Calcular bottom de forma segura
@@ -7939,7 +7939,7 @@ Comida premium y de cumpleaños
             // 🔄 DETECCIÓN MUY TEMPRANA DE BORDES
             handleSimpleFishBoundaries() {
                 const fish = this.fish;
-                const fishSize = 72; // Tamaño aproximado del pez Lottie
+                const fishSize = 64; // Tamaño aproximado del pez Lottie
                 const padding = fishSize + 40; // MARGEN MUY GRANDE (100px total)
                 
                 // DETECCIÓN TEMPRANA: Antes de que se salga del borde
