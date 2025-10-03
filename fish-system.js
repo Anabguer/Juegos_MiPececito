@@ -616,7 +616,7 @@ class FishSystem {
             // Cargar JSON del pez según la etapa
             const stageFiles = {
                 'baby': 'bebe.json',
-                'young': 'joven.json', 
+                'young': 'joven2.json', 
                 'adult': 'adulto.json'
             };
             
