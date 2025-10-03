@@ -409,11 +409,20 @@ class FishSystem {
                 targetV = {vx: Math.sin(fish.swimPhase) * 5, vy: Math.cos(fish.swimPhase * 1.2) * 2};
             }
         }
-        // Seguir dedo (SIEMPRE que haya dedo, sin restricciones)
+        // Seguir dedo (SIEMPRE que haya dedo, sin restricciones) - MÁS RÁPIDO
         else if (fish.desire) {
-            const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y, fish.maxSpeed * 0.7);
-            const t = this.clamp(s.dist / 120, 0.25, 1);
+            const s = this.seek(fish.x, fish.y, fish.desire.x, fish.desire.y, fish.maxSpeed * 1.2); // Aumentado de 0.7 a 1.2
+            const t = this.clamp(s.dist / 120, 0.4, 1); // Aumentado de 0.25 a 0.4
             targetV = {vx: s.vx * t, vy: s.vy * t};
+            speedMul = 1.2; // Añadir multiplicador de velocidad
+            
+            console.log(`👆 PEZ SIGUIENDO DEDO:`, {
+                pez: {x: fish.x.toFixed(1), y: fish.y.toFixed(1)},
+                dedo: {x: fish.desire.x.toFixed(1), y: fish.desire.y.toFixed(1)},
+                distancia: s.dist.toFixed(1),
+                velocidad: (fish.maxSpeed * 1.2).toFixed(1)
+            });
+            
             if (s.dist < 22) {
                 fish.desire = null;
                 targetV = {vx: 0, vy: 0};
@@ -423,6 +432,7 @@ class FishSystem {
                 }
                 // 💖 ACTUALIZAR DIVERSIÓN cuando llega al dedo
                 this.launchHeartToFun();
+                console.log('💖 ¡Pez llegó al dedo! Corazón lanzado hacia diversión');
             }
         }
         // Crisis aburrimiento sin comida (solo si no hay dedo)
@@ -810,14 +820,34 @@ class FishSystem {
         const startX = x !== undefined ? x : this.game.fish.x;
         const startY = y !== undefined ? y : this.game.fish.y;
         
-        // Crear corazón
+        // Calcular posición de la barra de diversión (aproximada)
+        const funBarX = this.canvas.width - 100; // Lado derecho
+        const funBarY = 50; // Parte superior
+        
+        // Calcular dirección hacia la barra de diversión
+        const dx = funBarX - startX;
+        const dy = funBarY - startY;
+        const distance = Math.hypot(dx, dy);
+        const normalizedDx = dx / distance;
+        const normalizedDy = dy / distance;
+        
+        // Crear corazón que va hacia la barra de diversión
         this.game.hearts.push({
             x: startX,
             y: startY,
-            vx: (Math.random() - 0.5) * 40,
-            vy: -Math.random() * 60 - 30,
-            life: 1.0,
-            size: 8 + Math.random() * 4
+            vx: normalizedDx * 80, // Velocidad hacia la barra
+            vy: normalizedDy * 80,
+            life: 2.0, // Duración más larga para que llegue
+            size: 8 + Math.random() * 4,
+            targetX: funBarX,
+            targetY: funBarY,
+            reachedTarget: false
+        });
+        
+        console.log('💖 Corazón lanzado hacia barra de diversión:', {
+            desde: {x: startX.toFixed(1), y: startY.toFixed(1)},
+            hacia: {x: funBarX, y: funBarY},
+            direccion: {dx: normalizedDx.toFixed(2), dy: normalizedDy.toFixed(2)}
         });
         
         // Actualizar diversión

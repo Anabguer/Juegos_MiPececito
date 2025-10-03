@@ -6401,31 +6401,12 @@
                 this.fish.excited = true;
                 
                 // 💖 SISTEMA DE CORAZONES - AUMENTA DIVERSIÓN
-                this.launchHeartToFun(clickX, clickY);
+                this.fishSystem.launchHeartToFun(clickX, clickY);
                 
                 console.log(`👆 Click en (${clickX.toFixed(0)}, ${clickY.toFixed(0)}) - Pez viene hacia ti!`);
             }
             
-            // 💖 LANZAR CORAZÓN A DIVERSIÓN
-            launchHeartToFun(x, y) {
-                if (!this.hearts) {
-                    this.hearts = [];
-                }
-                
-                this.hearts.push({
-                    x: x,
-                    y: y,
-                    vx: (Math.random() - 0.5) * 2,
-                    vy: -2 - Math.random() * 2,
-                    life: 1.0,
-                    scale: 0.5 + Math.random() * 0.5
-                });
-                
-                // Aumentar diversión
-                if (this.needsSystem) {
-                    this.needsSystem.entertainFish(15);
-                }
-            }
+            // 💖 LANZAR CORAZÓN A DIVERSIÓN - ELIMINADO (ahora en fish-system.js)
             // 👆 FUNCIÓN handleCanvasClick() ELIMINADA - AHORA EN fish-system.js
             
             // launchHeartToFun() - ELIMINADO (ahora en needs-system.js)
@@ -10335,6 +10316,37 @@ Comida premium y de cumpleaños
                         this.flyers.splice(i, 1);
                     }
                 }
+                
+                // 💖 ACTUALIZAR CORAZONES DEL FISH-SYSTEM
+                if (this.hearts) {
+                    for (let i = this.hearts.length - 1; i >= 0; i--) {
+                        const heart = this.hearts[i];
+                        heart.x += heart.vx * deltaTime;
+                        heart.y += heart.vy * deltaTime;
+                        heart.life -= deltaTime;
+                        
+                        // Si llegó cerca del objetivo, dar diversión
+                        if (heart.targetX && heart.targetY && !heart.reachedTarget) {
+                            const distance = Math.hypot(heart.x - heart.targetX, heart.y - heart.targetY);
+                            if (distance < 30) {
+                                heart.reachedTarget = true;
+                                // Efecto visual en la barra
+                                const barF = document.getElementById('funBarHeader');
+                                if (barF) {
+                                    barF.classList.remove('pulse'); 
+                                    void barF.offsetWidth; 
+                                    barF.classList.add('pulse');
+                                }
+                                console.log('💖 Corazón llegó a la barra de diversión!');
+                            }
+                        }
+                        
+                        // Eliminar si se acabó la vida
+                        if (heart.life <= 0) {
+                            this.hearts.splice(i, 1);
+                        }
+                    }
+                }
             }
             
             // 💖 DIBUJAR CORAZONES VOLADORES (SOLO CUANDO TOCAS AL PEZ, NO CUANDO COME)
@@ -10354,6 +10366,19 @@ Comida premium y de cumpleaños
                     this.ctx.fillStyle = 'rgba(255,120,160,1)';
                     this.ctx.fillText('❤', x - 6, y);
                     this.ctx.restore();
+                }
+                
+                // 💖 DIBUJAR CORAZONES DEL FISH-SYSTEM (que van hacia la barra)
+                if (this.hearts) {
+                    for (const heart of this.hearts) {
+                        this.ctx.save();
+                        this.ctx.globalAlpha = Math.max(0, heart.life / 2.0); // Fade out
+                        this.ctx.font = `bold ${heart.size}px system-ui, Segoe UI, Arial`;
+                        this.ctx.fillStyle = 'rgba(255,120,160,1)';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText('❤', heart.x, heart.y);
+                        this.ctx.restore();
+                    }
                 }
             }
         }
