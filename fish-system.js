@@ -769,7 +769,7 @@ class FishSystem {
             baseY: centerY,
             
             // Tamaño y escala (Lottie)
-            size: 80, // Tamaño del contenedor Lottie
+            size: this.getFishSizeForStage('baby'), // Usar tamaño correcto para bebé
             scale: 0.1, // Empezar muy pequeño
             targetScale: 1.0, // Crecer hasta tamaño normal
             growing: true,
