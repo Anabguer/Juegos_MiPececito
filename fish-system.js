@@ -357,7 +357,7 @@ class FishSystem {
             speedMul = (fish.spinKind === "clean") ? 1.8 : 1.25;
             fish.happyBurst = Math.max(0, fish.happyBurst - (fish.spinKind === "clean" ? 0.6 : 1.6) * deltaTime);
         }
-        // 🍎 COMIDA = MÁXIMA PRIORIDAD (SIEMPRE RÁPIDO)
+        // 🍎 COMIDA = MÁXIMA PRIORIDAD (SIEMPRE RÁPIDO - COMO UN PEZ REAL)
         else if (this.game.food?.length) {
             const best = this.nearestFood();
             const distancia = Math.hypot(best.x - fish.x, best.y - fish.y);
@@ -371,30 +371,19 @@ class FishSystem {
                 foodArray: this.game.food.length
             });
             
+            // 🐠 UN PEZ REAL SIEMPRE VA CORRIENDO HACIA LA COMIDA
             if (inHunger) {
-                // Crisis hambre + comida (RÁPIDO)
-                const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.2);
-                speedMul = 1.2;
+                // Crisis hambre + comida (MUY RÁPIDO)
+                const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.5);
+                speedMul = 1.5;
                 targetV = {vx: s.vx, vy: s.vy};
-                console.log(`🚨 CRISIS HAMBRE + COMIDA: velocidad=${(fish.maxSpeed * 1.2).toFixed(1)}, targetV=${targetV.vx.toFixed(1)},${targetV.vy.toFixed(1)}`);
-            } else if (inDirt) {
-                // Crisis suciedad + comida (NORMAL-RÁPIDO)
-                const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.1);
-                speedMul = 1.0;
-                targetV = {vx: s.vx, vy: s.vy};
-                console.log(`🧹 CRISIS SUCIEDAD + COMIDA: velocidad=${(fish.maxSpeed * 1.1).toFixed(1)}, targetV=${targetV.vx.toFixed(1)},${targetV.vy.toFixed(1)}`);
-            } else if (inBored) {
-                // Crisis aburrimiento + comida (NORMAL-RÁPIDO)
-                const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.1);
-                speedMul = 1.0;
-                targetV = {vx: s.vx, vy: s.vy};
-                console.log(`😴 CRISIS ABURRIMIENTO + COMIDA: velocidad=${(fish.maxSpeed * 1.1).toFixed(1)}, targetV=${targetV.vx.toFixed(1)},${targetV.vy.toFixed(1)}`);
+                console.log(`🚨 CRISIS HAMBRE + COMIDA: velocidad=${(fish.maxSpeed * 1.5).toFixed(1)}, targetV=${targetV.vx.toFixed(1)},${targetV.vy.toFixed(1)}`);
             } else {
-                // Comida normal (NORMAL)
-                const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.0);
-                speedMul = 0.9;
+                // CUALQUIER COMIDA = SIEMPRE RÁPIDO (como un pez real)
+                const s = this.seek(fish.x, fish.y, best.x, best.y, fish.maxSpeed * 1.3);
+                speedMul = 1.3;
                 targetV = {vx: s.vx, vy: s.vy};
-                console.log(`🍎 COMIDA NORMAL: velocidad=${fish.maxSpeed.toFixed(1)}, targetV=${targetV.vx.toFixed(1)},${targetV.vy.toFixed(1)}`);
+                console.log(`🍎 COMIDA DETECTADA - PEZ CORRIENDO: velocidad=${(fish.maxSpeed * 1.3).toFixed(1)}, targetV=${targetV.vx.toFixed(1)},${targetV.vy.toFixed(1)}`);
             }
         }
         // Crisis hambre sin comida
@@ -462,9 +451,15 @@ class FishSystem {
             };
         }
 
-        // Física (igual que el demo)
+        // Física mejorada para comida
         const maxSpeed = fish.maxSpeed * speedMul;
-        const maxAccel = fish.maxAccel * speedMul;
+        let maxAccel = fish.maxAccel * speedMul;
+        
+        // 🍎 ACELERACIÓN EXTRA HACIA LA COMIDA (como un pez real)
+        if (this.game.food?.length) {
+            maxAccel *= 2.0; // Doble aceleración hacia la comida
+        }
+        
         const ax = this.clamp(targetV.vx - fish.vx, -maxAccel, maxAccel);
         const ay = this.clamp(targetV.vy - fish.vy, -maxAccel, maxAccel);
         fish.vx += ax * deltaTime;
