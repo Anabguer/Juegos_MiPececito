@@ -5586,7 +5586,7 @@
                 
                 // Actualizar posición del Lottie
                 if (this.fish && this.fish.isLottie) {
-                    this.updateLottiePosition();
+                    this.fishSystem.updateLottiePosition();
                 }
                 
                 // Dibujar burbujas de limpieza
@@ -6319,84 +6319,9 @@
             // 🐠 CREAR PEZ BEBÉ LOTTIE
             // createFish() - MOVIDO A fish-system.js
             
-            // 🎨 CREAR PEZ LOTTIE
-            async createLottieFish(stage = 'baby') {
-                try {
-                    // Cargar JSON del pez según la etapa
-                    const stageFiles = {
-                        'baby': 'bebe.json',
-                        'young': 'joven.json', 
-                        'adult': 'adulto.json'
-                    };
-                    
-                    const fileName = stageFiles[stage] || 'bebe.json';
-                    const response = await fetch(`./ejemplos/${fileName}`);
-                    const animationData = await response.json();
-                    
-                    const container = document.getElementById('lottieContainer');
-                    container.style.display = 'block';
-                    
-                    // Crear animación Lottie
-                    this.lottieAnimation = lottie.loadAnimation({
-                        container: container,
-                        renderer: 'svg',
-                        loop: true,
-                        autoplay: true,
-                        animationData: animationData
-                    });
-                    
-                    console.log('🎨 Pez Lottie cargado correctamente');
-                    
-                    // Posicionar el contenedor
-                    this.updateLottiePosition();
-                    
-                } catch (error) {
-                    console.error('❌ Error cargando pez Lottie:', error);
-                }
-            }
+            // 🎨 FUNCIÓN createLottieFish() MOVIDA A fish-system.js
             
-            // 🎨 ACTUALIZAR POSICIÓN DEL PEZ LOTTIE
-            updateLottiePosition() {
-                if (!this.fish || !this.lottieAnimation) return;
-                
-                const container = document.getElementById('lottieContainer');
-                const rect = this.canvas.getBoundingClientRect();
-                
-                // CRECIMIENTO GRADUAL del pez recién nacido
-                if (this.fish.growing && this.fish.scale < this.fish.targetScale) {
-                    this.fish.scale += 0.02; // Crecimiento visible
-                    
-                    if (this.fish.scale >= this.fish.targetScale) {
-                        this.fish.scale = this.fish.targetScale;
-                        this.fish.growing = false;
-                        console.log('🐠 Pez alcanzó tamaño completo');
-                    }
-                }
-                
-                // Calcular posición en pantalla
-                const screenX = rect.left + this.fish.x - (this.fish.size * this.fish.scale) / 2;
-                const screenY = rect.top + this.fish.y - (this.fish.size * this.fish.scale) / 2;
-                
-                // Aplicar transformaciones
-                container.style.left = screenX + 'px';
-                container.style.top = screenY + 'px';
-                container.style.width = (this.fish.size * this.fish.scale) + 'px';
-                container.style.height = (this.fish.size * this.fish.scale) + 'px';
-                
-                // Voltear horizontalmente si va hacia la izquierda
-                if (this.fish.facing === -1) {
-                    container.style.transform = 'scaleX(-1)';
-                } else {
-                    container.style.transform = 'scaleX(1)';
-                }
-                
-                // DEBUG: Mostrar orientación
-                console.log('🐠 Orientación pez:', {
-                    facing: this.fish.facing,
-                    vx: this.fish.vx,
-                    transform: container.style.transform
-                });
-            }
+            // 🎨 FUNCIÓN updateLottiePosition() MOVIDA A fish-system.js
             
             // 🐠 SISTEMA DE NOMBRE
             askForFishName() {
@@ -8227,7 +8152,7 @@ Comida premium y de cumpleaños
                 }
                 
                 // 🎨 RECARGAR LOTTIE CON NUEVA ETAPA (MANTENER DISEÑOS BONITOS)
-                this.reloadLottieForStage(newStage);
+                this.fishSystem.reloadLottieForStage(newStage);
                 
                 // Añadir al álbum
                 const messages = {
@@ -8260,40 +8185,7 @@ Comida premium y de cumpleaños
                 console.log(`🎭 EVOLUCIÓN COMPLETADA: ${newStage}`);
             }
             
-            // 🎨 RECARGAR LOTTIE PARA NUEVA ETAPA (PRESERVANDO ESCALA)
-            async reloadLottieForStage(newStage) {
-                try {
-                    // Guardar escala antes de destruir
-                    const savedScale = this.fish ? this.fish.scale : 1.0;
-                    const savedPosition = this.fish ? {x: this.fish.x, y: this.fish.y} : null;
-                    
-                    // Destruir animación actual
-                    if (this.lottieAnimation) {
-                        this.lottieAnimation.destroy();
-                        this.lottieAnimation = null;
-                    }
-                    
-                    // Cargar nueva animación con la etapa correcta
-                    await this.createLottieFish(newStage);
-                    
-                    // RESTAURAR ESCALA Y POSICIÓN
-                    if (this.fish) {
-                        this.fish.scale = savedScale;
-                        this.fish.targetScale = savedScale;
-                        this.fish.growing = false; // No volver a crecer
-                        
-                        if (savedPosition) {
-                            this.fish.x = savedPosition.x;
-                            this.fish.y = savedPosition.y;
-                        }
-                    }
-                    
-                    console.log(`🎨 Lottie recargado para etapa: ${newStage} con escala: ${savedScale}`);
-                    
-                } catch (error) {
-                    console.error('❌ Error recargando Lottie:', error);
-                }
-            }
+            // 🎨 FUNCIÓN reloadLottieForStage() MOVIDA A fish-system.js
             
             // 🍎 SISTEMA DE NECESIDADES
             

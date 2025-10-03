@@ -609,6 +609,117 @@ class FishSystem {
     }
 
     /**
+     * 🎨 CREAR PEZ LOTTIE
+     */
+    async createLottieFish(stage = 'baby') {
+        try {
+            // Cargar JSON del pez según la etapa
+            const stageFiles = {
+                'baby': 'bebe.json',
+                'young': 'joven.json', 
+                'adult': 'adulto.json'
+            };
+            
+            const fileName = stageFiles[stage] || 'bebe.json';
+            const response = await fetch(`./ejemplos/${fileName}`);
+            const animationData = await response.json();
+            
+            const container = document.getElementById('lottieContainer');
+            container.style.display = 'block';
+            
+            // Crear animación Lottie
+            this.game.lottieAnimation = lottie.loadAnimation({
+                container: container,
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                animationData: animationData
+            });
+            
+            console.log('🎨 Pez Lottie cargado correctamente');
+            
+            // Posicionar el contenedor
+            this.updateLottiePosition();
+            
+        } catch (error) {
+            console.error('❌ Error cargando pez Lottie:', error);
+        }
+    }
+    
+    /**
+     * 🎨 ACTUALIZAR POSICIÓN DEL PEZ LOTTIE
+     */
+    updateLottiePosition() {
+        if (!this.game.fish || !this.game.lottieAnimation) return;
+        
+        const container = document.getElementById('lottieContainer');
+        const rect = this.game.canvas.getBoundingClientRect();
+        
+        // CRECIMIENTO GRADUAL del pez recién nacido
+        if (this.game.fish.growing && this.game.fish.scale < this.game.fish.targetScale) {
+            this.game.fish.scale += 0.02; // Crecimiento visible
+            
+            if (this.game.fish.scale >= this.game.fish.targetScale) {
+                this.game.fish.scale = this.game.fish.targetScale;
+                this.game.fish.growing = false;
+                console.log('🐠 Pez alcanzó tamaño completo');
+            }
+        }
+        
+        // Calcular posición en pantalla
+        const screenX = rect.left + this.game.fish.x - (this.game.fish.size * this.game.fish.scale) / 2;
+        const screenY = rect.top + this.game.fish.y - (this.game.fish.size * this.game.fish.scale) / 2;
+        
+        // Aplicar transformaciones
+        container.style.left = screenX + 'px';
+        container.style.top = screenY + 'px';
+        container.style.width = (this.game.fish.size * this.game.fish.scale) + 'px';
+        container.style.height = (this.game.fish.size * this.game.fish.scale) + 'px';
+        
+        // Voltear horizontalmente si va hacia la izquierda
+        if (this.game.fish.facing === -1) {
+            container.style.transform = 'scaleX(-1)';
+        } else {
+            container.style.transform = 'scaleX(1)';
+        }
+    }
+    
+    /**
+     * 🎨 RECARGAR LOTTIE PARA NUEVA ETAPA
+     */
+    async reloadLottieForStage(newStage) {
+        try {
+            // Guardar escala antes de destruir
+            const savedScale = this.game.fish ? this.game.fish.scale : 1.0;
+            const savedPosition = this.game.fish ? {x: this.game.fish.x, y: this.game.fish.y} : null;
+            
+            // Destruir animación actual
+            if (this.game.lottieAnimation) {
+                this.game.lottieAnimation.destroy();
+                this.game.lottieAnimation = null;
+            }
+            
+            // Cargar nueva animación con la etapa correcta
+            await this.createLottieFish(newStage);
+            
+            // RESTAURAR ESCALA Y POSICIÓN
+            if (this.game.fish) {
+                this.game.fish.scale = savedScale;
+                this.game.fish.targetScale = savedScale;
+                if (savedPosition) {
+                    this.game.fish.x = savedPosition.x;
+                    this.game.fish.y = savedPosition.y;
+                }
+            }
+            
+            console.log(`🎨 Lottie recargado para etapa: ${newStage} con escala: ${savedScale}`);
+            
+        } catch (error) {
+            console.error('❌ Error recargando Lottie:', error);
+        }
+    }
+
+    /**
      * 🎯 FUNCIONES AUXILIARES - COPIADAS DEL CÓDIGO ORIGINAL
      */
     
@@ -757,7 +868,7 @@ class FishSystem {
         console.log('🐠 Creando pez bebé Lottie...');
         
         // Crear pez Lottie REAL (bebé)
-        await this.game.createLottieFish('baby');
+        await this.createLottieFish('baby');
         
         const centerX = this.canvas.width / 2;
         const centerY = this.canvas.height * 0.6;
