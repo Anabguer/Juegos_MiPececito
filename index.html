@@ -9931,7 +9931,7 @@ Comida premium y de cumpleaños
                     const distance = this.fish ? this.dist(this.fish.x, this.fish.y, f.x, f.y) : 999;
                     
                     // 🍎 COLISIÓN CON EL PEZ (radio de colisión más amplio)
-                    if (this.fish && distance < 28) { // Aumentado de 22 a 28 para mejor detección
+                    if (this.fish && distance < 40) { // Aumentado de 28 a 40 para comer más fácil
                         console.log(`🍎 COLISIÓN: Pez en (${this.fish.x.toFixed(1)}, ${this.fish.y.toFixed(1)}) come pellet en (${f.x.toFixed(1)}, ${f.y.toFixed(1)}) - Distancia: ${distance.toFixed(1)}`);
                         this.food.splice(i, 1);
                         
