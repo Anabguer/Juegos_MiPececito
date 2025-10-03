@@ -602,8 +602,8 @@ class FishSystem {
         const sizes = {
             egg: 0,
             baby: 56,
-            young: 60,
-            adult: 64
+            young: 58,
+            adult: 60
         };
         return sizes[stage] || sizes.baby;
     }
