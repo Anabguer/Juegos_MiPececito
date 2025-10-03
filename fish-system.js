@@ -601,9 +601,9 @@ class FishSystem {
     getFishSizeForStage(stage) {
         const sizes = {
             egg: 0,
-            baby: 32,
-            young: 38,
-            adult: 44
+            baby: 48,
+            young: 56,
+            adult: 64
         };
         return sizes[stage] || sizes.baby;
     }
