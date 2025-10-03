@@ -60,18 +60,18 @@ const NEEDS_CONFIG = {
     // 🐟 BEBÉ (2-8 horas)
     baby: {
         hunger: {
-            increase: 0.8,    // +0.8% por segundo (muy hambriento)
+            increase: 0.1,    // +0.1% por segundo (más realista)
             decrease: 30,     // -30% al comer
             crisis: 75        // Crisis a 75%
         },
         dirt: {
-            increase: 0.4,    // +0.4% por segundo (se ensucia rápido)
+            increase: 0.08,   // +0.08% por segundo (se ensucia rápido)
             decrease: 40,     // -40% al limpiar
             crisis: 75        // Crisis a 75%
         },
         fun: {
             increase: 25,     // +25% al divertirse
-            decrease: 0.3,    // -0.3% por segundo (se aburre rápido)
+            decrease: 0.05,   // -0.05% por segundo (se aburre rápido)
             crisis: 25        // Crisis a 25%
         }
     },
@@ -79,18 +79,18 @@ const NEEDS_CONFIG = {
     // 🐠 JOVEN (8-24 horas)
     young: {
         hunger: {
-            increase: 0.5,    // +0.5% por segundo (hambriento)
+            increase: 0.05,   // +0.05% por segundo (más realista)
             decrease: 30,     // -30% al comer
             crisis: 75        // Crisis a 75%
         },
         dirt: {
-            increase: 0.3,    // +0.3% por segundo (se ensucia normal)
+            increase: 0.15,   // +0.15% por segundo (se ensucia normal)
             decrease: 40,     // -40% al limpiar
             crisis: 75        // Crisis a 75%
         },
         fun: {
             increase: 25,     // +25% al divertirse
-            decrease: 0.2,    // -0.2% por segundo (se aburre normal)
+            decrease: 0.1,    // -0.1% por segundo (se aburre normal)
             crisis: 25        // Crisis a 25%
         }
     },
@@ -98,18 +98,18 @@ const NEEDS_CONFIG = {
     // 👑 ADULTO (24+ horas)
     adult: {
         hunger: {
-            increase: 0.3,    // +0.3% por segundo (hambriento lento)
+            increase: 0.03,   // +0.03% por segundo (hambriento lento)
             decrease: 30,     // -30% al comer
             crisis: 75        // Crisis a 75%
         },
         dirt: {
-            increase: 0.2,    // +0.2% por segundo (se ensucia lento)
+            increase: 0.1,    // +0.1% por segundo (se ensucia lento)
             decrease: 40,     // -40% al limpiar
             crisis: 75        // Crisis a 75%
         },
         fun: {
             increase: 25,     // +25% al divertirse
-            decrease: 0.1,    // -0.1% por segundo (se aburre lento)
+            decrease: 0.05,   // -0.05% por segundo (se aburre lento)
             crisis: 25        // Crisis a 25%
         }
     }
@@ -198,6 +198,18 @@ class NeedsSystem {
         
         const config = this.getNeedsConfig();
         const hungerIncrease = config.hunger.increase * deltaTime;
+        
+        // Debug detallado cada frame para entender el problema
+        if (Math.random() < 0.1) { // 10% de probabilidad para no spamear
+            console.log('🍎 HAMBRE DEBUG:', {
+                stage: this.game.gameState.stage,
+                deltaTime: deltaTime.toFixed(4),
+                configIncrease: config.hunger.increase,
+                calculatedIncrease: hungerIncrease.toFixed(4),
+                currentHunger: this.game.gameState.needs.hunger.toFixed(1),
+                newHunger: (this.game.gameState.needs.hunger + hungerIncrease).toFixed(1)
+            });
+        }
         
         this.game.gameState.needs.hunger = Math.min(100, this.game.gameState.needs.hunger + hungerIncrease);
         

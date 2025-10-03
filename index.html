@@ -5287,10 +5287,20 @@
             startLoop() {
                 let lastTime = 0;
                 const loop = (currentTime) => {
+                    // Evitar deltaTime muy grande en el primer frame
+                    if (lastTime === 0) {
+                        lastTime = currentTime;
+                        requestAnimationFrame(loop);
+                        return;
+                    }
+                    
                     const deltaTime = (currentTime - lastTime) / 1000;
                     lastTime = currentTime;
                     
-                    this.update(deltaTime);
+                    // Limitar deltaTime para evitar saltos grandes
+                    const clampedDeltaTime = Math.min(deltaTime, 0.1); // Máximo 100ms
+                    
+                    this.update(clampedDeltaTime);
                     this.render();
                     requestAnimationFrame(loop);
                 };
