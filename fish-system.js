@@ -426,13 +426,21 @@ class FishSystem {
             if (s.dist < 22) {
                 fish.desire = null;
                 targetV = {vx: 0, vy: 0};
+                
                 // 🔊 SONIDO cuando llega al dedo
                 if (this.game.audioManager) {
                     this.game.audioManager.playSound('dedo');
                 }
-                // 💖 ACTUALIZAR DIVERSIÓN cuando llega al dedo
+                
+                // 💖 MOSTRAR MENSAJE cuando llega al dedo
+                if (this.game.showFishMessage) {
+                    this.game.showFishMessage('¡Me divierto mucho contigo!', '#44ff44');
+                }
+                
+                // 💖 LANZAR CORAZÓN cuando llega al dedo
                 this.launchHeartToFun();
-                console.log('💖 ¡Pez llegó al dedo! Corazón lanzado hacia diversión');
+                
+                console.log('💖 ¡Pez llegó al dedo! Mensaje mostrado y corazón lanzado');
             }
         }
         // Crisis aburrimiento sin comida (solo si no hay dedo)

@@ -760,16 +760,6 @@ class NeedsSystem {
         
         this.game.gameState.needs.fun = Math.min(100, this.game.gameState.needs.fun + funIncrease);
         
-        // Mostrar mensaje
-        if (this.game.showFishMessage) {
-            this.game.showFishMessage('¡Me divierto mucho contigo!', '#44ff44');
-        }
-        
-        // Reproducir sonido
-        if (this.game.audioManager) {
-            this.game.audioManager.playSound('acierto');
-        }
-        
         // Actualizar UI
         this.updateNeedBars();
         this.updateCrisisFlags();
